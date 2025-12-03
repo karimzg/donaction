@@ -1,0 +1,494 @@
+---
+description: PrimeNG 20 component usage with custom Aura preset theming, standalone imports, and accessibility best practices for Angular 21 applications
+globs: ["**/*.component.ts", "**/*.component.html", "**/theme/*.ts"]
+alwaysApply: false
+---
+
+# PrimeNG 20
+
+## Component Imports
+
+- Import from `primeng/*` packages
+- Add to component `imports` array
+- Standalone components only
+- Tree-shakable by design
+
+```typescript
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+
+@Component({
+  imports: [ButtonModule, InputTextModule]
+})
+```
+
+## Theme Configuration
+
+- Use Aura preset with customization
+- Configure via `providePrimeNG()`
+- Disable ripple for cleaner UX
+- CSS layer order matters
+
+Reference: @klubr-admin/src/app/shared/utils/theme/theme.preset.ts
+
+```typescript
+providePrimeNG({
+  theme: {
+    preset: KlubrPreset,
+    options: {
+      darkModeSelector: '.dark-mode',
+      cssLayer: { name: 'primeng', order: 'tailwind-base, primeng, tailwind-utilities' }
+    }
+  },
+  ripple: false,
+  inputStyle: 'outlined'
+})
+```
+
+## Form Components
+
+### Text Inputs
+
+- `InputTextModule` - basic text input
+- `InputTextareaModule` - multiline text
+- `PasswordModule` - password with strength meter
+- `InputMaskModule` - formatted input
+- `InputOtpModule` - one-time password
+- `InputNumberModule` - numeric input
+- Bind with signals or `[(ngModel)]`
+
+```html
+<input pInputText [ngModel]="value()" (ngModelChange)="value.set($event)" />
+<input pPassword [(ngModel)]="password" [feedback]="true" />
+<p-inputOtp [(ngModel)]="code" [length]="6" />
+```
+
+### Selection Components
+
+- `DropdownModule` - single select
+- `MultiSelectModule` - multiple selection
+- `AutoCompleteModule` - searchable dropdown
+- `CascadeSelectModule` - hierarchical selection
+- `ListboxModule` - list selection
+- `TreeSelectModule` - tree selection
+- Always provide `optionLabel` and `optionValue`
+
+```html
+<p-dropdown [options]="items()" [(ngModel)]="selected" optionLabel="name" />
+<p-multiSelect [options]="items()" [(ngModel)]="selectedItems" />
+<p-autoComplete [(ngModel)]="value" [suggestions]="filtered()" (completeMethod)="search($event)" />
+```
+
+### Buttons & Toggles
+
+- `ButtonModule` - standard button
+- `CheckboxModule` - checkbox input
+- `RadioButtonModule` - radio buttons
+- `ToggleButtonModule` - toggle switch
+- `SelectButtonModule` - button group
+- `SplitButtonModule` - dropdown button
+- Use `pButton` directive for styling
+
+```html
+<p-button label="Save" icon="pi pi-check" severity="primary" />
+<p-checkbox [(ngModel)]="checked" binary="true" />
+<p-toggleButton [(ngModel)]="active" onLabel="On" offLabel="Off" />
+```
+
+### Date & Time
+
+- `CalendarModule` - date picker
+- Use with signals or forms
+- Format with `dateFormat` attribute
+- Range selection supported
+
+```html
+<p-calendar [(ngModel)]="date" dateFormat="dd/mm/yy" [showIcon]="true" />
+<p-calendar [(ngModel)]="dateRange" selectionMode="range" />
+```
+
+### Other Inputs
+
+- `ChipsModule` - tag input
+- `ColorPickerModule` - color selection
+- `EditorModule` - rich text editor
+- `RatingModule` - star rating
+- `SliderModule` - range slider
+- `KnobModule` - circular slider
+
+## Data Display Components
+
+### Table
+
+- `TableModule` - full-featured data table
+- Signal bindings recommended
+- Built-in pagination, sorting, filtering
+- Column templates with `ng-template`
+- Lazy loading for performance
+
+```html
+<p-table [value]="items()" [loading]="loading()" [paginator]="true" [rows]="10">
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-item>
+    <tr>
+      <td>{{ item.name }}</td>
+    </tr>
+  </ng-template>
+</p-table>
+```
+
+### Lists & Grids
+
+- `DataViewModule` - flexible data display
+- `OrderListModule` - reorderable list
+- `PickListModule` - dual list selection
+- `TimelineModule` - event timeline
+- `VirtualScrollerModule` - virtual scrolling
+
+### Trees
+
+- `TreeModule` - hierarchical data
+- `TreeTableModule` - tree with columns
+- `OrganizationChartModule` - org chart
+
+## Panel Components
+
+### Containers
+
+- `PanelModule` - collapsible panel
+- `CardModule` - content card
+- `FieldsetModule` - grouped fields
+- `AccordionModule` - accordion panels
+- `TabViewModule` - tabbed interface
+- `ScrollPanelModule` - custom scrollbar
+
+```html
+<p-panel header="Details" [toggleable]="true">
+  <p>Content</p>
+</p-panel>
+
+<p-accordion>
+  <p-accordionPanel header="Section 1">
+    <p>Content</p>
+  </p-accordionPanel>
+</p-accordion>
+```
+
+### Layout
+
+- `DividerModule` - visual separator
+- `SplitterModule` - resizable panels
+- `ToolbarModule` - action toolbar
+
+## Overlay Components
+
+### Dialogs
+
+- `DialogModule` - modal dialog
+- `DynamicDialog` - programmatic dialogs
+- `ConfirmDialogModule` - confirmation
+- `ConfirmPopupModule` - inline confirm
+- Inject `DynamicDialogRef` in dialog component
+
+```typescript
+export class MyDialogComponent {
+  ref = inject(DynamicDialogRef);
+  config = inject(DynamicDialogConfig);
+
+  save() {
+    this.ref.close({ saved: true });
+  }
+}
+```
+
+```typescript
+dialogService = inject(DialogService);
+
+openDialog() {
+  const ref = this.dialogService.open(MyDialogComponent, {
+    header: 'Edit User',
+    data: { user: this.user() }
+  });
+
+  ref.onClose.subscribe(result => {
+    if (result?.saved) this.reload();
+  });
+}
+```
+
+### Other Overlays
+
+- `SidebarModule` - slide-in panel
+- `DrawerModule` - navigation drawer
+- `OverlayPanelModule` - floating panel
+- `TooltipModule` - hover tooltip
+- `PopoverModule` - popover content
+
+```html
+<p-sidebar [(visible)]="visible" position="right">
+  <p>Content</p>
+</p-sidebar>
+
+<button pButton pTooltip="Save changes" tooltipPosition="top" />
+```
+
+## Menu Components
+
+### Navigation
+
+- `MenuModule` - popup menu
+- `MenubarModule` - horizontal menu
+- `PanelMenuModule` - collapsible menu
+- `TieredMenuModule` - nested menu
+- `ContextMenuModule` - right-click menu
+- `MegaMenuModule` - mega menu
+- Use `MenuItem` interface for items
+
+```typescript
+items: MenuItem[] = [
+  { label: 'Home', icon: 'pi pi-home', routerLink: '/' },
+  { label: 'Users', icon: 'pi pi-users', routerLink: '/users' }
+];
+```
+
+```html
+<p-menubar [model]="items" />
+<p-menu [model]="items" [popup]="true" #menu />
+```
+
+### Other Navigation
+
+- `BreadcrumbModule` - breadcrumb trail
+- `StepsModule` - step indicator
+- `TabMenuModule` - tab navigation
+- `DockModule` - macOS-style dock
+
+## Message Components
+
+### Feedback
+
+- `ToastModule` - toast notifications
+- `MessageModule` - inline messages
+- `MessagesModule` - message list
+- Use `MessageService` for toasts
+
+```typescript
+messageService = inject(MessageService);
+
+showSuccess() {
+  this.messageService.add({
+    severity: 'success',
+    summary: 'Success',
+    detail: 'Operation completed'
+  });
+}
+```
+
+```html
+<p-toast />
+<p-message severity="info" text="Information message" />
+```
+
+### Progress
+
+- `ProgressBarModule` - progress indicator
+- `ProgressSpinnerModule` - loading spinner
+- `SkeletonModule` - content placeholder
+
+## Media Components
+
+- `ImageModule` - image with preview
+- `GalleriaModule` - image gallery
+- `CarouselModule` - content carousel
+- `AvatarModule` - user avatar
+- `AvatarGroupModule` - avatar stack
+
+```html
+<p-image src="image.jpg" [preview]="true" />
+<p-avatar label="JD" shape="circle" />
+```
+
+## File Components
+
+- `FileUploadModule` - file upload
+- Supports drag & drop
+- Multiple file selection
+- Progress tracking
+
+```html
+<p-fileUpload mode="basic" chooseLabel="Upload" (onUpload)="onUpload($event)" />
+```
+
+## Misc Components
+
+- `BadgeModule` - notification badge
+- `ChipModule` - compact element
+- `TagModule` - status tag
+- `InplaceModule` - inline editing
+- `TerminalModule` - command terminal
+- `BlockUIModule` - screen blocker
+- `FocusTrapModule` - focus management
+
+```html
+<p-badge [value]="5" severity="danger" />
+<p-chip label="Active" />
+<p-tag value="New" severity="success" />
+```
+
+## Service APIs
+
+### DialogService
+
+- Open dialogs programmatically
+- Pass data via config
+- Handle close events
+- Type-safe results
+
+```typescript
+dialogService = inject(DialogService);
+
+openDialog() {
+  const ref = this.dialogService.open(EditComponent, {
+    header: 'Edit',
+    width: '500px',
+    data: { item: this.item() }
+  });
+}
+```
+
+### MessageService
+
+- Show toast notifications
+- Multiple severity levels
+- Auto-dismiss configuration
+- Sticky messages supported
+
+```typescript
+messageService = inject(MessageService);
+
+messageService.add({
+  severity: 'success',
+  summary: 'Saved',
+  detail: 'Changes saved successfully',
+  life: 3000
+});
+```
+
+### ConfirmationService
+
+- Show confirmation dialogs
+- Accept/reject callbacks
+- Custom messages and icons
+
+```typescript
+confirmationService = inject(ConfirmationService);
+
+confirmationService.confirm({
+  message: 'Delete this item?',
+  accept: () => this.delete()
+});
+```
+
+## Styling
+
+### Severity Variants
+
+- `primary` - main actions
+- `secondary` - alternative actions
+- `success` - positive actions
+- `info` - informational
+- `warn` - warnings
+- `danger` - destructive actions
+- `contrast` - high contrast
+
+```html
+<p-button label="Delete" severity="danger" />
+<p-message severity="warn" text="Warning" />
+```
+
+### Size Variants
+
+- `small` - compact size
+- Default - standard size
+- `large` - larger size
+- Apply via `size` attribute
+
+```html
+<p-button label="Small" size="small" />
+<p-button label="Large" size="large" />
+```
+
+### Custom Styling
+
+- Use `styleClass` for Tailwind classes
+- Use `style` for inline styles
+- Theme tokens for consistency
+
+```html
+<p-button label="Custom" styleClass="w-full mt-4" />
+```
+
+## Best Practices
+
+### Signal Integration
+
+- Bind signals directly with `[ngModel]`
+- Use `(ngModelChange)` to update signals
+- Computed signals for derived values
+- Effects for side effects
+
+```typescript
+value = signal('');
+uppercase = computed(() => this.value().toUpperCase());
+```
+
+```html
+<input pInputText [ngModel]="value()" (ngModelChange)="value.set($event)" />
+<p>{{ uppercase() }}</p>
+```
+
+### Performance
+
+- Use `trackBy` in tables
+- Lazy load large datasets
+- Virtual scrolling for big lists
+- Defer heavy components
+
+```html
+<p-table [value]="items()" [lazy]="true" (onLazyLoad)="loadData($event)" />
+```
+
+### Accessibility
+
+- ARIA labels automatic
+- Keyboard navigation built-in
+- Focus management included
+- Screen reader support
+- High contrast themes
+
+### Error Handling
+
+- Display errors below fields
+- Use `p-error` class for styling
+- Show validation on touched
+- Clear error messages
+
+```html
+<input pInputText [ngModel]="email()" [class.ng-invalid]="emailError()" />
+@if (emailError()) {
+  <small class="p-error">{{ emailError() }}</small>
+}
+```
+
+### Form Integration
+
+- Works with Angular forms
+- Reactive forms compatible
+- Signal forms compatible
+- Template-driven forms supported
+
+Reference: @klubr-admin/src/app/app.config.ts for global configuration

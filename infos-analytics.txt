@@ -1,0 +1,66 @@
+Solution NextJs
+	https://plausible.io/docs/nextjs-integration
+
+Solution Angular
+    https://plausible.io/docs/angular-integration
+----------------------------------------------------------------------
+Self Hosting:
+	https://plausible.io/self-hosted-web-analytics
+	https://github.com/plausible/community-edition/
+----------------------------------------------------------------------
+AMDIN: 
+	Tracking des pages:
+		Ajouter le klubDenomination/Role/profile.uuid
+----------------------------------------------------------------------
+Pour comptabiliser toutes les visites, ajouter un prox Nginx vers Plausible:
+	https://plausible.io/docs/proxy/guides/nginx
+Ajouter Plausible dans les CSP
+	https://github.com/plausible/docs/issues/20
+	
+Tracking du localhost:
+	Remplacer le script.js par script.local.js: https://plausible.io/docs/script-extensions#advanced-tracking-options 
+	(section Advanced tracking options)
+
+Ajouter Google Console:
+	https://plausible.io/docs/google-search-console-integration
+
+API
+	Gestion des domaines:
+		https://plausible.io/docs/sites-api
+	Stats:
+		https://plausible.io/docs/stats-api
+	Playground:
+		https://plausible.io/docs/stats-api-playground
+		
+Dashboard:
+	https://plausible.io/docs/top-referrers
+	
+Tracking du dark traffic:
+	Ajouter des UTM au liens d'email + partages RS
+		https://plausible.io/blog/utm-tracking-tags
+Tracking des pages avec queryParams:
+	Mode manuel:	
+		https://plausible.io/docs/custom-query-params
+	
+GOALS:
+	https://plausible.io/docs/goal-conversions
+	Pageview:
+	Custom event:
+		- page de confirmation de don affichée
+		custom properties: 
+			https://plausible.io/docs/custom-props/for-custom-events
+			Segmentation du dashboard par customProperty
+			https://plausible.io/docs/custom-props/props-dashboard
+	Funnel analysis
+		- Landing présentation aux clubs > création de clubs
+		- Page club > page de confirmation de don affichée
+		- Page projet > page de confirmation de don affichée
+		https://plausible.io/docs/funnel-analysis
+	Ecommerce revenue tracking
+		- add dynamic monetary value to custom events
+		https://plausible.io/docs/ecommerce-revenue-tracking
+		
+		
+	
+Voir comment faire des partages RS avec du contenu
+		

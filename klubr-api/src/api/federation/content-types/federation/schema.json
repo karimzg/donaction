@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "federations",
+  "info": {
+    "singularName": "federation",
+    "pluralName": "federations",
+    "displayName": "Federation",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "klubrs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klubr.klubr",
+      "mappedBy": "federationLink"
+    },
+    "acronym": {
+      "type": "string"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

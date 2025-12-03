@@ -1,0 +1,39 @@
+<h1 #title class="admin-h1">Klubr membre</h1>
+<div class="grid">
+  <div class="col-12">
+    <div class="card">
+      <h5>Filtre</h5>
+      <div class="grid">
+        <div class="col-12 lg:col-6">
+          <app-dropdown-klubr-filter
+            (onItemUUIDSelected)="klubrUUID.set($event)"
+          >
+          </app-dropdown-klubr-filter>
+        </div>
+        <div class="col-12 lg:col-6">
+          <app-dropdown-klub-membre-filter
+            (onItemUUIDSelected)="itemUUID.set($event)"
+            [endpointSuffix]="klubrUUID() ? '&filters[klubr][uuid][$eq]=' + klubrUUID() : ''"
+            [endpointPopulate]="['avatar']"
+            [customItem]="customDropdownItem()">
+          </app-dropdown-klub-membre-filter>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="grid">
+  @if (item(); as itemSelected) {
+    <div class="col-12 lg:col-6">
+      <app-media-update
+        (onItemLoaded)="updateItem()"
+        [endpointPrefix]="'medias/klubr-membres/'"
+        [itemUUID]="itemUUID()!"
+        [itemMediaLabel]="'Avatar'"
+        [fileInput]="item()?.avatar"
+        [mediaField]="'avatar'"
+      >
+      </app-media-update>
+    </div>
+  }
+</div>

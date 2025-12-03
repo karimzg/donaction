@@ -1,0 +1,27 @@
+// Drawer for balance de dons
+.p-drawer-right {
+  top: 0;
+  right: 0;
+  width: 20rem;
+  height: 100%;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.p-drawer {
+  position: fixed;
+  transition: transform .3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.p-drawer-bottom {
+  background: transparent;
+  border: none;
+
+  & > * {
+    margin-top: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+}

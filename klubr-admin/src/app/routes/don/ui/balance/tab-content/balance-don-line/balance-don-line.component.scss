@@ -1,0 +1,26 @@
+.balance-don-line {
+  p {
+    margin: unset;
+  }
+
+  .balance-don-line-shadow {
+    box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12);;
+  }
+
+  .context-data {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+
+    @media screen and (max-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+      padding: 12px;
+      gap: 12px;
+
+      & > :first-child {
+        grid-column: span 2;
+      }
+    }
+  }
+
+}

@@ -1,0 +1,43 @@
+
+
+.outerBanner {
+  position: absolute;
+  display: flex;
+  height: 100px;
+  width: 200px;
+
+  &.true {
+    @media screen and (max-width: 768px) {
+      display: none !important;
+    }
+  }
+
+  &, .innerBanner {
+    &.topRight {
+      top: 0;
+      right: 0;
+      border-top-right-radius: 1rem;
+      clip-path: polygon(0 0, 100% 100%, 100% 0);
+      margin-left: auto;
+    }
+
+    &.botLeft {
+      bottom: 0;
+      left: 0;
+      border-bottom-left-radius: 1rem;
+      clip-path: polygon(0 0, 0 100%, 100% 100%);
+      margin-right: auto;
+      margin-top: auto;
+
+      @media screen and (max-width: 768px) {
+        display: none !important;
+      }
+    }
+  }
+
+  .innerBanner {
+    height: 70px;
+    width: 140px;
+    position: absolute;
+  }
+}

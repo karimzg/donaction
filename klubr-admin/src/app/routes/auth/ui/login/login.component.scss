@@ -1,0 +1,25 @@
+.centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Use min-height to ensure it covers the viewport height */
+    text-align: center; /* Center the content inside the flex item, if needed */
+}
+.flex-item.input {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+ .flex-item.message{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: red ;
+    display: flex;
+    justify-content: center;
+}
+ h5{
+    color: red !important;
+}
+::ng-deep .p-progressbar{
+    height: 15px;
+    margin-bottom: 10px;
+}

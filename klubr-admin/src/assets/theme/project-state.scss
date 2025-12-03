@@ -1,0 +1,47 @@
+
+.project-state {
+  &.is-template {
+    --project-state-color: #3B82F6;
+  }
+
+  &.is-billed {
+    --project-state-color: var(--black);
+  }
+
+  display: inline-flex;
+  position: relative;
+  background: transparent;
+  border: 1px solid;
+  border-color: var(--project-state-color);
+  outline-color: var(--project-state-color);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+  border-radius: var(--p-button-border-radius);
+  align-items: center;
+
+  & > span {
+    line-height: 1rem;
+    padding: var(--p-button-padding-y) 0.75rem;
+    font-size: 1rem;
+    color: var(--project-state-color);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1 1 auto;
+    width: 1%;
+    text-overflow: ellipsis;
+  }
+
+  &--small {
+    & > span {
+      font-size: 0.92rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  &--large {
+    & > span {
+      font-size: 1.08rem;
+      padding: 1.23rem 1.25rem;
+    }
+  }
+}

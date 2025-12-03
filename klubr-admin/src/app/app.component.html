@@ -1,0 +1,29 @@
+<p-toast
+  key="global-toast"
+  position="bottom-right"
+  [showTransformOptions]="'translateY(100%)'"
+  [showTransitionOptions]="'200ms'"
+  [hideTransitionOptions]="'200ms'"
+  [hideTransformOptions]="'translateX(100%)'"
+  [breakpoints]="{ '768px': { width: '100%', right: '0', left: '0' } }"
+  [life]="5000"></p-toast>
+<p-toast
+  key="global-quick-toast"
+  position="bottom-right"
+  [showTransformOptions]="'translateY(100%)'"
+  [showTransitionOptions]="'200ms'"
+  [hideTransitionOptions]="'200ms'"
+  [hideTransformOptions]="'translateX(100%)'"
+  [breakpoints]="{ '768px': { width: '100%', right: '0', left: '0' } }"
+  [life]="3000"></p-toast>
+<p-toast
+  key="keep-while-routing"
+  position="bottom-right"
+  [showTransformOptions]="'translateY(100%)'"
+  [showTransitionOptions]="'200ms'"
+  [hideTransitionOptions]="'200ms'"
+  [hideTransformOptions]="'translateX(100%)'"
+  [breakpoints]="{ '768px': { width: '100%', right: '0', left: '0' } }"
+  [life]="3000"></p-toast>
+<router-outlet></router-outlet>
+<app-confirm-dialog></app-confirm-dialog>

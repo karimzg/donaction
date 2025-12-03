@@ -1,0 +1,33 @@
+.p-fileupload-content-wrapper {
+  padding: 15px;
+  border-radius: 4px;
+  background-color: rgba(226, 232, 240, 0.3);
+  min-height: 252px;
+}
+
+.p-progressbar {
+  .p-progressbar-value {
+    background-color: #ff8100;
+  }
+}
+
+#tmpl-category {
+  .p-avatar {
+    img {
+      object-fit: fill;
+      padding: 2px;
+    }
+  }
+}
+
+.speeddial-tooltip-project {
+  position: sticky;
+  right: 0;
+  bottom: 8rem;
+
+  .speeddial-right {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+}

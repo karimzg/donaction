@@ -1,0 +1,38 @@
+<form [formGroup]="formGroup()!" class="p-dropdown-item-filter">
+  <p-multi-select
+    #filterDropdown
+    [options]="itemsList()"
+    formControlName="selectedItem"
+    [optionLabel]="optionLabel()"
+    [filter]="true"
+    filterBy="name"
+    [showClear]="true"
+    [placeholder]="placeholder()"
+    (onClear)="onClear()"
+    display="chip"
+    emptyMessage="Aucun élément disponible"
+    class="w-full"
+    [styleClass]="'w-full' + customItem() ? ' custom-tmpl-dropdown' : ''">
+    <ng-template #filter let-options="options">
+      <p-inputgroup (click)="$event.stopPropagation()">
+        <p-iconfield iconPosition="left" class="flex-grow">
+          <p-inputicon styleClass="pi pi-search"/>
+          <input
+            type="text"
+            pInputText
+            placeholder="Filtre"
+            formControlName="filterValue"
+            class="rounded-r-none w-full"
+          />
+        </p-iconfield>
+        <p-inputgroup-addon>
+          <p-button
+            icon="pi pi-times" severity="secondary" class="no-underline" variant="text"
+            (click)="resetFunction(options)"/>
+        </p-inputgroup-addon>
+      </p-inputgroup>
+    </ng-template>
+  </p-multi-select>
+</form>
+
+

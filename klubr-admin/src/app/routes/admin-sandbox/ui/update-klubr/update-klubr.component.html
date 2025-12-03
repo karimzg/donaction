@@ -1,0 +1,91 @@
+<h1 #title class="admin-h1">Club</h1>
+<div class="grid">
+  <div class="col-12 lg:col-6">
+    <div class="card">
+      <h5>Filtre</h5>
+      <app-dropdown-klubr-filter
+        (onItemUUIDSelected)="itemUUID.set($event)"
+      ></app-dropdown-klubr-filter>
+    </div>
+  </div>
+</div>
+
+
+<div class="grid">
+  @if (item(); as itemSelected) {
+    <div class="col-12 lg:col-6">
+      <app-media-update
+        [itemUUID]="itemUUID()!"
+        [itemMediaLabel]="'Logo'"
+        [fileInput]="item()?.logo"
+        (onItemLoaded)="updateItem()">
+
+      </app-media-update>
+    </div>
+    @if (subItem(); as sub) {
+      <div class="col-12 lg:col-6">
+        <app-media-update
+          [itemUUID]="sub.uuid"
+          [itemMediaLabel]="'Couverture'"
+          [endpointPrefix]="'medias/klubr-house/'"
+          [mediaField]="'couvertureMedia'"
+          [fileInput]="sub.couvertureMedia"
+          [allowVideo]="true"
+          [mediaPreviewWidth]="8"
+          (onItemLoaded)="updateSubItem()">
+        </app-media-update>
+      </div>
+      <div class="col-12 lg:col-6">
+        <app-media-update
+          [itemUUID]="sub.uuid"
+          [itemMediaLabel]="'Image poster'"
+          [endpointPrefix]="'medias/klubr-house/'"
+          [mediaField]="'poster_media'"
+          [fileInput]="sub.poster_media"
+          [allowVideo]="false"
+          [mediaPreviewWidth]="8"
+          (onItemLoaded)="updateSubItem()">
+        </app-media-update>
+      </div>
+      @if (subItem()?.club_presentation; as sections) {
+        <div class="grid">
+          @for (section of sections; let i = $index; track section.id) {
+            @if (section.__component === 'composant-atoms.section-texte-image') {
+              <div class="col-12 lg:col-6">
+                <app-media-update
+                  [itemUUID]="subItem()!.uuid"
+                  [fileInput]="section.image"
+                  [itemMediaLabel]="'Section Texte Image: ' + section.titre + '(' + section.id + ')'"
+                  [endpointPrefix]="'medias/dynamicZoneFiles/klubr-house/'"
+                  [endpointSuffix]="'/club_presentation/composant-atoms.section-texte-image/'+section.id"
+                  [mediaField]="'image'"
+                  [mediaPreviewWidth]="8"
+                  (onItemLoaded)="updateSubItem()">
+                </app-media-update>
+              </div>
+            }
+          }
+        </div>
+      }
+      @if (subItem()?.partnerList; as sections) {
+        <div class="grid">
+          @for (section of sections; let i = $index; track section.id) {
+            @if (section.__component === 'composant-atoms.partner-item') {
+              <div class="col-12 lg:col-6">
+                <app-media-update
+                  [itemUUID]="subItem()!.uuid"
+                  [fileInput]="section.logo"
+                  [itemMediaLabel]="'Section Partenaire: ' + section.title + '(' + section.id + ')'"
+                  [endpointPrefix]="'medias/dynamicZoneFiles/klubr-house/'"
+                  [endpointSuffix]="'/partnerList/composant-atoms.partner-item/'+section.id"
+                  [mediaField]="'logo'"
+                  (onItemLoaded)="updateSubItem()">
+                </app-media-update>
+              </div>
+            }
+          }
+        </div>
+      }
+    }
+  }
+</div>

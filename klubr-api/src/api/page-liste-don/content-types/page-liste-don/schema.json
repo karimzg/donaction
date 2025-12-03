@@ -1,0 +1,28 @@
+{
+  "kind": "singleType",
+  "collectionName": "page_liste_dons",
+  "info": {
+    "singularName": "page-liste-don",
+    "pluralName": "page-liste-dons",
+    "displayName": "Page Liste des dons"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "FAQ": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-sections.faqs"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

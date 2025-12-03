@@ -1,0 +1,114 @@
+<h1 #title class="admin-h1">Génération des factures</h1>
+<form [formGroup]="generationForm"
+      class="flex flex-col px-3 py-3 mt-3 gap-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0]">
+  <div class="flex flex-wrap gap-4">
+    <p-select
+      id="tmpl-library"
+      [options]="availableMonths()"
+      (onChange)="changePeriod($event.value)"
+      formControlName="billingPeriodSmall"
+      optionLabel="label"
+      placeholder="Choisir un mois"
+      emptyMessage="Aucun projet trouvé"
+      class="filter-component"
+    >
+    </p-select>
+
+    <app-dropdown-klubr-filter
+      #klubrDropdown
+      (onItemUUIDSelected)="klubrUuid.set($event)"
+      class="filter-component"
+    ></app-dropdown-klubr-filter>
+  </div>
+  <div class="flex flex-row gap-4">
+    <div class="flex flex-row gap-2 items-end">
+      <p-checkbox
+        formControlName="pdf"
+        [binary]="true"
+        inputId="genererPdf"/>
+      <label for="genererPdf">Générer en PDF</label>
+    </div>
+    @if (generationForm.get('pdf')?.value) {
+      <div class="flex flex-row gap-2">
+        <p-checkbox
+          formControlName="mail"
+          [binary]="true"
+          inputId="envoyerEmail"/>
+        <label for="envoyeremail">Envoyer la facture par email</label>
+      </div>
+    }
+  </div>
+  <div class="flex gap-3 justify-end">
+    <p-button label="Annuler" class="self-end" severity="secondary"
+              (onClick)="resetForm()" [disabled]="generationForm.pristine || isLoading()">
+    </p-button>
+    <p-button label="Envoyer" class="self-end" severity="contrast" type="submit"
+              (onClick)="generateInvoices(generationForm.value)" [disabled]="generationForm.pristine"
+              [loading]="isLoading()">
+    </p-button>
+  </div>
+</form>
+@if ((generatedInvoices().length || 0) > 0) {
+  <div class="app-listing">
+    <p-table [value]="generatedInvoices()"
+             size="small"
+             class="app-table">
+      <ng-template #header>
+        <tr>
+          <th>Klub</th>
+          <th>Période</th>
+          <th>Numéro Facture</th>
+          <th>Montant</th>
+          <th>Commission</th>
+          <th>Nb Dons Klub</th>
+          <th>Nb Dons Projets</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-invoice>
+        <tr>
+          <td class="max-w-[280px]">
+            <div class="table-content">
+              {{ invoice.klubr }}
+            </div>
+          </td>
+          <td class="max-w-[129px]">
+            <span class="flex flex-col w-fit">
+              {{ invoice.billingPeriodSmall }}
+            </span>
+          </td>
+          <td class="max-w-[168px]">
+            {{ invoice.invoiceNumber }}
+          </td>
+          <td class="max-w-[80px]">{{ invoice.amountExcludingTax | currency }}</td>
+          <td class="max-w-[80px]">{{ invoice.creditTotalAmount | currency }}</td>
+          <td class="max-w-[80px]">{{ invoice.nbDonationsKlub }}</td>
+          <td class="max-w-[80px]">{{ invoice.nbDonationsProjects }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+}
+@if ((generatedInvoicesErrors().length || 0) > 0) {
+  <div class="app-listing">
+    <p-table [value]="generatedInvoicesErrors()"
+             size="small"
+             class="app-table">
+      <ng-template #header>
+        <tr>
+          <th>Klub</th>
+          <th>Erreur</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-error>
+        <tr>
+          <td class="max-w-[280px]">
+            {{ error.klubr }}
+          </td>
+          <td>
+            {{ error.error }}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+}

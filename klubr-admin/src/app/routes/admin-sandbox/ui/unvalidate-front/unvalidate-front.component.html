@@ -1,0 +1,40 @@
+<h1 #title class="admin-h1">Invalidation de cache</h1>
+<div class="flex justify-center">
+  <p-card class="">
+    <div class="flex gap-5">
+      <div class="flex flex-column gap-2">
+        <label for="tags">Par tag(s)</label>
+        <p-multiSelect
+          class=""
+          [options]="tags"
+          [(ngModel)]="selectedTags"
+          placeholder="Selectionnez des tags"
+          optionLabel="label"
+          display="chip"
+          id="tags"
+          aria-describedby="tags-help"
+          [showClear]="true"/>
+        <small id="tags-help">
+          Sélectionnez les tags pour lesquels vous souhaitez invalider le cache.
+        </small>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="paths">Par path</label>
+        <!--        <p-chips [(ngModel)]="paths" id="paths" aria-describedby="path-help"/>-->
+        <p-autocomplete [(ngModel)]="paths" id="paths" multiple [typeahead]="false"
+                        aria-describedby="path-help"></p-autocomplete>
+        <small id="path-help">
+          Saisissez le path pour lequel vous souhaitez invalider le cache.
+        </small>
+      </div>
+    </div>
+    <ng-template #footer>
+      <div class="flex gap-3 mt-4 justify-end">
+        <p-button type="submit" label="Valider" class="self-end" severity="contrast"
+                  [disabled]="(selectedTags && !selectedTags.length && paths && !paths.length) || isLoading()"
+                  [loading]="isLoading()"
+                  (click)="submit()"/>
+      </div>
+    </ng-template>
+  </p-card>
+</div>

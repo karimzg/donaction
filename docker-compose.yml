@@ -1,0 +1,135 @@
+#version: '3'
+services:
+
+  klubrfrontend:
+    container_name: ${PROJECT_SLUG}_frontend
+    build:
+      context: .
+      dockerfile: ./klubr-frontend/docker/${ENVIRONMENT}/Dockerfile
+      args:
+        - NODE_ENV=${ENVIRONMENT}
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - ./klubr-frontend:/app
+      - klubrfrontend_node_modules:/app/node_modules
+      - klubrfrontend-next:/app/.next
+      - ./logs/klubrFrontend:/root/.npm/_logs
+    env_file:
+      - ./.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - klubrapi
+
+  klubradmin:
+    container_name: ${PROJECT_SLUG}_admin
+    build:
+      context: .
+      dockerfile: ./klubr-admin/docker/${ENVIRONMENT}/Dockerfile
+      args:
+        - NODE_ENV=${ENVIRONMENT}
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - ./klubr-admin:/app:rw
+      - klubradmin_node_modules:/app/node_modules
+      #      - klubradmin-next:/app/.next
+      - ./logs/klubrAdmin:/root/.npm/_logs
+    #    env_file:
+    #      - ./.env
+    ports:
+      - "4200:4200"
+    depends_on:
+      - klubrapi
+
+  klubrapi:
+    container_name: ${PROJECT_SLUG}_backend
+    build:
+      context: .
+      dockerfile: ./klubr-api/docker/${ENVIRONMENT}/Dockerfile
+      #dockerfile: ./klubr-api/docker/${ENVIRONMENT}/DockerfileTest
+      args:
+        - NODE_ENV=${ENVIRONMENT}
+      no_cache: true
+    tty: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      #DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: klubr_postgres_v5
+      #DATABASE_NAME: ${DATABASE_NAME}
+      #DATABASE_USERNAME: ${DATABASE_USERNAME}
+      #DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      #DATABASE_PORT: ${DATABASE_PORT}
+      #JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${ENVIRONMENT}
+
+    volumes:
+      - ./klubr-api/src:/usr/src/app/src
+      - klubrapi_node_modules:/usr/src/app/node_modules
+      - ./logs/klubrApi:/root/.npm/_logs
+      - ./klubr-api/config:/usr/src/app/config
+      - ./klubr-api/data:/usr/src/app/data
+      - ./klubr-api/database:/usr/src/app/database
+      - ./klubr-api/package.json:/usr/src/app/package.json
+      - ./klubr-api/package-lock.json:/usr/src/app/package-lock.json:rw # Replace with package-lock.json if using npm
+      - ./klubr-api/.env.development:/usr/src/app/.env
+      - ./klubr-api/private-pdf:/usr/src/app/private-pdf
+    networks:
+      - internal
+    depends_on:
+      - postgres
+    ports:
+      - "1337:1337"
+
+  postgres:
+    image: postgres:16.0-alpine
+    container_name: ${PROJECT_SLUG}_postgres_v5
+    platform: linux/amd64
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-v5:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: klubr_pgadmin4
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    networks:
+      - internal
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    # to run postgresql server on pgAdmin, get the network ip address of the postgresql container with the command:
+    # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PROJECT_SLUG}_postgres
+    # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' klubr_postgres
+
+volumes:
+  postgres-data-v5:
+  pgadmin-data:
+  klubrfrontend-next:
+  klubrfrontend_node_modules:
+  klubradmin_node_modules:
+  klubrapi_node_modules:
+
+networks:
+  internal:
+    name: ${PROJECT_SLUG}_internal
+    driver: bridge
+#    external: true

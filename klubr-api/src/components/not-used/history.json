@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_club_presentation_histories",
+  "info": {
+    "displayName": "history",
+    "icon": "book-open",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "history_item": {
+      "displayName": "history_item",
+      "type": "component",
+      "repeatable": true,
+      "component": "not-used.history-item"
+    },
+    "title": {
+      "type": "string"
+    }
+  }
+}

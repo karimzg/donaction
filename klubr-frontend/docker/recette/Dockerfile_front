@@ -1,0 +1,26 @@
+# phase build
+FROM node:18-alpine AS builder
+
+ARG ENV=re7
+
+WORKDIR /app-saas
+COPY ./klubr-saas ./
+RUN npm install
+RUN cp .env.${ENV} .env
+RUN npm run build
+
+WORKDIR /app-build
+COPY ./klubr-frontend ./
+RUN cp .env.${ENV} .env && yarn install  && yarn run build
+RUN cp -R ../app-saas/build/klubr-web-components public/klubr-web-components
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app-build/public ./public
+RUN mkdir .next
+COPY --from=builder  /app-build/.next/standalone ./
+COPY --from=builder  /app-build/.next/static ./.next/static
+EXPOSE 3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+CMD ["node", "server.js"]

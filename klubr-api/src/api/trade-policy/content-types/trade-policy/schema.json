@@ -1,0 +1,72 @@
+{
+  "kind": "collectionType",
+  "collectionName": "trade_policies",
+  "info": {
+    "singularName": "trade-policy",
+    "pluralName": "trade-policies",
+    "displayName": "Trade policy",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tradePolicyLabel": {
+      "type": "string",
+      "required": true
+    },
+    "commissionPercentage": {
+      "type": "decimal",
+      "required": true,
+      "default": 6
+    },
+    "noBilling": {
+      "type": "boolean",
+      "default": false
+    },
+    "reference": {
+      "type": "string"
+    },
+    "billingDescription": {
+      "type": "string"
+    },
+    "VATPercentage": {
+      "type": "decimal",
+      "default": 20,
+      "required": true
+    },
+    "defaultTradePolicy": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "allowKlubrContribution": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "perDonationCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "klubDonationReference": {
+      "type": "string"
+    },
+    "klubDonationDescription": {
+      "type": "string"
+    },
+    "klubDonationPercentage": {
+      "type": "decimal",
+      "default": 0
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

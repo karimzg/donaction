@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_club_presentation_section_citations",
+  "info": {
+    "displayName": "SectionCitation",
+    "icon": "quote",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "citations": {
+      "type": "component",
+      "repeatable": true,
+      "component": "composant-atoms.citation",
+      "required": true,
+      "min": 1
+    },
+    "titre": {
+      "type": "string"
+    }
+  }
+}

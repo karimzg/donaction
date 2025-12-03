@@ -1,0 +1,129 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubr_donateurs",
+  "info": {
+    "singularName": "klubr-donateur",
+    "pluralName": "klubr-donateurs",
+    "displayName": "Klubr Donateur",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "nom": {
+      "type": "string"
+    },
+    "prenom": {
+      "type": "string"
+    },
+    "civilite": {
+      "type": "enumeration",
+      "enum": [
+        "Madame",
+        "Monsieur"
+      ],
+      "default": "Madame"
+    },
+    "email": {
+      "type": "email",
+      "required": false
+    },
+    "donateurType": {
+      "type": "enumeration",
+      "enum": [
+        "Particulier",
+        "Organisme"
+      ],
+      "default": "Particulier",
+      "required": false
+    },
+    "raisonSocial": {
+      "type": "string"
+    },
+    "SIREN": {
+      "type": "string"
+    },
+    "formeJuridique": {
+      "type": "string"
+    },
+    "tel": {
+      "type": "string"
+    },
+    "adresse": {
+      "type": "string",
+      "required": false
+    },
+    "adresse2": {
+      "type": "string"
+    },
+    "cp": {
+      "type": "string",
+      "maxLength": 5,
+      "required": false
+    },
+    "ville": {
+      "type": "string",
+      "required": false
+    },
+    "pays": {
+      "type": "string",
+      "default": "France",
+      "required": false
+    },
+    "dateNaissance": {
+      "type": "date",
+      "required": false
+    },
+    "klubDon": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-don.klub-don",
+      "inversedBy": "klubDonateur"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "optInAffMontant": {
+      "type": "boolean"
+    },
+    "optInAffNom": {
+      "type": "boolean"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "place_id": {
+      "type": "string"
+    },
+    "anonymized": {
+      "type": "boolean",
+      "private": true,
+      "default": false
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<h1 #title class="admin-h1">Membres</h1>
+<!-- HEADER -->
+<app-list-header
+  [filtersList]="filtersList()"
+  [(filtersSearch)]="filtersSearch"
+  [displayFilters]="permissionsService.memberIsAtLeastLeaderSignal()"
+  #headerList
+  displaySearch="true"
+  searchPlaceholder="Recherche par prénom, nom, fonction"
+>
+  <ng-container tmplHeaderActions>
+    @if (!permissionsService.memberIsAdminSignal() && permissionsService.memberIsAtLeastLeaderSignal()) {
+      <p-button (onClick)="addMemberDialog()" label="Ajouter un membre" icon="pi pi-plus-circle"
+                class="p-button--only-icon-mobile"
+                severity="primary"/>
+    }
+  </ng-container>
+  @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+    <app-member-filters
+      #filtersComponent
+      (filtersChanged)="filtersList.set($event); headerList.closeDrawer()"
+      [klubrInit]="klubrInit()"
+      [accountInit]="accountInit()"
+    >
+    </app-member-filters>
+  }
+</app-list-header>
+
+<!-- LIST -->
+<div class="grid-member-listing m-0 gap-3 w-full" appScrollNearEnd (nearEnd)="onNearEndScroll()">
+  @for (profile of listing(); track profile.uuid) {
+    <app-member-card
+      [profile]="profile"
+      (onDelete)="onFiltersChanged()"
+      @fade
+    ></app-member-card>
+  }
+
+</div>
+
+<!-- LOADING / NO RESULT -->
+@if (listing()!.length === 0) {
+  <app-list-loading-no-results
+    label="membre"
+    [hasFilters]="!!hasFilters()"
+    [loading]="sharedFacade.loading()"
+  ></app-list-loading-no-results>
+}

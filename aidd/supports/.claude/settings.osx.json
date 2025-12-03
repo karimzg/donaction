@@ -1,0 +1,25 @@
+{
+	"hooks": {
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "afplay -v 0.4 aidd/assets/audio/finish.mp3"
+					}
+				]
+			}
+		],
+		"Notification": [
+			{
+				"matcher": "",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "afplay -v 0.4 aidd/assets/audio/need-human.mp3"
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,335 @@
+stages:
+  - Version
+  - Build
+  - Deploy
+
+include:
+  - local: $CI_PROJECT_DIR/cicd/globalDefinitions/ssh.yml
+
+# versioning and tagging
+generate_version:
+  stage: Version
+  before_script:
+    - git remote set-url origin https://oauth2:$CI_GITLAB_ACCESS_TOKEN@gitlab.com/$CI_PROJECT_PATH.git
+    - git config --global user.email "$CI_GITLAB_USER_EMAIL"
+    - git config --global user.name "$CI_GITLAB_USER_NAME"
+  script:
+    - |
+      MAJOR=1
+      MINOR=0
+      PATCH=$(date +%Y%m%d%H%M%S)
+      if [[ "$CI_COMMIT_REF_NAME" =~ ^release/ ]]; then
+        VERSION="$MAJOR.$MINOR.$PATCH"
+      elif [[ "$CI_COMMIT_REF_NAME" =~ ^demo/ ]]; then
+        VERSION="$MAJOR.$((MINOR+1)).$PATCH"
+      else
+        VERSION="$MAJOR.$MINOR.$PATCH-dev"
+      fi
+    - echo "export const version = '$VERSION';" > version.ts
+    - echo $VERSION
+    - git --version
+    - git remote -v
+    - git branch --show-current
+    - git tag -a v-$VERSION -m "Version created by gitlab-ci Build"
+    - git push --tags
+  artifacts:
+    paths:
+      - version.ts
+  when: manual
+  only:
+    - /^release\/.*$/
+    - /^demo\/.*$/
+    - /^feature\/.*$/
+
+# Template pour les builds Docker avec Buildx
+.docker_buildx_template:
+  image: docker:24-cli
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    # Attendre que Docker soit prêt
+    - until docker info; do sleep 1; done
+    # Authentification avec token Docker Hub encodé
+    - mkdir -p ~/.docker
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$DOCKER_AUTH_TOKEN\"}}}" > ~/.docker/config.json
+    # Créer le builder Buildx
+    - docker buildx create --use --driver docker-container --name mybuilder || true
+    - docker buildx inspect --bootstrap
+
+#admin-section
+package_admin:dev:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-admin/docker/recette/Dockerfile"
+    IMAGE_NAME: "nakaadev/admin"
+    TAG: "dev"
+  before_script:
+    - !reference [ .docker_buildx_template, before_script ]
+    - ls -la cicd/env/
+    - chmod +x cicd/env/set-angular-env-vars.sh
+    - cicd/env/set-angular-env-vars.sh re7
+    - cp version.ts klubr-admin/src/environments/version.ts
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=re7 \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  needs:
+    - generate_version
+  dependencies:
+    - generate_version
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-admin/**/*
+
+package_admin:prod:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-admin/docker/production/Dockerfile"
+    IMAGE_NAME: "nakaadev/admin"
+    TAG: "prod"
+  before_script:
+    - !reference [ .docker_buildx_template, before_script ]
+    - chmod +x cicd/env/set-angular-env-vars.sh
+    - cicd/env/set-angular-env-vars.sh prod
+    - cp version.ts klubr-admin/src/environments/version.ts
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=prod \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  needs:
+    - generate_version
+  dependencies:
+    - generate_version
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-admin/**/*
+
+# frontend section
+package_frontend:dev:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-frontend/docker/recette/Dockerfile_front"
+    IMAGE_NAME: "nakaadev/frontend"
+    TAG: "dev"
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=re7 \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-frontend/**/*
+
+package_frontend:prod:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-frontend/docker/production/Dockerfile_front"
+    IMAGE_NAME: "nakaadev/frontend"
+    TAG: "prod"
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=prod \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-frontend/**/*
+
+# api section
+package_api:dev:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-api/docker/recette/Dockerfile_api"
+    IMAGE_NAME: "nakaadev/api"
+    TAG: "dev"
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=re7 \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-api/**/*
+
+package_api:prod:
+  extends: .docker_buildx_template
+  stage: Build
+  #  tags:
+  #    - gitlab-org
+  variables:
+    DOCKER_FILE_PATH: "klubr-api/docker/production/Dockerfile_api"
+    IMAGE_NAME: "nakaadev/api"
+    TAG: "prod"
+  script:
+    - |
+      docker buildx build \
+        --build-arg ENV=prod \
+        --file $CI_PROJECT_DIR/${DOCKER_FILE_PATH} \
+        --tag ${IMAGE_NAME}:${TAG} \
+        --push \
+        $CI_PROJECT_DIR
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-api/**/*
+
+# deploy
+
+deploy_admin:dev:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_STG'
+    SHELL_COMMAND: "docker pull nakaadev/admin:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d "
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_admin:dev
+  when: manual
+  needs:
+    - package_admin:dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-admin/**/*
+
+deploy_admin:prod:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_PROD'
+    SHELL_COMMAND: "docker pull nakaadev/admin:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d "
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_admin:prod
+  when: manual
+  needs:
+    - package_admin:prod
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-amin/**/*
+
+deploy_API:dev:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_STG'
+    SHELL_COMMAND: "docker pull nakaadev/api:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_api:dev
+  when: manual
+  needs:
+    - package_api:dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-api/**/*
+
+deploy_FRONT:dev:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_STG'
+    SHELL_COMMAND: "docker pull nakaadev/frontend:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_frontend:dev
+  when: manual
+  needs:
+    - package_frontend:dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
+      changes:
+        - klubr-frontend/**/*
+
+deploy_API:prod:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_PROD'
+    SHELL_COMMAND: "docker pull nakaadev/api:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_api:prod
+  when: manual
+  needs:
+    - package_api:prod
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-api/**/*
+
+deploy_FRONT:prod:
+  stage: Deploy
+  #  tags:
+  #    - gitlab-org
+  variables:
+    TARGET_HOST: '$HOST_PROD'
+    SHELL_COMMAND: "docker pull nakaadev/frontend:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    IMAGE_TAG: 3
+  extends: .ssh
+  dependencies:
+    - package_frontend:prod
+  when: manual
+  needs:
+    - package_frontend:prod
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      changes:
+        - klubr-frontend/**/*

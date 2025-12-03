@@ -1,0 +1,41 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <form [formGroup]="filtersForm" class="flex gap-3 flex-row flex-wrap justify-between">
+    @if (permissionsService.memberIsAdminSignal()) {
+      <app-dropdown-klubr-filter
+        #klubrDropdown
+        class="filter-component"
+        [itemInit]="klubrInit() || undefined"
+        (onItemUUIDSelected)="setKlubFilter($event!)"
+      ></app-dropdown-klubr-filter>
+    }
+    <p-select
+      #roleDropdown
+      class="filter-component customDropdown"
+      [options]="roles()"
+      [checkmark]="true"
+      formControlName="role"
+      placeholder="Par rôle"
+      optionLabel="label"
+      optionValue="name"
+      emptyMessage="Aucun role disponible"
+      [showClear]="true"/>
+
+    <p-select
+      #accountDropdown
+      class="filter-component customDropdown"
+      [options]="accounts()"
+      [checkmark]="true"
+      formControlName="account"
+      placeholder="État du compte"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"/>
+    <div class="flex gap-3 justify-end filter-component">
+      <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end"
+                [disabled]="filtersForm.pristine"
+                severity="secondary"/>
+      <p-button (click)="applyFilters()" label="Filter" class="self-end" severity="contrast"
+                [disabled]="filtersForm.pristine"/>
+    </div>
+  </form>
+</div>

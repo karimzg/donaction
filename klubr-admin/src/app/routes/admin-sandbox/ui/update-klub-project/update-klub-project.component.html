@@ -1,0 +1,39 @@
+<h1 #title class="admin-h1">Klubr projects</h1>
+<div class="grid">
+  <div class="col-12">
+    <div class="card">
+      <h5>Filtre</h5>
+      <div class="grid">
+        <div class="col-12 lg:col-6">
+          <app-dropdown-klubr-filter
+            (onItemUUIDSelected)="klubrUUID.set($event)"
+          >
+          </app-dropdown-klubr-filter>
+        </div>
+        <div class="col-12 lg:col-6">
+          <app-dropdown-project-filter
+            (onItemUUIDSelected)="itemUUID.set($event)"
+            [endpointSuffix]="klubrUUID() ? '&filters[klubr][uuid][$eq]=' + klubrUUID() : ''"
+            [endpointPopulate]="['couverture']"
+          >
+          </app-dropdown-project-filter>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="grid">
+  @if (item()) {
+    <div class="col-12 lg:col-6">
+      <app-media-update
+        (onItemLoaded)="updateItem()"
+        [endpointPrefix]="'medias/klub-projet/'"
+        [itemUUID]="itemUUID()!"
+        [itemMediaLabel]="'Image de couverture'"
+        [fileInput]="item()?.couverture"
+        [mediaField]="'couverture'"
+      >
+      </app-media-update>
+    </div>
+  }
+</div>

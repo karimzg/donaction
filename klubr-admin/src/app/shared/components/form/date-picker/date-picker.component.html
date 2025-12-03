@@ -1,0 +1,12 @@
+@if (deviceService.isDesktop()) {
+  <p-datepicker
+    [showIcon]="true"
+    [iconDisplay]="'input'"
+    dateFormat="dd/mm/yy"
+    placeholder="JJ/MM/AAAA"
+    [formControl]="control()"
+  ></p-datepicker>
+} @else {
+  <input pInputText type="date" placeholder="JJ/MM/AAAA"
+         [formControl]="control()">
+}

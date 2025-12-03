@@ -1,0 +1,47 @@
+{
+  "kind": "singleType",
+  "collectionName": "cgus",
+  "info": {
+    "singularName": "cgu",
+    "pluralName": "cgus",
+    "displayName": "CGU",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "titre": {
+      "type": "string",
+      "required": false,
+      "default": "Conditions Générales d'Utilisation"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "titre",
+      "required": true
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "text"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

@@ -1,0 +1,111 @@
+<div
+  class="sm:w-[345px] min-h-[220px] flex flex-column bg-white border-solid border-1 border-[#CBD5E1] rounded p-3">
+  <div class="flex flex-col flex-1 items-center bg-[#F8FAFC] rounded py-2 px-3 sm:py-5 sm:px-6">
+    @if (!error()) {
+      <div class="flex flex-col gap-3 items-center">
+        @if (showUploadPoster()) {
+          <ng-container *ngTemplateOutlet="uploadPoster"></ng-container>
+        } @else if (imageUrl()) {
+          <img [src]="imageUrl()" (load)="isImageLoading.set(false)" alt="poster"
+               [ngClass]="{'w-[280px]' : isVideo(), 'hidden' : isImageLoading()}"
+               class="rounded w-full">
+          @if (isImageLoading()) {
+            <div class="flex items-center justify-center w-[155px] h-[220px]">
+              <ng-lottie
+                [options]="{path: 'assets/animations/loading.json'}"
+              ></ng-lottie>
+            </div>
+          }
+        } @else {
+          @if (isImageLoading()) {
+            <div class="flex items-center justify-center w-[155px] h-[220px]">
+              <ng-lottie
+                [options]="{path: 'assets/animations/loading.json'}"
+              ></ng-lottie>
+            </div>
+          } @else {
+            <img src="@assets/images/placeholders/placeholder-klubr.svg" alt="no-image"
+                 [ngClass]="{'w-[280px]' : isVideo()}" class="rounded w-full sm:w-[155px] sm:h-[220px]">
+          }
+        }
+        <div class="text-center w-full h-12 text-ellipsis overflow-hidden">
+          <b>{{ description() }}</b>
+        </div>
+      </div>
+      <hr class="m-5 w-full">
+      <div class="flex gap-3 justify-center w-full">
+        @if (isVideo()) {
+          <i (click)="toggleVideo()" class="pi pi-play rounded-full text-[1.5rem] bg-black/10 p-2 cursor-pointer"></i>
+          <i (click)="downloadVideo()"
+             class="pi pi-download rounded-full text-[#8312C8] text-[1.5rem] bg-[#8312C8]/10 p-2 cursor-pointer"></i>
+        } @else {
+          <i (click)="pdfAction('open')" pTooltip="Ouvrir l'affiche" tooltipPosition="top"
+             class="pi pi-eye rounded-full text-[1.5rem] bg-black/10 p-2 cursor-pointer"></i>
+          <i (click)="pdfAction('download')" pTooltip="Télécharger l'affiche" tooltipPosition="top"
+             class="pi pi-download rounded-full text-[#8312C8] text-[1.5rem] bg-[#8312C8]/10 p-2 cursor-pointer"></i>
+        }
+        @if (endpointPrefix() === 'klubr-houses') {
+          <i (click)="showUploadPoster.set(true)" pTooltip="Remplacer l'image d'affiche" tooltipPosition="top"
+             class="pi pi-upload rounded-full text-primary-500 text-[1.5rem] bg-primary/10 p-2 cursor-pointer"></i>
+        }
+        <!--      TODO : <i class="pi pi-share-alt rounded-full text-[#16A34A] text-[1.5rem] bg-[#16A34A]/10 p-2 cursor-pointer"></i>-->
+      </div>
+    } @else if (error() && (endpointPrefix() === 'klubr-houses' || endpointPrefix() === 'klub-projets')) {
+      <div class="flex flex-col gap-3 items-center">
+        @if (errorMsg()) {
+          <div class="flex flex-col items-center justify-center h-[220px]">
+            <div class="w-[155px] mb-4">
+              <ng-lottie
+                [options]="{path: 'assets/animations/no-results.json'}"
+              ></ng-lottie>
+            </div>
+            <div class="error-list mb-4" [innerHTML]="errorMsg()"></div>
+            @if (endpointPrefix() === 'klubr-houses') {
+              <p-button type="button" label="Ajouter les fichiers manquants" severity="contrast"
+                        [routerLink]="['/klub-house', klubUuid(), 'update']"
+              />
+            } @else if (endpointPrefix() === 'klub-projets') {
+              <p-button type="button" label="Ajouter les fichiers manquants" severity="contrast"
+                        [routerLink]="['/project', uuid(), 'update']"
+              />
+            }
+
+          </div>
+        } @else {
+          <ng-container *ngTemplateOutlet="uploadPoster"></ng-container>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #uploadPoster>
+  <app-form-media-update
+    [endpointPrefix]="'medias/klubr-house/'"
+    [itemUUID]="uuid()!"
+    [itemMediaLabel]="'Image d\'affiche'"
+    [control]="control"
+    [mediaField]="'poster_media'"
+    (reset)="error.set(true)"
+    #mediaUpload
+  >
+    <p> Glissez votre fichier ici. </p>
+  </app-form-media-update>
+  <div class="text-center w-full h-12 text-ellipsis overflow-hidden">
+    <b>Veuillez ajouter une photo pour générer votre affiche Klub</b>
+  </div>
+  <div class="flex gap-3 mt-4 justify-end">
+    <p-button type="submit" label="Sauvegarder" class="self-end" severity="contrast"
+              [disabled]="isLoading() || control.invalid"
+              [loading]="isLoading()"
+              (click)="updateFile()"/>
+  </div>
+
+</ng-template>
+
+<!--video pop-up-->
+<p-dialog header="Vidéo" [(visible)]="isPlaying" [style]="{width: '50vw'}">
+  <app-video-reader
+    [videoUrl]="imageUrl()"
+  ></app-video-reader>
+</p-dialog>

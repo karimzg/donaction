@@ -1,0 +1,14 @@
+.filter-component {
+  flex: 1 0 100%;
+
+  //&:last-child {
+  //  flex-grow: 1;
+  //}
+
+  @media (min-width: 768px) {
+    //flex: 0 1 32%;
+    //width: 32%;
+    flex: 1 1 250px;
+    //max-width: 50%;
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_club_presentation_club_presentations",
+  "info": {
+    "displayName": "Liens réseaux sociaux",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+     "fcb_link": {
+         "type": "string"
+     },
+     "inst_link": {
+         "type": "string"
+     },
+     "linkedin_link": {
+         "type": "string"
+     }
+  }
+}

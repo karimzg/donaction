@@ -1,0 +1,12 @@
+.with-action {
+  .p-message {
+    .p-message-text {
+      display: flex;
+      align-items: center;
+
+      .p-button {
+        flex: 1 0 auto;
+      }
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klub_projets",
+  "info": {
+    "singularName": "klub-projet",
+    "pluralName": "klub-projets",
+    "displayName": "Klub Projet",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "titre": {
+      "type": "string",
+      "required": true,
+      "minLength": 3
+    },
+    "montantAFinancer": {
+      "type": "integer",
+      "required": true,
+      "max": 100000,
+      "min": 0
+    },
+    "dateLimiteFinancementProjet": {
+      "type": "date"
+    },
+    "couverture": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "videos"
+      ]
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "titre",
+      "required": true
+    },
+    "contenu": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.section-texte-image",
+        "composant-atoms.slider"
+      ]
+    },
+    "descriptionCourte": {
+      "type": "blocks",
+      "required": false
+    },
+    "presentationTitre": {
+      "type": "string",
+      "default": "Notre Besoin"
+    },
+    "presentationDescription": {
+      "type": "blocks"
+    },
+    "montantTotalDonations": {
+      "type": "decimal"
+    },
+    "nbDons": {
+      "type": "integer"
+    },
+    "klubr_membre": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr-membre.klubr-membre"
+    },
+    "metaDescription": {
+      "type": "text",
+      "maxLength": 250
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "waitingApproval",
+        "published",
+        "closed",
+        "deleted",
+        "billed"
+      ],
+      "required": true,
+      "default": "draft"
+    },
+    "template_projects_category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::template-projects-category.template-projects-category",
+      "inversedBy": "klub_projets"
+    },
+    "isTemplate": {
+      "type": "boolean",
+      "default": false
+    },
+    "startDate": {
+      "type": "date"
+    },
+    "isFromTemplate": {
+      "type": "boolean",
+      "default": false
+    },
+    "tmplReference": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-projet.klub-projet",
+      "private": true
+    },
+    "invoice_line": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::invoice-line.invoice-line",
+      "mappedBy": "klub_projet"
+    },
+    "realisations": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.section-texte-image"
+      ]
+    }
+  }
+}

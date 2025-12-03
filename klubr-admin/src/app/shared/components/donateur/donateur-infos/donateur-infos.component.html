@@ -1,0 +1,28 @@
+<div class="flex items-center gap-2 relative">
+  @if (donateur()?.donateurType === "Organisme") {
+    <p-avatar
+      image="{{donateur()?.logo | media: 'logo'}}"
+      shape="circle"
+      class="avatar-logo"
+      [size]="size()"
+    ></p-avatar>
+    <p class="pr-5">
+      @if (displayProTag()) {
+        <p-tag value="PRO" class=""/>
+      }
+      {{ donateur()?.raisonSocial }}
+      {{ donateur()?.formeJuridique }}
+    </p>
+  } @else {
+    <p-avatar
+      image="{{donateur()?.avatar | media }}"
+      shape="circle"
+      class="avatar-logo"
+      [size]="size()"
+    ></p-avatar>
+    <p>
+      {{ donateur()?.prenom || "Anonyme" }}
+      {{ donateur()?.nom }}
+    </p>
+  }
+</div>

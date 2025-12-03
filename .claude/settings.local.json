@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ffplay -nodisp -autoexit aidd/assets/audio/finish.mp3"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ffplay -nodisp -autoexit  aidd/assets/audio/need-human.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "aidd/supports/.claude/_/statusbar.sh",
+    "padding": 0
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_club_presentation_support_s",
+  "info": {
+    "displayName": "support ",
+    "icon": "archway",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "support_item": {
+      "type": "component",
+      "repeatable": true,
+      "component": "not-used.support-item"
+    }
+  }
+}

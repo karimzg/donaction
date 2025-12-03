@@ -1,0 +1,26 @@
+<p-select
+  [options]="options()"
+  [(ngModel)]="currentStatus"
+  [disabled]="disabled() || !options() || options().length === 0"
+  optionLabel="actionLabel"
+  (onChange)="onStatusChange($event)"
+  [placeholder]="currentStatus()!.label"
+  [loading]="loading()"
+  class="state-select"
+  [ngClass]="'state-select--' + size()"
+  [ngStyle]="{'--select-color': currentStatus()?.color}"
+  emptyMessage="Aucune action disponible"
+  #select
+>
+  <ng-template #selectedItem>
+    <div class="flex align-items-center gap-2 max-w-48">
+      <div class="truncate">{{ currentStatus()?.label }}</div>
+    </div>
+  </ng-template>
+  <ng-template let-action #item>
+    <div class="flex align-items-center gap-2">
+      <div>{{ action }}</div>
+    </div>
+  </ng-template>
+</p-select>
+

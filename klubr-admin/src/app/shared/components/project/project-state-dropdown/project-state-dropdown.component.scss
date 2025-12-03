@@ -1,0 +1,40 @@
+.state-select {
+  border-color: var(--select-color);
+  outline-color: var(--select-color);
+
+  span {
+    color: var(--select-color);
+  }
+
+  .p-select-label {
+    color: var(--select-color);
+    line-height: 1rem;
+    padding: var(--p-button-padding-y) 0.75rem;
+  }
+
+  .p-select-dropdown {
+    color: var(--select-color);
+  }
+
+  &.p-disabled {
+    background-color: transparent;
+
+    .p-select-dropdown {
+      display: none;
+    }
+  }
+
+  &--small {
+    .p-select-label {
+      font-size: 0.92rem;
+      padding: 0.5rem .75rem;
+    }
+  }
+
+  &--large {
+    .p-select-label {
+      font-size: 1.08rem;
+      padding: 1.23rem 1.25rem;
+    }
+  }
+}

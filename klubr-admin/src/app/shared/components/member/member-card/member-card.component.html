@@ -1,0 +1,80 @@
+@if (profile(); as profile) {
+  <div class="bg-white border-solid border-[#CBD5E1] border rounded p-1 w-full h-full">
+    <div class="flex justify-between gap-2 items-start bg-[#F8FAFC] rounded py-2 pl-2 h-full">
+      <div class="flex gap-3 h-full overflow-hidden">
+        <p-avatar [image]="profile.avatar | media" size="large" shape="circle" class="flex-[1_0_auto]"></p-avatar>
+        <div class="flex flex-col gap-1 w-full justify-between overflow-hidden">
+          <div>
+            @if (permissionsService.memberIsAdminSignal()) {
+              @if (profile.klubr) {
+                <div class="text-black text-sm truncate"><b>{{ profile.klubr.denomination }}</b></div>
+              } @else {
+                <div class="text-red-500 text-sm truncate"><b>Profil sans club</b></div>
+              }
+            }
+            <div class="text-black text-sm truncate"><b>{{ profile.prenom }} {{ profile.nom }}</b></div>
+            <div class="text-black text-sm truncate">{{ profile.fonction }}</div>
+            @if ((permissionsService.isAtLeastLeader$ | async)) {
+              @if (profile.users_permissions_user?.email; as email) {
+                <p class="text-[#64748B] text-sm m-0 max-w-[150px] truncate"> {{ email }} </p>
+              }
+            }
+          </div>
+          @if (profile; as profileItem) {
+            <div class="flex w-full">
+              <app-role-tag [role]="profileItem.role"></app-role-tag>
+            </div>
+          }
+        </div>
+      </div>
+      @if (deviceService.isDesktop()) {
+        @if ((profile | connectedProfileHasGreaterRole)) {
+          <div>
+            <p-menu #menu [model]="menuOptions" [popup]="true"></p-menu>
+            <i class="pi pi-ellipsis-v p-2 self-start cursor-pointer text-black" (click)="menu.toggle($event)"></i>
+          </div>
+        }
+      } @else {
+        @if ((profile | connectedProfileHasGreaterRole)) {
+          <i class="pi pi-ellipsis-v p-2 self-start cursor-pointer text-black" (click)="toggleShowActions()"></i>
+        }
+      }
+    </div>
+  </div>
+  <p-drawer #drawerRef
+            [(visible)]="showActions"
+            position="bottom"
+            blockScroll="true"
+            transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)"
+            styleClass="filters-drawer-bottom">
+    <ng-template #headless>
+      <div class="flex flex-col px-3 py-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+        <div class="flex flex-col gap-4">
+          @if (permissionsService.isAtLeastLeaderSignal() && !(profile.users_permissions_user?.email)) {
+            <span (click)="showInvitationPopup(); toggleShowActions()">
+              <i class="pi pi-send"></i>
+              <span> Envoyer une invitation</span>
+            </span>
+            @if ((profile | connectedProfileHasGreaterRole)) {
+              <hr class="border-t border-gray-300 m-0">
+            }
+          }
+          @if ((profile | connectedProfileHasGreaterRole)) {
+            <span (click)="modifyUser(); toggleShowActions()">
+              <i class="pi pi-pencil"></i>
+              <span> Modifier</span>
+            </span>
+            @if ((permissionsService.memberIsAtLeastAdminEditorSignal())) {
+              <span (click)="deleteUser(); toggleShowActions()">
+                <i class="pi pi-trash"></i>
+                <span> Supprimer</span>
+              </span>
+            }
+          }
+        </div>
+      </div>
+    </ng-template>
+  </p-drawer>
+
+
+}

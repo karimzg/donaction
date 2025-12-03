@@ -1,0 +1,66 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubr_documents",
+  "info": {
+    "singularName": "klubr-document",
+    "pluralName": "klubr-documents",
+    "displayName": "Klubr Documents",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "justifDomicileDirigeant": {
+      "type": "json"
+    },
+    "justifDesignationPresident": {
+      "type": "json"
+    },
+    "statutsAssociation": {
+      "type": "json"
+    },
+    "ribAssociation": {
+      "type": "json"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr",
+      "inversedBy": "klubr_document"
+    },
+    "avisSituationSIRENE": {
+      "type": "json"
+    },
+    "attestationAffiliationFederation": {
+      "type": "json"
+    },
+    "statutsAssociationValide": {
+      "type": "boolean"
+    },
+    "justifDomicileDirigeantValide": {
+      "type": "boolean"
+    },
+    "justifDesignationPresidentValide": {
+      "type": "boolean"
+    },
+    "ribAssociationValide": {
+      "type": "boolean"
+    },
+    "avisSituationSIRENEValide": {
+      "type": "boolean"
+    },
+    "attestationAffiliationFederationValide": {
+      "type": "boolean"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

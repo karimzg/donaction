@@ -1,0 +1,160 @@
+@if (projectCard(); as projectCard) {
+  <div
+    class="flex flex-col gap-2.5 items-center bg-white border-solid border-[#CBD5E1] border rounded p-2.5 h-full max-w-full">
+
+    <div class="flex justify-between items-center w-full">
+      @if (projectCard && !isBilled() && !projectCard?.isTemplate) {
+        <app-project-state-dropdown
+          [size]="'small'"
+          [startStatus]="projectCard! | projectStatus"
+          [projectUuid]="projectCard!.uuid"
+          [userRole]="profile()?.role"
+          (limitDateChanged)="onLimitDateChanged($event)"
+          (onChange)="onStatusChange($event)"
+          [disabled]="projectCard!.isTemplate"
+          [pathsToUnvalidate]="pathsToUnvalidate()"
+        ></app-project-state-dropdown>
+      } @else if (isBilled()) {
+        <div class="project-state project-state--small is-billed">
+          <span>Projet facturé</span>
+        </div>
+      }
+
+      @if (projectCard?.isTemplate) {
+        <div class="project-state project-state--small is-template">
+          <span>Modèle de projet</span>
+        </div>
+        <!--         TODO: ajouter le nombre utilisatiion du model
+                      <p-badge value="2" severity="info"/>-->
+      }
+      @if (projectCard?.status !== "deleted") {
+        @if (deviceService.isDesktop()) {
+          <p-menu #menu [model]="menuOptions()" [popup]="true"/>
+          <i class="pi pi-ellipsis-v cursor-pointer text-black" (click)="menu.toggle($event)"></i>
+        } @else {
+          <i class="pi pi-ellipsis-v cursor-pointer text-black" (click)="toggleShowActions()"></i>
+        }
+      }
+    </div>
+    <div class="flex flex-col justify-between w-full h-full">
+      <div class="relative rounded mb-2">
+        <p-image
+          [src]="projectCard?.couverture | media : 'couv_project'"
+          alt="Image"
+          width="100%"
+          height="185"
+          class="img-elevated mb-4"
+        />
+        @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+          <div
+            class="absolute flex items-center rounded-t w-full px-2 py-2  top-0 left-0 justify-between bg-white/70">
+            @if (projectCard?.isTemplate) {
+              <div class="flex text-black gap-2 max-w-full">
+                <p-avatar
+                  [image]="projectCard?.template_projects_category?.template_projects_library?.klubr?.logo |  media : 'logo'"
+                  size="normal"
+                  [shape]="'circle'"
+                ></p-avatar>
+                <div class="flex flex-col max-w-full text-[14px] truncate">
+                  <div
+                    class="font-bold truncate">{{ projectCard?.template_projects_category?.template_projects_library?.label }}
+                  </div>
+                  <div class="truncate">{{ projectCard?.template_projects_category?.label }}</div>
+                </div>
+              </div>
+            } @else {
+              <div class="flex text-black gap-2 max-w-full">
+                <p-avatar
+                  [image]="projectCard?.klubr_membre?.avatar | media"
+                  size="normal"
+                  [shape]="'circle'"
+                ></p-avatar>
+                <div class="flex flex-col max-w-full text-[14px] truncate">
+                  <div
+                    class="font-bold truncate">{{ projectCard?.klubr_membre?.prenom }} {{ projectCard?.klubr_membre?.nom }}
+                  </div>
+                  <div class="text-[#64748B] truncate">{{ projectCard?.klubr_membre?.fonction }}</div>
+                  @if (permissionsService.memberIsAdminSignal()) {
+                    <div class="truncate">{{ projectCard?.klubr?.denomination }}</div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="flex flex-col w-full h-full">
+        <div class="flex gap-1 items-center w-full mb-4">
+          <u class="text-x font-semibold text-black max-w-full h-11 truncate-height ">{{ projectCard?.titre }}</u>
+        </div>
+
+        @if (!projectCard?.isTemplate) {
+          <div class="flex flex-col w-full text-black gap-2 rounded bg-[#F8FAFC] p-2">
+            <div class="flex justify-between w-full">
+              <b>{{ projectCard?.montantTotalDonations || "0" }}€</b>
+              <b>{{ projectCard?.montantAFinancer }}€</b>
+            </div>
+            <p-meterGroup
+              [value]="[{ label: '', value: (projectCard?.montantTotalDonations || 0) | percent:(projectCard?.montantAFinancer || 0), color: '#000000' }]"
+              [max]="100">
+              <ng-template #label></ng-template>
+            </p-meterGroup>
+            <p class="text-[#64748B] text-sm self-end" [@fadeInOut]="projectCardLimitDate()"
+               [innerText]="projectCardLimitDate() | date: 'dd/MM/yyyy'"></p>
+          </div>
+        } @else {
+          <div></div>
+        }
+      </div>
+    </div>
+
+  </div>
+  <p-drawer #drawerRef
+            [(visible)]="showActions"
+            position="bottom"
+            blockScroll="true"
+            transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)"
+            styleClass="filters-drawer-bottom">
+    <ng-template #headless>
+      <div class="flex flex-col px-3 py-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+        <div class="flex flex-col gap-4">
+          @if (projectCard?.status !== "deleted" && !projectCard?.isTemplate) {
+            <span (click)="openPreview(); toggleShowActions()">
+              <i class="pi pi-eye"></i>
+              <span> Voir le projet</span>
+            </span>
+          }
+          @if (projectCard?.status !== "deleted" && !projectCard?.isTemplate
+          && !(profile()?.role === "KlubMember" && projectCard?.klubr_membre?.uuid !== profile()?.uuid)) {
+            <span (click)="showDonations(); toggleShowActions()">
+              <i class="pi pi-wallet"></i>
+              <span> Voir les dons</span>
+            </span>
+          }
+          @if (projectCard?.status !== "deleted" && (permissionsService.memberIsAtLeastLeaderSignal()
+            || (profile()?.role === "KlubMember" && (projectCard?.status === "waitingApproval" || projectCard?.status === "draft")))) {
+            <span (click)="modifyProject(); toggleShowActions()">
+              <i class="pi pi-pencil"></i>
+              <span> Modifier le projet</span>
+            </span>
+          }
+          <!--
+          TODO:
+          @if (projectCard?.status !== "deleted") {
+            <span (click)="toggleShowActions()">
+              <i class="pi pi-share-alt"></i>
+              <span> Partager</span>
+            </span>
+          }-->
+          @if (projectCard?.status === "published" && permissionsService.memberIsAtLeastLeaderSignal()) {
+            <span (click)="addRealization(); toggleShowActions()">
+              <i class="pi pi-verified"></i>
+              <span> Ajouter une réalisation</span>
+            </span>
+          }
+        </div>
+      </div>
+    </ng-template>
+  </p-drawer>
+
+}

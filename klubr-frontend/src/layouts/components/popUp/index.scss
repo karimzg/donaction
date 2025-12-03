@@ -1,0 +1,88 @@
+
+.popUpMainContainer {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  position: fixed;
+  animation: fadein .3s ease-in-out;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+
+  &.isOpen {
+    display: flex;
+  }
+
+  &:after {
+    content: '';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(10px);
+    animation: fadein .3s ease-in-out;
+  }
+
+  @media screen and (max-width: 768px) {
+    height: fit-content;
+    top: unset;
+    bottom: -100%;
+    transition: bottom .3s ease-in-out;
+
+    &.isOpen {
+      bottom: 0;
+    }
+  }
+
+
+  &__ctx {
+    z-index: 999999;
+    min-width: 250px;
+
+
+    &__header {
+      position: relative;
+
+      &__x {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        cursor: pointer;
+      }
+    }
+
+    &__body {
+      max-width: min(75vw, 1220px);
+      max-height: min(75vh, 1220px);
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    @media screen and (max-width: 768px) {
+      width: 100%;
+      height: 100%;
+      border-radius: unset;
+      justify-content: start;
+
+      &__body {
+        max-width: unset;
+      }
+
+    }
+  }
+}
+
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

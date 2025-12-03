@@ -1,0 +1,30 @@
+.p-select, .p-multiselect {
+  font-size: 1rem;
+  --p-focus-ring-width: 0;
+  --p-focus-ring-style: none;
+  --p-focus-ring-color: transparent;
+  --p-focus-ring-offset: 0;
+  //--p-focus-ring-shadow: 0 0 0 0.2rem var(--select-color);
+
+  //--p-select-focus-border-color:;
+  --p-select-focus-ring-shadow: none;
+
+  //--p-select-focus-ring-width:;
+  //--p-select-focus-ring-style:;
+  //--p-select-focus-ring-color:;
+
+  //--p-select-focus-ring-offset:;
+
+  &.custom-tmpl-dropdown {
+    .p-select-label {
+      --p-select-padding-y: .26rem;
+      height: 2.71rem;
+      align-items: center;
+      display: flex;
+    }
+  }
+
+  .p-overlay {
+    max-width: calc(100vw - 2rem);
+  }
+}

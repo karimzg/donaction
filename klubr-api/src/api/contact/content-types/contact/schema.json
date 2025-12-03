@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contacts",
+  "info": {
+    "singularName": "contact",
+    "pluralName": "contacts",
+    "displayName": "Contact",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "object": {
+      "type": "string"
+    },
+    "msg": {
+      "type": "text"
+    },
+    "email": {
+      "type": "email"
+    },
+    "origin": {
+      "type": "enumeration",
+      "enum": [
+        "web-site-page-contact",
+        "admin-centre-aide"
+      ],
+      "default": "web-site-page-contact"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": false
+      }
+    }
+  }
+}

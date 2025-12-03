@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_club_presentation_sustains",
+  "info": {
+    "displayName": "sustain",
+    "icon": "allergies",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "media_subtitle": {
+      "type": "string"
+    },
+    "gallery": {
+      "type": "component",
+      "repeatable": true,
+      "component": "not-used.media"
+    },
+    "project_title": {
+      "type": "string"
+    },
+    "project_btn_text": {
+      "type": "string"
+    }
+  }
+}

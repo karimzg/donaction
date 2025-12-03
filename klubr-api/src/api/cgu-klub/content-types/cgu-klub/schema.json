@@ -1,0 +1,30 @@
+{
+  "kind": "singleType",
+  "collectionName": "cgu_klubs",
+  "info": {
+    "singularName": "cgu-klub",
+    "pluralName": "cgu-klubs",
+    "displayName": "CGU Klub",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "titre": {
+      "type": "string"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

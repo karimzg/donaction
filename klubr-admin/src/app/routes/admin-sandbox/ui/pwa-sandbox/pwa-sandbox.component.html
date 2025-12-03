@@ -1,0 +1,26 @@
+<div class="bg-black-alpha-10 p-2 max-w-full overflow-x-auto rounded-sm">
+  <div class="mb-2">Current version: {{ version }}</div>
+  <div class="mb-2">CurrentPWA version: {{ logUpdateService.versionStateCurrentVersion() }}</div>
+  <div>
+    Logs:
+    <ul class="mb-0 mt-1 list-none pl-0">
+      <li>Current Version State: {{ logUpdateService.versionStateCurrentVersion() }}</li>
+      <li>Is Standalone: {{ SWService.isStandalone() }}</li>
+      <li>Display mode: {{ SWService.getDisplayMode() }}</li>
+      <li>Can install: {{ SWService.canInstall() }}</li>
+      <li>App already installed: {{ SWService.isAppAlreadyInstalled() }}</li>
+    </ul>
+  </div>
+</div>
+@if (SWService.canInstall()) {
+  <hr>
+  <button pButton class="mb-1" (click)="SWService.installPwa()">Installer l'application</button>
+}
+
+<a href="https://example.com" target="_blank" rel="noopener noreferrer">Ouvrir dans le navigateur</a>
+<a href="https://example.com" target="_system">Ouvrir dans le navigateur SYSTEM</a>
+<hr>
+<button pButton class="mb-1" (click)="testBadges()">Test Badges</button>
+<pre class="bg-black-alpha-10 p-2 max-w-full overflow-x-auto rounded-sm">Badge Value: {{ badgeCpt() }}</pre>
+<hr>
+<button pButton class="mb-1" (click)="pushSubscription()">Push subscription</button>

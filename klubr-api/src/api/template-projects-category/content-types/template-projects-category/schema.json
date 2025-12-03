@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "template_projects_categories",
+  "info": {
+    "singularName": "template-projects-category",
+    "pluralName": "template-projects-categories",
+    "displayName": "Template Projects Category",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "template_projects_library": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::template-projects-library.template-projects-library",
+      "inversedBy": "template_projects_categories"
+    },
+    "klub_projets": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klub-projet.klub-projet",
+      "mappedBy": "template_projects_category"
+    },
+    "icon": {
+      "type": "string"
+    },
+    "sportType": {
+      "type": "enumeration",
+      "enum": [
+        "Autre",
+        "Aïkido",
+        "Aquatique",
+        "Athlétisme",
+        "Badminton",
+        "Baseball",
+        "Basket-ball",
+        "Billard",
+        "Boxe",
+        "Canöe",
+        "Course à pied",
+        "Danse",
+        "Equitation",
+        "Escalade",
+        "Escrime",
+        "Fléchettes",
+        "Football",
+        "Golf",
+        "Gymnastique",
+        "Handball",
+        "Hockey",
+        "Hockey sur glace",
+        "Judo",
+        "Karaté",
+        "Lutte",
+        "Moto",
+        "Natation",
+        "Nautisme",
+        "Patinage",
+        "Pêche",
+        "Pétanque",
+        "Planche à voile",
+        "Plongée sous marine",
+        "Ski alpin",
+        "Ski de fond",
+        "Ski nautique",
+        "Spéléologie",
+        "Sports automobiles",
+        "Taekwondo",
+        "Tennis",
+        "Tennis de table",
+        "Tir à l'arc",
+        "Triathlon",
+        "Vélo/BMX/VTT",
+        "Volleyball",
+        "Waterpolo",
+        "Trail"
+      ]
+    }
+  }
+}

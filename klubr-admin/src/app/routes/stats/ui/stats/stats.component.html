@@ -1,0 +1,18 @@
+<h1 #title class="admin-h1"> Statistiques </h1>
+@if (permissionService.memberIsAdminSignal()) {
+  <div class="mb-4">
+    <app-dropdown-klubr-filter
+      #klubrDropdown
+      class="filter-component"
+      (onItemUUIDSelected)="setKlubrFilterUuid($event!)"
+      [itemInit]="undefined"
+      placeholder="Choisissez un Klub"
+    ></app-dropdown-klubr-filter>
+  </div>
+  @if (klubrFilterUuid()) {
+    <app-klub-stats
+      [displayAll]="false"
+      [klubUuid]="klubrFilterUuid()"
+    ></app-klub-stats>
+  }
+}

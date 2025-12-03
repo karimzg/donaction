@@ -1,0 +1,29 @@
+.p-chip {
+  --p-chip-padding-y: 0.5rem;
+  --p-chip-padding-x: 0.75rem;
+}
+
+.chip-admin .p-chip {
+  background-color: #3B82F6;
+  outline: none;
+
+  & .p-chip-label {
+    color: white;
+  }
+}
+
+.chip-leader .p-chip {
+  background-color: #F97316;
+
+  & .p-chip-label {
+    color: white;
+  }
+}
+
+.chip-member .p-chip {
+  background-color: #22C55E;
+
+  & .p-chip-label {
+    color: white;
+  }
+}

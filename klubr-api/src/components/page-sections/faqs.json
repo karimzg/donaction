@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_club_presentation_faqs",
+  "info": {
+    "displayName": "FAQ",
+    "icon": "bullhorn",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "faq_item": {
+      "type": "component",
+      "repeatable": true,
+      "component": "composant-atoms.faq-item"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

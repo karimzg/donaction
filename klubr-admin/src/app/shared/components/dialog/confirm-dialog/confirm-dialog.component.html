@@ -1,0 +1,25 @@
+<p-confirmDialog key="confirm">
+  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+    <div class="flex flex-col items-center p-4 bg-surface-0 rounded">
+      <div
+        class="rounded-full bg-surface-600 text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
+      >
+        <i class="pi pi-question !text-5xl"></i>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-4">{{ message.header }}</span>
+      <p class="mb-0">{{ message.message }}</p>
+      @if (confirmation?.alertMsg) {
+        <p-message
+          class="mt-2"
+          [icon]="confirmation!.alertMsg!.severity === 'info' ? 'pi pi-info' : (confirmation!.alertMsg!.severity === 'error' ? 'pi pi-times-circle' : 'pi pi-check')"
+          [severity]="confirmation!.alertMsg!.severity || 'info'">{{ confirmation!.alertMsg!.text || '' }}
+        </p-message>
+      }
+      <div class="flex items-center gap-2 mt-4">
+        <p-button [label]="confirmation?.rejectLabel" [outlined]="true" (onClick)="onReject()"
+                  styleClass="min-w-32"></p-button>
+        <p-button [label]="confirmation?.acceptLabel" (onClick)="onAccept()" styleClass="min-w-32"></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>

@@ -1,0 +1,92 @@
+<!-- TODO: decide between format="jpeg" and format="png"-->
+
+@if (alertMsg()) {
+  <div class="mb-2">
+    @for (msg of alertMsg(); track msg.text) {
+      <p-message [severity]="msg.severity" class="mb-2">{{ msg.text }}</p-message>
+    }
+  </div>
+}
+
+@if (!disableCrop()) {
+  <div class="flex flex-wrap gap-3 justify-content-center mb-2">
+    <button pButton icon="pi pi-replay" class="p-button-sm" (click)="rotateLeft()" pTooltip="Rotation à gauche"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-refresh" class="p-button-sm" (click)="rotateRight()" pTooltip="Rotation à droite"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-arrows-h" class="p-button-sm" (click)="flipHorizontal()"
+            pTooltip="Retournement horizontal"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-arrows-v" class="p-button-sm" (click)="flipVertical()" pTooltip="Retournement vertical"
+            tooltipPosition="top"></button>
+    <!--<button pButton icon="pi pi-arrows-alt fa-rotate-45" class="p-button-sm" (click)="toggleContainWithinAspectRatio()"
+            pTooltip="{{containWithinAspectRatio() ? 'Rapport hauteur/largeur de remplissage' : 'Contenir dans le rapport hauteur/largeur'}}"
+            tooltipPosition="top"></button>-->
+  </div>
+}
+@if (isReady() && imageChangedEvent()) {
+  <image-cropper
+    [imageChangedEvent]="imageChangedEvent()"
+    [imageURL]="imageURL()!"
+    [maintainAspectRatio]="true"
+    [containWithinAspectRatio]="containWithinAspectRatio()"
+    [aspectRatio]="aspectRatio()"
+    [onlyScaleDown]="true"
+    [roundCropper]="false"
+    [canvasRotation]="canvasRotation()"
+    [(transform)]="transform"
+    [alignImage]="'center'"
+    [allowMoveImage]="allowMoveImage()"
+    [cropperMinHeight]="500"
+    imageAltText="Zone de recadrage d'image"
+    backgroundColor="#FFFFFF"
+    format="jpeg"
+    (imageCropped)="imageCropped($event)"
+    (imageLoaded)="imageLoaded($event)"
+    (cropperReady)="cropperReady($event)"
+    [resizeToWidth]="resizeToWidth()"
+    [cropperMinWidth]="cropperMinWidth()"
+    (loadImageFailed)="loadImageFailed()"
+    (wheel)="onMouseWheel($event)"
+    [disabled]="loading() || disableCrop()"
+    class="cropper-bg"
+  ></image-cropper>
+}
+@if (loading()) {
+  <div
+    class="loader absolute top-0 left-0 z-1 bg-black-alpha-50 w-full h-full flex align-items-center justify-content-center border-round-xl">
+    <i class="pi pi-spin pi-spinner text-white" style="font-size: 2rem"></i>
+  </div>
+}
+
+@if (!disableCrop()) {
+  <p-slider [(ngModel)]="sliderValue" (onChange)="zoomChanged()" [min]="-1.8" [max]="3" [step]="0.1"
+            styleClass="mt-3 mb-4"></p-slider>
+
+  <div class="flex flex-wrap gap-3 justify-content-center">
+    <!--<button pButton class="p-button-sm" (click)="toggleAspectRatio()">Aspect ratio: {{
+        aspectRatio === 4 / 3 ? '4/3' :
+          '16/5'
+      }}
+    </button>-->
+    <button pButton icon="pi pi-angle-left" class="p-button-sm hidden sm:inline-flex" (click)="moveLeft()"
+            pTooltip="Déplacer vers la gauche"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-angle-right" class="p-button-sm hidden sm:inline-flex" (click)="moveRight()"
+            pTooltip="Déplacer vers la droite"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-angle-up" class="p-button-sm hidden sm:inline-flex" (click)="moveTop()"
+            pTooltip="Déplacer le haut"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-angle-down" class="p-button-sm hidden sm:inline-flex" (click)="moveBottom()"
+            pTooltip="Déplacer le bas"
+            tooltipPosition="top"></button>
+    <button pButton icon="pi pi-arrows-alt fa-rotate-45" class="p-button-sm hidden sm:inline-flex"
+            (click)="toggleAllowMove()"
+            [pTooltip]="(allowMoveImage() ? 'Désactiver' : 'Activer') + ' le déplacement de l\'image'"
+            tooltipPosition="top"></button>
+    <!--    <button pButton class="p-button-sm" (click)="toggleAllowMove()">{{ allowMoveImage() ? 'Désactiver' : 'Activer' }}
+          le déplacement de l'image
+        </button>-->
+  </div>
+}

@@ -1,0 +1,55 @@
+.layout-center-logo {
+  height: 100%;
+  margin: auto;
+  padding: 0.5rem;
+
+  img {
+    height: 100%;
+    object-fit: contain;
+
+  }
+}
+
+.p-custom-link {
+  padding: 0.5rem;
+}
+
+.title-link {
+  color: #3B82F6;
+}
+
+.profile-button {
+  // display: block;
+}
+
+.profile-item {
+  &.has-tag {
+    position: relative;
+    margin-top: 14px;
+  }
+
+  button {
+    position: relative;
+  }
+
+  p-tag {
+    position: absolute;
+    right: -4px;
+    top: -11px;
+  }
+}
+
+.items-div {
+  display: none;
+}
+
+/* Styles for screens smaller than 994px (mobile devices) */
+@media screen and (max-width: 994px) {
+  .profile-button {
+    display: none !important; /* Hide profile button */
+  }
+
+  .items-div {
+    display: block; /* Show items div */
+  }
+}

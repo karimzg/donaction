@@ -1,0 +1,21 @@
+.amountPickerMainContainer {
+
+  &__freeAmountEntryContainer, &__buttonsContainer {}
+
+  &__freeAmountEntryContainer {
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      display: none;
+    }
+  }
+
+  &__buttonsContainer {
+    button {
+
+      &.selected {
+        background: #000;
+        color: white;
+      }
+    }
+  }
+}

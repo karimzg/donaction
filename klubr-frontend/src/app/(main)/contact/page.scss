@@ -1,0 +1,6 @@
+.contactMaxWidth{
+  max-width: min(75vw, 1220px);
+  @media screen and (max-width: 574px) {
+    padding: 0px 1rem;
+  }
+}

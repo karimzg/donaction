@@ -1,0 +1,239 @@
+<p-drawer
+  position="right"
+  [style]="{
+    'border-radius': '6px',
+    'width': 'min(784px, 100vw)',
+  }"
+  blockScroll="true"
+  [visible]="!!SIDEBAR().content"
+  (onHide)="onCloseSideBar.emit()"
+  class="tab-content-sidebar"
+  [appendTo]="null"
+>
+  <ng-template #headless>
+    @if (SIDEBAR().content; as content) {
+
+      <div class="px-4 py-2 flex items-center justify-between gap-3 text-[14px] w-full">
+        <div class="flex flex-row items-center gap-3">
+          <!--<p
+            class="text-[#64748B]">{{ SIDEBAR().context | tapContentSidebarTitle: content?.contextDetail?.title?.label }}</p>-->
+          @if (!!content.contextDetail.title.extra) {
+            <p-tag [severity]="content.contextDetail.title.extra.severity" [rounded]="true">
+              {{ content.contextDetail.title.extra.label }}
+            </p-tag>
+          }
+        </div>
+        <div class="cursor-pointer rounded-full bg-gray-200 h-8 w-2rem flex items-center justify-content-center">
+          <i class="pi pi-times" (click)="onCloseSideBar.emit()"></i>
+        </div>
+      </div>
+      <hr class="m-0"/>
+      <div class="overflow-y-auto">
+        <div class="px-4 py-2 flex flex-col items-start gap-4 text-[16px] w-full">
+          <div class="flex flex-col gap-2 items-start w-full">
+            <p
+              class="text-[#64748B] text-base">{{ SIDEBAR().context | tapContentSidebarTitle: content?.contextDetail?.title?.label }}</p>
+            <h2 class="mt-1">
+                  <span
+                    class="text-[18px] sm:text-[26px] font-bold inline-block leading-6">{{ SIDEBAR().context === 'FACTURES' ? 'Détails de la' : 'Détails de dons pour' }} {{ content.contextDetail.title.label }}</span>
+            </h2>
+            <div class="detailsGrid w-full gap-y-4 gap-x-2 text-base">
+              @for (item of content.contextData; track item.label) {
+                <div class="flex items-center gap-2">
+                  @if (!!item.icon) {
+                    <img [ngSrc]="item.icon.path" [width]="item.icon.width" [height]="item.icon.height" class="basis-5"
+                         [alt]="item.label"/>
+                  } @else if (item.piIcon) {
+                    <i class="pi {{item.piIcon.color ? 'text-[' + item.piIcon.color + ']' : 'text-[#64748B]'}} "
+                       [ngClass]="item.piIcon.name"></i>
+                  }
+                  <p class="text-[#64748B]">{{ item.label }}</p>
+                  <p class="ml-2 text-black">{{ item.value }}</p>
+                </div>
+              }
+            </div>
+            <div class="w-full flex md:flex-row flex-col gap-2 md:gap-4 md:items-center text-[#F69707] mt-4">
+              @if (invoice()) {
+                <p class="flex items-center gap-1 cursor-pointer font-medium flex-nowrap"
+                   (click)="downloadInvoice(invoice()!)">
+                  <i class="pi pi-download"></i>
+                  <span>Télécharger la facture</span>
+                </p>
+              }
+              <!-- TODO: Activate when API is ready-->
+              <p class="flex items-center gap-1 cursor-not-allowed text-base font-medium flex-nowrap text-[#CCCCCC]"
+                 [pTooltip]="'Fonctionnalité bientôt disponible'"
+                 tooltipPosition="top"
+              >
+                <!--cursor-pointer-->
+                <i class="pi pi-download"></i>
+                <span>
+                    {{ SIDEBAR().context === 'FACTURES' ? 'Export du fichier comptable' : 'Exporter les reçus fiscaux de tous les dons' }}
+                  </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-2 w-full">
+          <div *ngIf="isLoading(); else templateIsLoaded" class="w-full flex justify-center items-center">
+            <ng-lottie
+              width="350px"
+              [options]="{path: 'assets/animations/loading.json'}">
+            </ng-lottie>
+          </div>
+          <ng-template #templateIsLoaded>
+            @if (SIDEBAR().context !== 'FACTURES') {
+              <div>
+                @if (donationList()?.data?.length) {
+                  <p-table
+                    size="small"
+                    [value]="donationList()!.data"
+                    class="tableList text-[14px]"
+                  >
+                    <ng-template #header>
+                      <tr class="text-[14px] text-[#64748B]">
+                        <th>Date</th>
+                        <th>Donateur</th>
+                        <th>Montant</th>
+                      </tr>
+                    </ng-template>
+                    <ng-template #body let-donation>
+                      <tr class="text-black">
+                        <td>{{ donation.datePaiment | date:"dd/MM/yyyy HH:mm" }}</td>
+                        <td>
+                          <app-donateur-infos
+                            [donateur]="donation.klubDonateur"
+                          ></app-donateur-infos>
+                        </td>
+                        <td class="text-right">{{ donation.montant | currency }}</td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                  @if (paginationEnabled()) {
+                    @if (pagination() && pagination()!.page < pagination()!.pageCount) {
+                      <div class="flex mt-4 justify-center">
+                        <p-button (click)="changePage(pagination()!.page + 1)" [loading]="isLoading()"
+                                  label="Voir +" class="self-end" severity="contrast"/>
+                      </div>
+                    }
+                    <!-- TODO: fix paginator issue (click on page number not working) and replace "Voir +" button-->
+                      <!--<p-paginator
+                        [rows]="pageSize()"
+                        [rowsPerPageOptions]="[5,10,15,20]"
+                        [totalRecords]="pagination()!.total"
+                        [first]="0"
+                        (onPageChange)="changePage($event)"/>-->
+                  }
+                } @else {
+                  <div class="flex items-center justify-center">
+                    <ng-lottie
+                      width="350px"
+                      [options]="{path: 'assets/animations/no-donations.json'}">
+                    </ng-lottie>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="flex flex-col gap-2 mt-2">
+                <div class="flex flex-col gap-2">
+                  <h2><span
+                    class="text-[18px] sm:text-[26px] font-bold inline-block leading-5">Avoir(s)</span></h2>
+
+                  @if (creditLines().length) {
+                    <div class="flex flex-col gap-3">
+                      <p-table
+                        [value]="creditLines()"
+                        [paginator]="false"
+                        size="small"
+                        class="tableList">
+                        <ng-template #header>
+                          <tr class="text-[13px] sm:text-[14px] text-[#64748B]">
+                            <th>Projet</th>
+                            <th>Date de clôtures</th>
+                            <th>Montant</th>
+                          </tr>
+                        </ng-template>
+                        <ng-template #body let-avoir>
+                          <tr class="text-black text-[13px] sm:text-[14px]">
+                            <td>{{ avoir.project }}</td>
+                            <td>
+                              {{ avoir.date | date:"dd/MM/yyyy" }}
+                            </td>
+                            <td class="w-[100px] text-right">{{ avoir.amount | currency }}</td>
+                          </tr>
+                        </ng-template>
+                      </p-table>
+                      <div class="flex items-center justify-end gap-6 text-black pr-3 text-[14px] font-semibold">
+                        <p>Total Avoir</p>
+                        <p>{{ totalCreditLines() | currency }}</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="flex items-center justify-center">
+                      <ng-lottie
+                        width="350px"
+                        [options]="{path: 'assets/animations/no-donations.json'}">
+                      </ng-lottie>
+                    </div>
+                  }
+                </div>
+                <div class="flex flex-col gap-2">
+                  <h2><span
+                    class="text-[18px] sm:text-[26px] font-bold inline-block leading-5">Frais de fonctionnement</span>
+                  </h2>
+                  @if (debitLines().length) {
+                    <div class="flex flex-col gap-3">
+                      <p-table
+                        size="small"
+                        [value]="debitLines()"
+                        [paginator]="false"
+                        class="tableList text-[14px]">
+                        <ng-template #header>
+                          <tr class="text-[13px] sm:text-[14px] text-[#64748B]">
+                            <th>Reférence / Description</th>
+                            <th>Nombre</th>
+                            <th>P.Unitaire</th>
+                            <th>Montant</th>
+                          </tr>
+                        </ng-template>
+                        <ng-template #body let-frais>
+                          <tr class="text-black text-[13px] sm:text-[14px]">
+                            <td>{{ frais.ref }}</td>
+                            <td>
+                              {{ frais.quantity }}
+                            </td>
+                            <td>{{ frais.unitPrice | currency }}</td>
+                            <td class="w-[100px] text-right">{{ frais.amount | currency }}</td>
+                          </tr>
+                        </ng-template>
+                      </p-table>
+                      <div class="flex items-center justify-end gap-6 text-black pr-3 text-[14px] font-semibold">
+                        <p>Total dû</p>
+                        <p>{{ totalDeditLines() | currency }}</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="flex items-center justify-center">
+                      <ng-lottie
+                        width="350px"
+                        [options]="{path: 'assets/animations/no-donations.json'}">
+                      </ng-lottie>
+                    </div>
+                  }
+                </div>
+
+                @if (creditLines().length || debitLines().length) {
+                  <div
+                    class="flex items-center justify-between gap-3 text-white bg-black p-2 font-semibold text-[14px]">
+                    <p>Total facture</p>
+                    <p>{{ totalAmount() | currency }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </ng-template>
+        </div>
+      </div>
+    }
+  </ng-template>
+</p-drawer>

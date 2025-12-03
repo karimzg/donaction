@@ -1,0 +1,32 @@
+{
+  "collectionName": "components_club_presentation_video_teasers",
+  "info": {
+    "displayName": "Teaser vidéo",
+    "icon": "play",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "youtube",
+        "other"
+      ]
+    },
+    "video_src": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "youtube_src": {
+      "type": "string"
+    }
+  }
+}

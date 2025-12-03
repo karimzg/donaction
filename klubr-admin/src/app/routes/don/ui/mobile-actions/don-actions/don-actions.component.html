@@ -1,0 +1,62 @@
+<i class="pi pi-ellipsis-v px-2" (click)="toggleShowActions()"></i>
+
+<p-drawer #drawerRef
+          [(visible)]="showActions"
+          position="bottom"
+          blockScroll="true"
+          transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)"
+          styleClass="filters-drawer-bottom">
+  <ng-template #headless>
+    <div class="flex flex-col px-3 py-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+      @if (donation(); as donation) {
+        @if (showDetailLink()) {
+          <span
+            [routerLink]="['/don', donation!.uuid, 'details']"
+            [queryParams]="{'mes-dons': userIsDonationOwner() || undefined, 'contribUuid': contribUuid()}"
+          >
+          <i class="pi pi-eye"></i>
+          <span> Détails du don</span>
+        </span>
+        }
+        @if (donation?.statusPaiment === 'success') {
+          @if ((permissionsService.memberIsAtLeastLeaderSignal() && donation.withTaxReduction) || userIsDonationOwner() || permissionsService.memberIsAdminSignal()) {
+            @if (showDetailLink()) {
+              <hr class="border-t border-gray-300">
+            }
+            <div class="flex flex-col gap-4">
+              @if (donation.withTaxReduction) {
+                <span (click)="pdfService.getPdf(0, donation!.uuid)">
+                  <i class="pi pi-file"></i>
+                  <span> Télécharger le reçu fiscal</span>
+                </span>
+              }
+              @if (permissionsService.memberIsAdminSignal() || userIsDonationOwner()) {
+                <span
+                  (click)="pdfService.getPdf(1, !donation?.klub_don ? donation!.uuid : donation!.klub_don!.uuid)">
+                  <i class="pi pi-download"></i>
+                  <span> Télécharger l'attestation{{ !!donation?.klub_don ? ' originale' : '' }}</span>
+                </span>
+              }
+            </div>
+          }
+          @if ((permissionsService.memberIsAdminSignal() || userIsDonationOwner()) && (!!donation!.klub_don_contribution || !!contribUuid())) {
+            <hr class="border-t border-gray-300">
+            <div class="flex flex-col gap-4">
+              <span (click)="pdfService.getPdf(0, contribUuid() || donation!.klub_don_contribution!.uuid)">
+                <i class="pi pi-file"></i>
+                <span> Télécharger le reçu fiscal de contribution </span>
+              </span>
+            </div>
+          }
+        }
+      } @else if (donationPayment()) {
+        @if (permissionsService.memberIsAdminSignal()) {
+          <span (click)="stripeLink(donationPayment()!.intent_id)">
+          <i class="pi pi-exte  rnal-link"></i>
+          <span>Voir les détails du paiement (Stripe)</span>
+        </span>
+        }
+      }
+    </div>
+  </ng-template>
+</p-drawer>

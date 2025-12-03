@@ -1,0 +1,91 @@
+
+
+.inputFieldContainer {
+
+  &.hidden {
+    display: none !important;
+  }
+
+  &,
+  &__input {
+    display: flex;
+    flex-direction: column;
+  }
+  &__input {
+    gap: 5px;
+    &:not(&.checkbox) {
+      input {
+        width: 100%;
+        &.buttonInput {
+          border: 1px solid #9A9DA7 !important;
+          cursor: pointer;
+          padding: 10px 30px;
+        }
+        &.valid {
+          //border-color: #39c05a;
+        }
+        &.invalid {
+          border-color: red;
+        }
+      }
+    }
+    &.hidden {
+      display: none;
+    }
+    &.checkbox {
+      flex-direction: row-reverse;
+      justify-content: start;
+      gap: 10px;
+      input {
+        accent-color: #000 !important;
+        border-radius: 3px;
+        margin-top: 6px;
+      }
+    }
+  }
+
+  &.noMarginInput {
+    input {
+      margin-top: 0px !important;
+    }
+  }
+
+  &.noSmallDefHeight {
+    small {
+      min-height: unset !important;
+    }
+  }
+
+  small {
+    color: red;
+  }
+}
+
+.pac-container {
+  font-family: "Maven Pro", sans-serif;
+  .pac-item {
+    padding: 0.5rem 0.75rem;
+    border: 0 none;
+    color: #334155;
+    background: transparent;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+    cursor: pointer;
+    font-weight: 400;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    &.pac-item-selected, &:hover {
+      color: #1D4ED8;
+      .pac-item-query {
+        color: #1D4ED8;
+      }
+      background: rgba(59, 130, 246, 0.24);
+    }
+    .pac-icon.pac-icon-marker {
+      display: none;
+    }
+  }
+  &:after {
+    content: none;
+  }
+}

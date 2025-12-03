@@ -1,0 +1,12 @@
+<div class="inline-flex py-1 px-2 rounded-full max-w-max"
+     [ngClass]="{
+    'bg-[#FFC5C5]': !progress() || (progress()! < 50),
+    'bg-[#FFF0C5]': progress() && (progress()! < 100),
+    'bg-[#C5FFD9]': progress() && (progress()! === 100),
+  }">
+  <p class="text-[#FFBB00] text-xs" [ngClass]="{
+    'text-[#B91C1C]': !progress() || (progress()! < 50),
+    'text-[#FFBB00]': progress() && (progress()! < 100),
+    'text-[#14532D]': progress() && (progress()! === 100),
+  }">{{ label() }}{{ progress() | number : '0.0' }}%</p>
+</div>

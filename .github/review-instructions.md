@@ -1,0 +1,1 @@
+/repos/klubr/klubr-front/aidd/prompts/templates/code_review.md

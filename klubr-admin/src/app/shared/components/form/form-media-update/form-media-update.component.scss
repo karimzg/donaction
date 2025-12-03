@@ -1,0 +1,24 @@
+
+.p-fileupload-header {
+  display: none;
+}
+
+.p-file-upload-container {
+  --p-fileupload-content-gap: 0;
+  --p-fileupload-content-padding: 0.25rem;
+  border: 1px solid var(--p-form-field-border-color);
+  border-radius: var(--p-form-field-border-radius);
+  box-shadow: var(--p-form-field-shadow);
+  display: block;
+  overflow: hidden;
+
+  .p-fileupload-advanced {
+    border: 0;
+  }
+
+  &.p-fileupload-error {
+    border-color: var(--error-color);
+  }
+}
+
+

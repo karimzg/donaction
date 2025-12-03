@@ -1,0 +1,98 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoices",
+  "info": {
+    "singularName": "invoice",
+    "pluralName": "invoices",
+    "displayName": "Invoice",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "invoiceNumber"
+    }
+  },
+  "attributes": {
+    "invoiceNumber": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "dateInvoice": {
+      "type": "date",
+      "required": true
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "klub_dons": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klub-don.klub-don",
+      "mappedBy": "invoice"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr"
+    },
+    "amountExcludingTax": {
+      "type": "decimal",
+      "default": 0
+    },
+    "amountIncludingTax": {
+      "type": "decimal",
+      "default": 0
+    },
+    "VAT": {
+      "type": "decimal",
+      "default": 0
+    },
+    "creditTotalAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "invoice_lines": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::invoice-line.invoice-line",
+      "mappedBy": "invoice"
+    },
+    "dateBankTransfer": {
+      "type": "datetime"
+    },
+    "nbDonations": {
+      "type": "integer",
+      "default": 0
+    },
+    "averageBasket": {
+      "type": "decimal",
+      "default": 0
+    },
+    "billingPeriod": {
+      "type": "string",
+      "required": true
+    },
+    "billingPeriodSmall": {
+      "type": "string",
+      "required": true
+    },
+    "invoicePdfPath": {
+      "type": "string"
+    },
+    "commissionPercentage": {
+      "type": "decimal"
+    },
+    "firstSentEmailDate": {
+      "type": "datetime"
+    }
+  }
+}

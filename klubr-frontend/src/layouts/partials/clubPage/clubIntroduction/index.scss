@@ -1,0 +1,19 @@
+
+.clubIntroContainer {
+  width: 100%;
+  margin: 0 auto;
+
+
+  &__videoImage {
+    box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  &__iSupport,
+  &__description {
+    //background-color: #FFFFFF91;
+  }
+
+  &__logo {
+    box-shadow: 0 4px 4px 0 #00000026;
+  }
+}

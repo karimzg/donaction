@@ -1,0 +1,30 @@
+<h1 #title class="admin-h1">Sandbox</h1>
+<div class="flex flex-col justify-center">
+
+  <app-dropdown-multi-klubr-filter
+    #klubrDropdown
+    class="filter-component"
+    (onItemsUUIDsSelected)="returnedValue  = $event">
+  </app-dropdown-multi-klubr-filter>
+
+  @if (returnedValue) {
+    <div>
+      <pre class="bg-black-alpha-10 p-2 max-w-full overflow-x-auto rounded-sm">
+        {{ returnedValue | json }}
+      </pre>
+    </div>
+  }
+</div>
+<hr>
+<div class="flex flex-col justify-center">
+  <h2>Test MainMessageService</h2>
+  <button pButton class="mb-1" (click)="mms.addMessage('TEST de message')">Add</button>
+  <button pButton class="mb-1"
+          (click)="mms.addMessage('Une nouvelle version est disponible. Pour en bénéficier, rechargez la page en cliquant ici:', 
+          {type:'warn', action: reloadPage, actionIcon: 'pi-refresh'})">
+    Add Warn with reload
+    action
+  </button>
+</div>
+<hr>
+

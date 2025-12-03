@@ -1,0 +1,56 @@
+<div class="dons-balance">
+  <h1 #title class="admin-h1">Balance des Dons</h1>
+  @if (activeUrl()) {
+    <p-tabs [value]="activeUrl()!" class="mb-3 sticky top-32 z-20 bg-white px-4 mx-[-1rem]" @fade>
+      <p-tablist>
+        <!--styleClass="tabview-custom" [activeIndex]="activeIndex()" (activeIndexChange)="selectedTabChange($event)"-->
+        <p-tab [value]="'/don/balance/club'" [routerLink]="['/don/balance/club']">
+          <!--      <ng-template pTemplate="header">-->
+          <div class="flex align-items-center gap-2">
+            <p-image
+              alt=""
+              height="16.5"
+              src="assets/images/icons/balance-de-dons/club.svg"
+              width="17.5"/>
+            <span class="white-space-nowrap m-0">
+              <span class="hidden lg:inline">Dons pour le&nbsp;</span><span
+              class="capitalize lg:normal-case">Klub</span>
+          </span>
+          </div>
+          <!--      </ng-template>-->
+        </p-tab>
+        <p-tab [value]="'/don/balance/projets'" [routerLink]="['/don/balance/projets']">
+          <!--      <ng-template pTemplate="header">-->
+          <div class="flex align-items-center gap-2">
+            <p-image
+              alt=""
+              height="16.5"
+              src="assets/images/icons/balance-de-dons/projets.svg"
+              width="17.5"/>
+            <span class="white-space-nowrap m-0">
+              <span class="hidden lg:inline">Dons pour des&nbsp;</span><span
+              class="capitalize lg:normal-case">projets</span>
+          </span>
+          </div>
+          <!--      </ng-template>-->
+        </p-tab>
+        <p-tab [value]="'/don/balance/factures'" [routerLink]="['/don/balance/factures']">
+          <!--      <ng-template pTemplate="header">-->
+          <div class="flex align-items-center gap-2">
+            <p-image
+              alt=""
+              height="16.5"
+              src="assets/images/icons/balance-de-dons/factures.svg"
+              width="17.5"/>
+            <span class="white-space-nowrap m-0">
+              Factures
+          </span>
+          </div>
+          <!--      </ng-template>-->
+        </p-tab>
+      </p-tablist>
+    </p-tabs>
+
+  }
+  <router-outlet></router-outlet>
+</div>

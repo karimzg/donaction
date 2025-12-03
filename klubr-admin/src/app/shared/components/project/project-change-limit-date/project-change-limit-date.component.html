@@ -1,0 +1,16 @@
+<form [formGroup]="dateForm" (ngSubmit)="onSubmit()">
+  <div class="flex flex-col gap-2 w-full">
+    <p>{{message()}}</p>
+    <label for="dateLimiteFinancementProjet">Date limite de financement du projet<span class="text-red-700">*</span></label>
+    <app-date-picker id="dateLimiteFinancementProjet"
+                     [initValue]="initDateLimit()"
+                     [control]="dateForm | formControl : 'dateLimit'"></app-date-picker>
+
+    <app-error-display [control]="dateForm.controls['dateLimit']"
+                       [isSubmitted]="isSubmitted()"></app-error-display>
+  </div>
+  <div class="flex gap-3 mt-4 justify-end">
+    <p-button label="Annuler" class="self-end" severity="secondary" (click)="close()" [disabled]="loading()"/>
+    <p-button label="Enregistrer" class="self-end" severity="contrast" (onClick)="onSubmit()" [disabled]="!dateForm.valid" [loading]="loading()"/>
+  </div>
+</form>

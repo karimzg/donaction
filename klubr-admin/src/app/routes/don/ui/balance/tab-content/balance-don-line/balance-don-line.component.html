@@ -1,0 +1,322 @@
+@if (content(); as content) {
+  <div class="flex flex-col gap-2 balance-don-line ">
+
+    <!-- ADMIN BLOCK -->
+    @if (permissionsService.memberIsAdminSignal()) {
+      @if (context() === 'PROJETS') {
+        <div
+          class="context-detail w-full flex lg:flex-row gap-3 flex-wrap flex-col lg:items-center justify-between py-2 px-2.5 rounded-lg">
+          <div class="flex flex-row flex-wrap gap-3 items-center text-black">
+            <app-klub-infos [klub]="content.contextObject?.project?.klubr" [displaySport]="true"></app-klub-infos>
+          </div>
+        </div>
+      } @else if (content.contextObject?.invoice?.klubr) {
+        <div
+          class="context-detail w-full flex lg:flex-row gap-3 flex-wrap flex-col lg:items-center justify-between py-2 px-2.5 rounded-lg">
+          <div class="flex flex-row flex-wrap gap-3 items-center text-black">
+            <app-klub-infos [klub]="content.contextObject?.invoice?.klubr" [displaySport]="true"></app-klub-infos>
+          </div>
+        </div>
+      }
+    }
+    <div [ngClass]="{'balance-don-line-shadow': deviceService.isMobile()}" class="rounded-lg">
+      <!-- LINE HEADER -->
+      <div
+        class="context-detail w-full bg-[#F8FAFC] flex flex-row gap-3 items-center justify-between py-2 px-2.5 rounded-lg">
+        <div class="flex flex-row flex-wrap gap-3 items-center text-black">
+          <div class="flex flex-nowrap gap-3">
+            <div
+              class="bg-[#2F2F2F] min-w-[26px] max-w-[26px] min-h-[26px] max-h-[26px] flex items-center justify-center rounded ">
+              @if (content.contextDetail.title.icon; as icon) {
+                <img class="object-contain" [ngSrc]="icon.path" [width]="icon.width" [height]="icon.height"
+                     alt=""/>
+              } @else if (content.contextDetail.title.piIcon) {
+                <i class="pi text-white" [ngClass]="content.contextDetail.title.piIcon.name"></i>
+              }
+            </div>
+            <p class="font-semibold capitalize flex items-center">{{ content.contextDetail.title.label }}</p>
+          </div>
+          @if (content.contextDetail.title.extra) {
+            <p-tag [severity]="content.contextDetail.title.extra.severity" [rounded]="true">
+              {{ content.contextDetail.title.extra.label }}
+            </p-tag>
+          }
+        </div>
+
+        @if (deviceService.isDesktop()) {
+          <div class="flex flex-row items-center self-start flex-wrap md:gap-4 gap-2">
+            @for (link of content.contextDetail.links; let i = $index; track link.label) {
+              <div class="relative">
+                @if (link.url) {
+                  <a [href]="link.url" class="flex gap-2 items-center">
+                    <ng-container *ngTemplateOutlet="linkTmpl; context: {linkContext: link}"></ng-container>
+                  </a>
+                } @else if (link.onClick) {
+                  <div class="flex gap-2 items-center cursor-pointer"
+                       (click)="onAction.emit({action: link.onClick, event: content})">
+                    <ng-container *ngTemplateOutlet="linkTmpl; context: {linkContext: link}"></ng-container>
+                  </div>
+                } @else if (link.routerLink) {
+                  <a [routerLink]="link.routerLink" [queryParams]="link.queryParams" class="flex gap-2 items-center">
+                    <ng-container *ngTemplateOutlet="linkTmpl; context: {linkContext: link}"></ng-container>
+                  </a>
+                }
+                <ng-template #linkTmpl let-linkContext="linkContext">
+                  @if (linkContext.icon) {
+                    <img class="object-cover" [ngSrc]="linkContext.icon.path" alt=""
+                         [width]="linkContext.icon.width"
+                         [height]="linkContext.icon.height"/>
+                  } @else if (linkContext.piIcon) {
+                    <i
+                      class="pi {{linkContext.piIcon.color ? 'text-[' + linkContext.piIcon.color + ']' : 'text-[#F69707]'}}"
+                      [ngClass]="linkContext.piIcon.name"></i>
+                  }
+                  <p
+                    class="text-[#F69707] font-medium underline underline-[#F69707] underline-offset-2">{{ linkContext.label }}</p>
+                </ng-template>
+                <!--          <div *ngIf="content.contextDetail.links.length > 0 && i + 1 < content.contextDetail.links.length"-->
+                <!--               class="absolute -top-1 -right-3 h-[34px] w-[1px] bg-[#F69707]"></div>-->
+              </div>
+            }
+          </div>
+        } @else {
+          <i class="pi pi-ellipsis-v pl-2 pr-1.5" (click)="toggleActions(content)"></i>
+        }
+      </div>
+      <!-- LINE BLOCKS -->
+      <div class="context-data w-full">
+        @for (item of content.contextData; let i = $index; track item.label) {
+          <div class="border-1 border-[#A0A0A0] rounded-md p-3 text-black flex flex-col justify-between gap-2 relative">
+            @if (item.progress) {
+              <div [style.height]="item.progress + '%'"
+                   class="absolute bottom-0 left-0 rounded-b-md bg-[#E9F9EF] w-full z-0 flex justify-end px-3"
+              >
+                <p class="text-[#22C55E] font-medium flex"
+                   [ngClass]="{'items-end': item.progress <= 20 }"> {{ item.progress }}% </p>
+              </div>
+            }
+            <div class="flex flex-row justify-between items-center z-10">
+              <p class="font-medium text-base">{{ item.label }}</p>
+              @if (deviceService.isDesktop()) {
+                @if (item.link) {
+                  @if (item.link.url) {
+                    <a class="flex flex-row gap-2 text-[#F69707] text-sm"
+                       [href]="item.link.url">
+                      <ng-container
+                        *ngTemplateOutlet="linkCardTmpl; context: {linkContext: item.link}"></ng-container>
+                    </a>
+                  } @else if (item.link.onClick) {
+                    <div
+                      class="flex flex-row gap-2 text-[#F69707] text-sm cursor-pointer"
+                      (click)="onAction.emit({action: item.link.onClick, event: content})">
+                      <ng-container
+                        *ngTemplateOutlet="linkCardTmpl; context: {linkContext: item.link}"></ng-container>
+                    </div>
+                  } @else if (item.link.routerLink) {
+                    <a class="flex flex-row gap-2 text-[#F69707] text-sm"
+                       [routerLink]="item.link.routerLink" [queryParams]="item.link.queryParams">
+                      <ng-container
+                        *ngTemplateOutlet="linkCardTmpl; context: {linkContext: item.link}"></ng-container>
+                    </a>
+                  }
+                  <ng-template #linkCardTmpl let-linkContext="linkContext">
+                    @if (linkContext.icon) {
+                      <img class="object-cover" [ngSrc]="linkContext.icon.path" alt=""
+                           [width]="linkContext.icon.width"
+                           [height]="linkContext.icon.height"/>
+                    } @else if (linkContext.piIcon) {
+                      <i
+                        class="no-underline pi {{linkContext.piIcon.color ? 'text-[' + linkContext.piIcon.color + ']' : 'text-white'}}"
+                        [ngClass]="linkContext.piIcon.name"></i>
+                    }
+                    <span class="underline-offset-2 underline underline-[#F69707]">{{ linkContext.label }}</span>
+                  </ng-template>
+                }
+              }
+            </div>
+            <div class="flex flex-row justify-between items-center z-10">
+              <p
+                [class]="item.unboldValue ? 'font-normal text-md text-[#64748B]' : 'font-semibold text-2xl'">{{ item.value }}</p>
+              @if (item.action) {
+                @if (item.action.icon; as icon) {
+                  <img [ngSrc]="icon.path" class="cursor-pointer" alt="item.action.action"
+                       (click)="onAction.emit({action: item.action.action, event: content})"
+                       [width]="icon.width" [height]="icon.height"/>
+                } @else if (item.action.piIcon) {
+                  <i class="pi {{item.action.piIcon.color ? 'text-[' + item.action.piIcon.color + ']' : 'text-white'}}"
+                     [ngClass]="item.action.piIcon.name"></i>
+                }
+              }
+              @if (item.percent) {
+                <p-tag [severity]="item.percent.sign > 0 ? 'success' : 'danger'" [rounded]="true">
+                  <div class="flex flex-row gap-1 items-baseline">
+                    @if (!item.percent.withoutIcon) {
+                      @if (item.percent.sign > 0) {
+                        <i class="pi pi-arrow-up-right text-xs"></i>
+                      } @else {
+                        <i class="pi pi-arrow-down-right text-xs"></i>
+                      }
+                    }
+                    <span>{{ item.percent.value }}</span>
+                  </div>
+                </p-tag>
+                <!--<p class="py-2 px-3 flex flex-row gap-2 items-baseline rounded-full"
+                   [style.color]="item.percent.sign > 0 ? '#22C55E' : '#B91C1C'"
+                   [style.background-color]="item.percent.sign > 0 ? '#E9F9EF' : '#FCE7E7'">
+                  @if (!item.percent.withoutIcon) {
+                    <img
+                      [ngSrc]="item.percent.sign > 0 ? '/assets/images/icons/balance-de-dons/arrow-up.svg' : '/assets/images/icons/balance-de-dons/arrow-down.svg'"
+                      alt="{{item.percent.sign > 0 ? 'Progression': 'Régression'}}"
+                      width="10" height="10"/>
+                  }
+                  <span>{{ item.percent.value }}</span>
+                </p>-->
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+    @if (context() === 'FACTURES') {
+      <div class="w-full flex gap-2 md:gap-4 flex-wrap items-center text-[#F69707] mt-2">
+        <p class="flex items-center gap-1 cursor-pointer font-medium" (click)="downloadInvoice(invoice()!)">
+          <i class="pi pi-download"></i>
+          <span>Télécharger la facture</span>
+        </p>
+        <p class="flex items-center gap-1 cursor-not-allowed font-medium text-[#CCCCCC]"
+           [pTooltip]="'Fonctionnalité bientôt disponible'"
+           tooltipPosition="top">
+          <i class="pi pi-download"></i>
+          <span>Exporter le fichier comptable </span>
+        </p>
+      </div>
+    }
+  </div>
+  <!-- MOBILE DRAWER -->
+  <p-drawer #drawerRef [(visible)]="showActions" position="bottom" [style]="{'height': 'auto'}"
+            transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)"
+            styleClass="filters-drawer-bottom">
+    <ng-template #headless>
+      <div
+        class="flex flex-col px-3 py-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+
+        @if (selectedItem()?.contextDetail?.links && selectedItem()?.contextDetail?.links!.length > 0) {
+          <div class="flex flex-col gap-4">
+            @for (link of selectedItem()?.contextDetail?.links; let i = $index; track link.label) {
+              @if (link.url) {
+                <a [href]="link.url" class="flex gap-2 items-center">
+                  <i class="pi" [ngClass]="link.piIcon?.name"></i>
+                  {{ link.label }}
+                </a>
+              } @else if (link.onClick) {
+                <span
+                  (click)="onAction.emit({action: link.onClick!, event: selectedItem()!}); toggleActions();">
+                        <i class="pi" [ngClass]="link.piIcon?.name"></i>
+                  {{ link.label }}
+                      </span>
+              } @else if (link.routerLink) {
+                <a
+                  [routerLink]="link.routerLink" [queryParams]="link.queryParams">
+                  <i class="pi" [ngClass]="link.piIcon?.name"></i>
+                  {{ link.label }}
+                </a>
+              }
+            }
+          </div>
+        }
+        <hr>
+        @if (selectedItem()?.contextData && selectedItem()?.contextData!.length > 0) {
+          <div class="flex flex-col gap-4">
+            @for (item of selectedItem()?.contextData; let i = $index; track item.label) {
+              @if (item.link) {
+                @if (item.link.url) {
+                  <a
+                    [href]="item.link.url">
+                    <i class="pi" [ngClass]="item.link.piIcon?.name"></i>
+                    {{ item.link.label }}
+                  </a>
+                } @else if (item.link.onClick) {
+                  <span
+                    (click)="onAction.emit({action: item.link.onClick!, event: selectedItem()!}); toggleActions();">
+                        <i class="pi" [ngClass]="item.link.piIcon?.name"></i>
+                    {{ item.link.label }}
+                      </span>
+                } @else if (item.link.routerLink) {
+                  <a
+                    [routerLink]="item.link.routerLink" [queryParams]="item.link.queryParams">
+                    <i class="pi" [ngClass]="item.link.piIcon?.name"></i>
+                    {{ item.link.label }}
+                  </a>
+                }
+              }
+            }
+          </div>
+        }
+
+        <!--@if (context() === 'FACTURES') {
+          @if (selectedItem()) {
+            <span
+              (click)="onAction.emit({action: selectedItem()!.contextDetail.links[0].onClick!, event: selectedItem()!})">
+            <i class="pi pi-eye"></i>
+            Détails de dons de la facture
+          </span>
+          }
+          <hr class="my-3"/>
+          <span (click)="downloadInvoice(invoice()!)">
+            <i class="pi pi-download"></i>
+            Télécharger la facture
+          </span>
+          <hr class="my-3"/>
+          <span class="text-[#CCCCCC]">
+            <i class="pi pi-download"></i>
+            Export du fichier comptable
+          </span>
+        } @else {
+          @if (context() === 'CLUB') {
+            <span
+              (click)="onAction.emit({action: selectedItem()!.contextDetail.links[0].onClick!, event: selectedItem()!})">
+            <i class="pi pi-eye"></i>
+            Détails de dons du mois
+            </span>
+            <hr class="my-3"/>
+          }
+          @if (context() === 'PROJETS') {
+            @if (selectedItem()!.contextDetail.links[1]; as item) {
+              @if (item.onClick) {
+                <span
+                  (click)="onAction.emit({action: item.onClick!, event: selectedItem()!})">
+                <i class="pi pi-eye"></i>
+                Détails de dons du projet
+                </span>
+                <hr class="my-3"/>
+              }
+            }
+            <span
+              [routerLink]="selectedItem()!.contextDetail.links[0].routerLink"
+              [queryParams]="selectedItem()!.contextDetail.links[0].queryParams">
+              <i class="pi pi-pencil"></i>
+              Modifier le projet
+            </span>
+            <hr class="my-3"/>
+            @if (selectedItem()!.contextData[4].link; as item) {
+              @if (item.onClick) {
+                <span
+                  (click)="onAction.emit({action: item.onClick!, event: selectedItem()!})">
+                  <i class="pi pi-calendar"></i>
+                  Modifier la date limite
+                </span>
+                <hr class="my-3"/>
+              }
+            }
+          }
+          <span [routerLink]="['/project', 'listing']">
+            <i class="pi pi-list"></i>
+            Liste des dons
+          </span>
+        }-->
+
+      </div>
+    </ng-template>
+  </p-drawer>
+}

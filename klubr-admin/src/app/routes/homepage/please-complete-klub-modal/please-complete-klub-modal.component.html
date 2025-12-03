@@ -1,0 +1,30 @@
+<p>Pour activer votre page, les informations nécessaires concernant votre klub doivent être complétées: </p>
+<ul>
+
+</ul>
+@if (sharedFacade.currentKlubInfosCompletion() < 100) {
+  <li>Certaines informations du klub sont manquantes. Veuillez les compléter en cliquant <a
+    class="cursor-pointer text-primary-500"
+    (click)="link(['/klub/' + sharedFacade.currentKlub()!.uuid + '/infos-legales'])">ici</a>
+  </li>
+}
+@if ((sharedFacade.currentKlubDocsCompletion() + sharedFacade.currentKlubDocsPendingCompletion()) < 100) {
+  <li>Certains documents du klub sont manquants. Veuillez les ajouter en cliquant <a
+    class="cursor-pointer text-primary-500"
+    (click)="link(['/klub/' + sharedFacade.currentKlub()!.uuid + '/documents'])">ici</a>
+  </li>
+} @else if (sharedFacade.currentKlubDocsPendingCompletion() > 0) {
+  <li>Certains documents du klub sont en attente de validation. L'administrateur du site va s'en
+    charger dans les plus brefs délais.<!-- N'hésitez pas à le relancer si besoin :--></li>
+  <!--<p-button label="Contactez-nous" class="self-end" severity="contrast" (onClick)="toggleContactDialog()"/>-->
+}
+<!--
+
+<p-dialog header="Contactez-nous" [modal]="true" [(visible)]="showContactDialog"
+          [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+  <app-contact-form
+    [isDialog]="true"
+    (dialogState)="handleDialogState($event)"
+  ></app-contact-form>
+</p-dialog>
+-->

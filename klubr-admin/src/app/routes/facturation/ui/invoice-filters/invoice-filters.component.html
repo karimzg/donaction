@@ -1,0 +1,60 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <div class="flex gap-3 flex-row flex-wrap justify-between">
+
+    <form [formGroup]="filtersForm"
+          class="w-full flex flex-col gap-4">
+      <div class="flex flex-wrap gap-4">
+        <p-iconfield iconPosition="left" class="filter-component">
+          <p-inputicon styleClass="pi pi-search"/>
+          <input #firstInput autofocus="autofocus" type="text" pInputText formControlName="searchParams" class="w-full"
+                 placeholder="Recherche par n° de facture"/>
+        </p-iconfield>
+
+        <p-select
+          id="tmpl-library"
+          [options]="availableMonths()"
+          formControlName="billingPeriodSmall"
+          optionLabel="label"
+          placeholder="Choisir un mois"
+          emptyMessage="Aucun projet trouvé"
+          class="customDropdown filter-component"
+        >
+        </p-select>
+
+        <app-dropdown-multi-klubr-filter
+          #klubrDropdown
+          class="filter-component"
+          [itemInit]="klubrInit() || undefined"
+          (onItemsUUIDsSelected)="setKlubFilter($event!)"
+        ></app-dropdown-multi-klubr-filter>
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <label for="genererPdf" class="flex gap-1"><b> PDF généré </b></label>
+          <p-selectButton
+            [options]="[{label: 'Oui', value: true},{label: 'Non', value: false}]"
+            formControlName="invoicePdfPath"
+            id="genererPdf"
+            optionLabel="label"
+            optionValue="value"/>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label for="genererPdf" class="flex gap-1"><b> Facture envoyée par email </b></label>
+          <p-selectButton
+            [options]="[{label: 'Oui', value: true},{label: 'Non', value: false}]"
+            formControlName="firstSentEmailDate"
+            id="firstSentEmailDate"
+            optionLabel="label"
+            optionValue="value"/>
+        </div>
+        <div class="flex gap-3 justify-end filter-component">
+          <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end" [disabled]="filtersForm.pristine"
+                    severity="secondary"/>
+          <p-button (click)="applyFilters()" label="Filter" class="self-end" [disabled]="filtersForm.pristine"
+                    severity="contrast"/>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

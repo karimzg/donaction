@@ -1,0 +1,53 @@
+{
+  "kind": "singleType",
+  "collectionName": "page_mecenats",
+  "info": {
+    "singularName": "page-mecenat",
+    "pluralName": "page-mecenats",
+    "displayName": "Page mécénat",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "titre": {
+      "type": "string"
+    },
+    "FAQ": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-sections.faqs"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "titre",
+      "required": true
+    },
+    "slider": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.slider-hp"
+      ]
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

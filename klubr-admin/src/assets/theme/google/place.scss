@@ -1,0 +1,35 @@
+/* GOOGLE PLACES */
+.pac-container {
+  font-family: var(--font-family), "Arial Narrow", sans-serif;
+  font-feature-settings: var(--font-feature-settings, normal);
+
+  .pac-item {
+    margin: 2px 0;
+    padding: 0.5rem 0.75rem;
+    border: 0 none;
+    color: #334155;
+    background: transparent;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 400;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      color: #1D4ED8;
+      background: rgba(59, 130, 246, 0.24);
+    }
+
+    .pac-icon.pac-icon-marker {
+    }
+
+    .pac-matched {
+    }
+  }
+
+  &:after {
+    content: none;
+  }
+}

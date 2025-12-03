@@ -1,0 +1,33 @@
+@use '../../../../styles/main';
+
+
+.btnContainer {
+  padding: 0 1.5rem;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  gap: 1rem;
+
+  @media screen and (max-width: 768px) {
+    margin-top: 1rem;
+    .secondary-btn {
+      max-width: 60px;
+      height: 45px;
+      padding: unset;
+
+      &:hover {
+        img {
+          filter: invert(100%);
+        }
+      }
+    }
+  }
+
+  .previous {
+    transform: rotate(180deg);
+    height: 25px;
+  }
+
+}

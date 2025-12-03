@@ -1,0 +1,35 @@
+.p-avatar {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
+  background: white;
+
+  img {
+    object-fit: cover;
+  }
+}
+
+.avatar-logo {
+  &.p-avatar {
+    padding: 2px;
+  }
+
+  img {
+    object-fit: contain;
+  }
+}
+
+/* Prime-Ng Overrides */
+// default avatar size
+.p-avatar {
+  width: 2.2rem;
+  height: 2.2rem;
+
+  &.p-avatar-lg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  &.p-avatar-xl {
+    width: 5rem;
+    height: 5rem;
+  }
+}

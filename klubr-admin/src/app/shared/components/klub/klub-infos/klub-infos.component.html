@@ -1,0 +1,19 @@
+@if (klub()) {
+  <p-avatar
+    image="{{klub()!.logo | media : 'logo'}}"
+    shape="circle"
+    class="avatar-logo"
+    [size]="size()"
+  ></p-avatar>
+  <div class="klub-infos">
+    <span [ngClass]="{'font-bold' : size() === 'xlarge'}"
+          class="text-black">{{ customLabel() || klub()!.denomination }}</span>
+    @if (displaySport()) {
+      <em class="text-black">{{ klub()!.sportType }}</em>
+    }
+    @if (showProgress()) {
+      <app-klub-infos-completion [progress]="progress()"></app-klub-infos-completion>
+    }
+
+  </div>
+}

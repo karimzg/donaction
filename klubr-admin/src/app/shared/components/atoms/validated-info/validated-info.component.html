@@ -1,0 +1,12 @@
+@if (!hasDoc()) {
+  <i class="pi pi-question-circle text-[1.5rem] text-[#9747FF]" [pTooltip]="'Non fourni'" @flip></i>
+} @else if (validated() === undefined || validated() === null) {
+  <i class="pi text-[1.5rem] "
+     [ngClass]="permissionService.memberIsAtLeastAdminEditorSignal() ? 'pi-spin pi-cog text-[#CCCCCC]': 'pi-history text-[#fbbf24]' "
+     [pTooltip]="'Document en attente de validation'" @flip></i>
+} @else if (validated()) {
+  <i class="pi pi-check-circle text-[1.5rem] text-[#22C55E]" [pTooltip]="'Document validé'" @flip></i>
+} @else {
+  <i class="pi pi-times-circle text-[1.5rem] text-[#E3271B]"
+     [pTooltip]="'Document refusé. Merci de fournir un autre document.'" @flip></i>
+}

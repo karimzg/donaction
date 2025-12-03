@@ -1,0 +1,69 @@
+{
+  "kind": "singleType",
+  "collectionName": "page_homes",
+  "info": {
+    "singularName": "page-home",
+    "pluralName": "page-homes",
+    "displayName": "Page Home",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "titre": {
+      "type": "string"
+    },
+    "partnerList": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.partner-item"
+      ]
+    },
+    "klub_projets_featured": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klub-projet.klub-projet"
+    },
+    "klubrs_featured": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klubr.klubr"
+    },
+    "FAQ": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-sections.faqs"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "contenu": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.section-texte-image"
+      ]
+    },
+    "slider": {
+      "type": "dynamiczone",
+      "components": [
+        "composant-atoms.slider-hp"
+      ]
+    },
+    "slug": {
+      "type": "uid"
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "kind": "singleType",
+  "collectionName": "page_cookies",
+  "info": {
+    "singularName": "page-cookie",
+    "pluralName": "page-cookies",
+    "displayName": "Page Cookie",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "titre": {
+      "type": "string"
+    },
+    "contenu": {
+      "type": "blocks"
+    },
+    "slug": {
+      "type": "uid",
+      "required": false
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "text"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

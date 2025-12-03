@@ -1,0 +1,122 @@
+@if (isReady()) {
+  <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" appInvalidControlScroll>
+    <div class="flex flex-col gap-3">
+      <h3 class="text-lg font-bold">Détails de l’utilisateur</h3>
+      <input id="avatarInput" type="text" class="hidden" formControlName="avatar">
+      <app-avatar-selector
+        [avatar]="currentAvatar()"
+        (fileSelected)="onFileSelected($event)"
+        (avatarSelected)="onAvatarSelected($event)"
+      ></app-avatar-selector>
+    </div>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex flex-col gap-2 w-full">
+          <label for="lastName" class="flex gap-1"><b>Nom</b><span class="text-red-700">*</span></label>
+          <!-- TEST DE INPLACE -->
+          <!--@if (editMode) {
+            <p-inplace>
+              <ng-template pTemplate="display">
+                <span>{{entityForm.get('nom')?.value}}</span>
+              </ng-template>
+              <ng-template pTemplate="content">
+                <input pInputText id="lastName" type="text" placeholder="Nom" formControlName="nom">
+              </ng-template>
+            </p-inplace>
+          } @else {-->
+          <input autofocus="autofocus" pInputText id="lastName" type="text" placeholder="Nom" formControlName="nom">
+          <!--      }-->
+
+          <app-error-display [control]="entityForm.controls['nom']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 w-full">
+          <label for="firstName" class="flex gap-1"><b>Prénom</b><span class="text-red-700">*</span></label>
+          <input pInputText id="firstName" type="text" placeholder="Prénom" formControlName="prenom">
+          <app-error-display [control]="entityForm.controls['prenom']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex flex-col gap-2 w-full">
+          <label for="numLicence" class="flex gap-1"><b> Numéro de licence </b><!--<span
+            class="text-red-700">*</span>--></label>
+          <input autofocus="autofocus" pInputText id="numLicence" type="text" placeholder="Numéro de licence"
+                 formControlName="numLicence">
+          <app-error-display [control]="entityForm.controls['numLicence']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 w-full">
+          <label for="tel" class="flex gap-1"><b>Numéro de téléphone</b><!--<span class="text-red-700">*</span>-->
+          </label>
+          <app-phone
+            id="tel"
+            [control]="entityForm | formControl : 'tel'"
+          ></app-phone>
+          <app-error-display [control]="entityForm.controls['tel']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex flex-col gap-2 w-full">
+          <label for="email" class="flex gap-1"><b>Email</b><!--<span class="text-red-700">*</span>--></label>
+          <input autofocus="autofocus" pInputText id="email" type="text" placeholder="Adresse mail"
+                 formControlName="email">
+          <app-error-display [control]="entityForm.controls['email']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+    </div>
+    <hr class="border-[#E2E8F0]">
+    <div class="flex flex-col gap-2">
+      <h3 class="text-lg font-bold">Rôle et Fonction</h3>
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <div class="flex flex-col gap-2 w-full">
+          <span><b>Rôle</b><span class="text-red-700">*</span></span>
+          <div class="flex gap-3 max-w-full overflow-x-auto">
+            @let role = entityForm.get('role')?.value;
+            @if (permissionsService.memberIsAdminSignal()) {
+              <p-button [label]="'Admin' | profileRoleLabel" [rounded]="true" [outlined]="role !== 'Admin'"
+                        (click)="onRoleSelected('Admin')" [severity]="'Admin' | profileRoleSeverity"/>
+            }
+            @if (permissionsService.memberIsAtLeastAdminEditorSignal()) {
+              <p-button [label]="'AdminEditor' | profileRoleLabel" [rounded]="true" [outlined]="role !== 'AdminEditor'"
+                        (click)="onRoleSelected('AdminEditor')" [severity]="'AdminEditor' | profileRoleSeverity"/>
+            }
+            <p-button [label]="'KlubMemberLeader' | profileRoleLabel" [rounded]="true"
+                      [outlined]="role !== 'KlubMemberLeader'"
+                      (click)="onRoleSelected('KlubMemberLeader')"
+                      [severity]="'KlubMemberLeader' | profileRoleSeverity"/>
+            <p-button [label]="'KlubMember' | profileRoleLabel" [rounded]="true"
+                      [outlined]="role !== 'KlubMember'"
+                      (click)="onRoleSelected('KlubMember')" [severity]="'KlubMember' | profileRoleSeverity"/>
+          </div>
+          <input id="roleInput" type="text" class="hidden" formControlName="role">
+          <app-error-display [control]="entityForm.controls['role']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 w-full">
+          <label for="fonction" class="flex gap-1"><b>Fonction</b><span class="text-red-700">*</span></label>
+          <p-select
+            class="w-full customDropdown text-left"
+            id="fonction"
+            formControlName="fonction"
+            [options]="defaultKlubMemberFunctions"
+            [editable]="true"
+            placeholder="Fonction"
+          />
+          <app-error-display [control]="entityForm.controls['fonction']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+    </div>
+    <div
+      class="flex gap-3 pt-4 px-3 justify-between sm:justify-end bg-white">
+      <p-button label="Annuler" class="self-end" severity="secondary" (click)="close()"
+                [disabled]="entityForm.pristine || sharedFacade.loading() || loading()"/>
+      <p-button label="Enregistrer" class="self-end" severity="contrast" type="submit" [disabled]="entityForm.pristine"
+                [loading]="sharedFacade.loading() || loading()"/>
+    </div>
+  </form>
+}
+

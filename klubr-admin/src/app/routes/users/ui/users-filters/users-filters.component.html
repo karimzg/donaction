@@ -1,0 +1,59 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <form [formGroup]="filtersForm" class="flex gap-3 flex-row flex-wrap justify-between">
+    <p-datepicker
+      #userCalendar
+      class="calendar filter-component"
+      formControlName="creationDate"
+      [showIcon]="true"
+      [showButtonBar]="true"
+      [readonlyInput]="true"
+      selectionMode="range"
+      inputId="selectedUserDate"
+      placeholder="Dernière connexion"
+    ></p-datepicker>
+
+    <p-select
+      #roleDropdown
+      class="filter-component customDropdown"
+      [options]="roles()"
+      [checkmark]="true"
+      formControlName="role"
+      placeholder="Par rôle"
+      optionLabel="label"
+      optionValue="name"
+      emptyMessage="Aucun role disponible"
+      [showClear]="true"/>
+
+    <p-select
+      #profilDropdown
+      class="filter-component customDropdown"
+      [options]="profiles()"
+      [checkmark]="true"
+      formControlName="profiles"
+      placeholder="Par profil rattaché"
+      optionLabel="label"
+      optionValue="name"
+      emptyMessage="Aucun profil disponible"
+      [showClear]="true"/>
+
+    <p-select
+      #originDropdown
+      class="filter-component customDropdown"
+      [options]="origins()"
+      [checkmark]="true"
+      formControlName="origin"
+      placeholder="Par origine"
+      optionLabel="label"
+      optionValue="name"
+      emptyMessage="Aucune origine disponible"
+      [showClear]="true"/>
+
+    <div class="flex gap-3 justify-end filter-component">
+      <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end"
+                [disabled]="filtersForm.pristine"
+                severity="secondary"/>
+      <p-button (click)="applyFilters()" label="Filter" class="self-end" severity="contrast"
+                [disabled]="filtersForm.pristine"/>
+    </div>
+  </form>
+</div>

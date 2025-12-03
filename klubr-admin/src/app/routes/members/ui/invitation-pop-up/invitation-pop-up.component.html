@@ -1,0 +1,122 @@
+<div class="flex flex-col gap-4">
+
+  <div class="flex flex-col rounded bg-[#F9FAFB] w-full px-4 py-3">
+    <div class="flex flex-col md:flex-row gap-2 items-center">
+      <h3 class="m-0 text-lg font-bold">Votre code invitation :</h3>
+      <span class="font-medium">
+        {{ invitationCode() }}
+      </span>
+      <i class="pi pi-clone p-2 rounded bg-[#E5E7EB] cursor-pointer text-xl"
+         (click)="copyToClipboard(invitationCode())"></i>
+    </div>
+    <span class="text-[#6B7280]">Communiquez ce code invitation à la personne qui pourra l'utiliser une fois connectée à klubr</span>
+  </div>
+
+  <div class="flex items-center gap-5">
+    <h3 class="m-0 text-lg font-bold">Ou plus simplement, envoyez ce lien directement </h3>
+    <hr class="flex-1 border-[#E2E8F0]">
+  </div>
+
+  <div class="flex items-center bg-[#F9FAFB] rounded w-full gap-4 px-3 py-2 md:px-4 md:py-3">
+    <i class="pi pi-send p-2 rounded bg-[#E5E7EB] text[1.5rem]"></i>
+    <div class="flex flex-col flex-1 invitation-link">
+      <div class="flex items-center gap-2">
+        <h3 class="m-0 text-lg font-bold truncate">{{ invitationLinkSm() }}</h3>
+        <i class="pi pi-clone p-2 rounded bg-[#E5E7EB] cursor-pointer text-xl"
+           (click)="copyToClipboard(invitationLink())"></i>
+      </div>
+      <span class="text-[#6B7280]">Copier et partager le lien pour donner l’accès à cet utilisateur</span>
+    </div>
+  </div>
+
+  @if (!canShare()) {
+    <div class="flex items-center gap-5">
+      <h3 class="m-0 text-lg font-bold">Ou partagez</h3>
+      <hr class="flex-1 border-[#E2E8F0]">
+    </div>
+    <div class="flex gap-2 items-center justify-between">
+      <p-avatar
+        image="assets/images/social-networks/whatsapp.svg"
+        size="large"
+        shape="circle"/>
+      <p-button label="Inviter" severity="contrast" (click)="share2()"/>
+    </div><!--
+    <div class="flex gap-2 items-center justify-between">
+      <p-avatar
+        image="assets/images/social-networks/messenger.svg"
+        size="large"
+        shape="circle" />
+      <p-button label="Inviter" severity="contrast" (click)="share2('messenger')"/>
+    </div>-->
+  } @else {
+    <div class="flex items-center gap-5">
+      <h3 class="m-0 text-lg font-bold">Ou partagez</h3>
+      <hr class="flex-1 border-[#E2E8F0]">
+    </div>
+    <div class="flex gap-2 items-center justify-between">
+      <div class="flex gap-2 items-center">
+        <p-avatarGroup styleClass="mb-3">
+          <p-avatar
+            image="assets/images/social-networks/whatsapp.svg"
+            size="large"
+            shape="circle"/>
+          <p-avatar
+            image="assets/images/social-networks/messenger.svg"
+            size="large"
+            shape="circle"/>
+          <p-avatar
+            image="assets/images/social-networks/telegram.svg"
+            size="large"
+            shape="circle"/>
+          <p-avatar
+            image="assets/images/social-networks/teams.svg"
+            size="large"
+            shape="circle"/>
+          <p-avatar
+            image="assets/images/social-networks/mail-ios.svg"
+            size="large"
+            shape="circle"/>
+          <p-avatar
+            image="assets/images/social-networks/gmail.svg"
+            size="large"
+            shape="circle"/>
+        </p-avatarGroup>
+      </div>
+      <p-button label="Inviter" severity="contrast" (click)="shareMobile()"/>
+    </div>
+  }
+
+  <div class="flex items-center gap-5">
+    <h3 class="m-0 text-lg font-bold">Ou par mail</h3>
+    <hr class="flex-1 border-[#E2E8F0]">
+  </div>
+
+  <div [formGroup]="sendInvitationForm" (ngSubmit)="onSubmit()" class="flex gap-2 items-center justify-between">
+    <div class="flex flex-col gap-2 basis-[350px]">
+      <label for="email">Adresse e-mail</label>
+      <input pInputText formControlName="email" id="email" type="email" placeholder="Email" class="flex w-full">
+      <app-error-display [control]="sendInvitationForm.controls['email']"
+                         [isSubmitted]="isSubmitted()"></app-error-display>
+    </div>
+
+    <div class="flex gap-3 mt-4 justify-end">
+      <p-button type="submit" label="Inviter" (click)="onSubmit()" class="self-end" severity="contrast"
+                [disabled]="!sendInvitationForm.valid || sendInvitationForm.pristine" [loading]="loading()"/>
+    </div>
+  </div>
+
+
+</div>
+<!-- FOOTER-->
+<hr class="flex-1 border-[#E2E8F0]">
+<div class="flex gap-3 mt-4 justify-end">
+  <p-button label="Envoyer plus tard" class="self-end" (click)="close()" severity="secondary"/>
+</div>
+<!--
+ <ng-template pTemplate="footer">
+  <div class="flex gap-3 mt-4 justify-end">
+    <p-button label="Annuler" class="self-end" severity="secondary"/>
+    <p-button type="submit" label="Enregistrer" severity="contrast" class="self-end"/>
+  </div>
+</ng-template>
+-->

@@ -1,0 +1,25 @@
+<h1 #title class="admin-h1">Utilisateurs</h1>
+<!-- HEADER -->
+<app-list-header
+  [filtersList]="filtersList()"
+  [(filtersSearch)]="filtersSearch"
+  [displayFilters]="permissionsService.memberIsAtLeastLeaderSignal()"
+  #headerList
+  displaySearch="true"
+  searchPlaceholder="Recherche par email"
+>
+  <app-users-filters
+    #filtersComponent
+    (filtersChanged)="filtersList.set($event); headerList.closeDrawer()"
+  >
+  </app-users-filters>
+</app-list-header>
+
+<!-- LIST -->
+<div class="grid-user-listing m-0 gap-3 w-full" appScrollNearEnd (nearEnd)="onNearEndScroll()">
+  @for (profile of listing(); track profile.uuid) {
+    <app-user-card
+      [user]="profile"
+    ></app-user-card>
+  }
+</div>

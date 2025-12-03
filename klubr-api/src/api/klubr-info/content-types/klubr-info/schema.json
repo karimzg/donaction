@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubr_infos",
+  "info": {
+    "singularName": "klubr-info",
+    "pluralName": "klubr-infos",
+    "displayName": "Klubr Info"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr",
+      "inversedBy": "klubr_info"
+    },
+    "requiredFieldsCompletion": {
+      "type": "decimal",
+      "default": 0
+    },
+    "requiredDocsValidatedCompletion": {
+      "type": "decimal",
+      "default": 0
+    },
+    "requiredDocsWaitingValidationCompletion": {
+      "type": "decimal",
+      "default": 0
+    },
+    "requiredDocsRefusedCompletion": {
+      "type": "decimal",
+      "default": 0
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

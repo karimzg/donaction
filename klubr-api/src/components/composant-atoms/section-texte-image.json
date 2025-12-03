@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_composant_atoms_section_texte_images",
+  "info": {
+    "displayName": "Section texte & image",
+    "icon": "code",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "titre": {
+      "type": "string"
+    },
+    "texte": {
+      "type": "blocks",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "imgToTheLeft": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

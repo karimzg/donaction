@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_not_used_not_useds",
+  "info": {
+    "displayName": "Not Used"
+  },
+  "options": {},
+  "attributes": {
+    "notUsed": {
+      "type": "string"
+    }
+  }
+}

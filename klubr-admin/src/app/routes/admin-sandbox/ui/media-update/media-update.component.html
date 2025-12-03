@@ -1,0 +1,36 @@
+<h5>{{ itemMediaLabel() }}</h5>
+<p-fileUpload [name]="mediaField()" [url]="endpoint[0]()"
+              (onUpload)="onUpload($event)"
+              (onProgress)="onProgress($event)"
+              (onSelect)="onSelectionChange($event)"
+              (onError)="onError($event)"
+              [headers]="headers()"
+              [multiple]="false" accept="{{allowVideo() ? 'image/*,video/*' : 'image/*'}}"
+              [maxFileSize]="allowVideo() ? 10000000 : 2000000">
+  <ng-template #content>
+    @if (files[0]().length) {
+      @for (file of files[0](); track file.name) {
+        <div>
+          @if (file.mime.startsWith('image')) {
+            <img [src]="file.url" alt="logo" class="uploaded-image w-{{mediaPreviewWidth()}}">
+          } @else if (file.mime.startsWith('video')) {
+            <video [src]="file.url" controls class="uploaded-image w-{{mediaPreviewWidth()}}"></video>
+          } @else {
+            <div class="p-d-flex p-flex-column p-ai-center">
+              <i class="pi pi-image p-mt-3 p-p-5" style="font-size: 3rem"></i>
+              <p>Aucun fichier pour l'instant</p>
+            </div>
+          }
+          <button pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-danger" outlined="true"
+                  (click)="removeMedia(file)">
+          </button>
+        </div>
+      }
+    } @else {
+      <div class="p-d-flex p-flex-column p-ai-center">
+        <i class="pi pi-image p-mt-3 p-p-5" style="font-size: 3rem"></i>
+        <p>Aucun fichier pour l'instant</p>
+      </div>
+    }
+  </ng-template>
+</p-fileUpload>

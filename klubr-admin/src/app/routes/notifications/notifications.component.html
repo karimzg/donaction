@@ -1,0 +1,128 @@
+<div class="flex flex-col sm:flex-row sm:gap-4 sm:sticky top-[70px] bg-white px-3 mx-[-1rem] z-10 pt-3">
+  <h1 #title class="admin-h1 flex flex-1 items-center gap-4">
+    <i (click)="goBack()" class="pi pi-arrow-circle-left text-[1.5rem] cursor-pointer"></i>
+    <div class="flex w-full justify-between text-black">
+      Notifications
+      <div class="flex gap-3">
+        <div [ngClass]="{'notif-button-active': allNotifications(), 'notif-button-inactive': !allNotifications()}"
+             (click)="toggleAllNotifications(true)">
+          <span class="text-base"> Tout </span>
+        </div>
+        <div [ngClass]="{'notif-button-active': !allNotifications(), 'notif-button-inactive': allNotifications()}"
+             (click)="toggleAllNotifications(false)">
+          <span class="text-base"> Non lu </span>
+        </div>
+      </div>
+    </div>
+  </h1>
+</div>
+@if (!allNotifications()) {
+  <div class="flex flex-col gap-2">
+    <div class="flex items-center justify-center w-full">
+      <ng-lottie
+        width="200px"
+        [options]="{path: 'assets/animations/notification.json'}"
+      ></ng-lottie>
+    </div>
+    <div class="flex flex-col gap-1 self-center items-center">
+      <p class="m-0 text-gray-600 text-sm"> Vous serez notifié ici de vos dons reçus et informations importantes </p>
+      <p class="m-0 font-semibold text-black"> Suivez vos actualités ! </p>
+    </div>
+  </div>
+}@else{
+  <!--TODO : Replace by @for -->
+  <div class="flex flex-col gap-2">
+    <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+      <div class="flex gap-2">
+        <p-avatar
+          icon="pi pi-user"
+          size="normal"
+          [shape]="'circle'"
+        ></p-avatar>
+        <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                </span>
+          <p class="m-0 text-gray-600 text-sm"> il y a 14 heures </p>
+        </div>
+      </div>
+      <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="left"></i>
+    </div>
+    <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+      <div class="flex gap-2">
+        <p-avatar
+          icon="pi pi-user"
+          size="normal"
+          [shape]="'circle'"
+        ></p-avatar>
+        <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Theodore T.C. Calvin </span> ajouter un nouveau projet <span class="font-semibold"> Vidéo surveillance pour les infrastructures sportives. </span>
+                </span>
+          <p class="m-0 text-gray-600 text-sm"> il y a 23 heures </p>
+        </div>
+      </div>
+      <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="left"></i>
+    </div>
+    <div class="flex justify-between rounded-lg p-2">
+      <div class="flex gap-2">
+        <p-avatar
+          icon="pi pi-user"
+          size="normal"
+          [shape]="'circle'"
+        ></p-avatar>
+        <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                </span>
+          <p class="m-0 text-gray-600 text-sm"> 24/01/2025 </p>
+        </div>
+      </div>
+    </div>
+  <div class="flex justify-between rounded-lg p-2">
+    <div class="flex gap-2">
+      <p-avatar
+        icon="pi pi-user"
+        size="normal"
+        [shape]="'circle'"
+      ></p-avatar>
+      <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                </span>
+        <p class="m-0 text-gray-600 text-sm"> il y a 14 heures </p>
+      </div>
+    </div>
+  </div>
+  <div class="flex justify-between rounded-lg p-2">
+    <div class="flex gap-2">
+      <p-avatar
+        icon="pi pi-user"
+        size="normal"
+        [shape]="'circle'"
+      ></p-avatar>
+      <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Theodore T.C. Calvin </span> ajouter un nouveau projet <span class="font-semibold"> Vidéo surveillance pour les infrastructures sportives. </span>
+                </span>
+        <p class="m-0 text-gray-600 text-sm"> il y a 23 heures </p>
+      </div>
+    </div>
+  </div>
+  <div class="flex justify-between rounded-lg p-2">
+    <div class="flex gap-2">
+      <p-avatar
+        icon="pi pi-user"
+        size="normal"
+        [shape]="'circle'"
+      ></p-avatar>
+      <div class="flex flex-col gap-1">
+                <span>
+                  <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                </span>
+        <p class="m-0 text-gray-600 text-sm"> 24/01/2025 </p>
+      </div>
+    </div>
+  </div>
+  </div>
+}

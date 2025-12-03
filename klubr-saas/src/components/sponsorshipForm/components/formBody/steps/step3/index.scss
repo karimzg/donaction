@@ -1,0 +1,105 @@
+@use '../../../../../../styles/main';
+
+.step3 {
+  margin: 2.5rem;
+
+  .recap {
+    border-radius: 6px;
+    border: 1px solid;
+    width: 100%;
+    padding: 8px 0;
+
+    @media screen and (max-width: 768px) {
+      margin-top: 2rem;
+    }
+
+  }
+
+  .recapList {
+    min-width: 70%;
+
+    @media screen and (max-width: 768px) {
+      width: 100%;
+      min-width: unset;
+    }
+
+    .separator {
+      height: 1px;
+      background: #000;
+    }
+  }
+
+  .disclaimer {
+    font-size: 14px;
+
+    b {
+      font-size: 14px;
+    }
+
+    a {
+      all: unset;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  }
+
+  .checkboxesContainer {
+    * {
+      font-size: 14px;
+    }
+
+    gap: 1rem;
+
+    div {
+      flex-wrap: wrap;
+
+      input {
+        margin-right: 1rem;
+      }
+
+      small {
+        &.error {
+          min-width: 100%;
+          margin-left: 34px;
+        }
+      }
+    }
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+
+  @media screen and (max-width: 768px) {
+    margin: 0;
+  }
+}
+
+.klubrCGU {
+
+  .cguHeader {
+    position: absolute;
+    width: 100%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1;
+    top: 10px;
+    left: 0;
+    gap: 10px;
+
+    .closer {
+      cursor: pointer;
+      margin-left: 1.5rem;
+    }
+  }
+
+  .cguBody {
+    margin-top: 50px;
+  }
+}
+
+

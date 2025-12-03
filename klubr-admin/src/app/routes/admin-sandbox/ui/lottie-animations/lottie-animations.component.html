@@ -1,0 +1,20 @@
+<h1 #title class="admin-h1">Lottie animations</h1>
+<div>
+  <p-autoComplete
+    [(ngModel)]="selectedAnimation"
+    [dropdown]="true"
+    [suggestions]="filteredAnimations!"
+    (onSelect)="updateAnimation($event.value)"
+    (completeMethod)="filterAnimation($event)"
+    field="label">
+    <ng-template let-animation #item>
+      <div class="p-clearfix">
+        <div>{{ animation.label }}</div>
+      </div>
+    </ng-template>
+  </p-autoComplete>
+</div>
+<br>
+<ng-lottie
+  width="300px"
+  [options]="options()" (animationCreated)="animationCreated($event)"/>

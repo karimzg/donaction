@@ -1,0 +1,318 @@
+<div pFocusTrap>
+  @if (isReady()) {
+    @if (formDisabled() && disabledMsg()) {
+      @for (msg of disabledMsg(); track msg.text) {
+        <p-message [severity]="msg.severity">{{ msg.text }}</p-message>
+      }
+    }
+    <div class="flex flex-col sm:flex-row sm:gap-4 sm:sticky top-[70px] bg-white px-3 mx-[-1rem] z-10 pt-3">
+      <h1 #title class="admin-h1 flex flex-1 items-center gap-4">
+        <i (click)="goBack()" class="pi pi-arrow-circle-left text-[1.5rem] cursor-pointer"></i>
+        @if (entitySignal()?.uuid) {
+          Modifier le projet
+        } @else {
+          Créer un nouveau projet
+        }
+      </h1>
+      <div class="flex flex-row sm:flex-row justify-between gap-4 mb-4">
+        @if (!isTemplate() && entitySignal() && !isBilled()) {
+          <app-project-state-dropdown
+            [disabled]="!editMode || !entityForm.pristine || sharedFacade.loading() || couverture.loading()"
+            [startStatus]="entitySignal()! | projectStatus"
+            [projectUuid]="entitySignal()!.uuid"
+            [userRole]="sharedFacade.profile()?.role"
+            [pathsToUnvalidate]="pathsToUnvalidate()"
+            (onChange)="onStatusChange($event)"
+            (limitDateChanged)="onLimitDateChanged($event)"
+          ></app-project-state-dropdown>
+        } @else if (isBilled()) {
+          <div class="project-state is-billed project-state">
+            <span>Projet facturé</span>
+          </div>
+        }
+        @if (isTemplate()) {
+          <div class="project-state is-template project-state">
+            <span>Modèle de projet</span>
+          </div>
+        }
+        <p-button class="" label="Voir le projet" (click)="openPreview()" icon="pi pi-eye" severity="primary"
+                  [disabled]="!editMode || sharedFacade.loading() || couverture.loading()"/>
+      </div>
+    </div>
+    <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" appInvalidControlScroll [labelOffset]="200"
+          class="flex flex-col gap-4" @fade>
+
+      <!-- TEMPLATE LIBRARY / CATEGORY -->
+      @if (mergedTmplLibraries$ | async; as mergedLibraries) {
+        <div class="flex flex-col lg:flex-row flex-1 max-w-full justify-between gap-4">
+          <!-- TEMPLATE LIBRARY -->
+          <div class="flex flex-col flex-1 gap-2">
+            <label for="tmpl-library" class="flex gap-1"><b>Librairie de projet</b><span
+              class="text-red-700">*</span></label>
+            <p-select
+              id="tmpl-library"
+              [(ngModel)]="selectedTmplLibrary"
+              [ngModelOptions]="{standalone: true}"
+              [options]="mergedLibraries"
+              optionValue="uuid"
+              optionLabel="label"
+              placeholder="Choisir une librarie projet"
+              emptyMessage="Aucune librairie de projet disponible"
+            >
+            </p-select>
+            <app-error-display [control]="entityForm.controls['klubr_membre']"
+                               [isSubmitted]="isSubmitted()"></app-error-display>
+          </div>
+          <!-- TEMPLATE CATEGORY -->
+          <div class="flex flex-col flex-1 gap-2">
+            <label for="tmpl-category" class="flex gap-1"><b>Catégorie de projet</b><span class="text-red-700">*</span></label>
+            @if (selectedTmplLibrary()) {
+              <p-select
+                id="tmpl-category"
+                formControlName="template_projects_category"
+                [options]="mergedLibraries | tmplCategory : selectedTmplLibrary()!"
+                optionValue="uuid"
+                placeholder="Choisir une catégorie de projet"
+                emptyMessage="Aucune catégorie de projet disponible"
+                styleClass="custom-tmpl-dropdown"
+              >
+                <ng-template let-selectedItem #selectedItem>
+                  <div class="flex align-items-center gap-2">
+
+                    <p-avatar [image]="'https://ik.imagekit.io/klubr/Admin/Projects/Categories/' + selectedItem.icon"
+                              size="normal"></p-avatar>
+                    <div>{{ selectedItem.label }}</div>
+                  </div>
+                </ng-template>
+                <ng-template let-category #item>
+                  <div class="flex align-items-center gap-2">
+                    <p-avatar [image]="'https://ik.imagekit.io/klubr/Admin/Projects/Categories/' + category.icon"
+                              size="normal"></p-avatar>
+                    <div>{{ category.label }}</div>
+                  </div>
+                </ng-template>
+              </p-select>
+            }
+            <app-error-display [control]="entityForm.controls['klubr_membre']"
+                               [isSubmitted]="isSubmitted()"></app-error-display>
+          </div>
+        </div>
+
+      }
+      <!-- TITRE -->
+      <div class="flex flex-col gap-2">
+        <label for="titre" class="flex gap-1"><b> Titre </b><span class="text-red-700">*</span></label>
+        <input #firstInput id="titre" pInputText type="text" placeholder="Titre" formControlName="titre">
+        <app-error-display [control]="entityForm.controls['titre']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <!-- COUVERTURE -->
+      <div class="flex flex-col gap-2">
+        <label for="couverture" class="flex gap-1"><b> Image de couverture </b><span
+          class="text-red-700">*</span></label>
+        <input id="couverture" type="text" class="hidden" formControlName="couverture">
+        <app-form-media-update
+          [endpointPrefix]="'medias/klub-projet/'"
+          [itemUUID]="entitySignal()!.uuid"
+          [itemMediaLabel]="'Image de couverture'"
+          [control]="entityForm | formControl : 'couverture'"
+          [mediaField]="'couverture'"
+          [disabled]="formDisabled()"
+          activateCropperForImg="true"
+          #couverture
+        >
+          <p> Glissez votre fichier ici. </p>
+        </app-form-media-update>
+        <app-error-display [control]="entityForm.controls['couverture']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <!-- DESCRIPTION COURTE -->
+      <div class="flex flex-col gap-2">
+        <label class="flex flex-col lg:flex-row gap-1">
+          <span><b>Description courte</b>&nbsp;<span class="text-red-700">*</span></span>
+          <span class="text-gray-500 text-sm self-center leading-none">(Cette description apparaitra dans les listes de projets et ne doit pas excéder 500 caractères)</span>
+        </label>
+        <app-editor [control]="entityForm | formControl : 'descriptionCourte'"
+                    [placeholder]="'Décrivez plus succinctement votre projet'" [minChars]="50"
+                    [maxChars]="300"></app-editor>
+        <app-error-display [control]="entityForm.get('descriptionCourte')!"
+                           [handleWarnings]="true"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+
+      <!-- PRESENTATION DESCRIPTION -->
+      <div class="flex flex-col gap-2">
+        <label class="flex flex-col lg:flex-row gap-1">
+          <span><b>Description</b>&nbsp;<span class="text-red-700">*</span></span>
+          <span class="text-gray-500 text-sm self-center leading-none">(Cette description ne doit pas excéder 2000 caractères)</span>
+        </label>
+        <app-editor [control]="entityForm | formControl : 'presentationDescription'"
+                    [placeholder]="'Décrivez votre projet de manière complète'" [minChars]="50"
+                    [maxChars]="1000"></app-editor>
+        <app-error-display [control]="entityForm.get('presentationDescription')!"
+                           [handleWarnings]="true"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <!-- PORTEUR / MONTANT / DATE LIMITE -->
+      <div class="flex flex-col lg:flex-row flex-1 max-w-full justify-between gap-4">
+        <!-- PORTEUR -->
+        <div class="flex flex-col flex-1 gap-2">
+          <label for="creator" class="flex gap-1"><b>Porteur du projet</b><span class="text-red-700">*</span></label>
+          <p-select
+            id="creator"
+            formControlName="klubr_membre"
+            [options]="creatorOptions()"
+            optionValue="uuid"
+            placeholder="Choisir un porteur du projet"
+            emptyMessage="Aucun porteur de projet disponible"
+            styleClass="custom-tmpl-dropdown"
+          >
+            <ng-template let-selectedItem #selectedItem>
+              <div class="flex align-items-center gap-2">
+                <p-avatar [image]="selectedItem.avatar | media" size="normal" shape="circle"></p-avatar>
+                <div>{{ selectedItem.prenom }} {{ selectedItem.nom }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-creator #item>
+              <div class="flex align-items-center gap-2">
+                <p-avatar [image]="creator.avatar | media" size="normal" shape="circle"></p-avatar>
+                <div>{{ creator.prenom }} {{ creator.nom }}</div>
+              </div>
+            </ng-template>
+          </p-select>
+          <app-error-display [control]="entityForm.controls['klubr_membre']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <!-- MONTANT -->
+        <div class="flex flex-col flex-1 gap-2">
+          <label for="montantAFinancer" class="flex gap-1 max-w-full">
+            @if (tradePolicyPourcentage() > 0) {
+              <i class="pi pi-info-circle mr-0.5 relative top-[2px]"
+                 [pTooltip]="('Nous vous conseillons de majorer le montant de ' + tradePolicyPourcentage() + '% pour tenir compte des frais.' + (entityForm.get('montantAFinancer')?.value ? '\nLe montant net sera ici de ' + entityForm.get('montantAFinancer')?.value * (1 - (tradePolicyPourcentage() * 0.01)) + '€' : ''))"
+                 tooltipPosition="top"
+              ></i>
+            }
+            <b>Montant attendu</b><span class="text-red-700">*</span>
+
+            <!--<span class="text-gray-500 truncate text-sm self-center leading-none">(min. 0 / max. 100000)</span>-->
+          </label>
+          <input id="montantAFinancer"
+                 pInputText type="number"
+                 placeholder="1000€"
+                 formControlName="montantAFinancer">
+          <app-error-display [control]="entityForm.controls['montantAFinancer']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <!-- DATE LIMITE -->
+        <div class="flex flex-col flex-1 gap-2">
+          <label for="dateLimiteFinancementProjet" class="flex gap-1"><b>Date limite</b><span
+            class="text-red-700">*</span></label>
+          <app-date-picker
+            id="dateLimiteFinancementProjet"
+            [initValue]="this.entitySignal()?.dateLimiteFinancementProjet"
+            [control]="entityForm | formControl : 'dateLimiteFinancementProjet'"></app-date-picker>
+          <app-error-display [control]="entityForm.controls['dateLimiteFinancementProjet']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+      <!-- META DESCRIPTION -->
+      @if (this.editMode || this.fromTemplate()) {
+        <div class="flex flex-col gap-2">
+          <label for="meta-desc" class="flex flex-col lg:flex-row gap-1">
+            <span><b>Meta Description</b>&nbsp;<span class="text-red-700">*</span></span>
+            <span
+              class="text-gray-500 text-sm self-center leading-none">(Un court résumé qui apparaît dans les résultats de recherche.)</span>
+          </label>
+          <textarea
+            placeholder="Décrivez votre projet en quelques mots... (Objectif, bénéficiaires, etc.) Cette description ne doit pas excéder 160 caractères"
+            pTextarea
+            formControlName="metaDescription" id="meta-desc" cols="30" rows="4"></textarea>
+          <app-error-display [control]="entityForm.get('metaDescription')!"
+                             [handleWarnings]="true"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      }
+
+      @if (entitySignal()) {
+        @if ((entityForm | formArray  :'contenu').controls.length > 0) {
+          <hr class="flex flex-1 m-0">
+          <div class="flex flex-col gap-4">
+            <label for="meta-desc" class="flex flex-col lg:flex-row gap-1">
+              <b>Sections texte/image</b>
+            </label>
+            <ng-container formArrayName="contenu">
+              @for (contenuForm of (entityForm | formArray  :'contenu').controls; let i = $index; track contenuForm) {
+                <section-txt-img
+                  [itemUuid]="entitySignal()!.uuid"
+                  [formControlName]="i"
+                  [isSubmitted]="isSubmitted()"
+                  (removeItem)="removeContenu(i)"
+                  entityLabel="klub-projet"
+                  entityField="contenu"
+                  textareaPlaceholder="Titre de votre section"
+                  titlePlaceholder="Votre texte..."
+                  #contenu
+                >
+
+                </section-txt-img>
+              }
+            </ng-container>
+          </div>
+        }
+        @if ((entityForm | formArray  :'realisations').controls.length > 0) {
+          <hr class="flex flex-1 m-0">
+          <div class="flex flex-col gap-4">
+            <label for="meta-desc" class="flex flex-col lg:flex-row gap-1">
+              <b>Réalisations</b>
+            </label>
+            <ng-container formArrayName="realisations">
+              @for (realisationForm of (entityForm | formArray  :'realisations').controls; let i = $index; track realisationForm) {
+                <section-txt-img
+                  [itemUuid]="entitySignal()!.uuid"
+                  [formControlName]="i"
+                  [isSubmitted]="isSubmitted()"
+                  (removeItem)="removeRealisation(i)"
+                  entityLabel="klub-projet"
+                  entityField="realisations"
+                  textareaPlaceholder="Votre générosité nous a permis de mettre en oeuvre ce projet..."
+                  titlePlaceholder="Grâce à dons, nous avons pu..."
+                  #realisation
+                >
+                </section-txt-img>
+              }
+            </ng-container>
+          </div>
+        }
+      }
+
+      <hr class="flex flex-1 m-0">
+
+      <!-- CTA -->
+      <div class="flex justify-between sticky bottom-0 py-3 px-3 mx-[-1rem] bg-white">
+        <p-button label="Annuler" severity="secondary" (onClick)="resetForm()"
+                  [disabled]="entitySignal()?.status === 'deleted' || entityForm.pristine || sharedFacade.loading() || couverture.loading()"/>
+        <div class="flex items-center gap-2">
+          <p-button label="Enregistrer" type="submit" severity="primary"
+                    [disabled]="entitySignal()?.status === 'deleted' || entityForm.pristine"
+                    [loading]="sharedFacade.loading() || couverture.loading()"/>
+          <!--@if (permissionsService.memberIsAtLeastLeaderSignal() && this.editMode && !isTemplate()) {
+            <p-button label="Publier" type="submit" (click)="onSubmit(true)" severity="contrast"
+                      [disabled]="entitySignal()?.status === 'deleted' || !entityForm.valid || entityForm.pristine"
+                      [loading]="sharedFacade.loading() || couverture.loading()"/>
+          }-->
+        </div>
+      </div>
+
+    </form>
+    @if (entitySignal()?.uuid) {
+      <div class="speeddial-tooltip-project">
+        <p-toast></p-toast>
+        <p-speeddial
+          [model]="speedDialItems"
+          className="speeddial-right"
+          direction="up">
+        </p-speeddial>
+      </div>
+    }
+  }
+</div>

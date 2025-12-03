@@ -1,0 +1,21 @@
+<hr class="mt-5">
+<div class="mb-5">
+  <h3>Permissions:</h3>
+  @for (perm of permissionsArray; track perm.label) {
+    @if (perm.permission$ | async) {
+      @if (perm.bold) {
+        <div><b>{{ perm.label }}</b></div>
+      } @else {
+        <div>{{ perm.label }}</div>
+      }
+    }
+  }
+  @if (authFacade.authMode()) {
+    <h3>Mode Authentification:</h3>
+    <div>
+      <p-chip [label]="authFacade.authMode()"/>
+    </div>
+  }
+
+</div>
+<button pButton pRipple (click)="test()">test</button>

@@ -1,0 +1,116 @@
+<h1 #title class="admin-h1">Gérer les factures</h1>
+<!-- HEADER -->
+<app-list-header
+  [filtersList]="filtersList()"
+  #headerList
+  displaySearch="false"
+>
+  @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+    <app-invoice-filters
+      #filtersComponent
+      (filtersChanged)="filtersList.set($event); headerList.closeDrawer()"
+      [klubrInit]="klubrInit()"
+    >
+    </app-invoice-filters>
+  }
+</app-list-header>
+<!-- LIST -->
+<div class="app-listing">
+  @if (listing().length > 0 && pagination()) {
+    <p-table
+      [value]="listing()"
+      size="small"
+      class="app-table"
+      @fade>
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="denomination">Club
+            <p-sortIcon field="denomination"/>
+          </th>
+          <th>Période</th>
+          <th>Numéro Facture</th>
+          <th>Montant</th>
+          <th>Commission</th>
+          <th>Nb Projets</th>
+          <th>Nb Dons</th>
+          <th>PDF</th>
+          <th>Mail</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-invoice>
+        <tr>
+          <td class="max-w-[280px]">
+            <div class="table-content">
+              <app-klub-infos [klub]="invoice.klubr" [displaySport]="true"></app-klub-infos>
+            </div>
+          </td>
+          <td class="max-w-[129px]">
+        <span class="flex flex-col w-fit">
+          {{ invoice.billingPeriodSmall | date:"MM/yyyy" }}
+        </span>
+          </td>
+          <td class="max-w-[168px]">
+            {{ invoice.invoiceNumber }}
+          </td>
+          <td class="max-w-[80px]">{{ invoice.creditTotalAmount }}€</td>
+          <td class="max-w-[80px]">{{ invoice.commissionPercentage }}%</td>
+          <td class="max-w-[80px]">
+            @if (invoice | invoiceNbProjects; as nbProject) {
+              <span [pTooltip]="tooltipContent">{{ nbProject }}</span>
+              <ng-template #tooltipContent>
+                <div [innerHTML]="invoice | invoiceProjectsList"></div>
+              </ng-template>
+            } @else {
+              0
+            }
+          </td>
+          <td class="max-w-[80px]">{{ invoice.nbDonations }}</td>
+          <td class="max-w-12 text-center">
+            @if (invoice.invoicePdfPath) {
+              <i class="pi pi-check-circle text-[1.5rem] text-[#22C55E]" @flip></i>
+            } @else {
+              <i class="pi pi-times-circle text-[1.5rem] text-[#E3271B]" @flip></i>
+            }
+          </td>
+          <td class="max-w-12 text-center">
+            @if (invoice.firstSentEmailDate) {
+              <i class="pi pi-check-circle text-[1.5rem] text-[#22C55E]" @flip></i>
+            } @else {
+              <i class="pi pi-times-circle text-[1.5rem] text-[#E3271B]" @flip></i>
+            }
+          </td>
+          <td class="actions max-w-12">
+            <div class="flex gap-2">
+              <app-download-invoice (invoiceDownloaded)="invoice.invoicePdfPath = true"
+                                    [invoice]="invoice"></app-download-invoice>
+              <app-send-by-mail-invoice (emailSent)="invoice.firstSentEmailDate = true"
+                                        [invoice]="invoice"></app-send-by-mail-invoice>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- PAGINATION -->
+    <p-paginator
+      [rows]="pageSize()"
+      [rowsPerPageOptions]="[5,10,15,20]"
+      [totalRecords]="pagination()!.total"
+      [first]="0"
+      (onPageChange)="changePage($event)"
+      [showCurrentPageReport]="false"
+      [showPageLinks]="true"
+      [showJumpToPageDropdown]="false"
+      currentPageReportTemplate="Dons {first} à {last} parmis {totalRecords}"/>
+  } @else {
+    <!-- LOADING / NO RESULT -->
+    <app-list-loading-no-results
+      label="facture"
+      [hasFilters]="!!hasFilters()"
+      [loading]="sharedFacade.loading()"
+    ></app-list-loading-no-results>
+  }
+</div>
+
+

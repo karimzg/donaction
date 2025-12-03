@@ -1,0 +1,121 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubr_membres",
+  "info": {
+    "singularName": "klubr-membre",
+    "pluralName": "klubr-membres",
+    "displayName": "Klubr Membre",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "nom": {
+      "type": "string",
+      "required": true
+    },
+    "prenom": {
+      "type": "string"
+    },
+    "fonction": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "klubr_membres"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr"
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": [
+        "KlubMember",
+        "KlubMemberLeader",
+        "NetworkLeader",
+        "AdminEditor",
+        "Admin"
+      ],
+      "default": "KlubMember",
+      "required": true
+    },
+    "code": {
+      "type": "string",
+      "unique": true
+    },
+    "date_link_user": {
+      "type": "datetime"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "nom",
+      "required": false
+    },
+    "optin_mail_don_project": {
+      "type": "boolean",
+      "default": true
+    },
+    "optin_mail_don_klub_project": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "optin_mail_don_klub": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "email": {
+      "type": "email"
+    },
+    "tel": {
+      "type": "string"
+    },
+    "birthDate": {
+      "type": "date"
+    },
+    "optin_mail_invoice": {
+      "type": "boolean",
+      "default": false
+    },
+    "numLicence": {
+      "type": "string"
+    },
+    "isRelaunched": {
+      "type": "boolean",
+      "default": false,
+      "private": true
+    },
+    "anonymized": {
+      "type": "boolean",
+      "default": false,
+      "private": true
+    }
+  }
+}

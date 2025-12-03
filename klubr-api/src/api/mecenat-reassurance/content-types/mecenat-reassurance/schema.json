@@ -1,0 +1,63 @@
+{
+  "kind": "singleType",
+  "collectionName": "mecenat_reassurances",
+  "info": {
+    "singularName": "mecenat-reassurance",
+    "pluralName": "mecenat-reassurances",
+    "displayName": "Mécénat Réassurance",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "titre": {
+      "type": "string",
+      "default": "Comment fonctionne le mécénat ?",
+      "required": true
+    },
+    "bloc1Titre": {
+      "type": "string"
+    },
+    "bloc1Text": {
+      "type": "blocks"
+    },
+    "bloc2Titre": {
+      "type": "string"
+    },
+    "bloc2Text": {
+      "type": "blocks"
+    },
+    "bloc3Titre": {
+      "type": "string"
+    },
+    "bloc3Text": {
+      "type": "blocks"
+    },
+    "ctaLabel": {
+      "type": "string",
+      "default": "En savoir +"
+    },
+    "ctaUri": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "titre",
+      "required": true
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

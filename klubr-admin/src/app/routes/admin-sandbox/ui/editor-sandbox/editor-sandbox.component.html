@@ -1,0 +1,12 @@
+<h1 #title class="admin-h1">NGX Editor</h1>
+<div class="flex justify-center">
+  <p-card class="w-full">
+    <app-editor [control]="editorControl"></app-editor>
+
+    <ng-template #footer>
+      <div class="flex gap-3 mt-4 justify-end">
+        <p-button label="Enregistrer" severity="contrast" class="self-end" (click)="saveEditorContent()"/>
+      </div>
+    </ng-template>
+  </p-card>
+</div>

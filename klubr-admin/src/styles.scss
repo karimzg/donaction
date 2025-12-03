@@ -1,0 +1,150 @@
+@layer tailwind-base, primeng, klubr, tailwind-utilities;
+
+@layer tailwind-base {
+  //@tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+:root {
+  font-family: "Inter", sans-serif !important;
+  --font-family: "Inter", sans-serif !important;
+  --Black: #000000;
+  --red-700: var(--error-color);
+}
+
+/* You can add global styles to this file, and also import other style files */
+/* PrimeNG */
+body {
+  --surface-ground: #FFFFFF;
+  --Inactive-boutton: #777777;
+  --Inactive-text: #77777755;
+  --white: #FFFFFF;
+  --black: #000000;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+
+@import "assets/layout/layout.scss";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeicons/primeicons.css";
+@import "assets/theme/theme-fix";
+
+body {
+  overflow-x: hidden;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+label {
+  font-size: 1.07rem;
+
+  span {
+    font-size: 1rem;
+  }
+}
+
+.w-full-component {
+  .p-component:not(.p-iconwrapper) {
+    width: 100%;
+  }
+}
+
+.p-inplace {
+  .p-inplace-content {
+    width: 100%;
+    display: inline-block;
+  }
+
+  .p-inplace-display {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  .p-inputtext {
+    width: 100%;
+  }
+}
+
+.p-inputmask {
+  width: 100%;
+}
+
+.p-warn {
+  color: var(--orange-400);
+}
+
+/* Hack for display: grid */
+.display-grid {
+  display: grid;
+}
+
+.grid-member-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.grid-project-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.grid-user-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.card-box-shadow {
+  box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12);
+}
+
+@media screen and (max-width: 768px) {
+  .sticky-bottom-box-shadow {
+    box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.12);
+  }
+  .sticky-top-box-shadow {
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+  }
+}
+
+.notif-button-active {
+  display: flex;
+  align-items: center;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background-color: #FFF0C5;
+  color: #FFBB00;
+  border-radius: 32px;
+  cursor: pointer;
+}
+
+.notif-button-inactive {
+  display: flex;
+  align-items: center;
+  color: black;
+  cursor: pointer;
+}
+

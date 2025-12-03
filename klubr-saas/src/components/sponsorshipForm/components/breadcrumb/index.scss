@@ -1,0 +1,39 @@
+.breadcrumbContainer {
+  font-family: Maven-Pro-semibold, sans-serif;
+  align-self: start;
+  width: 100%;
+  font-size: 14px;
+
+  &.true {
+    display: flex;
+  }
+
+  &.false {
+    display: flex;
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  padding: 0 1.5rem 1.5rem;
+  max-width: 90%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: start;
+  gap: .25rem;
+  color: #D1D5DB;
+  margin-bottom: .5rem;
+
+  p {
+    all: unset;
+
+    &.active {
+      color: black;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    padding: .75rem 1.5rem 0.5rem;
+    line-height: 1;
+  }
+}

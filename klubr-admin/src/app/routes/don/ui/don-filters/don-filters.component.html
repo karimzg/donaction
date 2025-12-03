@@ -1,0 +1,87 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <form [formGroup]="filtersForm" class="flex gap-3 flex-row flex-wrap justify-between">
+    @if (permissionsService.memberIsAdminSignal()) {
+      <app-dropdown-klubr-filter
+        #klubrDropdown
+        class="filter-component"
+        (onItemUUIDSelected)="setKlubFilter($event!)"
+        [itemInit]="klubrInit() || undefined"
+      ></app-dropdown-klubr-filter>
+    }
+    <app-dropdown-project-filter
+      #projectDropdown
+      class="filter-component"
+      [miscItem]="'Dons non affectés (pour le Klub)'"
+      [misc2Item]="'Dons affectés (pour des projets)'"
+      [misc2ItemValue]="'notNull'"
+      (onItemUUIDSelected)="setProjectFilter($event!)"
+      [endpointSuffix]="klubrUuid() ? '&filters[klubr][uuid][$eq]=' + klubrUuid() : ''"
+      [itemInit]="projectInit()"
+      [miscItemInit]="miscProjectInit()"
+      [misc2ItemInit]="projectInit()?.uuid === 'notNull'"
+    ></app-dropdown-project-filter>
+
+    @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+      <app-dropdown-invoice-filter
+        #invoiceDropdown
+        class="filter-component"
+        [miscItem]="'Non facturé'"
+        (onItemUUIDSelected)="setInvoiceFilter($event!)"
+        [endpointSuffix]="klubrUuid() ? '&filters[klubr][uuid][$eq]=' + klubrUuid() : ''"
+        [itemInit]="invoiceInit()"
+        [miscItemInit]="miscInvoiceInit()"
+      >
+      </app-dropdown-invoice-filter>
+    }
+    <p-datepicker
+      #donationCalendar
+      class="calendar filter-component"
+      formControlName="donationDate"
+      [showIcon]="true"
+      [showButtonBar]="true"
+      [readonlyInput]="true"
+      selectionMode="range"
+      inputId="selectedDonationDate"
+      placeholder="Date"
+    ></p-datepicker>
+    <!-- TODO: styles for overlay panel + format placeholder -->
+    <!--<p-select
+      class="fake-dropdown filter-component"
+      [options]="[]"
+      [ngModel]=""
+      optionLabel="name"
+      [editable]="false"
+      (click)="op.toggle($event)"
+      [placeholder]="donationPrice.length > 0 ? 'Entre ' + donationPrice.join(' et ') + '€': 'Par montant'" />-->
+    <p-select
+      #donationDropdown
+      class="filter-component customDropdown"
+      [options]="donationStatusList()"
+      formControlName="donationStatus"
+      [checkmark]="true"
+      placeholder="Par statut de paiement"
+      optionLabel="label"
+      optionValue="code"
+      emptyMessage="Aucun statut disponible"
+      [showClear]="true"/>
+    @if (permissionsService.memberIsAdminSignal()) {
+      <p-select
+        #contributionDropdown
+        class="filter-component customDropdown"
+        [options]="contributionValues()"
+        formControlName="contribution"
+        [checkmark]="true"
+        placeholder="Contribution"
+        optionLabel="label"
+        optionValue="code"
+        [showClear]="true"/>
+    }
+    <div class="flex gap-3 justify-end filter-component">
+      <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end" severity="secondary"/>
+      <p-button (click)="applyFilters()" label="Filtrer" class="self-end" severity="contrast"/>
+    </div>
+  </form>
+  <!--    <p-overlayPanel #op>
+        <app-price-filter (priceRangeChanged)="onPriceRangeChange($event)"></app-price-filter>
+      </p-overlayPanel>-->
+</div>

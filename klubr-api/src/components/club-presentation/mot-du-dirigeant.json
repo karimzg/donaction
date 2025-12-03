@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_club_presentation_mot_du_dirigeants",
+  "info": {
+    "displayName": "Mot du Dirigeant",
+    "icon": "layer",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "citation": {
+      "type": "component",
+      "repeatable": false,
+      "component": "composant-atoms.citation"
+    },
+    "titre": {
+      "type": "string",
+      "default": "Mot du président",
+      "required": true
+    }
+  }
+}

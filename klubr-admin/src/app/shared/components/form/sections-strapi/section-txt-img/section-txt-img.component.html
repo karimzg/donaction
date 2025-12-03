@@ -1,0 +1,110 @@
+<p-accordion class="w-full flex customAccordeon" [formGroup]="form" value="0">
+  <p-accordion-panel value="0" class="w-full">
+    <p-accordion-header>
+      <ng-template #toggleicon let-active="active">
+        <!--        <i class="pi pi-chevron-down bg-surface-300 text-black rounded-full p-3"
+                   [ngClass]="{'pi-chevron-down': active, 'pi-chevron-up': !active}"></i>-->
+        <p-button icon="pi {{active ? 'pi-chevron-down' : 'pi-chevron-up'}}"
+                  [rounded]="true"
+                  [outlined]="false"
+                  severity="secondary"/>
+      </ng-template>
+      <div class="flex flex-1 mr-2 text-white">
+        <div class="flex flex-1 items-center">
+          <div class="flex gap-2 items-center">
+            <b
+              class="text-black"> {{ form.get('titre')?.value || 'Titre de votre réalisation' }} </b>
+          </div>
+          <div class="ml-auto">
+            <p-button
+              (onClick)="$event.preventDefault();$event.stopPropagation(); form.markAsDirty() ;removeItem.emit()"
+              icon="pi pi-trash"
+              [rounded]="true"
+              [outlined]="false"
+              [pTooltip]="'Supprimer la réalisation'"
+              tooltipPosition="top"
+              severity="danger"/>
+            @if (sendButton()) {
+              <i class="pi pi-send p-[.75rem] ml-2 rounded-full bg-[#000000] cursor-pointer"
+                 (click)="$event.preventDefault();$event.stopPropagation(); sendAction.emit()"
+                 [pTooltip]="'Envoyer un mail aux donateurs pour les informer de la réalisation du projet'"
+                 tooltipPosition="top"></i>
+            }
+          </div>
+        </div>
+      </div>
+    </p-accordion-header>
+    <p-accordion-content>
+      <div class="flex flex-col gap-5 py-4 px-5 border-solid border rounded-b border-[#D7D9DE] bg-[#F9FAFB]">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="titre" class="flex gap-1"><b> Titre </b><span
+              class="text-red-700">*</span></label>
+            <input id="titre" #firstInput formControlName="titre" pInputText type="text"
+                   [placeholder]="titlePlaceholder()">
+            <app-error-display [control]="form.controls['titre']" [isSubmitted]="isSubmitted()"
+            ></app-error-display>
+          </div>
+          <div class="flex gap-4 flex-wrap"
+               [ngClass]="{'flex-row-reverse': !form.get('imgToTheLeft')?.value}">
+            <!-- Description -->
+            <div class="flex flex-1 flex-col gap-2 sm:min-w-[500px]">
+              <label class="flex flex-wrap  gap-1">
+                <div class="flex"><b> Description </b><span class="text-red-700">*</span></div>
+                <span
+                  class="text-gray-500 text-sm self-center leading-none">(Ce texte ne doit pas excéder 750 caractères) </span>
+              </label>
+              <app-editor [control]="form | formControl : 'texte'"
+                          [placeholder]="textareaPlaceholder()" [minChars]="50"
+                          [maxChars]="750"></app-editor>
+              <app-error-display [control]="form.controls['texte']" [isSubmitted]="isSubmitted()"
+              ></app-error-display>
+            </div>
+            <!-- Image -->
+            <div class="flex flex-1 flex-col gap-2 min-w-[267px]">
+              <label for="image" class="flex gap-1"><b> Image </b><span
+                class="text-red-700">*</span></label>
+              <input id="image" type="text" class="hidden">
+              <div class="flex flex-col gap-4">
+                <app-form-media-update
+                  [itemUUID]="itemUuid()"
+                  [endpointPrefix]="'medias/dynamicZoneFiles/' + entityLabel() +'/'"
+                  [endpointSuffix]="'/' + entityField() +'/composant-atoms.section-texte-image/'"
+                  [mediaField]="'image'"
+                  [itemMediaLabel]="'Image'"
+                  [mediaPreviewWidth]="8"
+                  [control]="form | formControl : 'image'"
+                  activateCropperForImg="true"
+                  #image
+                >
+                  <p> Glissez votre fichier ici. </p>
+                </app-form-media-update>
+                <app-error-display [control]="form.controls['image']" [isSubmitted]="isSubmitted()"
+                ></app-error-display>
+                <div class="flex gap-4 align-items-center flex-wrap">
+                  <label for="imgToTheLeft" class="flex gap-1"><b>Placement de l'image</b><span
+                    class="text-red-700">*</span></label>
+                  <p-selectButton
+                    id="imgToTheLeft"
+                    class="shrink-0 basis-auto"
+                    [options]="[{label: 'Gauche', icon: 'pi pi-arrow-left', value: false}, {label: 'Droite', icon: 'pi pi-arrow-right',value: true}]"
+                    formControlName="imgToTheLeft"
+                    optionLabel="label"
+                    optionValue="value">
+                    <ng-template let-item pTemplate>
+                      <i [class]="item.icon"></i>
+                    </ng-template>
+                  </p-selectButton>
+                  <app-error-display [control]="form.controls['imgToTheLeft']" [isSubmitted]="isSubmitted()"
+                  ></app-error-display>
+                  <div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-accordion-content>
+  </p-accordion-panel>
+</p-accordion>

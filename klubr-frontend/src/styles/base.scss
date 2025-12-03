@@ -1,0 +1,17 @@
+html {
+  @apply text-base;
+  scroll-behavior: smooth;
+
+}
+
+body {
+  @apply bg-body font-primary font-normal leading-relaxed text-text;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  * {
+    word-break: break-word;
+  }
+}
+

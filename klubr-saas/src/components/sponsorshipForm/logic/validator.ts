@@ -1,0 +1,184 @@
+import {
+  DEFAULT_VALUES,
+  FORM_CONFIG,
+  isBeingFilled,
+  triggerValidation
+} from './useSponsorshipForm.svelte';
+import eventBus from '../../../utils/eventBus';
+import { EVENT_CONTEXT } from './initListeners';
+
+const stringRegExp = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
+const stringWithoutNumbersRegExp = /[^A-Za-z\s'-]/;
+const emailRegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const postalCodeRegExp = /^(([0-8][0-9])|(9[0-5]))[0-9]{3}$/;
+
+const sirenRegExp = /^\d{9}$/;
+
+const validateAmount = (value: number, fieldName: string) => {
+  if (value === 0 || isNaN(value)) return 'Ce champ est obligatoire';
+  if (isNaN(value) || String(value).includes('e')) return `${fieldName} non valide`;
+  if (value < 10) return `Le montant minimum est de 10 €`;
+  return '';
+};
+
+const validateSiren = (value: number) => {
+  if (isNaN(value) || String(value).includes('e')) return `Siren non valide`;
+  if (!sirenRegExp.test(value.toString()))
+    return `Le numéro Siren doit contenir exactement 9 chiffres`;
+  return '';
+};
+
+const validateTrue = (value: boolean) => {
+  if (!value) return 'Ce champ est obligatoire';
+  return '';
+};
+
+const validateDateMajor = (value: string) => {
+  const birthdate = new Date(String(value));
+  const today = new Date();
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const monthDifference = today.getMonth() - birthdate.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+    age--;
+  }
+  if (age < 18) {
+    return 'Vous devez être majeur(e)';
+  }
+  if (age > 110) {
+    return 'Date non valide';
+  }
+  return '';
+};
+
+const validateDate = (value: string, fieldName: string) => {
+  const temp = new Date(String(value));
+  if (String(value).trim().length === 0) return 'Ce champ est obligatoire';
+  if (isNaN(Number(temp))) return `${fieldName} non valide`;
+  return '';
+};
+
+function validateString(value: string, fieldName: string, regExp: RegExp) {
+  if (regExp?.test(value.trim())) return `${fieldName} non valide`;
+  return '';
+}
+
+function validateEmail(value: string) {
+  if (!emailRegExp?.test(value.trim())) return `E-mail non valide`;
+  return '';
+}
+
+function validatePostalCode(value: string) {
+  if (!postalCodeRegExp?.test(value.trim())) return `Code postal non valide`;
+  return '';
+}
+
+function validateRequired(value: string) {
+  if (value.trim().length < 2) return 'Ce champ est obligatoire';
+  return '';
+}
+
+function eighteenYearsAgo() {
+  const now = new Date();
+  now.setFullYear(now.getFullYear() - 18);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Les mois sont de 0 à 11, donc ajoutez 1 et formatez
+  const day = String(now.getDate()).padStart(2, '0'); // Formatez le jour avec un zéro initial si nécessaire
+  return `${year}-${month}-${day}`;
+}
+
+const dirtyKeys = [
+  'E-mail',
+  'Numéro de rue',
+  'Nom de rue',
+  'Raison sociale',
+  'Siren',
+  'Forme juridique',
+  'Prénom',
+  'Nom',
+  'Ville',
+  'Date de naissance',
+  'Code postal'
+];
+
+function validator(
+  node: HTMLInputElement,
+  {
+    validateFunctions,
+    fieldName,
+    regExp
+  }: {
+    validateFunctions: [Function];
+    fieldName: string;
+    regExp?: RegExp;
+  }
+) {
+  isBeingFilled.set(true);
+
+  function validate(correct?: true) {
+    let message: '';
+    for (const fn of validateFunctions) {
+      message = fn(node.type === 'checkbox' ? node.checked : node.value, fieldName, regExp);
+      if (message) break;
+    }
+    if (fieldName === 'E-mail' && !message) {
+      eventBus.emit(`${EVENT_CONTEXT}emailUpdated`, node.value);
+    }
+
+    if (dirtyKeys.includes(fieldName)) {
+      if (FORM_CONFIG.myLast && !FORM_CONFIG.dirty) {
+        FORM_CONFIG.dirty = Object.keys(FORM_CONFIG.myLast).some((_) => {
+          return FORM_CONFIG.myLast[_] !== DEFAULT_VALUES[_];
+        });
+      }
+    }
+    if (!correct) {
+      node.style.border = message ? `1px red solid` : '';
+      if (node.type === 'checkbox' && node.nextElementSibling?.nextElementSibling) {
+        node.nextElementSibling.nextElementSibling.textContent = message;
+      } else if (node.nextElementSibling) {
+        node.nextElementSibling.textContent = message;
+      }
+    } else if (!message) {
+      node.style.border = '';
+      if (node.type === 'checkbox' && node.nextElementSibling?.nextElementSibling) {
+        node.nextElementSibling.nextElementSibling.textContent = '';
+      } else if (node.nextElementSibling) {
+        node.nextElementSibling.textContent = '';
+      }
+    }
+  }
+
+  node.addEventListener('blur', () => validate());
+  node.addEventListener('input', () => validate(true));
+
+  triggerValidation.subscribe((_) => {
+    if (_ > 0) {
+      validate();
+    }
+  });
+
+  return {
+    destroy() {
+      node.removeEventListener('blur', () => validate());
+      node.removeEventListener('input', () => validate(true));
+    }
+  };
+}
+
+export {
+  validator,
+  emailRegExp,
+  stringRegExp,
+  validateDate,
+  validateTrue,
+  validateEmail,
+  validateSiren,
+  validateString,
+  validateAmount,
+  validateRequired,
+  eighteenYearsAgo,
+  validateDateMajor,
+  validatePostalCode,
+  stringWithoutNumbersRegExp
+};

@@ -1,0 +1,21 @@
+.tab-content-sidebar {
+  p {
+    margin: unset;
+  }
+
+  .tableList {
+    th {
+      background-color: #F8FAFC;
+      font-weight: 500;
+    }
+  }
+
+  .detailsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    @media screen and (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}

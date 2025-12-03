@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_club_presentation_history_items",
+  "info": {
+    "displayName": "history_item",
+    "icon": "atlas",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "description": {
+      "type": "text"
+    },
+    "title": {
+      "type": "string"
+    }
+  }
+}

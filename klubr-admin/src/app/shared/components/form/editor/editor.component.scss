@@ -1,0 +1,59 @@
+
+.app-editor {
+  box-shadow: var(--p-form-field-shadow);
+  border-radius: var(--p-form-field-border-radius);
+
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+app-editor {
+  &.ng-dirty.ng-invalid, &.ng-touched.ng-invalid {
+    .app-editor, .NgxEditor__MenuBar {
+      --ngx-editor-border-color: var(--p-form-field-invalid-border-color);
+    }
+  }
+}
+
+.NgxEditor__MenuBar {
+  --ngx-editor-menubar-bg-color: #E2E8F0;
+  --ngx-editor-border-color: #CBD5E1;
+  border-top-left-radius: var(--ngx-editor-border-radius);
+  border-top-right-radius: var(--ngx-editor-border-radius);
+  border: 1px solid var(--ngx-editor-border-color);
+  border-bottom: 0;
+
+  .NgxEditor__MenuItem--NbChars {
+    flex: 1 0 auto;
+    justify-content: end;
+    color: #64748B;
+    font-size: 12px;
+
+    &__Limit {
+      color: #DD1F2A;
+    }
+  }
+}
+
+ngx-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+
+  .NgxEditor {
+    flex: 1;
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    &__Content {
+      padding: 1rem;
+      font-family: var(--font-family), "Arial Narrow", sans-serif;
+      font-feature-settings: var(--font-feature-settings, normal);
+      font-size: 1rem;
+      color: #334155;
+    }
+  }
+}

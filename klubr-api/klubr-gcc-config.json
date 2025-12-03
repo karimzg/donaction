@@ -1,0 +1,14 @@
+{
+  "type": "service_account",
+  "project_id": "klubr-406915",
+  "private_key_id": "f47c860ab9eddacd7fef160c56d9f12197d3c583",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDbU/GGM3pEh3Tw\npSeXOo0etdnDQkuCHKLaiCh5h5MVU8zrYbRKilZRH0lSOpCZlgIFeRZhVO/7CpJN\n+gDWfoX/B0Ok4nWTUQKJbmic+w+9H/W74OICeUZUxUm9ORmPKxUs/nwVu4eGKfJg\n6DMkWDQZFbRB2MYViEi0xzlYgnkZEEwrL8Or7pfqR9GEUN+v05Whzwk3H5/bwTAK\nYZfv7cxsYPDIRSOoaqhyF/TV7aKqtvsA3sYbU0Epdvbg4YWkejLIygGhxjBP/3tt\nz6btmHrt7toTirf54nJoXiidR9VArnJn4Lnvkm/STNgrTO/VB9thrn9UYQQdlISY\nrz7+MZa5AgMBAAECggEAIl6vNJaQjHilrKhU4e/8+VkJ/P1Ak+0k4BYCMbk7JVZy\ngFhZRm0TRbcfaFFhI5BMVMs65JnI2ZA4iRuqUfKV0Pc0dHxAbIt/WEYDAsadGsgN\nXBnLkROsH9Ci05JFHRhlQx3GGCnA/RdJskHw8bsYvu2Vx9POhsVKj3nA1Mvtai3H\nW6tHOtDjaj5305siv5nSwkpHkFrJZ2AtjSAVswuIIRyO0DU2OogtjwevyNcLQZMf\nRrp1+edNQMbwlHK7aN1t2VDRJKV3CD1J5YxjZic1ueilkM8QKZMIdJARvQ/zl0Yh\nQmog5Hk2PSpn7/dZXXxLP7L+VHy3cTFh2hdq5o1pYQKBgQDwn8nk3HSL6lroK2Dz\nyrerGue2qtNUFXNU75yU3hmGoyLNr9eI//n/ERxi0jYvqKKJjXLCzNvN9kxZvT2x\n/Xe8tDhYCogDCau40UIokRSa6s93/k9b+n4kFKHZ1d1e7FazYLAEA3+O6rzJp3SS\nXY9v7hA76OfdTYS3NQMjWY2UTQKBgQDpV8iCR3jk/Fa/6rxp24XYxrDV8n1ofIfc\n3egwNYs1EanSz72PGSZTv9+hwVchCGbhYG8i2t+Q6S2rwv2Efo6h+6zfDC9g1MB8\n/pu6bAEpOEHx7NWiE42I0NscJiVl8mL/+WVfqOr6RVJo5BTBQOOJnQpyGJcEERm/\nPnMZplPyHQKBgC2UNuwRDkqKg9nCjcTgO1Y/7HBff1RIE+ac1K4mO/OS5z7K9irP\nQg2csiHN69GvQcqIbpqTr3ceFmxROmSCvLGT+bBDnmvk4xBJIx0IDj0iCVaTZ3jm\nxAoVlmrq5dnbLrkfsXexKfJqaIRSIfSvoEH1eEHA5lq3GlKRyhxiFD1pAoGBANwR\nx3BfWfyUpHhSOaqYuE5vbb4J+g6+TCCZRO+awBSn+QNym7PHI2efMZnLz5G+69Cp\nc4dq56ky0bkJqLH57imFRFAEnPZ1EKmSM2sJi7rFbSRumjlGuZiMaenNbD4O8SG7\no8kpdZveH0//tDdjLHXQH1bmLB9QxXihvEo3nTpdAoGBAJgwJ7x4X2UGYHosuKh7\njifbJoizLHBzLCtMdR5EDF68LUfcLRE2fTfxBe9W+pqIp7dHNCM0oAApitv+3T+p\nf8efrZXnVxdcz3FDBTFhVyB9se2KE18I/GgszyzMh78PkG5BFdUelYM3pzA4VQBv\nHpjDU1IOe9FkyEAFzPUyEmPn\n-----END PRIVATE KEY-----\n",
+  "client_email": "klubr-service-account@klubr-406915.iam.gserviceaccount.com",
+  "client_id": "113016910761479239328",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/klubr-service-account%40klubr-406915.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+

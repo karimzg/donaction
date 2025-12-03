@@ -1,0 +1,70 @@
+@use '../../../../../../styles/main';
+
+.step2 {
+  width: 100%;
+
+  small {
+    font-size: small;
+
+    &.description {
+      margin: 0 1rem;
+    }
+  }
+
+  form {
+    .inputField {
+      gap: .3rem;
+
+      * {
+        font-size: 14px;
+      }
+
+      input, select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid;
+        height: 36px;
+      }
+
+      input:disabled {
+        background-color: #f0f0f0;
+        color: #a0a0a0;
+        cursor: not-allowed;
+      }
+
+      &.proLogoContainer {
+        label {
+          width: fit-content;
+          position: relative;
+
+          .picker {
+            cursor: pointer;
+            width: 85px;
+            height: 85px;
+            background-color: black;
+            border-radius: 100%;
+
+            .pen {
+              position: absolute;
+              width: 39px;
+              height: 39px;
+              border-radius: 100%;
+              background: #e4e4e5;
+              bottom: -10%;
+              right: 50%;
+            }
+
+            img {
+              &.true {
+                border-radius: 100%;
+                object-fit: cover;
+                filter: invert(0%);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+}

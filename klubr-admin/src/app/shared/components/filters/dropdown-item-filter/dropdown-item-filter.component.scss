@@ -1,0 +1,20 @@
+.p-dropdown-item-filter {
+  .p-select-header {
+    .p-inputtext {
+      padding-top: var(--p-form-field-sm-padding-y);
+      padding-bottom: var(--p-form-field-sm-padding-y);
+    }
+
+    .p-inputgroupaddon {
+      .p-button {
+        padding: var(--p-form-field-sm-padding-y) var(--p-form-field-sm-padding-x);
+        text-decoration: none;
+        height: auto;
+
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <form [formGroup]="filtersForm" class="flex gap-3 flex-col">
+    <div class="flex gap-3 flex-col md:flex-row md:flex-wrap">
+      @if (permissionsService.memberIsAdminSignal()) {
+        <app-dropdown-klubr-filter
+          #klubrDropdown
+          class="filter-component"
+          (onItemUUIDSelected)="setKlubFilter($event!)"
+          [itemInit]="klubrInit() || undefined"
+        >
+        </app-dropdown-klubr-filter>
+      }
+      @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+        <app-dropdown-klub-membre-filter
+          #membersDropdown
+          (onItemUUIDSelected)="setMemberFilter($event!)"
+          [endpointSuffix]="klubrUuid() ? '&filters[klubr][uuid][$eq]=' + klubrUuid() : ''"
+          [endpointPopulate]="['avatar']"
+          [customItem]="membersDropdownItem()"
+          class="filter-component"
+        ></app-dropdown-klub-membre-filter>
+      }
+
+      <p-select
+        class="filter-component"
+        [options]="projectIsFromTmpl()"
+        formControlName="isFromTemplate"
+        [showClear]="true"
+        placeholder="Modèle de base de projet"
+        optionLabel="label"
+        optionValue="value"
+      />
+      @if (permissionsService.memberIsAtLeastNetworkSignal()) {
+        <p-select
+          class="filter-component"
+          [options]="projectIsTmpl()"
+          formControlName="isTemplate"
+          [showClear]="true"
+          placeholder="Type de projet"
+          optionLabel="label"
+          optionValue="value"
+        />
+      }
+
+      <p-multiselect
+        class="filter-component"
+        [options]="status()"
+        formControlName="status"
+        [showClear]="true"
+        display="chip"
+        placeholder="Par status"
+        optionLabel="label"
+        optionValue="value"
+        emptyMessage="Aucun status disponible"
+      />
+
+      @if (permissionsService.memberIsAdminSignal()) {
+        <app-dropdown-project-libraries-filter
+          #projectLibrariesDropdown
+          (onItemUUIDSelected)="setProjectLibraryFilter($event!)"
+          class="filter-component"
+          [endpointPopulate]="['klubr.logo']"
+          [customItem]="projectLibrariesDropdownItem()"
+        ></app-dropdown-project-libraries-filter>
+      }
+    </div>
+    <div class="flex gap-3 justify-between  md:justify-end">
+      <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end" severity="secondary"
+                [disabled]="filtersForm.pristine"/>
+      <p-button (click)="applyFilters()" type="Appliquer" label="Filter" class="self-end" severity="contrast"
+                [disabled]="filtersForm.pristine"/>
+    </div>
+  </form>
+</div>
+

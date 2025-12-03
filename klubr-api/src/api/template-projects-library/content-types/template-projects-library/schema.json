@@ -1,0 +1,96 @@
+{
+  "kind": "collectionType",
+  "collectionName": "template_projects_libraries",
+  "info": {
+    "singularName": "template-projects-library",
+    "pluralName": "template-projects-libraries",
+    "displayName": "Template Projects Library",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "template_projects_categories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::template-projects-category.template-projects-category",
+      "mappedBy": "template_projects_library"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klubr.klubr",
+      "inversedBy": "template_projects_libraries"
+    },
+    "weight": {
+      "type": "integer",
+      "default": 0
+    },
+    "sportType": {
+      "type": "enumeration",
+      "enum": [
+        "Autre",
+        "Aïkido",
+        "Aquatique",
+        "Athlétisme",
+        "Badminton",
+        "Baseball",
+        "Basket-ball",
+        "Billard",
+        "Boxe",
+        "Canöe",
+        "Course à pied",
+        "Danse",
+        "Equitation",
+        "Escalade",
+        "Escrime",
+        "Fléchettes",
+        "Football",
+        "Golf",
+        "Gymnastique",
+        "Handball",
+        "Hockey",
+        "Hockey sur glace",
+        "Judo",
+        "Karaté",
+        "Lutte",
+        "Moto",
+        "Natation",
+        "Nautisme",
+        "Patinage",
+        "Pêche",
+        "Pétanque",
+        "Planche à voile",
+        "Plongée sous marine",
+        "Ski alpin",
+        "Ski de fond",
+        "Ski nautique",
+        "Spéléologie",
+        "Sports automobiles",
+        "Taekwondo",
+        "Tennis",
+        "Tennis de table",
+        "Tir à l'arc",
+        "Triathlon",
+        "Vélo/BMX/VTT",
+        "Volleyball",
+        "Waterpolo",
+        "Trail"
+      ]
+    }
+  }
+}

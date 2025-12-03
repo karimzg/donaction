@@ -1,0 +1,44 @@
+.p-dialog {
+  --p-dialog-header-padding: 0.5rem 1rem 0.5rem 1.5rem;
+  //--p-confirmdialog-icon-color
+  --p-confirmdialog-icon-size: 1.5rem;
+
+  .p-dialog-header {
+    border-bottom: 1px #E2E8F0 solid;
+    margin-bottom: 2rem;
+    min-height: 4rem;
+
+    .p-dialog-title {
+      font-weight: 700;
+    }
+  }
+
+  &.footer-border {
+    .p-dialog-footer {
+      border-top: 1px #E2E8F0 solid;
+    }
+  }
+
+  .p-dialog-mask.p-component-overlay {
+    background-color: red;
+  }
+
+  &.overflow-visible {
+    @media (min-width: 768px) {
+      .p-dialog-content {
+        overflow: visible !important;
+      }
+    }
+  }
+
+  .p-dialog-header-icons {
+    position: absolute;
+    right: 2rem;
+  }
+
+  &-title-align-left {
+    .p-dialog-header {
+      justify-content: start;
+    }
+  }
+}

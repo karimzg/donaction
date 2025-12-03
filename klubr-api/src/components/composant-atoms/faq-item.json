@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_club_presentation_faq_items",
+  "info": {
+    "displayName": "FAQ - Question",
+    "icon": "question",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "question": {
+      "type": "string",
+      "required": true
+    },
+    "answer": {
+      "type": "blocks",
+      "required": true
+    }
+  }
+}

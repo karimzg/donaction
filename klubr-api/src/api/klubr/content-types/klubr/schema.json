@@ -1,0 +1,267 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubrs",
+  "info": {
+    "singularName": "klubr",
+    "pluralName": "klubrs",
+    "displayName": "Klubr",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "import-export-entries": {
+      "idField": "slug"
+    }
+  },
+  "attributes": {
+    "denomination": {
+      "type": "string",
+      "required": true
+    },
+    "federation": {
+      "type": "string"
+    },
+    "siegeSocialAdresse": {
+      "type": "string"
+    },
+    "siegeSocialAdresse2": {
+      "type": "string"
+    },
+    "siegeSocialCP": {
+      "type": "string",
+      "maxLength": 5
+    },
+    "siegeSocialVille": {
+      "type": "string"
+    },
+    "nbMembres": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "published",
+        "deleted"
+      ],
+      "default": "draft",
+      "required": true
+    },
+    "siegeSocialPays": {
+      "type": "string",
+      "default": "France"
+    },
+    "associationType": {
+      "type": "enumeration",
+      "enum": [
+        "Sport",
+        "Aide à la personne",
+        "Humanitaire",
+        "Aide animale",
+        "Religion"
+      ],
+      "default": "Sport",
+      "required": true
+    },
+    "sportType": {
+      "type": "enumeration",
+      "enum": [
+        "Autre",
+        "Aïkido",
+        "Aquatique",
+        "Athlétisme",
+        "Aviron",
+        "Badminton",
+        "Baseball",
+        "Basket-ball",
+        "Billard",
+        "Boxe",
+        "Canöe",
+        "Char à voile",
+        "Course à pied",
+        "Danse",
+        "Equitation",
+        "Escalade",
+        "Escrime",
+        "Fléchettes",
+        "Football",
+        "Golf",
+        "Gymnastique",
+        "Handball",
+        "Hockey",
+        "Hockey sur glace",
+        "Judo",
+        "Karaté",
+        "Lutte",
+        "Moto",
+        "Natation",
+        "Nautisme",
+        "Patinage",
+        "Pêche",
+        "Pétanque",
+        "Planche à voile",
+        "Plongée sous marine",
+        "Ski alpin",
+        "Ski de fond",
+        "Ski nautique",
+        "Spéléologie",
+        "Sports nautiques",
+        "Sports automobiles",
+        "Surf",
+        "Taekwondo",
+        "Tennis",
+        "Tennis de table",
+        "Tir à l'arc",
+        "Triathlon",
+        "Vélo/BMX/VTT",
+        "Voile",
+        "Volleyball",
+        "Waterpolo",
+        "Trail"
+      ],
+      "default": "Football"
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "klubr_house": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr-house.klubr-house",
+      "inversedBy": "klubr"
+    },
+    "nbBenevoles": {
+      "type": "integer"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "denomination",
+      "required": true
+    },
+    "slogan": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "acronyme": {
+      "type": "string",
+      "required": true,
+      "maxLength": 8
+    },
+    "code": {
+      "type": "string",
+      "unique": true
+    },
+    "codeLeader": {
+      "type": "string",
+      "unique": true
+    },
+    "template_projects_libraries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::template-projects-library.template-projects-library",
+      "mappedBy": "klubr"
+    },
+    "donationEligible": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "trade_policy": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::trade-policy.trade-policy"
+    },
+    "klubr_document": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr-document.klubr-document",
+      "mappedBy": "klubr"
+    },
+    "legalStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Association Loi 1901",
+        "Association Loi 1905",
+        "Association Loi 1908",
+        "Associations professionnelles nationales de militaires",
+        "Associations syndicales de propriétaires",
+        "Collectivités territoriales",
+        "Comité d'entreprise",
+        "CSE",
+        "Fabrique d'église",
+        "Fondation",
+        "Fonds de dotation",
+        "Fonds de pérennité",
+        "GIE",
+        "GIP",
+        "Mense curiale",
+        "SCIC",
+        "SCOP",
+        "Autre"
+      ]
+    },
+    "googlePlace": {
+      "type": "json"
+    },
+    "siegeSocialDepartement": {
+      "type": "string"
+    },
+    "siegeSocialRegion": {
+      "type": "string"
+    },
+    "webSite": {
+      "type": "string"
+    },
+    "hasRescritFiscal": {
+      "type": "boolean",
+      "default": false
+    },
+    "klubr_info": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr-info.klubr-info",
+      "mappedBy": "klubr"
+    },
+    "klubYearCreation": {
+      "type": "integer"
+    },
+    "federationLink": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::federation.federation",
+      "inversedBy": "klubrs"
+    },
+    "klubr_subscriptions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klubr-subscription.klubr-subscription",
+      "mappedBy": "klubr"
+    },
+    "klubrsAffiliateds": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::klubr.klubr",
+      "inversedBy": "klubrAffiliations"
+    },
+    "klubrAffiliations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::klubr.klubr",
+      "mappedBy": "klubrsAffiliateds"
+    }
+  }
+}

@@ -1,0 +1,247 @@
+---
+description: Next.js 14 rendering strategies including Static Site Generation (SSG), Server-Side Rendering (SSR), Incremental Static Regeneration (ISR), streaming, and Suspense patterns. Critical for optimizing page load performance and choosing the right rendering strategy per route.
+globs: ["klubr-frontend/src/app/**/*.{ts,tsx}"]
+alwaysApply: false
+---
+
+# Next.js 14 Rendering Strategies
+
+## Static Rendering (SSG)
+
+- Default rendering mode in Next.js 14
+- Generates HTML at build time
+- Use `generateStaticParams` for dynamic routes
+- Fastest performance for end users
+- Best for content that changes infrequently
+
+```typescript
+// @klubr-frontend/src/app/[slug]/page.tsx
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const slugsResp = await getAllClubsSlugs(undefined, true);
+  return slugsResp;
+}
+
+export default async function club({ params }: { params: { slug: string } }) {
+  // Static at build time
+  const klub = await getClubDetailBySlug(params.slug);
+  return <ClubPage klub={klub} />;
+}
+```
+
+## Dynamic Rendering (SSR)
+
+- Triggers when using dynamic functions
+- `cookies()`, `headers()`, `searchParams` force SSR
+- Renders HTML on each request
+- Use for authenticated or personalized content
+- Higher server load than static
+
+```typescript
+// @klubr-frontend/src/app/[slug]/page.tsx
+export default async function club({ params }) {
+  const cookieStore = cookies(); // Forces dynamic rendering
+  const isPreview = !!cookieStore.get('isPreviewMode')?.value;
+
+  const klub = await getClubDetailBySlug(params.slug, isPreview);
+  return <ClubPage klub={klub} />;
+}
+```
+
+## Force Dynamic Configuration
+
+- Use `export const dynamic = 'force-dynamic'`
+- Use `export const revalidate = 0` to disable caching
+- Set per page or layout
+- Opt-out of static optimization when needed
+- Use for real-time data requirements
+
+```typescript
+// Force SSR for entire route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function Page() {
+  // Always renders on demand
+}
+```
+
+## Incremental Static Regeneration (ISR)
+
+- Revalidate static pages after deployment
+- Use revalidation tags for on-demand updates
+- Set time-based revalidation with `revalidate` export
+- Update specific pages without full rebuild
+- Balance freshness and performance
+
+```typescript
+// Time-based ISR
+export const revalidate = 3600; // Revalidate every hour
+
+// Tag-based ISR
+export default async function club({ params }) {
+  const klub = await getClubDetailBySlug(params.slug);
+  // Revalidate via API: revalidateTag('club')
+  return <ClubPage klub={klub} />;
+}
+```
+
+## On-Demand Revalidation
+
+- Trigger revalidation via API route
+- Use `revalidatePath()` or `revalidateTag()`
+- Call after data mutations in CMS
+- Revalidate specific pages not entire site
+- Use tags for fine-grained control
+
+```typescript
+// @klubr-frontend/src/app/api/revalidate/route.ts
+import { revalidatePath, revalidateTag } from 'next/cache';
+
+export async function POST(request: Request) {
+  const { tag, path } = await request.json();
+
+  if (tag) {
+    revalidateTag(tag);
+  }
+
+  if (path) {
+    revalidatePath(path);
+  }
+
+  return Response.json({ revalidated: true });
+}
+```
+
+## Streaming & Suspense
+
+- Not currently used in klubr-frontend
+- Stream slow components with Suspense
+- Use `loading.tsx` for route-level loading
+- Stream non-critical data after initial load
+- Show instant feedback to users
+
+```typescript
+// Future pattern with Suspense
+import { Suspense } from 'react';
+
+export default function Page() {
+  return (
+    <>
+      <Header />
+      <Suspense fallback={<LoadingSkeleton />}>
+        <SlowComponent />
+      </Suspense>
+    </>
+  );
+}
+```
+
+## Route Segment Config
+
+- Configure rendering per route segment
+- Set `dynamic`, `revalidate`, `fetchCache`
+- Export from page or layout files
+- Inherits from parent layouts
+- Override at most specific level
+
+```typescript
+// page.tsx
+export const dynamic = 'force-static'; // or 'force-dynamic', 'error', 'auto'
+export const revalidate = false; // or 0, number
+export const fetchCache = 'default-cache'; // or 'force-cache', 'force-no-store'
+```
+
+## Preview Mode
+
+- Use cookie to enable draft content preview
+- Check `isPreviewMode` cookie in Server Components
+- Bypass cache when preview enabled
+- Fetch draft data from CMS
+- Show preview indicator to editors
+
+```typescript
+// @klubr-frontend/src/app/[slug]/page.tsx
+const cookieStore = cookies();
+const isPreview = !!cookieStore.get('isPreviewMode')?.value;
+
+const klub = await getClubDetailBySlug(
+  params.slug,
+  isPreview, // Fetch draft content
+  cookieStore.toString(),
+);
+```
+
+## Metadata Generation
+
+- Export `metadata` object for static metadata
+- Use `generateMetadata` for dynamic metadata
+- Async function with params and searchParams
+- Merge with parent metadata automatically
+- Return typed Metadata object
+
+```typescript
+// @klubr-frontend/src/app/[slug]/page.tsx
+export async function generateMetadata({
+  params
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const klub = await getClubDetailBySlug(params.slug);
+
+  return {
+    title: klub.denomination,
+    description: klub.metaDescription,
+    openGraph: {
+      title: klub.denomination,
+      description: klub.metaDescription,
+      url: `${SITE_URL}/${params.slug}`,
+      images: [{ url: klub.logo.url }],
+    },
+  };
+}
+```
+
+## Hybrid Rendering Strategy
+
+- Mix SSG and SSR per route
+- Static for public pages like homepage
+- Dynamic for user-specific pages like `/profile`
+- ISR for content that updates periodically
+- Client-side for real-time interactive features
+
+```typescript
+// Static homepage
+// app/(main)/page.tsx
+export default async function HomePage() {
+  const data = await getHomePageData();
+  return <Home data={data} />;
+}
+
+// Dynamic profile page
+// app/(main)/profile/page.tsx
+export default async function ProfilePage() {
+  const session = await getServerSession();
+  const user = await me(cookies().toString());
+  return <Profile user={user} />;
+}
+```
+
+## Build Output Analysis
+
+- Use `output: 'standalone'` for Docker deployment
+- Check `.next/server/app` for rendering modes
+- Static pages have `.html` files generated
+- Dynamic pages have `.js` runtime modules
+- Monitor bundle size with `@next/bundle-analyzer`
+
+```javascript
+// @klubr-frontend/next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer({
+  output: 'standalone',
+  // ...
+});
+```

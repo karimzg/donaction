@@ -1,0 +1,290 @@
+---
+description: State management using NgRx Signal Store or custom signal-based services with rxResource, linkedSignal, and computed values for reactive, type-safe state in Angular 21
+globs: ["**/*.store.ts", "**/*+state/*.ts", "**/*.service.ts"]
+alwaysApply: false
+---
+
+# State Management
+
+## Approach 1: NgRx Signal Store
+
+### Store Definition
+
+- Use `signalStore()` from `@ngrx/signals`
+- Provide in root or component tree
+- Compose with features
+- Type-safe state access
+
+```typescript
+import { signalStore, withState, withComputed, withMethods } from '@ngrx/signals';
+import { patchState } from '@ngrx/signals';
+
+export const UserStore = signalStore(
+  { providedIn: 'root' },
+  withState({
+    users: [] as User[],
+    selectedId: null as string | null,
+    loading: false
+  })
+);
+```
+
+### State Access
+
+```typescript
+export class UserListComponent {
+  store = inject(UserStore);
+
+  users = this.store.users;
+  loading = this.store.loading;
+}
+```
+
+### Computed State
+
+```typescript
+export const UserStore = signalStore(
+  withState({ users: [], selectedId: null }),
+  withComputed((state) => ({
+    selectedUser: computed(() =>
+      state.users().find(u => u.id === state.selectedId())
+    ),
+    userCount: computed(() => state.users().length),
+    hasUsers: computed(() => state.users().length > 0)
+  }))
+);
+```
+
+### State Methods
+
+```typescript
+export const UserStore = signalStore(
+  withState({ users: [], loading: false }),
+  withMethods((store, userService = inject(UserService)) => ({
+    async loadUsers() {
+      patchState(store, { loading: true });
+      const users = await userService.getUsers();
+      patchState(store, { users, loading: false });
+    },
+    selectUser(id: string) {
+      patchState(store, { selectedId: id });
+    },
+    clearSelection() {
+      patchState(store, { selectedId: null });
+    }
+  }))
+);
+```
+
+### Effects with rxMethod
+
+```typescript
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, switchMap, tap } from 'rxjs';
+
+export const UserStore = signalStore(
+  withMethods((store, api = inject(ApiService)) => ({
+    loadUser: rxMethod<string>(
+      pipe(
+        tap(() => patchState(store, { loading: true })),
+        switchMap((id) => api.getUser(id)),
+        tap(user => patchState(store, { user, loading: false }))
+      )
+    )
+  }))
+);
+```
+
+## Approach 2: Custom Signal Service
+
+### Service Definition
+
+- Use `signal()` for writable state
+- Use `computed()` for derived values
+- Use `rxResource()` for async data
+- Use `linkedSignal()` for dependent state
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class UserStateService {
+  private http = inject(HttpClient);
+
+  // Writable state
+  private selectedIdSignal = signal<string | null>(null);
+
+  // Resource for async data
+  private usersResource = rxResource({
+    loader: () => this.http.get<User[]>('/api/users')
+  });
+
+  // Computed state
+  users = computed(() => this.usersResource.value() ?? []);
+  isLoading = computed(() => this.usersResource.isLoading());
+  error = computed(() => this.usersResource.error());
+
+  selectedUser = computed(() =>
+    this.users().find(u => u.id === this.selectedIdSignal())
+  );
+
+  // Actions
+  selectUser(id: string) {
+    this.selectedIdSignal.set(id);
+  }
+
+  reload() {
+    this.usersResource.reload();
+  }
+}
+```
+
+### rxResource Pattern
+
+- Use for HTTP requests
+- Tracks loading/error states automatically
+- Cancels pending requests on reload
+- Reactive to param changes
+
+```typescript
+export class ProductService {
+  private http = inject(HttpClient);
+
+  // Reactive parameter
+  private categoryId = signal<string>('all');
+
+  // Resource reloads when categoryId changes
+  productsResource = rxResource({
+    request: () => ({ categoryId: this.categoryId() }),
+    loader: ({ request, abortSignal }) =>
+      this.http.get<Product[]>(`/api/products?cat=${request.categoryId}`, {
+        context: new HttpContext().set(ABORT_SIGNAL, abortSignal)
+      })
+  });
+
+  products = computed(() => this.productsResource.value() ?? []);
+  isLoading = computed(() => this.productsResource.isLoading());
+
+  setCategory(id: string) {
+    this.categoryId.set(id); // Auto-triggers reload
+  }
+}
+```
+
+### Resource Status States
+
+| Status | value() | Description |
+|--------|---------|-------------|
+| `'idle'` | undefined | Not loaded yet |
+| `'loading'` | undefined | Initial fetch |
+| `'reloading'` | previous | Manual reload() |
+| `'resolved'` | data | Success |
+| `'error'` | undefined | Failure |
+| `'local'` | custom | Set via .set() |
+
+### linkedSignal Pattern
+
+- Writable signal synced to source
+- Resets when source changes
+- Access previous values
+- Maintain validity across updates
+
+```typescript
+export class ShippingService {
+  shippingOptions = signal<ShippingMethod[]>([]);
+
+  // Automatically selects first option when options change
+  selectedOption = linkedSignal(() => this.shippingOptions()[0]);
+
+  // Advanced: preserve selection if available
+  selectedOptionAdvanced = linkedSignal<ShippingMethod[], ShippingMethod>({
+    source: this.shippingOptions,
+    computation: (newOptions, previous) => {
+      return newOptions.find(opt => opt.id === previous?.value.id)
+        ?? newOptions[0];
+    }
+  });
+}
+```
+
+### Complete Service Example
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ProductStateService {
+  private http = inject(HttpClient);
+
+  // Filter state
+  private categoryFilter = signal<string | null>(null);
+  private searchQuery = signal<string>('');
+
+  // Data fetching with rxResource
+  private productsResource = rxResource({
+    request: () => ({
+      category: this.categoryFilter(),
+      search: this.searchQuery()
+    }),
+    loader: ({ request }) => this.http.get<Product[]>('/api/products', {
+      params: {
+        ...(request.category && { category: request.category }),
+        ...(request.search && { search: request.search })
+      }
+    })
+  });
+
+  // Computed derived state
+  products = computed(() => this.productsResource.value() ?? []);
+  isLoading = computed(() => this.productsResource.isLoading());
+  productCount = computed(() => this.products().length);
+
+  // Linked selection
+  selectedProduct = linkedSignal<Product[], Product | null>({
+    source: this.products,
+    computation: (products, previous) => {
+      return products.find(p => p.id === previous?.value?.id) ?? null;
+    }
+  });
+
+  // Actions
+  setCategory(category: string | null) {
+    this.categoryFilter.set(category);
+  }
+
+  setSearch(query: string) {
+    this.searchQuery.set(query);
+  }
+
+  selectProduct(product: Product) {
+    this.selectedProduct.set(product);
+  }
+}
+```
+
+## When to Use Which
+
+**NgRx Signal Store:**
+- Complex state with many features
+- Team familiar with NgRx patterns
+- Need devtools integration
+- Multiple stores in application
+
+**Custom Signal Service:**
+- Simpler state management needs
+- Prefer lightweight approach
+- Direct control over patterns
+- No NgRx dependency desired
+
+## Best Practices
+
+- One store/service per feature domain
+- Expose computed signals, not raw state
+- Use rxResource for all HTTP requests
+- linkedSignal for dependent selections
+- Computed for derived values
+- Never expose writable signals directly
+- Provide actions/methods for mutations
+- Handle errors in computed fallbacks
+
+References:
+- [Angular Signals](https://angular.dev/guide/signals)
+- [rxResource](https://angular.dev/guide/signals/resource)
+- [linkedSignal](https://angular.dev/guide/signals/linked-signal)
+- [NgRx Signal Store](https://ngrx.io/guide/signals/signal-store)

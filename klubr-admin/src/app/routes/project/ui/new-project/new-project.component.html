@@ -1,0 +1,161 @@
+<p-dialog header="Choisissez un modèle de projet"
+          [modal]="true"
+          [(visible)]="visible"
+          (onHide)="closeModal()"
+          [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+          [style]="{ width: '800px' }"
+>
+  @if (!categoryMode()) {
+    <!-- TMPL LIBRARIES AFFILIATES -->
+    @if (isLoaded$ | async) {
+      <p-accordion [value]="0">
+        @if (tmplLibrariesAffiliates$ | async; as tmplLibrariesAffiliates) {
+          @for (tmplLibrary of tmplLibrariesAffiliates; let i = $index; track tmplLibrary.uuid) {
+            @if (tmplLibrary | tmplNbByLibrary) {
+              <p-accordion-panel [value]="i">
+                <p-accordion-header>
+                  <app-klub-infos [klub]="tmplLibrary.klubr" [customLabel]="tmplLibrary.label"></app-klub-infos>
+                </p-accordion-header>
+                <p-accordion-content>
+                  <div class="project-tmpl-categories">
+                    <ng-container *ngTemplateOutlet="virginTmpl"></ng-container>
+                    @if (sharedFacade.profile()?.klubr?.uuid === tmplLibrary.klubr.uuid && permissionService.memberIsAtLeastLeaderSignal()) {
+                      <ng-container *ngTemplateOutlet="createTmpl"></ng-container>
+                    }
+                    @for (templateProjectsCategory of tmplLibrary.template_projects_categories; let i = $index; track templateProjectsCategory.uuid) {
+                      @if (templateProjectsCategory.klub_projets.length > 0) {
+                        <div class="project-tmpl-category--card" [tabIndex]="0"
+                             (click)="openCategory(templateProjectsCategory)">
+                          <div class="project-tmpl-category--card__img">
+                            <img
+                              src="https://ik.imagekit.io/klubr/Admin/Projects/Categories/{{templateProjectsCategory.icon}}"
+                              alt="{{templateProjectsCategory.label}}"/>
+                          </div>
+                          <div class="project-tmpl-category--card__content">
+                            <span>{{ templateProjectsCategory.label }}</span>
+                          </div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </p-accordion-content>
+              </p-accordion-panel>
+            } @else if (sharedFacade.profile()?.klubr?.uuid === tmplLibrary.klubr.uuid && permissionService.memberIsAtLeastNetworkSignal()) {
+              <p-accordion-panel [value]="i">
+                <p-accordion-header>
+                  <app-klub-infos [klub]="tmplLibrary.klubr" [customLabel]="tmplLibrary.label"
+                                  [displaySport]="true"></app-klub-infos>
+                </p-accordion-header>
+                <p-accordion-content>
+                  <div class="project-tmpl-categories">
+                    <ng-container *ngTemplateOutlet="createTmpl"></ng-container>
+                  </div>
+                </p-accordion-content>
+              </p-accordion-panel>
+            }
+          }
+        }
+        @let panelIndex = (tmplLibrariesAffiliates$ | async)?.length || 0;
+        <!-- TMPL LIBRARIES KLUBR -->
+        @for (tmplLibrary of (tmplLibraries$ | async); let i = $index; track tmplLibrary.uuid) {
+          @if ((tmplLibrary | tmplNbByLibrary) || i === 0) {
+            @let panelIndexB = panelIndex + i;
+            <p-accordion-panel [value]="panelIndexB">
+              <p-accordion-header>
+                <app-klub-infos [klub]="tmplLibrary.klubr" [customLabel]="tmplLibrary.label"></app-klub-infos>
+                <!-- TODO: @if (tmplLibrary.sportType) > replace klubr logo by sportLogo -->
+              </p-accordion-header>
+              <p-accordion-content>
+                <div class="project-tmpl-categories">
+                  <!--@if (!tmplLibrary.sportType) {
+                    <div class="project-tmpl-category&#45;&#45;card" [tabIndex]="0" [routerLink]="['/project', 'create']">
+                      <div class="project-tmpl-category&#45;&#45;card__img">
+                        <img src="https://ik.imagekit.io/klubr/Admin/Projects/Categories/virgin-project.svg"
+                             alt="Projet vièrge"/>
+                      </div>
+                      <div class="project-tmpl-category&#45;&#45;card__content">
+                        <span>Projet vièrge</span>
+                      </div>
+                    </div>
+                  }-->
+                  <ng-container *ngTemplateOutlet="virginTmpl"></ng-container>
+                  @if (this.isKlubr() && permissionService.memberIsAtLeastNetworkSignal()) {
+                    <ng-container *ngTemplateOutlet="createTmpl"></ng-container>
+                  }
+                  @for (templateProjectsCategory of tmplLibrary.template_projects_categories; let i = $index; track templateProjectsCategory.uuid) {
+                    @if (templateProjectsCategory.klub_projets.length > 0) {
+                      <div class="project-tmpl-category--card" [tabIndex]="0"
+                           (click)="openCategory(templateProjectsCategory)">
+                        <div class="project-tmpl-category--card__img">
+                          <img
+                            src="https://ik.imagekit.io/klubr/Admin/Projects/Categories/{{templateProjectsCategory.icon}}"
+                            alt="{{templateProjectsCategory.label}}"/>
+                        </div>
+                        <div class="project-tmpl-category--card__content">
+                          <span>{{ templateProjectsCategory.label }}</span>
+                          <!--{{ templateProjectsCategory.sportType ? '(' + templateProjectsCategory.sportType + ')' : '' }}-->
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              </p-accordion-content>
+            </p-accordion-panel>
+          }
+        }
+      </p-accordion>
+    } @else {
+      <div class="flex justify-content-center">
+        <ng-lottie
+          width="350px"
+          [options]="{path: 'assets/animations/loading-2.json'}">
+        </ng-lottie>
+      </div>
+    }
+  } @else {
+    <h3 class="project-tmpl--title flex flex-1 items-center gap-2"><i (click)="backToCategories()"
+                                                                      class="pi pi-arrow-circle-left text-[1.5rem] cursor-pointer"></i>{{ currentCategory()?.label }}
+    </h3>
+    <div class="project-tmpl-projects">
+      @for (templateProject of currentCategory()?.klub_projets; let i = $index; track templateProject.uuid) {
+        <div class="project-tmpl-project--card" [tabIndex]="0"
+             [routerLink]="['/project', 'create', 'template', templateProject.uuid]">
+          <div class="project-tmpl-project--card__img">
+            <p-image
+              [src]="templateProject.couverture | media : 'couv_project_xs'"
+              alt="Image"
+              width="100%"
+              height="110"
+              class="img-elevated mb-4"
+            />
+          </div>
+          <div class="project-tmpl-category--card__content">
+            <span>{{ templateProject.titre }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</p-dialog>
+<ng-template #createTmpl>
+  <div class="project-tmpl-category--card" [routerLink]="['/project', 'create', 'template']">
+    <div class="project-tmpl-category--card__img">
+      <img src="https://ik.imagekit.io/klubr/Admin/Projects/Categories/new-project-template.svg"
+           alt="Projet vièrge"/>
+    </div>
+    <div class="project-tmpl-category--card__content">
+      <span>Créer un nouveau modèle</span>
+    </div>
+  </div>
+</ng-template>
+<ng-template #virginTmpl>
+  <div class="project-tmpl-category--card" [tabIndex]="0" [routerLink]="['/project', 'create']">
+    <div class="project-tmpl-category--card__img">
+      <img src="https://ik.imagekit.io/klubr/Admin/Projects/Categories/virgin-project.svg"
+           alt="Projet vièrge"/>
+    </div>
+    <div class="project-tmpl-category--card__content">
+      <span>Projet vièrge</span>
+    </div>
+  </div>
+</ng-template>

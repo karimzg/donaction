@@ -1,0 +1,49 @@
+
+.toastItem {
+  position: fixed;
+  z-index: 999999999999;
+  max-width: min(400px, 80vw);
+  right: 2rem;
+  padding: 13px 28px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0;
+  animation: opacityChange 4s ease-in-out;
+  transition: bottom ease-in-out .2s;
+
+  color: #FFF;
+
+  // TODO: bgColors to be changed
+  &.info {
+    background: #000;
+  }
+  &.warning {
+    background: darkorange;
+  }
+  &.success {
+    background: green;
+  }
+  &.error {
+    background: red;
+  }
+
+  @keyframes opacityChange {
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    10% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    90% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+}

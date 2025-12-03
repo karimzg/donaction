@@ -1,0 +1,471 @@
+<div class="app-listing">
+  <h1 #title class="admin-h1">Liste des Clubs</h1>
+  <!-- HEADER -->
+  <app-list-header
+    [filtersList]="filtersList()"
+    [(filtersSearch)]="filtersSearch"
+    #headerList
+    displaySearch="true"
+    searchPlaceholder="Rechercher par club, statut, sport ou région"
+  >
+    @if (deviceService.isDesktop()) {
+      <ng-container tmplHeaderActions>
+        <p-multiSelect
+          [options]="colFiltersOptionsGrouped"
+          [(ngModel)]="selectedColFilters"
+          [group]="true"
+          placeholder="Choix des colonnes à afficher"
+          display="chip"
+          [showClear]="true"
+          [maxSelectedLabels]="deviceService.isMobile() ? 1 : 3"
+        />
+      </ng-container>
+    }
+
+    <app-klub-filters
+      #filtersComponent
+      (filtersChanged)="filtersList.set($event); headerList.closeDrawer()"
+    ></app-klub-filters>
+  </app-list-header>
+
+  <!-- LIST -->
+  @if (listing().length > 0 && pagination()) {
+    @if (deviceService.isDesktop()) {
+      <!-- DESKTOP -->
+      <p-table [value]="listing()"
+               size="small"
+               class="app-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="denomination">Club
+              <p-sortIcon field="denomination"/>
+            </th>
+            @for (col of selectedCol(); track col) {
+              @if (col.sortable) {
+                <th pSortableColumn="{{col.value}}">{{ col.label }}
+                  <p-sortIcon field="{{col.value}}"/>
+                </th>
+              } @else {
+                <th>{{ col.label }}</th>
+              }
+            }
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-club>
+          <tr>
+            <td class="max-w-[280px]">
+              <div class="table-content">
+                <app-klub-infos [klub]="club" [displaySport]="true"></app-klub-infos>
+              </div>
+            </td>
+            @for (col of selectedCol(); track col) {
+              @switch (col.value) {
+                @case (COL_FILTERS_LIST_VALUES.STATE.value) {
+                  <td>
+                    <app-klub-status
+                      [ngClass]="{'cursor-pointer': club.status === 'published'}"
+                      [klub]="club"></app-klub-status>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.SPORT.value) {
+                  <td>
+                    <div class="max-w-[450px]">{{ club?.sportType }}</div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.FEDERATION.value) {
+                  <td>
+                    <div class="max-w-[180px]">{{ club.federationLink?.name }}</div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.REGION.value) {
+                  <td>
+                    <div class="max-w-[129px]">{{ club.siegeSocialRegion }}</div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.NUMBER_OF_MEMBERS.value) {
+                  <td>
+                    <div class="max-w-[200px]">
+                      <p-tag [value]="club.statNbMembers + ' / ' +club.statNbMembersWithAccount"
+                             pTooltip="Nb membres / Nb membres avec compte"
+                             severity="secondary"
+                             class="cursor-pointer"
+                             [routerLink]="['/members', 'listing']"
+                             [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                    </div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.NUMBER_OF_PROJECTS.value) {
+                  <td>
+                    <div class="max-w-[200px]">
+                      @if (club.nbProjects) {
+                        <p-tag [value]="club.nbActiveProjects + ' / ' + club.nbProjects" severity="secondary"
+                               pTooltip="Nb projets en cours / Nb projets"
+                               class="cursor-pointer"
+                               [routerLink]="['/project', 'listing']"
+                               [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                      } @else {
+                        <p-tag value="Aucun projet" severity="secondary"></p-tag>
+                      }
+                    </div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.AMOUNT_COLLECTED.value) {
+                  <td>
+                    <div class="max-w-[168px]">
+                      @if (!!club.statNbDons) {
+                        <p-tag [value]="club.statNbDons" severity="secondary" pTooltip="Nb de dons"
+                               [routerLink]="['/don', 'listing']"
+                               class="cursor-pointer"
+                               [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                        @if (!!club.statDonsTotalAmount) {
+                          <p-tag [value]="(club.statDonsTotalAmount | currency)!" pTooltip="Montant collecté"
+                                 [routerLink]="['/don', 'listing']"
+                                 [queryParams]="{ filterClubUuid: club.uuid }"
+                                 severity="success" class="ml-2 cursor-pointer"></p-tag>
+                        }
+                      } @else {
+                        <p-tag value="Aucun don" severity="secondary"></p-tag>
+                      }
+                    </div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.COMPLETION.value) {
+                  <td>
+                    <div class="max-w-[190px]">
+                      <app-klub-infos-completion
+                        [progress]="club?.klubr_info?.requiredFieldsCompletion"
+                        label=""></app-klub-infos-completion>
+                    </div>
+                  </td>
+                }
+                <!--TODO: Add the correct value-->
+                @case (COL_FILTERS_LIST_VALUES.COMPLETION_KLUB_HOUSE.value) {
+                  <td>
+                    <div class="max-w-[146px]">{{ 'X' }}%</div>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.STATUS_DOCS.value) {
+                  <td>
+                    <app-docs-full-completion [klub]="club"></app-docs-full-completion>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.ASSOCIATION_STATUS.value) {
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.statutsAssociation"
+                      [validated]="club.klubr_document?.statutsAssociationValide"></app-validated-info>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.SITUATION_NOTICE.value) {
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.avisSituationSIRENE"
+                      [validated]="club.klubr_document?.avisSituationSIRENEValide"></app-validated-info>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.FEDERATION_AFFILIATION_CERTIFICATE.value) {
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.attestationAffiliationFederation"
+                      [validated]="club.klubr_document?.attestationAffiliationFederationValide"></app-validated-info>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.ASSOCIATION_RIB.value) {
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.ribAssociation"
+                      [validated]="club.klubr_document?.ribAssociationValide"></app-validated-info>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.PRESIDENT_DESIGNATION_ACT.value) {
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.justifDesignationPresident"
+                      [validated]="club.klubr_document?.justifDesignationPresidentValide"></app-validated-info>
+                  </td>
+                }
+                @case (COL_FILTERS_LIST_VALUES.LAST_UPDATED_AT.value) {
+                  <td>
+                    @if (club | lastUpdatedAt; as lastUpdatedAt) {
+                      <span class="flex flex-col w-fit">
+                      {{ lastUpdatedAt | date:"dd/MM/yyyy" }}
+                        <br><small class="self-end">{{ lastUpdatedAt | date:"HH:mm" }}</small>
+                    </span>
+                    } @else {
+                      {{ 'Non renseigné' }}
+                    }
+                  </td>
+                }
+                @default {
+                  {{ 'Non renseigné' }}
+                }
+              }
+            }
+            <td>
+              <div class="flex gap-2">
+                <i class="pi pi-info-circle text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Infos légales'"
+                   tooltipPosition="top"
+                   [routerLink]="['/klub', club.uuid, 'infos-legales']"></i>
+                <i class="pi pi-folder text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Documents'"
+                   tooltipPosition="top"
+                   [routerLink]="['/klub', club.uuid, 'documents']"></i>
+                <i class="pi pi-eye text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Page klub'"
+                   tooltipPosition="top"
+                   [routerLink]="['/klub-house', club.uuid, 'update']"></i>
+                <i class="pi pi-inbox text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Projets'"
+                   tooltipPosition="top"
+                   [routerLink]="['/project', 'listing']"
+                   [queryParams]="{ filterClubUuid: club.uuid }"></i>
+                <i class="pi pi-wallet text-[1.5rem] cursor-pointer"
+                   [routerLink]="['/don', 'listing']"
+                   [pTooltip]="'Listing des dons'"
+                   tooltipPosition="top"
+                   [queryParams]="{ filterClubUuid: club.uuid }"></i>
+                <i class="pi pi-file text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Facturation'"
+                   tooltipPosition="top"
+                   [routerLink]="['/facturation', 'gerer']"
+                   [queryParams]="{ filterClubUuid: club.uuid }"></i>
+                <i class="pi pi-user text-[1.5rem] cursor-pointer"
+                   [pTooltip]="'Connect as'"
+                   tooltipPosition="top"
+                   (click)="connectAs(club)"></i>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else {
+      <!-- MOBILE -->
+      <div class="flex flex-col gap-4">
+        @for (club of listing(); track club.uuid) {
+          <div class="flex flex-col card-box-shadow	rounded-lg gap-2 pt-4 pb-3">
+            <div class="flex justify-between items-center pl-3 pr-2">
+              <app-klub-infos [klub]="club" [displaySport]="true"></app-klub-infos>
+              <i class="pi pi-ellipsis-v px-2" (click)="toggleShowActions(club)"></i>
+            </div>
+            <hr class="border-t border-gray-300 mb-1">
+            <div class="px-3 flex flex-col">
+              <table>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Statut</td>
+                  <td>
+                    <app-klub-status
+                      [ngClass]="{'cursor-pointer': club.status === 'published'}"
+                      [klub]="club"></app-klub-status>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Sport</td>
+                  <td class="text-black font-semibold">{{ club?.sportType }}</td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Fédération</td>
+                  <td
+                    class="text-black font-semibold">{{ club.federationLink?.name || 'Aucune féderation' }}
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Région</td>
+                  <td class="text-black font-semibold">{{ club.siegeSocialRegion }}</td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Nb de Membres</td>
+                  <td>
+                    <p-tag [value]="club.statNbMembers + ' / ' +club.statNbMembersWithAccount"
+                           pTooltip="Nb membres / Nb membres avec compte"
+                           severity="secondary"
+                           class="cursor-pointer font-semibold"
+                           [routerLink]="['/members', 'listing']"
+                           [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Nombre de projets</td>
+                  <td>
+                    @if (club.nbProjects) {
+                      <p-tag [value]="club.nbProjects" severity="secondary" pTooltip="Nb projets"
+                             class="cursor-pointer font-semibold"
+                             [routerLink]="['/project', 'listing']"
+                             [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                    } @else {
+                      <p-tag value="Aucun projet" severity="secondary"></p-tag>
+                    }
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Montant collecté</td>
+                  <td>
+                    <div class="max-w-[168px]">
+                      @if (!!club.statNbDons) {
+                        <p-tag [value]="club.statNbDons.toString()" severity="secondary" pTooltip="Nb de dons"
+                               [routerLink]="['/don', 'listing']"
+                               class="cursor-pointer font-semibold"
+                               [queryParams]="{ filterClubUuid: club.uuid }"></p-tag>
+                        @if (!!club.statDonsTotalAmount) {
+                          <p-tag [value]="(club.statDonsTotalAmount | currency)!" pTooltip="Montant collecté"
+                                 [routerLink]="['/don', 'listing']"
+                                 [queryParams]="{ filterClubUuid: club.uuid }"
+                                 severity="success" class="ml-2 cursor-pointer font-semibold"></p-tag>
+                        }
+                      } @else {
+                        <p-tag class="font-semibold" value="Aucun don" severity="secondary"></p-tag>
+                      }
+                    </div>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Complétion Klub</td>
+                  <td>
+                    <div class="max-w-[190px]">
+                      <app-klub-infos-completion
+                        [progress]="club?.klubr_info?.requiredFieldsCompletion"
+                        label=""></app-klub-infos-completion>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">C.Klub House</td>
+                  <!--TODO: Add the correct value-->
+                  <td class="text-black font-semibold">{{ 'X' }}%</td>
+                </tr>
+              </table>
+              <div class="text-black font-semibold m-1">Documents légaux</div>
+              <table>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Statut</td>
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.statutsAssociation"
+                      [validated]="club.klubr_document?.statutsAssociationValide"></app-validated-info>
+                  </td>
+                  <td class="font-light pr-2">Avis</td>
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.avisSituationSIRENE"
+                      [validated]="club.klubr_document?.avisSituationSIRENEValide"></app-validated-info>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Affiliation</td>
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.attestationAffiliationFederation"
+                      [validated]="club.klubr_document?.attestationAffiliationFederationValide"></app-validated-info>
+                  </td>
+                  <td class="font-light pr-2">RIB</td>
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.ribAssociation"
+                      [validated]="club.klubr_document?.ribAssociationValide"></app-validated-info>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Président</td>
+                  <td>
+                    <app-validated-info
+                      class="ml-2 cursor-pointer"
+                      [routerLink]="['/klub', club.uuid, 'documents']"
+                      [hasDoc]="!!club.klubr_document?.justifDesignationPresident"
+                      [validated]="club.klubr_document?.justifDesignationPresidentValide"></app-validated-info>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+      <p-drawer #drawerRef [(visible)]="showActions" position="bottom"
+                transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)"
+                styleClass="filters-drawer-bottom">
+        <ng-template #headless>
+          <div
+            class="flex flex-col px-3 py-4 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+            <span class="flex gap-2 items-center mb-4" [routerLink]="['/klub', selectedClub()!.uuid, 'infos-legales']">
+              <i class="pi pi-info-circle"></i>
+              <span> Infos légales </span>
+            </span>
+            <span class="flex gap-2 items-center" [routerLink]="['/klub', selectedClub()!.uuid, 'documents']">
+              <i class="pi pi-folder"></i>
+              <span> Documents </span>
+            </span>
+            <hr class="border-t border-gray-300">
+            <span class="flex gap-2 items-center mb-4" [routerLink]="['/klub-house', selectedClub()!.uuid, 'update']">
+              <i class="pi pi-eye"></i>
+              <span> Page klub </span>
+            </span>
+            <span class="flex gap-2 items-center"
+                  [routerLink]="['/project', 'listing']"
+                  [queryParams]="{ filterClubUuid: selectedClub()!.uuid }">
+              <i class="pi pi-inbox"></i>
+              <span> Projets </span>
+            </span>
+            <hr class="border-t border-gray-300">
+            <span class="flex gap-2 items-center mb-4"
+                  [routerLink]="['/don', 'listing']"
+                  [queryParams]="{ filterClubUuid: selectedClub()!.uuid }">
+              <i class="pi pi-wallet"></i>
+              <span> Listing des dons </span>
+            </span>
+            <span class="flex gap-2 items-center"
+                  [routerLink]="['/facturation', 'gerer']"
+                  [queryParams]="{ filterClubUuid: selectedClub()!.uuid }">
+              <i class="pi pi-file"></i>
+              <span> Facturation </span>
+            </span>
+            <hr class="border-t border-gray-300">
+            <span class="flex gap-2 items-center"
+                  (click)="connectAs(selectedClub()!)">
+              <i class="pi pi-user"></i>
+              <span> Se connecter en tant qu'admin </span>
+            </span>
+          </div>
+        </ng-template>
+      </p-drawer>
+    }
+
+    <!-- PAGINATION -->
+    @if (pagination()!.total > pageSize()) {
+      <p-paginator
+        class="sticky bottom-0 mt-4 px-3 mx-[-1rem] bg-white block sticky-bottom-box-shadow "
+        [rows]="pageSize()"
+        [rowsPerPageOptions]="[5,10,15,20, 50, 100]"
+        [totalRecords]="pagination()!.total"
+        [first]="0"
+        (onPageChange)="changePage($event)"
+        [showCurrentPageReport]="false"
+        [showPageLinks]="true"
+        [showJumpToPageDropdown]="false"
+        currentPageReportTemplate="Clubs {first} à {last} parmis {totalRecords}"/>
+    }
+  } @else {
+    <!-- LOADING / NO RESULT -->
+    <app-list-loading-no-results
+      label="klub"
+      [hasFilters]="!!hasFilters()"
+      [loading]="sharedFacade.loading()"
+    ></app-list-loading-no-results>
+  }</div>

@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_composant_atoms_citations",
+  "info": {
+    "displayName": "Citation",
+    "icon": "quote",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "citation": {
+      "type": "blocks",
+      "required": true
+    },
+    "nom": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

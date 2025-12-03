@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klub_don_payments",
+  "info": {
+    "singularName": "klub-don-payment",
+    "pluralName": "klub-don-payments",
+    "displayName": "Klub don payment",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "amount": {
+      "type": "biginteger",
+      "required": true
+    },
+    "client_secret": {
+      "type": "string",
+      "required": true
+    },
+    "currency": {
+      "type": "string",
+      "required": true
+    },
+    "payment_method": {
+      "type": "string",
+      "required": true
+    },
+    "created": {
+      "type": "biginteger",
+      "required": true
+    },
+    "intent_id": {
+      "type": "string",
+      "required": true
+    },
+    "klub_don": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klub-don.klub-don",
+      "inversedBy": "klub_don_payments"
+    },
+    "error_code": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

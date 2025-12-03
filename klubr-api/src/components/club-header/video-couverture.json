@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_club_header_video_couvertures",
+  "info": {
+    "displayName": "videoCouverture",
+    "icon": "play",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "media": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "videos"
+      ]
+    }
+  }
+}

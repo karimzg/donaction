@@ -1,0 +1,198 @@
+<div class="flex flex-col sm:flex-row sm:gap-4">
+  <h1 #title class="admin-h1 flex flex-1 items-center gap-4 justify-content-between">
+    Informations du klub
+    @if (permissionsService.memberIsAdminSignal() && entity()) {
+      <app-klub-infos [klub]="entity()!" [displaySport]="true" [displayReverse]="true"></app-klub-infos>
+    }
+  </h1>
+</div>
+@if (isReady()) {
+  <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" appInvalidControlScroll @fade>
+    <div class="flex flex-col gap-2">
+      <label for="denomination" class="flex gap-1"><b> Nom du Klub </b><span class="text-red-700">*</span></label>
+      <input id="denomination" pInputText type="text" placeholder="Nom du Klub" formControlName="denomination">
+      <app-error-display [control]="entityForm.controls['denomination']"
+                         [isSubmitted]="isSubmitted()"></app-error-display>
+    </div>
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="acronyme" class="flex gap-1"><b> Sigle </b><span
+          class="text-red-700">*</span></label>
+        <input id="acronyme" pInputText type="text" placeholder="FCB, ASM..." formControlName="acronyme">
+        <app-error-display [control]="entityForm.controls['acronyme']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="slogan" class="flex gap-1"><b> Slogan du Klub </b><span class="text-red-700"></span></label>
+        <input id="slogan" pInputText type="text" placeholder="Slogan du Klub" formControlName="slogan">
+        <app-error-display [control]="entityForm.controls['slogan']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="klubYearCreation" class="flex gap-1"><b> Année de création du club </b><span
+          class="text-red-700"></span></label>
+        <p-datepicker
+          id="klubYearCreation"
+          inputId="klubYearCreation"
+          formControlName="klubYearCreation"
+          view="year"
+          [maxDate]="maxDate"
+          dateFormat="yy"></p-datepicker>
+        <app-error-display [control]="entityForm.controls['klubYearCreation']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+    </div>
+
+    <hr class="flex flex-1">
+
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <!-- STATUTS -->
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="juridique" class="flex gap-1"><b> Structure Juridique </b><span
+          class="text-red-700">*</span></label>
+        <p-select
+          id="juridique"
+          formControlName="legalStatus"
+          [options]="legalStructureOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Structure Juridique"
+        />
+        <app-error-display [control]="entityForm.controls['legalStatus']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      <!-- ASSOCIATION TYPE -->
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="associationType" class="flex gap-1"><b> Type d’association </b><span
+          class="text-red-700">*</span></label>
+        <p-select
+          id="associationType"
+          formControlName="associationType"
+          [options]="associationTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Type d’association"
+        />
+        <app-error-display [control]="entityForm.controls['associationType']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <!-- TYPE DE SPORT -->
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="sportType" class="flex gap-1"><b> Type de sport </b><span class="text-red-700">*</span></label>
+        <p-select
+          id="sportType"
+          formControlName="sportType"
+          [options]="sportTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Type de sport"
+        />
+        <app-error-display [control]="entityForm.controls['sportType']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+
+      <!-- FEDERATION LINK -->
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="federationLink" class="flex gap-1"><b>Fédération</b><span class="text-red-700">*</span>
+        </label>
+        @if (federationOptions()) {
+          <p-select
+            id="federationLink"
+            formControlName="federationLink"
+            [options]="federationOptions()"
+            [filter]="true"
+            filterBy="name"
+            [showClear]="true"
+            [checkmark]="true"
+            placeholder="Sélectionnez votre fédération"
+            emptyMessage="Aucune fédération disponible"
+            optionLabel="name"
+            optionValue="id"
+          >
+          </p-select>
+          <app-error-display [control]="entityForm.controls['federationLink']"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="googlePlace" class="flex gap-1"><b> Adresse du Klub </b><span
+        class="text-red-700">*</span></label>
+      <input
+        id="googlePlace"
+        pInputText
+        appAutocompleteOff
+        type="text"
+        placeholder="Adresse du Klub"
+        (focus)="selectAllContent($event)"
+        (blur)="checkAddress()"
+        (mouseup)="$event.preventDefault()"
+        appGooglePlaceAutocomplete
+        (onSelect)="onAddressSelected($event)"
+        #googlePlaceInput
+        formControlName="googlePlace">
+      <app-error-display [control]="entityForm | formControl : 'googlePlace'"
+                         [isSubmitted]="isSubmitted()"></app-error-display>
+    </div>
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialAdresse" class="flex gap-1"><b> Adresse </b></label>
+        <input id="siegeSocialAdresse" pInputText type="text" placeholder="Adresse" formControlName="siegeSocialAdresse"
+               readonly="readonly" class="disabled">
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialAdresse2" class="flex gap-1"><b> Complément d'adresse </b></label>
+        <input id="siegeSocialAdresse2" pInputText type="text" placeholder="Complément d'adresse"
+               formControlName="siegeSocialAdresse2">
+      </div>
+    </div>
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="siegeSocialCP" class="flex gap-1"><b> Code postal </b></label>
+        <input id="siegeSocialCP" pInputText type="text" placeholder="Code postal" formControlName="siegeSocialCP">
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialVille" class="flex gap-1"><b> Ville </b></label>
+        <input id="siegeSocialVille" pInputText type="text" placeholder="Ville" formControlName="siegeSocialVille">
+      </div>
+    </div>
+    <div class="flex flex-col md:flex-row flex-1 max-w-full justify-between gap-4">
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialPays" class="flex gap-1"><b> Pays </b></label>
+        <input id="siegeSocialPays" pInputText type="text" placeholder="Pays" formControlName="siegeSocialPays">
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialDepartement" class="flex gap-1"><b> Département </b></label>
+        <input id="siegeSocialDepartement" pInputText type="text" placeholder="Département"
+               formControlName="siegeSocialDepartement">
+      </div>
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="siegeSocialRegion" class="flex gap-1"><b> Région </b></label>
+        <input id="siegeSocialRegion" pInputText type="text" placeholder="Région" formControlName="siegeSocialRegion">
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col flex-1 gap-2">
+        <label for="webSite" class="flex gap-1"><b> Site Web </b><span class="text-red-700"></span></label>
+        <input id="webSite" pInputText type="text" placeholder="Site Web du Klub" formControlName="webSite">
+        <app-error-display [control]="entityForm.controls['webSite']"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+    </div>
+    <div class="flex justify-between sticky bottom-0 py-3 px-3 mx-[-1rem] bg-white">
+      <p-button label="Annuler" icon="pi pi-times" severity="secondary" (onClick)="resetForm()"
+                [disabled]="entityForm.pristine || sharedFacade.loading()">
+
+      </p-button>
+      <p-button type="submit" label="Enregistrer" icon="pi pi-save" severity="contrast"
+                [disabled]="entityForm.pristine"
+                [loading]="sharedFacade.loading()">
+      </p-button><!--(click)="onSubmit()"-->
+    </div>
+  </form>
+}

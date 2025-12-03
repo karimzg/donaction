@@ -1,0 +1,75 @@
+<div class="px-3 py-3 mt-3 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg dons-filters">
+  <form [formGroup]="filtersForm" class="flex gap-3 flex-col flex-wrap justify-between">
+    <div class="flex flex-1 flex-col md:flex-row gap-3">
+      <app-dropdown-multi-klubr-filter
+        #klubrDropdown
+        class="filter-component"
+        (onItemsUUIDsSelected)="setKlubFilter($event!)">
+      </app-dropdown-multi-klubr-filter>
+      <p-select
+        #statusDropdown
+        class="customDropdown flex-1"
+        [options]="statusOptions"
+        formControlName="status"
+        [checkmark]="true"
+        placeholder="Statut"
+        optionLabel="label"
+        optionValue="value"
+        emptyMessage="Aucun statut disponible"
+        [showClear]="true"/>
+      <!-- TODO: réfléchir à une meilleur solution-->
+      <!--<input
+        #completionDropdown
+        class="flex-1"
+        pInputText
+        type="number"
+        [(ngModel)]="completion"
+        placeholder="Complétion %"
+      />-->
+    </div>
+    <div class="flex flex-col md:flex-row gap-3 w-full">
+      <p-multiSelect
+        [options]="sportsOptions()"
+        formControlName="sportType"
+        placeholder="Sports"
+        optionLabel="value"
+        optionValue="value"
+        display="chip"
+        [showClear]="true"
+        class="customMultiSelect filter-component"
+      />
+      @if (federationOptions()) {
+        <p-select
+          id="federationLink"
+          [options]="federationOptions()"
+          formControlName="federation"
+          [filter]="true"
+          filterBy="name"
+          [showClear]="true"
+          [checkmark]="true"
+          placeholder="Fédération"
+          emptyMessage="Aucune fédération disponible"
+          class="customDropdown flex-1"
+          optionLabel="name"
+          optionValue="id"
+        ></p-select>
+      }
+
+      <div class="flex flex-wrap items-center gap-2">
+        <label for="documentToValidateDropdown" class="flex gap-1"><b>Document à valider</b></label>
+        <p-selectButton
+          [options]="[{label: 'Oui', value: true},{label: 'Non', value: false}]"
+          formControlName="documentsToValidate"
+          id="documentToValidateDropdown"
+          optionLabel="label"
+          optionValue="value"/>
+      </div>
+    </div>
+    <div class="flex mt-2 gap-2 self-end">
+      <p-button (click)="resetFilters()" label="Réinitialiser" class="self-end" [disabled]="filtersForm.pristine"
+                severity="secondary"/>
+      <p-button (click)="applyFilters()" label="Filtrer" class="self-end" [disabled]="filtersForm.pristine"
+                severity="contrast"/>
+    </div>
+  </form>
+</div>

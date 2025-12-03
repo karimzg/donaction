@@ -1,0 +1,81 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoice_lines",
+  "info": {
+    "singularName": "invoice-line",
+    "pluralName": "invoice-lines",
+    "displayName": "Invoice line",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "invoice": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::invoice.invoice",
+      "inversedBy": "invoice_lines"
+    },
+    "reference": {
+      "type": "string",
+      "required": true
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 0,
+      "required": true
+    },
+    "unitPriceExcludingTax": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "amountExcludingTax": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "isCreditLine": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "invoiceLineNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "klub_dons": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klub-don.klub-don",
+      "mappedBy": "invoice_line"
+    },
+    "klub_projet": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-projet.klub-projet",
+      "inversedBy": "invoice_line"
+    },
+    "closingDate": {
+      "type": "date"
+    },
+    "nbDonations": {
+      "type": "integer",
+      "default": 0
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

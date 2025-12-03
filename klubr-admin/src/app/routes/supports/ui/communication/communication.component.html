@@ -1,0 +1,55 @@
+<h1 #title class="admin-h1">Support de communication</h1>
+<!--<div class="px-6 py-3 bg-[#F8FAFC] border-solid border-[#E2E8F0] mb-5">-->
+<!--  <div class="flex justify-between mb-3">-->
+<!--    <div class="flex items-center gap-2 bg-white border-solid border-[#CBD5E1] p-3 rounded">-->
+<!--      <i class="pi pi-search" alt="search-icon"></i>-->
+<!--      <input class="border-0 p-0 outline-0;" placeholder="Recherche">-->
+<!--    </div>-->
+<!--    <button class="flex items-center bg-inherit border-1 border-black rounded gap-3 p-3">-->
+<!--      <i style="transform: rotate(90deg);" class="pi pi-arrow-right-arrow-left" alt="filter-icon"></i>-->
+<!--      <b>Trier</b>-->
+<!--    </button>-->
+<!--  </div>-->
+<!--</div>-->
+
+<div class="flex flex-col">
+  <section>
+    <h2 class="admin-h2 sticky top-32 bg-white py-2 z-1 mb-0">Affiche du Klub</h2>
+    <div class="flex flex-col gap-3">
+      <div class="grid m-0 gap-3 mb-4">
+        <app-informations-image-card
+          [description]="profile()!.klubr.denomination"
+          endpointPrefix="klubr-houses"
+          [uuid]="klubrHouse()?.uuid"
+          [klubUuid]="profile()!.klubr.uuid"
+          @fade
+        >
+        </app-informations-image-card>
+      </div>
+    </div>
+  </section>
+
+  <hr class="w-full">
+  <section>
+    <h2 class="admin-h2 sticky top-32 bg-white py-2 z-1 mb-0">Affiche(s) de projet(s)</h2>
+    <div class="flex flex-col gap-3">
+      <div class="grid m-0 gap-3 mb-4">
+        @if (projectList().length === 0) {
+          <div class="flex justify-center items-center bg-[#F8FAFC] border border-solid border-[#E2E8F0] p-3 rounded">
+            <p class="text-center">Aucun projet en cours de validité pour le moment.</p>
+          </div>
+        }
+
+        @for (project of projectList(); track project.uuid) {
+          <app-informations-image-card
+            [description]="project?.titre"
+            endpointPrefix="klub-projets"
+            [uuid]="project.uuid"
+            @fade
+          >
+          </app-informations-image-card>
+        }
+      </div>
+    </div>
+  </section>
+</div>

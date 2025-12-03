@@ -1,0 +1,161 @@
+@if (!klubrsStats.isLoading()) {
+  <span class="font-semibold text-black"> Statistiques </span>
+
+  <!-- SUPER ADMIN STATS -->
+  @if (klubrsStats.value()!.donations; as donationsStats) {
+    <div class="grid-container mt-3">
+      @if (donationsStats.forKlub; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Dons non affectés (pour le Klub)"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterProjectUuid: 'null', filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+      @if (donationsStats.forProjects; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Dons affectés (pour des projets)"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterProjectUuid: 'notNull', filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+      @if (donationsStats.total; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Cumul des dons"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterClubUuid: !displayAll() ? klubUuid() : undefined}"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+      @if (donationsStats.forKlubContribution; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Contrib. de dons non affectés"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterProjectUuid: 'null', filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+      @if (donationsStats.forProjectsContribution; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Contrib. de dons affectés"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterProjectUuid: 'notNull', filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+      @if (donationsStats.totalContribution; as donationStat) {
+        <app-klub-stats-card
+          textColor="#9747FF"
+          title="Cumul des contributions"
+          [value]="donationStat.total.totalAmount"
+          symbol="€"
+          [value2]="donationStat.total.nbDonations"
+          [symbol2]="donationStat.total.nbDonations > 1 ? ' dons' : ' don'"
+          [routerLinkValue]="['/don', 'listing']"
+          [routerLinkQueryParams]="{ filterDonationStatus: 'success', filterClubUuid: !displayAll() ? klubUuid() : undefined}"
+          [meterValues]="[
+          { label: 'Particulier', value: (donationStat.fromPart.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#C5FFD9' },
+          { label: 'Pro', value: (donationStat.fromPro.totalAmount || 0) | percent:(donationStat.total.totalAmount || 0), color: '#FFF0C5' },
+          ]"
+        ></app-klub-stats-card>
+      }
+    </div>
+  }
+  @if (klubrsStats.value()?.projects; as projectsStats) {
+    <div class="grid-container mt-3">
+      <app-klub-stats-card
+        textColor="#22C55E"
+        title="Nombre de projets en cours"
+        [value]="projectsStats.nbPublishedProjects"
+        [routerLinkValue]="['/project', 'listing']"
+        [routerLinkQueryParams]="{ filterProjectStatus: 'published', filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+      ></app-klub-stats-card>
+      @if (projectsStats.nbProjectTmpl && projectsStats.nbProjectTmpl > 0) {
+        <!-- LEADER & ADMIN STATS -->
+        <app-klub-stats-card
+          textColor="#581C87"
+          title="Nombre de template de projet"
+          [value]="projectsStats.nbProjectTmpl!"
+        ></app-klub-stats-card>
+      }
+    </div>
+  }
+  @if (klubrsStats.value()?.members; as membersStats) {
+    <div class="grid-container mt-3">
+      <app-klub-stats-card
+        textColor="#3B82F6"
+        title="Nombre de membres actifs"
+        [value]="membersStats.nbActiveMembers"
+        [routerLinkValue]="['/members', 'listing']"
+        [routerLinkQueryParams]="{ filterMemberAccount: true, filterClubUuid: !displayAll() ? klubUuid() : undefined }"
+      ></app-klub-stats-card>
+    </div>
+  }
+  @if (klubrsStats.value()?.infos; as infosStats) {
+    @if (klubUuid()) {
+      <div class="grid-container mt-3">
+        <app-klub-stats-card
+          textColor="#F69707"
+          title="Complétion d’informations"
+          [value]="infosStats.requiredFieldsCompletion"
+          symbol="%"
+          [routerLinkValue]="['/klub', klubUuid()!,'infos-legales']"
+        ></app-klub-stats-card>
+        <app-klub-stats-card
+          textColor="#64748B"
+          title="Nombre de documents stockés"
+          [value]="infosStats.requiredDocsValidated"
+          [routerLinkValue]="['/klub', klubUuid()!,'documents']"
+        ></app-klub-stats-card>
+      </div>
+    }
+  }
+} @else {
+  <div class="w-full flex justify-center items-center">
+    <ng-lottie
+      width="350px"
+      [options]="{path: 'assets/animations/loading.json'}">
+    </ng-lottie>
+  </div>
+}

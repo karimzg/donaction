@@ -1,0 +1,2 @@
+export const TAUX_DEDUCTION_FISCALE_PART = 0.66;
+export const TAUX_DEDUCTION_FISCALE_PRO = 0.6;

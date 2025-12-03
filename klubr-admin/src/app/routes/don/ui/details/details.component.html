@@ -1,0 +1,392 @@
+<p-breadcrumb
+  class="w-full"
+  [model]="[
+    {
+      label: deviceService.isDesktop() ? (!isFromMyDonations() ? 'Liste des dons' : 'Mes dons') : undefined,
+      routerLink: !isFromMyDonations() ? '/don/listing' : '/don/mes-dons',
+      icon: !deviceService.isDesktop() ? 'pi pi-list' : undefined,
+    },
+    { label:  donation()?.klub_projet?.titre || 'Don pour le financement du klub' },
+  ]"/>
+@if (donation(); as donation) {
+  <div class="mt-2 flex flex-wrap gap-5">
+    <!-- DETAILS DU DON -->
+    <div
+      class="flex flex-col gap-2 rounded-lg shadow-md pt-4 pb-3 w-full md:w-auto md:min-w-[45rem] size-min overflow-hidden">
+      <div class="flex flex-row justify-between items-center pl-3 pr-2">
+        <b class="text-black">Les détails du don</b>
+        @if (donation?.statusPaiment === 'success') {
+          @if (deviceService.isDesktop()) {
+            @if (permissionsService.memberIsAtLeastLeaderSignal() || isFromMyDonations()) {
+              <app-download-pdf [uuid]="donation!.uuid"
+                                [withTaxReduction]="!!donation.withTaxReduction"
+                                [onlyRecu]="!(isFromMyDonations() || permissionsService.memberIsAdminSignal())"
+                                [uuidContribution]="donation.klub_don_contribution?.uuid"
+                                [uuidOriginal]="donation.klub_don?.uuid"
+                                [isButton]="false"></app-download-pdf>
+            }
+          } @else {
+            @if (donation.withTaxReduction || permissionsService.memberIsAdminSignal() || isFromMyDonations()) {
+              <app-don-actions
+                [donation]="donation"
+                [userIsDonationOwner]="isFromMyDonations()"
+                [contribUuid]="contribUuid()"
+              ></app-don-actions>
+            }
+          }
+        }
+      </div>
+      <hr class="border-t border-gray-300 mb-1">
+      <div class="px-3 md:px-4">
+        <table>
+          @if (permissionsService.memberIsAdminSignal() || isFromMyDonations()) {
+            <tr class="h-9">
+              <td class="font-light pr-2">Klub</td>
+              <td class="flex font-semibold">
+                <app-klub-infos [klub]="donation?.klubr" [displaySport]="true"></app-klub-infos>
+              </td>
+            </tr>
+          }
+          <tr class="h-9">
+            <td class="font-light pr-2">Projet</td>
+            <td
+              class="font-semibold text-black">{{ donation?.klub_projet?.titre || 'Don pour le klub' }}
+            </td>
+          </tr>
+          <tr class="h-9">
+            <td class="font-light pr-2">Montant</td>
+            <td>
+              <p-tag
+                severity="success"
+              >{{ donation.montant | currency }}
+              </p-tag>
+              @if (donation.withTaxReduction) {
+                <img
+                  alt="Don avec réduction d'impôts"
+                  height="18"
+                  width="20"
+                  class="ml-1 relative top-1"
+                  pTooltip="Don avec réduction d'impôts"
+                  ngSrc="assets/images/icons/subtract.svg"/>
+              }
+            </td>
+          </tr>
+          <tr class="h-9">
+            <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+              Réduction fiscale
+            } @else {
+              Réd. fiscale
+            }</td>
+            <td>
+              <p-tag
+                severity="secondary"
+              >{{ donation.deductionFiscale | currency }}
+              </p-tag>
+            </td>
+          </tr>
+          @if (permissionsService.memberIsAdminSignal() || (isFromMyDonations() && donation?.contributionAKlubr)) {
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Contribution Klubr
+              } @else {
+                Contrib. K.
+              } </td>
+              @if (donation?.contributionAKlubr) {
+                <td>
+                  <p-tag
+                    severity="info"
+                  >{{ donation.contributionAKlubr | currency }}
+                  </p-tag>
+                </td>
+              } @else {
+                <td class="font-semibold text-red-300">
+                  Non
+                </td>
+              }
+            </tr>
+          }
+          @if (permissionsService.memberIsAdminSignal() && !isFromMyDonations()) {
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Don de contribution
+              } @else {
+                Est contrib.
+              }</td>
+              <td class="font-semibold text-black"
+                  [ngClass]="{ 'text-green-300': donation?.isContributionDonation, 'text-red-300': !donation?.isContributionDonation }">
+                {{ donation?.isContributionDonation ? "Oui" : "Non" }}
+              </td>
+            </tr>
+          }
+          <tr class="h-9">
+            <td class="font-light pr-2"> Date</td>
+            <td class="font-semibold text-black">
+              {{ (donation?.datePaiment || donation?.createdAt) | date:"dd/MM/yyyy" }}
+              <small class="text-[#777777]">{{ (donation?.datePaiment || donation?.createdAt)| date:"HH:mm" }}</small>
+            </td>
+          </tr>
+          <tr class="h-9">
+            <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+              N° d'attestation
+            } @else {
+              Attestation
+            }</td>
+            <td class="font-semibold text-black">
+              {{ donation?.attestationNumber }}
+            </td>
+          </tr>
+          @if (permissionsService.memberIsAtLeastLeaderSignal() && !isFromMyDonations()) {
+            <tr class="h-9">
+              <td class="font-light pr-2"> Facture</td>
+              <td class="font-semibold text-black">
+                {{ donation?.invoice?.invoiceNumber || "Pas de facture" }}
+              </td>
+            </tr>
+          }
+          @if (permissionsService.memberIsAtLeastAdminEditorSignal() && !isFromMyDonations()) {
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                E-mail envoyé
+              } @else {
+                E-mail
+              }</td>
+              <td class="font-semibold text-black"
+                  [ngClass]="{ 'text-green-300': donation?.emailSent, 'text-red-300': !donation?.emailSent }">
+                {{ donation?.emailSent ? "Oui" : "Non" }}
+              </td>
+            </tr>
+          }
+          <tr class="h-9">
+            <td class="font-light pr-2"> Statut</td>
+            <td class="font-semibold">
+              <p-tag [value]="(donation! | statusDonBody)?.text"
+                     [severity]="(donation! | statusDonBody)?.severity"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <!-- INFOS DONATEUR -->
+    <div
+      class="flex flex-col gap-2 rounded-lg shadow-md pt-4 pb-3 w-full md:w-auto md:min-w-[45rem] size-min overflow-hidden">
+      <div class="flex flex-row justify-between items-center px-3">
+        <b class="text-black">Les informations du donateur</b>
+        @if (donation!.klubDonateur.donateurType === 'Organisme') {
+          <p-tag value="PRO" class=""/>
+        }
+      </div>
+      <hr class="border-t border-gray-300 mb-1">
+      @if (donation!.klubDonateur.donateurType === 'Organisme') {
+        <div class="px-3 md:px-4">
+          <table>
+            <tr class="h-9">
+              <td class="font-light pr-2">Entreprise</td>
+              <td class="flex font-semibold">
+                <app-donateur-infos [donateur]="donation!.klubDonateur" [displayProTag]="false"></app-donateur-infos>
+              </td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Adresse mail
+              } @else {
+                Mail
+              }</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.email }}</td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Forme juridique
+              } @else {
+                Forme J.
+              }</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.formeJuridique }}</td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Raison Sociale
+              } @else {
+                Raison
+              }</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.raisonSocial }}</td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">Siren</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.SIREN }}</td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Adresse postale
+              } @else {
+                Adresse
+              }</td>
+              <td
+                class="font-semibold text-black">{{ donation!.klubDonateur.adresse }}{{ donation!.klubDonateur.adresse2 ? ' ' + donation!.klubDonateur.adresse2 : '' }}
+                <br>
+                {{ donation!.klubDonateur.cp }} {{ donation!.klubDonateur.ville }}, {{ donation!.klubDonateur.pays }}
+              </td>
+            </tr>
+          </table>
+        </div>
+        <hr class="border-t border-gray-300 mb-1">
+      }
+      <div class="px-3 md:px-4">
+        <table>
+          <tr class="h-9">
+            <td class="font-light pr-2">Nom</td>
+            <td class="font-semibold text-black">
+              {{ donation!.klubDonateur.prenom }} {{ donation!.klubDonateur.nom }}
+            </td>
+          </tr>
+
+          <tr class="h-9">
+            <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+              Adresse mail
+            } @else {
+              Mail
+            }</td>
+            <td class="font-semibold text-black">{{ donation!.klubDonateur.email }}</td>
+          </tr>
+          @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Date de naissance
+              } @else {
+                Date Nais.
+              }</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.dateNaissance | date: 'dd/MM/yyyy' }}</td>
+            </tr>
+            <tr class="h-9">
+              <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                Numéro de téléphone
+              } @else {
+                N° de tél.
+              }</td>
+              <td class="font-semibold text-black">{{ donation!.klubDonateur.tel || 'Non renseigné' }}</td>
+            </tr>
+            @if (donation!.klubDonateur.donateurType === 'Particulier' && !!donation.withTaxReduction) {
+              <tr class="h-9">
+                <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                  Adresse postale
+                } @else {
+                  Adresse
+                }</td>
+                <td
+                  class="font-semibold text-black">{{ donation!.klubDonateur.adresse }}{{ donation!.klubDonateur.adresse2 ? ' ' + donation!.klubDonateur.adresse2 : '' }}
+                  <br>
+                  {{ donation!.klubDonateur.cp }} {{ donation!.klubDonateur.ville }}, {{ donation!.klubDonateur.pays }}
+                </td>
+              </tr>
+            }
+          }
+          <tr class="h-9">
+            <td class="font-light pr-2">Don visible</td>
+            <td class="font-semibold text-black"
+                [ngClass]="{ 'text-green-300': donation!.klubDonateur!.optInAffMontant, 'text-red-300': !donation!.klubDonateur!.optInAffMontant }">
+              {{ donation?.klubDonateur!.optInAffMontant ? "Oui" : "Non" }}
+            </td>
+          </tr>
+          @if (permissionsService.memberIsAtLeastLeaderSignal() && !isFromMyDonations()) {
+            <tr class="h-9">
+              <td class="font-light pr-2">Compte Klubr</td>
+              <td class="font-semibold text-black"
+                  [ngClass]="{ 'text-green-300': donation!.klubDonateur!.optInAffNom, 'text-red-300': !donation!.klubDonateur!.optInAffNom }">
+                {{ donation?.klubDonateur!.optInAffNom ? "Oui" : "Non" }}
+              </td>
+            </tr>
+          }
+        </table>
+      </div>
+    </div>
+    <!-- INFOS PAIEMENT -->
+    @if (permissionsService.memberIsAtLeastLeaderSignal() && !isFromMyDonations()) {
+      @for (donPayment of (donation!.klub_don_payments | sort : 'DESC'); track donPayment.documentId) {
+        <div
+          class="flex flex-col gap-2 rounded-lg shadow-md pt-4 pb-3 w-full md:w-auto md:min-w-[45rem] size-min overflow-hidden">
+          <div class="flex justify-between items-center gap-5 px-3">
+            <b class="text-black">Les informations de paiement</b>
+            @if (permissionsService.memberIsAdminSignal()) {
+              @if (deviceService.isDesktop()) {
+                <small class="text-orange-300 flex gap-2 cursor-pointer"
+                       (click)="stripeLink(donPayment.intent_id)"
+                >
+                  <u>Voir les détails du paiement</u>
+                  <i class="pi pi-external-link"></i>
+                </small>
+              } @else {
+                <app-don-actions
+                  [donationPayment]="donPayment"
+                ></app-don-actions>
+              }
+            }
+          </div>
+          <hr class="border-t border-gray-300 mb-1">
+          <div class="px-3 md:px-4">
+            <table>
+
+              <tr class="h-9">
+                <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                  Date de création
+                } @else {
+                  Date
+                }</td>
+                <td class="font-semibold text-black">
+                  {{ donPayment.createdAt | date:"dd/MM/yyyy" }}
+                  <small class="text-[#777777]">{{ donPayment.createdAt | date:"HH:mm" }}</small>
+                </td>
+              </tr>
+              @if (permissionsService.memberIsAdminSignal()) {
+                <tr class="h-9">
+                  <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                    Méthode de paiement
+                  } @else {
+                    Méthode
+                  }</td>
+                  <td
+                    class="font-semibold text-black">
+                    <div
+                      class="text-ellipsis whitespace-nowrap overflow-hidden w-[99%]">{{ donPayment.payment_method }}
+                    </div>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                    ID d’intention
+                  } @else {
+                    IdIntent
+                  }</td>
+                  <td class="font-semibold text-black">
+                    <div
+                      class="text-ellipsis whitespace-nowrap overflow-hidden w-[99%]">{{ donPayment.intent_id }}
+                    </div>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">@if (deviceService.isDesktop()) {
+                    Code d'erreur
+                  } @else {
+                    Erreur
+                  }</td>
+                  <td class="font-semibold text-black">
+                    <div
+                      class="text-ellipsis whitespace-nowrap overflow-hidden w-[99%]">{{ donPayment.error_code || 'Aucune erreur' }}
+                    </div>
+                  </td>
+                </tr>
+              }
+              <tr class="h-9">
+                <td class="font-light pr-2"> Statut</td>
+                <td class="font-semibold">
+                  <p-tag [value]="(donPayment | statusDonPayment)?.text"
+                         [severity]="(donPayment | statusDonPayment)?.severity"/>
+                </td>
+              </tr>
+
+            </table>
+          </div>
+        </div>
+      }
+    }
+  </div>
+} @else {
+  Aucun don trouvé
+}

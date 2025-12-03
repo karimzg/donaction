@@ -1,0 +1,79 @@
+<form [formGroup]="formGroup()!" class="p-dropdown-item-filter">
+  <p-select
+    #filterDropdown
+    [options]="itemsList()"
+    formControlName="selectedItem"
+    [optionLabel]="optionLabel()"
+    [filter]="true"
+    filterBy="name"
+    [showClear]="true"
+    [checkmark]="true"
+    [placeholder]="placeholder()"
+    (onClear)="onClear()"
+    emptyMessage="Aucun élément disponible"
+    class="w-full"
+    [styleClass]="'w-full' + customItem() ? ' custom-tmpl-dropdown' : ''">
+    <ng-template #filter let-options="options">
+
+      <p-inputgroup>
+        <p-iconfield iconPosition="left" class="flex-grow">
+          <p-inputicon styleClass="pi pi-search"/>
+          <input type="text"
+                 pInputText
+                 placeholder="Filtre"
+                 formControlName="filterValue"
+                 class="rounded-r-none w-full"
+          />
+        </p-iconfield>
+        <p-inputgroup-addon>
+          <p-button icon="pi pi-times" severity="secondary" class="no-underline" variant="text"
+                    (click)="resetFunction(options)"/>
+        </p-inputgroup-addon>
+      </p-inputgroup>
+      <!--<div class="p-inputgroup" (click)="$event.stopPropagation()">
+        <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>
+        <input
+          type="text"
+          pInputText
+          placeholder="Filter"
+          formControlName="filterValue"/>
+      </div>
+      <button pButton icon="pi pi-times" (click)="resetFunction(options)"></button>-->
+    </ng-template>
+
+    @if (customItem(); as cusItem) {
+      <ng-template #selectedItem>
+        @if (formGroup()!.get('selectedItem')!.value; as selected) {
+          <div class="flex align-items-center gap-2">
+            @if (cusItem.imgField && selected[cusItem.imgField]?.url) {
+              <img
+                alt=""
+                [src]="selected[cusItem.imgField]?.url"
+                style="width: 25px; height: 25px; object-fit: cover; border-radius: 100%"/>
+            }
+            <div>@for (field of cusItem.labelFields; track field) {
+              {{ selected[field] }}
+            }</div>
+
+          </div>
+        }
+      </ng-template>
+      <ng-template let-item #item>
+        <div class="flex align-items-center gap-2">
+          @if (cusItem.imgField) {
+            @if ((item | nestedProperty:cusItem.imgField)?.url; as url) {
+              <img
+                [src]=url
+                style="width: 25px; height: 25px; object-fit: cover; border-radius: 100%"/>
+            }
+          }
+          <div>@for (field of cusItem.labelFields; track field) {
+            {{ item[field] }}
+          }</div>
+        </div>
+      </ng-template>
+    }
+  </p-select>
+</form>
+
+

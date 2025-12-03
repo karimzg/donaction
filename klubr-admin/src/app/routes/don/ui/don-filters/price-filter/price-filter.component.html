@@ -1,0 +1,18 @@
+<div class="w-22rem bg-white border-round">
+  <div class="flex flex-column align-items-center gap-4">
+    <div>Montant</div>
+    <div class="flex flex-column gap-5">
+      <div class="flex gap-5">
+        <input type="number" (change)="updatePriceRange()" [(ngModel)]="priceRange[0]" placeholder="Min" class="w-6rem" />
+        <hr class="w-1rem" />
+        <input type="number" (change)="updatePriceRange()" [(ngModel)]="priceRange[1]" placeholder="Max" class="w-6rem" />
+      </div>
+      <p-slider [(ngModel)]="priceRange" [range]="true"/>
+      <div class="flex justify-content-end">
+        <button (click)="onPriceRangeChange()" class="text-white rounded bg-black-alpha-90 hover:bg-black-alpha-80 p-3">
+          Appliquer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

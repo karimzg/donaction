@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klubr_subscriptions",
+  "info": {
+    "singularName": "klubr-subscription",
+    "pluralName": "klubr-subscriptions",
+    "displayName": "Klubr subscription",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "apiToken": {
+      "type": "text",
+      "unique": true,
+      "private": true
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klubr.klubr",
+      "inversedBy": "klubr_subscriptions"
+    },
+    "host": {
+      "type": "string",
+      "required": true,
+      "unique": false
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "web_component": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

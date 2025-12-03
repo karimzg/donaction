@@ -1,0 +1,208 @@
+<h1 #title class="admin-h1">Mon Klub</h1>
+
+@if (currentKlub()) {
+  <div class="flex flex-col gap-5">
+    <div class="flex flex-col md:flex-row gap-5 text-black">
+      <div class="flex flex-col flex-1 gap-5" @fade>
+        <div class="flex flex-1 flex-col gap-2 p-3 rounded border border-solid border-[#B5B5B5] " @fade>
+          <div class="flex items-center justify-between cursor-pointer"
+               [ngClass]="{'cursor-pointer': currentKlub()?.status === 'published'}"
+               (click)="(currentKlub()?.status === 'published') && redirectToKlubr()">
+            <div class="flex gap-2 items-start"
+                 [ngClass]="{'font-semibold': currentKlub()?.status === 'published', 'text-gray-500': currentKlub()?.status === 'draft'}">
+              <i class="pi pi-globe text-2xl"></i>
+              <p class="text-lg"><span>Voir ma page Klub</span>&nbsp;
+                @if (currentKlub()?.status === 'draft') {
+                  <span class="">(Votre page est désactivée, il faut l'activer)</span>
+                }
+              </p>
+            </div>
+            @if (currentKlub()?.status === 'published') {
+              <i class="pi pi-external-link text-[#F79707] self-start ml-2 "></i>
+            }
+          </div>
+          @if (currentKlub()?.status === 'published') {
+            <div>
+              @if (permissionsService.memberIsAtLeastAdminEditorSignal()) {
+                <p-button label="Active" [rounded]="true" severity="success"
+                          (click)="enableKlubr(currentKlub()?.uuid!, true)"/>
+              } @else {
+                <p-button label="Active" [rounded]="true" severity="success" disabled="true"/>
+              }
+            </div>
+          } @else if (currentKlub()?.status === 'draft') {
+            <div>
+              @if (permissionsService.memberIsAtLeastAdminEditorSignal()
+              || (permissionsService.memberIsAtLeastLeaderSignal() && sharedFacade.currentKlubGlobaleCompletion() === 100)) {
+                <p-button label="Activer" [rounded]="true" severity="primary"
+                          (click)="enableKlubr(currentKlub()?.uuid!)"/>
+              } @else {
+                <p-button label="Activer" [rounded]="true" severity="primary" (click)="showPleaseCompleteKlubPopup()"/>
+              }
+            </div>
+          }
+        </div>
+        @if (currentKlub()?.status === 'draft') {
+          <div class="flex flex-col w-full gap-2 p-3 rounded border border-solid border-[#B5B5B5] justify-between">
+            <div class="flex items-center justify-between cursor-pointer" (click)="redirectToKlubr()">
+              <div class="flex flex-col 2xl:flex-row items-start gap-2  ">
+                <div class="flex gap-2 items-start">
+                  <i class="pi pi-eye text-2xl"></i>
+                  <p class="text-lg m-0"><span class="font-semibold">Prévisualiser ma page Klub</span>&nbsp;
+                    <!--                <span class="text-gray-500">(Les modifications non encore visibles)</span>-->
+                  </p>
+                </div>
+              </div>
+              <i class="pi pi-external-link text-[#F79707] self-start ml-2"></i>
+            </div>
+            @if (permissionsService.memberIsAtLeastAdminEditorSignal()) {
+              <div>
+                <p-button label="Rendre mes modifications visibles" [rounded]="true" severity="primary"
+                          (click)="revalidateCache()"/>
+              </div>
+            }
+          </div>
+        }
+        @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+          <div @fade
+               class="flex flex-1 w-full justify-between gap-4 p-3 rounded border border-solid border-[#B5B5B5] bg-[#F4F4F4] flex-wrap">
+            <div class="flex gap-3 items-center flex-wrap justify-center">
+              <div class="flex gap-2 items-start">
+                <i class="pi pi-send text-2xl"></i>
+                <div class="flex flex-wrap gap-2">
+                  <span class="text-lg font-semibold">Inviter de nouveaux membres à rejoindre mon Klub</span>
+                  <p><span class="text-gray-500 m-0 text-md">(Choisir son rôle)</span><span class="text-lg">:</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-center xl:justify-between items-center w-full flex-wrap gap-4">
+              <div class="flex gap-3">
+                <p-button label="Dirigeant" [rounded]="true" [outlined]="selectedRole() !== 'KlubMemberLeader'"
+                          (click)="selectedRole.set('KlubMemberLeader')" severity="warn"/>
+                <p-button label="Membre" [rounded]="true" [outlined]="selectedRole() !== 'KlubMember'"
+                          (click)="selectedRole.set('KlubMember')" severity="success"/>
+              </div>
+              <p-button class="btn btn-primary text-right" severity="contrast" (click)="showInvitationPopup()">
+                Envoyer l'invitation
+              </p-button>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="flex flex-col gap-2 p-3 rounded border border-solid border-[#B5B5B5] flex-auto" @fade>
+        <div class="flex w-full justify-between text-black">
+          <div class="flex gap-2">
+            <i class="pi pi-bell text-[1.5rem]"></i>
+            <p class="m-0 font-semibold"> Notifications </p>
+          </div>
+          <!--TODO: Implement when Notifs ready-->
+          <!--<div class="flex gap-3">
+            <div [ngClass]="{'notif-button-active': allNotifications(), 'notif-button-inactive': !allNotifications()}"
+                 (click)="toggleAllNotifications(true)">
+              <span> Tout </span>
+            </div>
+            <div [ngClass]="{'notif-button-active': !allNotifications(), 'notif-button-inactive': allNotifications()}"
+                 (click)="toggleAllNotifications(false)">
+              <span> Non lu </span>
+            </div>
+          </div>-->
+        </div>
+        <!--        @if (!allNotifications()) {-->
+        <div class="flex items-center justify-center w-full">
+          <ng-lottie
+            width="200px"
+            [options]="{path: 'assets/animations/notification.json'}"
+          ></ng-lottie>
+        </div>
+        <div class="flex flex-col gap-1 self-center items-center">
+          <p class="m-0 text-gray-600 text-sm"> Vous serez notifié ici de vos dons reçus et informations
+            importantes </p>
+          <p class="m-0 font-semibold text-black"> Suivez vos actualités ! </p>
+        </div>
+        <!--        TODO: Implement when Notifs ready-->
+        <!--        }@else{
+                  <div class="flex flex-col gap-2">
+                    <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+                      <div class="flex gap-2">
+                        <p-avatar
+                          icon="pi pi-user"
+                          size="normal"
+                          [shape]="'circle'"
+                          class="flex-[1_0_auto]"
+                        ></p-avatar>
+                        <div class="flex flex-col gap-1">
+                        <span>
+                          <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                        </span>
+                          <p class="m-0 text-gray-600 text-sm"> il y a 14 heures </p>
+                        </div>
+                      </div>
+                      <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="left"></i>
+                    </div>
+                    <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+                      <div class="flex gap-2">
+                        <p-avatar
+                          icon="pi pi-user"
+                          size="normal"
+                          [shape]="'circle'"
+                          class="flex-[1_0_auto]"
+                        ></p-avatar>
+                        <div class="flex flex-col gap-1">
+                        <span>
+                          <span class="font-semibold"> Theodore T.C. Calvin </span> ajouter un nouveau projet <span class="font-semibold"> Vidéo surveillance pour les infrastructures sportives. </span>
+                        </span>
+                          <p class="m-0 text-gray-600 text-sm"> il y a 23 heures </p>
+                        </div>
+                      </div>
+                      <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="left"></i>
+                    </div>
+                    <div class="flex justify-between rounded-lg p-2">
+                      <div class="flex gap-2">
+                        <p-avatar
+                          icon="pi pi-user"
+                          size="normal"
+                          [shape]="'circle'"
+                          class="flex-[1_0_auto]"
+                        ></p-avatar>
+                        <div class="flex flex-col gap-1">
+                        <span>
+                          <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
+                        </span>
+                          <p class="m-0 text-gray-600 text-sm"> 24/01/2025 </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p-button [routerLink]="['/notifications']" class="mt-4" severity="secondary">Voir toutes les notifications</p-button>
+                }-->
+      </div>
+    </div>
+    @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+      <div class="flex flex-col gap-4">
+        <app-klub-stats
+          [displayAll]="!!permissionsService.memberIsAdminSignal()"
+          [klubUuid]="currentKlub()?.uuid"
+        ></app-klub-stats>
+      </div>
+    }
+    <!--TODO: Implement when News Ready>
+    <div class="flex flex-col gap-4">
+      <span class="font-semibold text-black"> Dernière fonctionnalités de Klubr </span>
+      <div class="flex flex-col gap-2 p-3 text-black rounded-lg border border-solid border-[#B5B5B5] max-w-[350px]"
+           @fade>
+        <div class="flex items-center gap-2">
+          <p-image src="assets/images/icons/hp-message.svg" alt="Message" width="45" class="self-start"/>
+          <div class="flex flex-col gap-1">
+            <span class="text-black font-bold"> La messagerie est en ligne ! </span>
+            <span class="text-[#64748B] text-sm"> Échangez facilement avec vos membres et partenaires. </span>
+          </div>
+        </div>
+        <div class="flex gap-2 self-end cursor-pointer">
+          <u class="text-[#3B82F6]">Cliquez sur Tutoriel</u>
+          <i class="pi pi-arrow-right text-[#3B82F6]"></i>
+        </div>
+      </div>
+    </div>-->
+  </div>
+}
+<!--<app-empty-page title="Notre nouvelle page de tableau de bord arrive bientôt..."></app-empty-page>-->

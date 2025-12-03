@@ -1,0 +1,14 @@
+<div class="flex flex-col  items-center">
+  <div class="flex items-center h-full justify-center">
+    <ng-lottie
+      class="w-full max-w-screen-sm my-4"
+      [options]="{path: 'assets/animations/coming-soon-2.json'}">
+    </ng-lottie>
+  </div>
+  @if (title()) {
+    <p class="text-[#83868B] text-xl">{{ title() }}</p>
+  }
+  @if (subTitle()) {
+    <p class="font-semibold text-2xl">{{ subTitle() }}</p>
+  }
+</div>

@@ -1,0 +1,33 @@
+
+
+.clubDescription {
+  &__leftSection {
+    position: relative;
+
+    &__title {
+      font-weight: 600;
+      font-size: 42px;
+      line-height: 1em;
+    }
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 100%;
+      background-color: #00000024;
+      right: -2rem;
+      top: 0;
+
+      @media screen and (max-width: 767px) {
+        display: none;
+      }
+    }
+  }
+
+  &__rightSection {
+    button {
+
+    }
+  }
+}

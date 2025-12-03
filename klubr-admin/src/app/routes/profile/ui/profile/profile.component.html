@@ -1,0 +1,152 @@
+<h1 #title class="admin-h1">Mon profil</h1>
+<div class="flex justify-center">
+  @if (isReady()) {
+    <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" appInvalidControlScroll class="w-[700px] max-w-full"
+          pFocusTrap @fade>
+      <p-card class="">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold m-0">Mon Profil</h2>
+          <app-role-tag [role]="entitySignal()!.role"></app-role-tag>
+        </div>
+        <input id="avatarInput" type="text" class="hidden" formControlName="avatar">
+        <app-avatar-selector
+          [avatar]="currentAvatar()"
+          (fileSelected)="onFileSelected($event)"
+          (avatarSelected)="onAvatarSelected($event)"
+        ></app-avatar-selector>
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex flex-col gap-2 w-full">
+              <label for="nom" class="flex gap-1"><b>Nom</b><span class="text-red-700">*</span></label>
+              <input #firstInput pInputText autofocus="autofocus" id="nom" type="text" placeholder="Nom"
+                     formControlName="nom">
+              <app-error-display [control]="entityForm.controls['nom']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+              <label for="prenom" class="flex gap-1"><b>Prénom</b><span class="text-red-700">*</span></label>
+              <input pInputText id="prenom" type="text" placeholder="Prénom" formControlName="prenom">
+              <app-error-display [control]="entityForm.controls['prenom']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="numLicence" class="flex gap-1"><b> Numéro de licence </b><!--<span
+              class="text-red-700">*</span>--></label>
+            <input pInputText id="numLicence" type="text" placeholder="Numéro de licence"
+                   formControlName="numLicence">
+            <app-error-display [control]="entityForm.controls['numLicence']"
+                               [isSubmitted]="isSubmitted()"></app-error-display>
+
+          </div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex flex-col gap-2 w-full">
+              <label for="fonction" class="flex gap-1"><b>Fonction</b><span class="text-red-700">*</span></label>
+              <p-select
+                class="w-full"
+                styleClass="customDropdown text-left"
+                id="fonction"
+                formControlName="fonction"
+                [options]="defaultKlubMemberFunctions"
+                [editable]="true"
+                placeholder="Précisez votre fonction"
+              />
+              <app-error-display [control]="entityForm.controls['fonction']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+              <label for="tel" class="flex gap-1"><b>Téléphone</b><!--<span class="text-red-700">*</span>--></label>
+              <app-phone
+                id="tel"
+                [control]="entityForm | formControl : 'tel'"
+              ></app-phone>
+
+              <app-error-display [control]="entityForm.controls['tel']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="email" class="flex gap-1"><b>Email</b><!--<span class="text-red-700">*</span>--></label>
+            <input pInputText id="email" type="text" placeholder="Adresse email"
+                   formControlName="email">
+            <app-error-display [control]="entityForm.controls['email']"
+                               [isSubmitted]="isSubmitted()"></app-error-display>
+
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="flex gap-1"><b>Notifications</b><span class="text-red-700">*</span></label>
+            <div class="flex flex-col gap-2">
+              <div class="flex gap-2 items-center">
+                <p-selectButton
+                  [options]=" [{ label: 'Oui', value: true }, { label: 'Non', value: false }]"
+                  class="basis-auto shrink-0 self-start"
+                  formControlName="optin_mail_don_project"
+                  id="optin_mail_don_project"
+                  optionLabel="label"
+                  optionValue="value"/>
+                <label for="optin_mail_don_project" class="flex gap-1">Recevoir un email quand un don est réalisé pour
+                  un de mes projets.</label>
+              </div>
+              <app-error-display [control]="entityForm.controls['optin_mail_don_project']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+              @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+                <div class="flex gap-2 items-center">
+                  <p-selectButton
+                    [options]=" [{ label: 'Oui', value: true }, { label: 'Non', value: false }]"
+                    class="basis-auto shrink-0 self-start"
+                    formControlName="optin_mail_don_klub_project"
+                    id="optin_mail_don_klub_project"
+                    optionLabel="label"
+                    optionValue="value"/>
+                  <label for="optin_mail_don_klub_project" class="flex gap-1">Recevoir un email quand un don est réalisé
+                    pour un projet de mon Klub.</label>
+                </div>
+                <app-error-display [control]="entityForm.controls['optin_mail_don_klub_project']"
+                                   [isSubmitted]="isSubmitted()"></app-error-display>
+              }
+              @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+                <div class="flex gap-2 items-center">
+                  <p-selectButton
+                    [options]=" [{ label: 'Oui', value: true }, { label: 'Non', value: false }]"
+                    class="basis-auto shrink-0 self-start"
+                    formControlName="optin_mail_don_klub"
+                    id="optin_mail_don_klub"
+                    optionLabel="label"
+                    optionValue="value"/>
+                  <label for="optin_mail_don_klub" class="flex gap-1">Recevoir un email quand un don est réalisé pour
+                    mon Klub.</label>
+                </div>
+                <app-error-display [control]="entityForm.controls['optin_mail_don_klub']"
+                                   [isSubmitted]="isSubmitted()"></app-error-display>
+              }
+              @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+                <div class="flex gap-2 items-center">
+                  <p-selectButton
+                    [options]=" [{ label: 'Oui', value: true }, { label: 'Non', value: false }]"
+                    class="basis-auto shrink-0 self-start"
+                    formControlName="optin_mail_invoice"
+                    id="optin_mail_invoice"
+                    optionLabel="label"
+                    optionValue="value"/>
+                  <label for="optin_mail_invoice" class="flex gap-1">Recevoir les facture de mon Klub par email.</label>
+                </div>
+                <app-error-display [control]="entityForm.controls['optin_mail_invoice']"
+                                   [isSubmitted]="isSubmitted()"></app-error-display>
+              }
+            </div>
+          </div>
+        </div>
+        <ng-template #footer>
+          <div class="flex gap-3 mt-4 justify-end">
+            <p-button label="Annuler" class="self-end" severity="secondary" (click)="resetForm()"
+                      [disabled]="entityForm.pristine || sharedFacade.loading() || loading()"/>
+            <p-button type="submit" label="Enregistrer" severity="contrast" class="self-end"
+                      [disabled]="entityForm.pristine" [loading]="sharedFacade.loading() || loading()"/>
+          </div>
+        </ng-template>
+      </p-card>
+    </form>
+  }
+</div>

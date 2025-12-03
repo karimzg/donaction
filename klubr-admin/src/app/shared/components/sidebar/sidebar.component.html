@@ -1,0 +1,21 @@
+<div class="scrollbar">
+  <a [routerLink]="['/']" class="flex gap-2 items-center my-2 mx-2">
+    @if (profile()?.klubr) {
+      <app-klub-infos
+        [klub]="profile()?.klubr"
+        [displayProgress]="!!permissionsService.memberIsAtLeastLeaderSignal()"
+        size="xlarge"></app-klub-infos>
+    }
+  </a>
+
+  <ul class="layout-menu">
+    @for (item of model(); let i = $index; track item.label) {
+      <li app-menuitem [item]="item" [index]="i" [root]="true" [isDisabled]="sharedFacade.loading()"></li>
+    }
+  </ul>
+
+  <!--  @if (isAdmin()) {-->
+  <!--    <app-permissions-info></app-permissions-info>-->
+  <!--  }-->
+
+</div>

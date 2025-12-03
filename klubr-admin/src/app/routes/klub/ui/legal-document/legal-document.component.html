@@ -1,0 +1,200 @@
+<div class="flex flex-col gap-4 sticky top-5 z-10 px-3 mx-[-1rem] bg-white">
+  <div class="flex flex-col sm:flex-row sm:gap-4">
+    <h1 #title class="admin-h1 flex flex-1 items-center gap-4 justify-content-between">
+      Documents
+      @if (permissionsService.memberIsAdminSignal() && entity()?.klubr) {
+        <app-klub-infos [klub]="entity()?.klubr" [displaySport]="true" [displayReverse]="true"></app-klub-infos>
+      }
+    </h1>
+  </div>
+  @if (meter()) {
+    <p-meterGroup [value]="meter()" class="mb-4 mt-[-1.5rem]" @fade/>
+  }
+</div>
+
+<!--  replace with form-->
+@if (isReady()) {
+  <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" @fade>
+
+    <div class="flex flex-col gap-5">
+      <div class="flex flex-col flex-1 gap-2">
+        <b class="m-0">
+          Documents du Club
+        </b>
+        <p class="text-[#94A3B8] mb-0">Les documents officiels et les justificatifs essentiels concernant le Klub.</p>
+        <hr class="flex flex-1 mt-0 mb-0">
+      </div>
+      <div class="flex gap-4 flex-wrap justify-between doc-list">
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="statutsAssociation" class="flex gap-1"><b> Statuts de l'association </b><span
+            class="text-red-700">*</span></label>
+          <app-form-media-update
+            id="statutsAssociation"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'Statuts de l\'association'"
+            [control]="entityForm | formControl : 'statutsAssociation'"
+            [mediaField]="'statutsAssociation'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['statutsAssociationValide'].value"
+            (onValidatedClick)="onValidatedClick('statutsAssociation')"
+            (onDownloadFile)="downloadFile('statutsAssociation', $event,'statutsAssociation')"
+            #statutsAssociation>
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="avisSituationSIRENE" class="flex gap-1"><b> Avis de situation au SIRENE </b><span
+            class="text-red-700">*</span></label>
+          <app-form-media-update
+            id="avisSituationSIRENE"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'Avis de situation au SIRENE'"
+            [control]="entityForm | formControl : 'avisSituationSIRENE'"
+            [mediaField]="'avisSituationSIRENE'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['avisSituationSIRENEValide'].value"
+            (onValidatedClick)="onValidatedClick('avisSituationSIRENE')"
+            (onDownloadFile)="downloadFile('avisSituationSIRENE', $event,'avisSituationSIRENE')"
+            #avisSituationSIRENE>
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="attestationAffiliationFederation" class="flex gap-1"><b> Attestation d’affiliation à la
+            fédération </b><span
+            class="text-red-700">*</span></label>
+          <app-form-media-update
+            id="attestationAffiliationFederation"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'Attestation d’affiliation à la fédération'"
+            [control]="entityForm | formControl : 'attestationAffiliationFederation'"
+            [mediaField]="'attestationAffiliationFederation'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['attestationAffiliationFederationValide'].value"
+            (onValidatedClick)="onValidatedClick('attestationAffiliationFederation')"
+            (onDownloadFile)="downloadFile('attestationAffiliationFederation', $event,'attestationAffiliationFederation')"
+            #attestationAffiliationFederation>
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="ribAssociation" class="flex gap-1"><b> RIB de l'association </b><span
+            class="text-red-700">*</span></label>
+          <app-form-media-update
+            id="ribAssociation"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'RIB de l\'association'"
+            [control]="entityForm | formControl : 'ribAssociation'"
+            [mediaField]="'ribAssociation'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['ribAssociationValide'].value"
+            (onValidatedClick)="onValidatedClick('ribAssociation')"
+            (onDownloadFile)="downloadFile('ribAssociation', $event, 'ribAssociation')"
+            #ribAssociation>
+            <!--
+            (reset)="error.set(true)"-->
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="border-t-4">
+
+    <div class="flex flex-col gap-5">
+      <div class="flex flex-col flex-1 gap-2">
+        <b class="m-0">
+          Documents du dirigeant
+        </b>
+        <p class="text-[#94A3B8] mb-0">Les documents et justificatifs essentiels concernant le responsable du Klub.</p>
+        <hr class="flex flex-1 mt-0 mb-0">
+      </div>
+      <div class="flex gap-4 flex-wrap justify-between doc-list">
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="statutsAssociation" class="flex gap-1"><b> Justificatif de domicile </b></label>
+          <app-form-media-update
+            id="justifDomicileDirigeant"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'Justificatif de domicile du Président'"
+            [control]="entityForm | formControl : 'justifDomicileDirigeant'"
+            [mediaField]="'justifDomicileDirigeant'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['justifDomicileDirigeantValide'].value"
+            (onValidatedClick)="onValidatedClick('justifDomicileDirigeant')"
+            (onDownloadFile)="downloadFile('justifDomicileDirigeant', $event, 'justifDomicileDirigeant')"
+            #justifDomicileDirigeant>
+            <!--
+            (reset)="error.set(true)"-->
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+
+        <div class="flex flex-col gap-2 max-w-full flex-[1_1_350px] mb-4">
+          <label for="justifDesignationPresident" class="flex gap-1"><b>Acte désignant le président (PV de désignation
+            du
+            président)</b><span class="text-red-700">*</span></label>
+          <app-form-media-update
+            id="justifDesignationPresident"
+            [size]="'sm'"
+            [endpointPrefix]="'klubrs/'"
+            [endpointSuffix]="'/documents'"
+            [itemUUID]="klubrUuid()!"
+            [itemMediaLabel]="'Acte désignant le président (PV de désignation du président)'"
+            [control]="entityForm | formControl : 'justifDesignationPresident'"
+            [mediaField]="'justifDesignationPresident'"
+            [mediaType]="'doc'"
+            [fileTypesAllowed]="['doc']"
+            [validatedDocument]="entityForm.controls['justifDesignationPresidentValide'].value"
+            (onValidatedClick)="onValidatedClick('justifDesignationPresident')"
+            (onDownloadFile)="downloadFile('justifDesignationPresident', $event, 'justifDesignationPresident')"
+            #justifDesignationPresident>
+            <!--
+            (reset)="error.set(true)"-->
+            <ng-container *ngTemplateOutlet="uploadPlaceholder"></ng-container>
+          </app-form-media-update>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-between sticky bottom-0 py-3 px-3 mx-[-1rem] bg-white">
+      <p-button label="Annuler" icon="pi pi-times" severity="secondary" (onClick)="resetForm()"
+                [disabled]="entityForm.pristine || sharedFacade.loading()">
+
+      </p-button>
+      <p-button type="submit" label="Enregistrer" icon="pi pi-save" severity="contrast"
+                [disabled]="entityForm.pristine"
+                [loading]="sharedFacade.loading()">
+      </p-button>
+    </div>
+  </form>
+}
+
+<ng-template #uploadPlaceholder>
+  <div class="flex flex-col text-[#64748B]">
+    <p class="m-0"><strong> Cliquez pour télécharger </strong> ou glissez </p>
+    <p> PDF ou Word (max 10 Mo) </p>
+  </div>
+</ng-template>

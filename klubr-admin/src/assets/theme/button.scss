@@ -1,0 +1,90 @@
+//// Button
+.p-button {
+  max-height: 2.7rem;
+  height: 2.7rem;
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+button:focus {
+  outline: 0;
+}
+
+button {
+  outline: 0 !important;
+}
+
+.p-button-label {
+  line-height: 1;
+}
+
+.p-button--only-icon-mobile {
+  @media (max-width: 767px) {
+    .p-button {
+      margin: 0;
+    }
+    .p-button-label {
+      display: none;
+    }
+    .p-button-icon {
+      margin: 0;
+    }
+  }
+}
+
+//
+//.p-button.p-button-contrast {
+//  color: #ffffff;
+//  border: 1px solid #000000;
+//  padding: 1em 1.25rem;
+//  font-size: 1.08rem;
+//  font-weight: 600;
+//  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+//  border-radius: 4px;
+//  background: var(--Black, #000);
+//  outline-color: transparent;
+//  cursor: pointer;
+//
+//  &:not(:disabled):hover, &:focus {
+//    box-shadow: 0 4px 7px 0 rgba(0, 0, 0, 0.18);
+//  }
+//}
+//
+//.p-button.p-button-primary {
+//  color: #000000;
+//  background: #FFFFFF;
+//  border: 1px solid #000000;
+//  padding: 1em 1.25rem;
+//  font-size: 1.08rem;
+//  font-weight: 600;
+//  transition: background-color 0.2s, color 0s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+//  border-radius: 4px;
+//  outline-color: transparent;
+//  cursor: pointer;
+//
+//  &:not(:disabled):hover, &:focus {
+//    color: var(--white, #FFFFFF);
+//    background: var(--Black, #000);
+//    border-color: var(--Black, #000);
+//  }
+//}
+//
+//.p-button.p-button-secondary, .p-button-group.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button {
+//  background: transparent;
+//  color: #000000;
+//  border: none;
+//  padding: 1em 1.25rem;
+//  font-size: 1.08rem;
+//  font-weight: 600;
+//  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, outline-color 0.2s;
+//  border-radius: 4px;
+//  outline-color: transparent;
+//  cursor: pointer;
+//
+//  &:not(:disabled):hover, &:focus {
+//    text-decoration: underline;
+//    background: transparent;
+//  }
+//}

@@ -1,0 +1,40 @@
+.popAuth {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background-color: white;
+  z-index: 99999;
+  animation: fadein 1s ease-in-out;
+}
+.popAuthBackDrop {
+  content: '';
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  animation: fadein 1s ease-in-out;
+}
+.popAuthX {
+  display: initial;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  cursor: pointer;
+  z-index: 9999999;
+}
+
+@keyframes fadein{
+  0%{
+    opacity:0;
+  }
+  100%{
+    opacity:1;
+  }
+}

@@ -1,0 +1,159 @@
+<div class="app-listing">
+  <h1 #title class="admin-h1">Mes Dons</h1>
+  @if (listing().length > 0 && pagination()) {
+    @if (deviceService.isDesktop()) {
+      <!-- Desktop -->
+      <p-table
+        [value]="listing()"
+        size="small"
+        class="app-table"
+        @fade>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="denomination">Club
+              <p-sortIcon field="denomination"/>
+            </th>
+            <th>Projet</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Donateur</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-donation>
+          <tr>
+            <td class="max-w-[280px]">
+              <div class="table-content">
+                <app-klub-infos [klub]="donation.klubr" [displaySport]="true"></app-klub-infos>
+              </div>
+            </td>
+            <td class="max-w-[450px]">{{ donation.klub_projet?.titre || "Don en faveur du fonctionnement du Klub" }}
+            </td>
+            <td class="max-w-[133px]">
+              <div class="flex items-center gap-2">
+                <p-tag
+                  severity="success"
+                >{{ donation.montant | currency }}
+                </p-tag>
+                @if (!!donation.contributionAKlubr) {
+                  <p-tag
+                    pTooltip="Contribution à la plateforme Klubr"
+                    [severity]="donation.contributionAKlubr && donation.contributionAKlubr > 0 ? 'info' : 'secondary'"
+                  >{{ (donation.contributionAKlubr || 0) | currency }}
+                  </p-tag>
+                }</div>
+            </td>
+            <td class="max-w-[129px]">
+              <span class="flex flex-col w-fit">
+                {{ donation.datePaiment | date:"dd/MM/yyyy" }}
+                <br><small class="self-end">{{ donation.datePaiment | date:"HH:mm" }}</small>
+              </span>
+            </td>
+            <td class="max-w-[200px]">
+              <div class="table-content">
+                <app-donateur-infos
+                  [donateur]="donation.klubDonateur"
+                ></app-donateur-infos>
+              </div>
+            </td>
+            <td style="max-width: 146px;">
+              <p-tag [value]="(donation | statusDonBody)?.text" [severity]="(donation | statusDonBody)?.severity"/>
+            </td>
+            <td class="actions max-w-16">
+              <div class="flex items-center justify-evenly">
+                @if (donation.statusPaiment === 'success') {
+                  <app-download-pdf [uuid]="donation.uuid"
+                                    [withTaxReduction]="!!donation.withTaxReduction"
+                                    [uuidContribution]="donation.klub_don_contribution?.uuid"
+                                    [isButton]="false"></app-download-pdf>
+                }
+                <i class="pi pi-eye cursor-pointer" [routerLink]="['/don', donation.uuid, 'details']"
+                   [queryParams]="{'mes-dons': true, 'contribUuid': donation!.klub_don_contribution?.uuid}"></i>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p-paginator
+        [rows]="pageSize()"
+        [rowsPerPageOptions]="[5,10,15,20]"
+        [totalRecords]="pagination()!.total"
+        [first]="0"
+        (onPageChange)="changePage($event)"
+        [showCurrentPageReport]="false"
+        [showPageLinks]="true"
+        [showJumpToPageDropdown]="false"
+        currentPageReportTemplate="Dons {first} à {last} parmis {totalRecords}"/>
+    } @else {
+      <!-- Mobile -->
+      <div class="flex flex-col gap-4">
+        @for (donation of listing(); track donation.uuid) {
+          <div class="flex flex-col card-box-shadow	rounded-lg gap-2 pt-4 pb-3">
+            <div class="flex justify-between items-center pl-3 pr-2">
+              <app-klub-infos [klub]="donation.klubr" [displaySport]="true"></app-klub-infos>
+              <app-don-actions
+                [donation]="donation"
+                [userIsDonationOwner]="true"
+                [contribUuid]="donation!.klub_don_contribution?.uuid"
+                showDetailLink="true"
+              ></app-don-actions>
+            </div>
+            <hr class="border-t border-gray-300 mb-1">
+            <table class=" px-3">
+              <tr class="h-9">
+                <td class="font-light pr-2">Projet</td>
+                <td>
+                  {{ donation.klub_projet?.titre || "Don en faveur du fonctionnement du Klub" }}
+                </td>
+              </tr>
+              <tr class="h-9">
+                <td class="font-light pr-2">Montant</td>
+                <td>
+                  <p-tag [value]="(donation.montant | currency)!" pTooltip="Montant du don"
+                         severity="success" class="cursor-pointer font-semibold"></p-tag>
+                </td>
+              </tr>
+              @if (!!donation.contributionAKlubr) {
+                <tr class="h-9">
+                  <td class="font-light pr-2">Contribution</td>
+                  <td>
+                    <p-tag [value]="(donation.contributionAKlubr | currency)!" pTooltip="Montant du don"
+                           severity="info" class="cursor-pointer font-semibold"></p-tag>
+                  </td>
+                </tr>
+              }
+              <tr class="h-9">
+                <td class="font-light pr-2">Donateur</td>
+                <td>
+                  <app-donateur-infos
+                    [donateur]="donation.klubDonateur"
+                  ></app-donateur-infos>
+                </td>
+              </tr>
+              <tr class="h-9">
+                <td class="font-light pr-2">Statut</td>
+                <td>
+                  <p-tag [value]="(donation | statusDonBody)?.text"
+                         [severity]="(donation | statusDonBody)?.severity"/>
+                </td>
+              </tr>
+              <tr class="h-9">
+                <td class="font-light pr-2">Date</td>
+                <td><span class="text-[#777777]">{{ donation.datePaiment | date:"dd/MM/yyyy" }}
+                  <small>{{ donation.datePaiment | date:"HH:mm" }}</small></span></td>
+              </tr>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- LOADING / NO RESULT -->
+    <app-list-loading-no-results
+      label="don"
+      [hasFilters]="!!hasFilters()"
+      [loading]="sharedFacade.loading()"
+    ></app-list-loading-no-results>
+  }
+</div>

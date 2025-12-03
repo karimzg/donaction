@@ -1,0 +1,90 @@
+//.dons-filters {
+//  .p-dropdown-header {
+//    input {
+//      border-width: 1px;
+//      border-color: #cbd5e1;
+//      border-style: solid;
+//      flex: 1;
+//      padding-left: 1rem;
+//    }
+//  }
+//  .p-dropdown-panel {
+//    max-width: 300px;
+//    .p-dropdown-item {
+//      span {
+//        // prevent overflow text
+//        white-space: nowrap;
+//        overflow: hidden;
+//        text-overflow: ellipsis;
+//        width: 100%;
+//        max-width: 80vw;
+//        display: inline-block;
+//        padding-right: 20px;
+//      }
+//      .p-element.p-icon-wrapper {
+//        display: none;
+//      }
+//    }
+//  }
+//  .customDropdown{
+//    .p-dropdown{
+//      height: 48px;
+//      width: 100% !important;
+//      align-items: center;
+//    }
+//  }
+//  .filter-component {
+//    flex: 1 0 100%;
+//    &:last-child {
+//      flex-grow: 1;
+//    }
+//    @media (min-width: 768px) {
+//      flex: 0 1 32%;
+//      width: 32%;
+//    }
+//  }
+//
+//  .fake-dropdown {
+//    p-overlay {
+//      display: none;
+//    }
+//  }
+//
+//  .customMultiSelect .p-multiselect{
+//    width: 100%;
+//    height: 48px;
+//    align-items: center;
+//    border-radius: 4px;
+//  }
+//
+//  .p-calendar {
+//    width: 100%;
+//  }
+//  .calendar{
+//    height: 48px;
+//    .p-calendar {
+//      .p-inputtext	{
+//        width: 100%;
+//        height: 48px;
+//        border: 1px solid #E2E8F0;
+//        border-radius: 4px 0 0 4px;
+//        &::placeholder{
+//          color: #64748b;
+//        }
+//        &:focus{
+//          border-color: #000000;
+//        }
+//      }
+//      .p-datepicker{
+//        position: absolute;
+//      }
+//      .p-datepicker-trigger {
+//        background-color: #000000;
+//        border: 1px solid #000000;
+//        border-top-left-radius: 0;
+//        border-bottom-left-radius: 0;
+//      }
+//    }
+//  }
+//
+//}

@@ -1,0 +1,26 @@
+<span class="block mb-5">Laissez-nous votre message, et nous vous recontacterons dans les plus brefs délais.</span>
+<form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="w-[700px] max-w-full">
+  <input pInputText type="text" formControlName="email" class="hidden">
+  <div class="flex flex-col gap-2 mb-3">
+    <label class="text-[#64748B]" for="objet">Objet</label>
+    <input pInputText id="objet" type="text" placeholder="Objet" formControlName="objet">
+    <app-error-display [control]="contactForm.controls['objet']"
+    ></app-error-display>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label class="text-[#64748B]">Message</label>
+    <textarea
+      rows="5"
+      cols="30"
+      placeholder="Votre message"
+      pTextarea
+      formControlName="message">
+      </textarea>
+    <app-error-display [control]="contactForm.controls['message']"
+    ></app-error-display>
+  </div>
+  <div class="flex gap-3 mt-4 justify-end">
+    <p-button label="Annuler" class="self-end" severity="secondary" (onClick)="closeDialog()"/>
+    <p-button label="Envoyer" class="self-end" severity="contrast" type="submit" [disabled]="!contactForm.valid"/>
+  </div>
+</form>

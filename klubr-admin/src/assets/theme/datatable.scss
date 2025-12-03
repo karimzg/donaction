@@ -1,0 +1,659 @@
+@layer klubr {
+  :root {
+    --p-datatable-column-title-font-weight: 600;
+  }
+}
+
+.app-listing {
+  .filters-active {
+    color: #FFFFFF;
+    filter: brightness(0) invert(1);
+  }
+
+  .app-table {
+    .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+      color: #000000;
+      background-color: rgba(217, 217, 217, 0.4);
+    }
+
+    th {
+      border: 1px solid #E2E8F0;
+      background: #F8FAFC;
+    }
+
+    td {
+      border: 1px solid #E2E8F0;
+      width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+
+  .table-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &, p {
+      //width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 3px
+    }
+  }
+
+  .button-responsive {
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+}
+
+.p-datatable {
+  font-size: 1rem;
+
+  //.p-paginator-top,
+  //.p-paginator-bottom {
+  //  border-width: 0 0 1px 0;
+  //  border-radius: 0;
+  //}
+  //
+  //.p-datatable-header,
+  //.p-datatable-footer {
+  //  background: #f9fafb;
+  //  color: #374151;
+  //  border: 1px solid #e5e7eb;
+  //  border-width: 1px 0 1px 0;
+  //  padding: 1rem 1rem;
+  //  font-weight: 700;
+  //}
+
+  //.p-datatable-thead > tr > th,
+  //.p-datatable-tfoot > tr > td {
+  //  text-align: left;
+  //  padding: .75rem 1rem;
+  //  border: 1px solid #e5e7eb;
+  //  border-width: 0 0 1px 0;
+  //  font-weight: 600;
+  //  color: #374151;
+  //  background: #f9fafb;
+  //  transition: box-shadow 0.2s;
+  //}
+
+  //.p-sortable-column {
+  //  .p-sortable-column-icon {
+  //    color: #374151;
+  //    margin-left: 0.5rem;
+  //  }
+  //
+  //  .p-sortable-column-badge {
+  //    border-radius: 50%;
+  //    height: 1.143rem;
+  //    min-width: 1.143rem;
+  //    line-height: 1.143rem;
+  //    color: #1d4ed8;
+  //    background: #eff6ff;
+  //    margin-left: 0.5rem;
+  //  }
+  //
+  //  &:not(.p-highlight):hover {
+  //    background: #f3f4f6;
+  //    color: #374151;
+  //
+  //    .p-sortable-column-icon {
+  //      color: #374151;
+  //    }
+  //  }
+  //
+  //  &.p-highlight {
+  //    background: #eff6ff;
+  //    color: #1d4ed8;
+  //
+  //    .p-sortable-column-icon {
+  //      color: #1d4ed8;
+  //    }
+  //
+  //    &:hover {
+  //      background: #eff6ff;
+  //      color: #1d4ed8;
+  //
+  //      .p-sortable-column-icon {
+  //        color: #1d4ed8;
+  //      }
+  //    }
+  //  }
+  //
+  //  &:focus-visible {
+  //    box-shadow: inset 0 0 0 0.15rem #bfdbfe;
+  //    outline: 0 none;
+  //  }
+  //}
+  //
+  //.p-datatable-tbody > tr {
+  //  background: #ffffff;
+  //  color: #4b5563;
+  //  transition: box-shadow 0.2s;
+  //
+  //  > td {
+  //    text-align: left;
+  //    border: 1px solid #e5e7eb;
+  //    border-width: 0 0 1px 0;
+  //    padding: .75rem 1rem;
+  //
+  //    .p-row-toggler,
+  //    .p-row-editor-init,
+  //    .p-row-editor-save,
+  //    .p-row-editor-cancel {
+  //      width: 2rem;
+  //      height: 2rem;
+  //      color: #6b7280;
+  //      border: 0 none;
+  //      background: transparent;
+  //      border-radius: 50%;
+  //      transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  //
+  //      &:enabled:hover {
+  //        color: #374151;
+  //        border-color: transparent;
+  //        background: #f3f4f6;
+  //      }
+  //
+  //      &:focus-visible {
+  //        outline: 0 none;
+  //        outline-offset: 0;
+  //        box-shadow: 0 0 0 0.2rem #bfdbfe;
+  //      }
+  //    }
+  //
+  //    .p-row-editor-save {
+  //      margin-right: 0.5rem;
+  //    }
+  //  }
+  //
+  //  &:focus-visible {
+  //    outline: 0.15rem solid #bfdbfe;
+  //    outline-offset: -0.15rem;
+  //  }
+  //
+  //  &.p-highlight {
+  //    background: #eff6ff;
+  //    color: #1d4ed8;
+  //  }
+  //
+  //  &.p-datatable-dragpoint-top > td {
+  //    box-shadow: inset 0 2px 0 0 #eff6ff;
+  //  }
+  //
+  //  &.p-datatable-dragpoint-bottom > td {
+  //    box-shadow: inset 0 -2px 0 0 #eff6ff;
+  //  }
+  //
+  //  &:not(.p-highlight):hover {
+  //    background: #f3f4f6;
+  //    color: #4b5563;
+  //  }
+  //}
+  //
+  //.p-column-resizer-helper {
+  //  background: #3b82f6;
+  //}
+  //
+  //.p-datatable-scrollable-header,
+  //.p-datatable-scrollable-footer {
+  //  background: #f9fafb;
+  //}
+  //
+  //&.p-datatable-scrollable {
+  //  > .p-datatable-wrapper {
+  //    > .p-datatable-table {
+  //      > .p-datatable-thead,
+  //      > .p-datatable-tfoot,
+  //      .p-scroller-viewport > .p-scroller > .p-datatable-table > .p-datatable-thead,
+  //      .p-scroller-viewport > .p-scroller > .p-datatable-table > .p-datatable-tfoot {
+  //        background-color: #f9fafb;
+  //      }
+  //    }
+  //  }
+  //}
+  //
+  //.p-datatable-loading-icon {
+  //  font-size: 2rem;
+  //}
+  //
+  //&.p-datatable-gridlines {
+  //  .p-datatable-header {
+  //    border-width: 1px 1px 0 1px;
+  //  }
+  //
+  //  .p-datatable-footer {
+  //    border-width: 0 1px 1px 1px;
+  //  }
+  //
+  //  .p-paginator-top {
+  //    border-width: 0 1px 0 1px;
+  //  }
+  //
+  //  .p-paginator-bottom {
+  //    border-width: 0 1px 1px 1px;
+  //  }
+  //
+  //  .p-datatable-thead > tr > th {
+  //    border-width: 1px 0 1px 1px;
+  //
+  //    &:last-child {
+  //      border-width: 1px;
+  //    }
+  //  }
+  //
+  //  .p-datatable-tbody > tr > td {
+  //    border-width: 1px 0 0 1px;
+  //
+  //    &:last-child {
+  //      border-width: 1px 1px 0 1px;
+  //    }
+  //  }
+  //
+  //  .p-datatable-tbody > tr:last-child > td {
+  //    border-width: 1px 0 1px 1px;
+  //
+  //    &:last-child {
+  //      border-width: 1px;
+  //    }
+  //  }
+  //
+  //  .p-datatable-tfoot > tr > td {
+  //    border-width: 1px 0 1px 1px;
+  //
+  //    &:last-child {
+  //      border-width: 1px 1px 1px 1px;
+  //    }
+  //  }
+  //
+  //  .p-datatable-thead + .p-datatable-tfoot > tr > td {
+  //    border-width: 0 0 1px 1px;
+  //
+  //    &:last-child {
+  //      border-width: 0 1px 1px 1px;
+  //    }
+  //  }
+  //
+  //  &:has(.p-datatable-thead):has(.p-datatable-tbody) {
+  //    .p-datatable-tbody > tr > td {
+  //      border-width: 0 0 1px 1px;
+  //
+  //      &:last-child {
+  //        border-width: 0 1px 1px 1px;
+  //      }
+  //    }
+  //  }
+  //
+  //  &:has(.p-datatable-tbody):has(.p-datatable-tfoot) {
+  //    .p-datatable-tbody > tr:last-child > td {
+  //      border-width: 0 0 0 1px;
+  //
+  //      &:last-child {
+  //        border-width: 0 1px 0 1px;
+  //      }
+  //    }
+  //  }
+  //}
+  //
+  //&.p-datatable-striped {
+  //  .p-datatable-tbody > tr:nth-child(even) {
+  //    background: #f8f8fa;
+  //
+  //    &.p-highlight {
+  //      background: #eff6ff;
+  //      color: #1d4ed8;
+  //
+  //      .p-row-toggler {
+  //        color: #1d4ed8;
+  //
+  //        &:hover {
+  //          color: #1d4ed8;
+  //        }
+  //      }
+  //    }
+  //  }
+  //}
+  //
+  //&.p-datatable-sm {
+  //  .p-datatable-header,
+  //  .p-datatable-thead > tr > th,
+  //  .p-datatable-tbody > tr > td,
+  //  .p-datatable-tfoot > tr > td,
+  //  .p-datatable-footer {
+  //    padding: 0.5rem 0.5rem;
+  //  }
+  //}
+  //
+  //&.p-datatable-lg {
+  //  .p-datatable-header,
+  //  .p-datatable-thead > tr > th,
+  //  .p-datatable-tbody > tr > td,
+  //  .p-datatable-tfoot > tr > td,
+  //  .p-datatable-footer {
+  //    padding: 1.25rem 1.25rem;
+  //  }
+  //}
+}
+
+//.p-dataview {
+//  .p-paginator-top,
+//  .p-paginator-bottom {
+//    border-width: 0 0 1px 0;
+//    border-radius: 0;
+//  }
+//
+//  .p-dataview-header,
+//  .p-dataview-footer {
+//    background: #f9fafb;
+//    color: #374151;
+//    border: 1px solid #e5e7eb;
+//    border-width: 1px 0 1px 0;
+//    padding: 1rem 1rem;
+//    font-weight: 700;
+//  }
+//
+//  .p-dataview-content {
+//    background: #ffffff;
+//    color: #4b5563;
+//    border: 0 none;
+//    padding: 0;
+//  }
+//
+//  .p-dataview-loading-icon {
+//    font-size: 2rem;
+//  }
+//
+//  .p-dataview-emptymessage {
+//    padding: 1.25rem;
+//  }
+//}
+//
+//.p-column-filter-row {
+//  .p-column-filter-menu-button,
+//  .p-column-filter-clear-button {
+//    margin-left: 0.5rem;
+//  }
+//}
+//
+//.p-column-filter-menu-button,
+//.p-column-filter-clear-button {
+//  width: 2rem;
+//  height: 2rem;
+//  color: #6b7280;
+//  border: 0 none;
+//  background: transparent;
+//  border-radius: 50%;
+//  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+//
+//  &:hover {
+//    color: #374151;
+//    border-color: transparent;
+//    background: #f3f4f6;
+//  }
+//
+//  &:focus-visible {
+//    outline: 0 none;
+//    outline-offset: 0;
+//    box-shadow: 0 0 0 0.2rem #bfdbfe;
+//  }
+//
+//  &.p-column-filter-menu-button-open,
+//  &.p-column-filter-menu-button-open:hover {
+//    background: #f3f4f6;
+//    color: #374151;
+//  }
+//
+//  &.p-column-filter-menu-button-active,
+//  &.p-column-filter-menu-button-active:hover {
+//    background: #eff6ff;
+//    color: #1d4ed8;
+//  }
+//}
+//
+//.p-column-filter-overlay {
+//  background: #ffffff;
+//  color: #4b5563;
+//  border: 0 none;
+//  border-radius: 6px;
+//  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+//  min-width: 12.5rem;
+//
+//  .p-column-filter-row-items {
+//    padding: 0.75rem 0;
+//
+//    .p-column-filter-row-item {
+//      margin: 0;
+//      padding: 0.75rem 1.25rem;
+//      border: 0 none;
+//      color: #4b5563;
+//      background: transparent;
+//      transition: box-shadow 0.2s;
+//      border-radius: 0;
+//
+//      &.p-highlight {
+//        color: #1d4ed8;
+//        background: #eff6ff;
+//      }
+//
+//      &:not(.p-highlight):not(.p-disabled):hover {
+//        color: #4b5563;
+//        background: #f3f4f6;
+//      }
+//
+//      &:focus-visible {
+//        outline: 0 none;
+//        outline-offset: 0;
+//        box-shadow: inset 0 0 0 0.15rem #bfdbfe;
+//      }
+//    }
+//
+//    .p-column-filter-separator {
+//      border-top: 1px solid #e5e7eb;
+//      margin: 0.25rem 0;
+//    }
+//  }
+//
+//  &-menu {
+//    .p-column-filter-operator {
+//      padding: 0.75rem 1.25rem;
+//      border-bottom: 1px solid #e5e7eb;
+//      color: #374151;
+//      background: #f9fafb;
+//      margin: 0;
+//      border-top-right-radius: 6px;
+//      border-top-left-radius: 6px;
+//    }
+//
+//    .p-column-filter-constraint {
+//      padding: 1.25rem;
+//      border-bottom: 1px solid #e5e7eb;
+//
+//      .p-column-filter-matchmode-dropdown {
+//        margin-bottom: 0.5rem;
+//      }
+//
+//      .p-column-filter-remove-button {
+//        margin-top: 0.5rem;
+//      }
+//
+//      &:last-child {
+//        border-bottom: 0 none;
+//      }
+//    }
+//
+//    .p-column-filter-add-rule {
+//      padding: 0.75rem 1.25rem;
+//    }
+//
+//    .p-column-filter-buttonbar {
+//      padding: 1.25rem;
+//    }
+//  }
+//}
+//
+//.p-orderlist {
+//  .p-orderlist-controls {
+//    padding: 1.25rem;
+//
+//    .p-button {
+//      margin-bottom: 0.5rem;
+//    }
+//  }
+//
+//  .p-orderlist-header {
+//    background: #f9fafb;
+//    color: #374151;
+//    border: 1px solid #e5e7eb;
+//    padding: 1.25rem;
+//    border-bottom: 0 none;
+//    border-top-right-radius: 6px;
+//    border-top-left-radius: 6px;
+//
+//    .p-orderlist-title {
+//      font-weight: 700;
+//    }
+//  }
+//
+//  .p-orderlist-filter-container {
+//    padding: 1.25rem;
+//    background: #ffffff;
+//    border: 1px solid #e5e7eb;
+//    border-bottom: 0 none;
+//
+//    .p-orderlist-filter-input {
+//      padding-right: 1.75rem;
+//    }
+//
+//    .p-orderlist-filter-icon {
+//      right: 0.75rem;
+//      color: #6b7280;
+//    }
+//  }
+//
+//  .p-orderlist-list {
+//    border: 1px solid #e5e7eb;
+//    background: #ffffff;
+//    color: #4b5563;
+//    padding: 0.75rem 0;
+//    border-bottom-right-radius: 6px;
+//    border-bottom-left-radius: 6px;
+//    outline: 0 none;
+//
+//    .p-orderlist-item {
+//      padding: 0.75rem 1.25rem;
+//      margin: 0;
+//      border: 0 none;
+//      color: #4b5563;
+//      background: transparent;
+//      transition: box-shadow 0.2s;
+//
+//      &:not(.p-highlight):hover {
+//        background: #f3f4f6;
+//        color: #4b5563;
+//      }
+//
+//      &.p-focus {
+//        color: #4b5563;
+//        background: #e5e7eb;
+//      }
+//
+//      &.p-highlight {
+//        color: #1d4ed8;
+//        background: #eff6ff;
+//
+//        &.p-focus {
+//          background: rgba(59, 130, 246, 0.24);
+//        }
+//      }
+//    }
+//
+//    .p-orderlist-empty-message {
+//      padding: 0.75rem 1.25rem;
+//      color: #4b5563;
+//    }
+//
+//    &:not(.cdk-drop-list-dragging) .p-orderlist-item:not(.p-highlight):hover {
+//      background: #f3f4f6;
+//      color: #4b5563;
+//    }
+//  }
+//
+//  &.p-orderlist-striped {
+//    .p-orderlist-list {
+//      .p-orderlist-item:nth-child(even) {
+//        background: #f8f8fa;
+//
+//        &:hover {
+//          background: #f3f4f6;
+//        }
+//      }
+//    }
+//  }
+//
+//  .p-orderlist-item.cdk-drag-preview {
+//    padding: 0.75rem 1.25rem;
+//    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+//    border: 0 none;
+//    color: #4b5563;
+//    background: #ffffff;
+//    margin: 0;
+//  }
+//}
+//
+//.p-organizationchart {
+//  .p-organizationchart-node-content {
+//    border: 1px solid #e5e7eb;
+//    background: #ffffff;
+//    color: #4b5563;
+//    padding: 1.25rem;
+//
+//    &.p-organizationchart-selectable-node:not(.p-highlight):hover {
+//      background: #f3f4f6;
+//      color: #4b5563;
+//    }
+//
+//    &.p-highlight {
+//      background: #eff6ff;
+//      color: #1d4ed8;
+//
+//      .p-node-toggler i {
+//        color: #70aeff;
+//      }
+//    }
+//
+//    .p-node-toggler {
+//      background: inherit;
+//      color: inherit;
+//      border-radius: 50%;
+//
+//      &:focus-visible {
+//        outline: 0 none;
+//        outline-offset: 0;
+//        box-shadow: 0 0 0 0.2rem #bfdbfe;
+//      }
+//    }
+//  }
+//
+//  .p-organizationchart-line-down {
+//    background: #e5e7eb;
+//  }
+//
+//  .p-organizationchart-line-left,
+//  .p-organizationchart-line-top {
+//    border-color: #e5e7eb;
+//  }
+//
+//  .p-organizationchart-line-left {
+//    border-right: 1px solid;
+//  }
+//
+//  .p-organizationchart-line-top {
+//    border-top: 1px solid;
+//  }
+//}

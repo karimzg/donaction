@@ -1,0 +1,21 @@
+
+.p-tabview-panels {
+  padding-left: 0;
+  padding-right: 0;
+}
+.p-tabview-nav-link {
+  color: black;
+  span {
+    font-weight: 400 !important;
+  }
+  &[aria-selected="true"] {
+    span {
+      font-weight: 600 !important;
+    }
+  }
+}
+
+.p-tabview-ink-bar {
+  background-color: black;
+  height: 2px;
+}

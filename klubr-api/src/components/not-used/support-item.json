@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_club_presentation_support_items",
+  "info": {
+    "displayName": "support_item",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "description": {
+      "type": "text"
+    },
+    "support_text": {
+      "type": "text"
+    },
+    "supporter_name": {
+      "type": "string"
+    }
+  }
+}

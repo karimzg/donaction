@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_club_presentation_pourquoi_klubr_accompagnes",
+  "info": {
+    "displayName": "Pourquoi Klubr accompagne",
+    "icon": "seed",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "description": {
+      "type": "blocks",
+      "required": true
+    },
+    "titre": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

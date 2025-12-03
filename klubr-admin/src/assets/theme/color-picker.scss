@@ -1,0 +1,34 @@
+.p-colorpicker-preview,
+.p-fluid .p-colorpicker-preview.p-inputtext {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--p-inputtext-border-color);
+
+  &:hover {
+    border-color: var(--p-inputtext-hover-border-color);
+  }
+}
+
+.p-colorpicker-panel {
+  background: #323232;
+  border: 1px solid #191919;
+}
+
+.p-colorpicker-panel .p-colorpicker-color-handle,
+.p-colorpicker-panel .p-colorpicker-hue-handle {
+  border-color: #ffffff;
+}
+
+.p-colorpicker-overlay-panel {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.p-colorpicker-panel {
+  .p-colorpicker-color {
+    background: transparent url("/assets/prime-ng/color-picker/custom-color.png") no-repeat left top !important;
+  }
+
+  .p-colorpicker-hue {
+    background: transparent url("/assets/prime-ng/color-picker/custom-hue.png") no-repeat left top !important;
+  }
+}

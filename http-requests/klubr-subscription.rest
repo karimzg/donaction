@@ -1,0 +1,18 @@
+### GET tous les klubrs
+GET http://localhost:1337/api/klubr
+Accept: application/json
+Authorization: Bearer {{api_token-website}}
+Connection: close
+Upgrade:
+
+### POST un nouvel utilisateur
+POST {{api_host}}/klubr-subscriptions
+Authorization: Bearer {{api_token-website}}
+Content-Type: application/json
+
+{
+  "data": {
+    "web_component": "KlubrSponsorshipForm",
+    "host": "{{host}}"
+  }
+}

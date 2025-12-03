@@ -1,0 +1,164 @@
+@use "../assets/fonts/index";
+
+* {
+  font-family: 'Maven-Pro-Regular', sans-serif;
+  font-size: 16px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 768px) {
+    font-size: 14px;
+  }
+}
+
+.boxBoxShadow {
+  box-shadow: 0 4px 22px 0 #00000021;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+.justify-center {
+  justify-content: center;
+}
+
+.self-end {
+  margin-left: auto;
+}
+
+.gap-1-2 {
+  gap: .5rem
+}
+.gap-1 {
+  gap: 1rem
+}
+.gap-2 {
+  gap: 2rem
+}
+.gap-3 {
+  gap: 3rem
+}
+.gap-4 {
+  gap: 4rem
+}
+
+.font-bold {
+  font-family: Maven-Pro-Bold, sans-serif;
+  font-weight: 600;
+}
+.font-semibold {
+  font-family: Maven-Pro-semibold, sans-serif;
+  font-weight: 600;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+//.tooltip {
+//  background: rgba(0, 0, 0, 0.7) !important;
+//  color: white !important;
+//}
+
+
+.grid-item-2 {
+  grid-column: span 2;
+
+  @media screen and (max-width: 768px) {
+    grid-column: unset;
+  }
+}
+
+.primary-btn, .secondary-btn {
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 13px 28px;
+  border: 1px solid black;
+  border-radius: 6px;
+  font-weight: bold;
+  background-color: black;
+  color: white;
+  transition: background-color .3s ease-in-out;
+
+  &.disabled {
+    background-color: gray;
+    border: unset;
+  }
+
+  @media screen and (max-width: 768px) {
+    width: 100%;
+  }
+
+  &.secondary-btn {
+    background-color: white;
+    color: black;
+
+    &:hover {
+      background-color: black;
+      color: white;
+    }
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.invert {
+  filter: invert(100%);
+}
+
+p {
+  margin: unset;
+}
+
+.desktop {
+  display: initial;
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+}
+.mobile {
+  display: initial;
+  @media screen and (min-width: 769px) {
+    display: none;
+  }
+}
+
+small {
+  &.error {
+    font-size: 12px !important;
+    color: red;
+  }
+}

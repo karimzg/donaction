@@ -1,0 +1,168 @@
+@use '../../../../../../styles/main';
+
+.step1 {
+
+  align-items: center;
+
+  .clubProjectContainer {
+    font-size: 14px;
+
+    .title {
+      font-size: 18px;
+
+      @media screen and (max-width: 768px) {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .enTantQue {
+
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      align-items: center;
+    }
+    .choice {
+      cursor: pointer;
+      position: relative;
+      font-size: 14px;
+      border-radius: 6px;
+      padding: .5rem 1rem;
+      background-color: #f4f4f4;
+
+      span {
+        //transition: font-weight .1s ease-in-out;
+      }
+
+      .selector {
+        background-color: white;
+        height: 80%;
+        width: 47%;
+        position: absolute;
+        top: 10%;
+        left: 2%;
+
+        border-radius: 6px;
+        z-index: 0;
+        transition: left .3s ease-in-out;
+
+        &.true {
+          left: 51%;
+        }
+
+      }
+
+      span {
+        z-index: 1;
+      }
+    }
+  }
+
+  .amountPicker {
+    .amounts {
+      .amount {
+        cursor: pointer;
+        text-align: center;
+        border: 1px solid;
+        border-radius: 6px;
+        min-width: 64px;
+        min-height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color .3s ease-in-out;
+
+        &.true {
+          background-color: black;
+          color: white;
+        }
+
+        @media screen and (max-width: 768px) {
+          font-size: 14px;
+          min-width: 52px;
+          min-height: 36px;
+        }
+      }
+    }
+  }
+
+  .freeAmount {
+
+    input {
+      width: 128px;
+      height: 42px;
+      border: 1px solid black;
+      border-radius: 6px;
+      text-align: center;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      display: none;
+    }
+  }
+
+  .afterTax {
+    span {
+      background-color: #f4f4f4;
+      padding: .5rem 0;
+      min-width: 120px;
+      border-radius: 6px;
+      text-align: center;
+    }
+  }
+
+
+  .projectSelectionContainer {
+    width: 100%;
+    .swiperContainer {
+      //margin: 0 auto;
+      max-width: 785px;
+      width: 90%;
+      position: relative;
+
+      img {
+        &.disabled {
+          filter: grayscale(1);
+        }
+      }
+
+      swiper-slide {
+        //max-width: 248px;
+        //width: 248px;
+        //max-height: 248px;
+        //height: 248px;
+
+        .content {
+          padding: 10px;
+          border-radius: 10px;
+          transform: scale(.9);
+          margin: unset !important;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          cursor: pointer;
+
+          &.true {
+            border: 1px solid;
+          }
+
+          p {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            max-height: 50px;
+            min-height: 50px;
+            overflow: hidden;
+          }
+          img {
+            width: 100%;
+            height: 147px;
+            border-radius: 10px;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+  }
+}

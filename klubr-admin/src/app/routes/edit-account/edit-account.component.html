@@ -1,0 +1,104 @@
+<h1 #title class="admin-h1">Mon compte</h1>
+<div class="grid d-flex justify-content-center" pFocusTrap>
+  <div class="col-12 md:col-6 flex flex-col gap-5" @fade>
+    <p-card class="">
+      <h2 class="text-2xl font-semibold m-0 mb-4">Mon email</h2>
+      <div class="flex flex-col gap-2">
+        <label for="email"><b>Email</b></label>
+        <input id="email" type="email" [value]="me()?.email" disabled="disabled" readonly="readonly" pInputText/>
+      </div>
+    </p-card>
+    <p-card class="">
+      <h2 class="text-2xl font-semibold mb-4">Changer le mot de passe</h2>
+      @if (isReady()) {
+        <form [formGroup]="entityForm" (ngSubmit)="onSubmit()">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-2">
+              <label for="currentPassword" class="flex gap-1"><b>Mot de passe actuel</b><span
+                class="text-red-700">*</span></label>
+              <p-password
+                autofocus="autofocus"
+                id="currentPassword"
+                formControlName="currentPassword"
+                [toggleMask]="true"
+                [feedback]="false"
+                class="w-full-component"
+                [ngClass]="{'ng-dirty': entityForm.controls['currentPassword'].dirty,
+                                      'ng-invalid': entityForm.controls['currentPassword'].invalid && (entityForm.controls['currentPassword'].dirty || isSubmitted())}"
+              />
+              <app-error-display [control]="entityForm.controls['currentPassword']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="password" class="flex gap-1"><b>Nouveau mot de passe</b><span
+                class="text-red-700">*</span></label>
+              <p-password
+                id="password"
+                formControlName="password"
+                [toggleMask]="true"
+                promptLabel="Sécurité du mot de passe"
+                weakLabel="Très faible"
+                mediumLabel="Acceptable"
+                strongLabel="Optimale"
+                class="w-full-component"
+                [ngClass]="{'ng-dirty': entityForm.controls['password'].dirty,
+                                      'ng-invalid': entityForm.controls['password'].invalid && (entityForm.controls['password'].dirty || isSubmitted())}"
+              >
+                <ng-template pTemplate="header">
+                  <div class="font-semibold text-xm mb-2">Sécurité du mot de passe</div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                  <p-divider/>
+                  <ul class="pl-2 ml-2 my-0 leading-normal">
+                    <li>Au moins 8 caractères</li>
+                    <li>Au moins une minuscule</li>
+                    <li>Au moins une majuscule</li>
+                    <li>Au moins un chiffre</li>
+                    <li>Au moins un caractère spécial</li>
+                  </ul>
+                </ng-template>
+              </p-password>
+              <app-error-display [control]="entityForm.controls['password']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="passwordConfirmation" class="flex gap-1"><b>Confirmation du mot de passe</b><span
+                class="text-red-700">*</span></label>
+              <p-password
+                id="passwordConfirmation"
+                formControlName="passwordConfirmation"
+                [toggleMask]="true"
+                [feedback]="false"
+                class="w-full-component"
+                [ngClass]="{'ng-dirty': entityForm.controls['passwordConfirmation'].dirty,
+                                    'ng-invalid': entityForm.controls['passwordConfirmation'].invalid && (entityForm.controls['passwordConfirmation'].dirty || isSubmitted())}"
+              >
+              </p-password>
+              <app-error-display [control]="entityForm.controls['passwordConfirmation']"
+                                 [isSubmitted]="isSubmitted()"></app-error-display>
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <p-button type="submit" label="Modifier" severity="contrast" class="self-end"
+                      [disabled]="entityForm.pristine || !entityForm.valid"
+                      [loading]="sharedFacade.loading() || loading()"/>
+          </div>
+        </form>
+      }
+    </p-card>
+    @if (isLocalhost) {
+      <p-card class="">
+        <h2 class="text-2xl font-semibold m-0 mb-4">Localhost settings</h2>
+        <div class="flex flex-col gap-2">
+          <label for="email"><b>Plausible Tracking</b></label>
+          <p-toggleswitch [(ngModel)]="plausibleTracking">
+            <ng-template #handle let-checked="checked">
+              <i [ngClass]="['!text-xs', 'pi', checked ? 'pi-check' : 'pi-times']"></i>
+            </ng-template>
+          </p-toggleswitch>
+        </div>
+      </p-card>
+    }
+  </div>
+</div>
+

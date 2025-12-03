@@ -1,0 +1,17 @@
+
+.p-highlight {
+  background-color: #c4c4c4;
+  color: black;
+}
+
+.p-datatable-wrapper {
+  * {
+    word-break: initial;
+  }
+  .p-datatable-table {
+    margin-bottom: 200px;
+  }
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

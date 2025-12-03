@@ -1,0 +1,135 @@
+{
+  "kind": "collectionType",
+  "collectionName": "klub_dons",
+  "info": {
+    "singularName": "klub-don",
+    "pluralName": "klub-dons",
+    "displayName": "Klub Don",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "datePaiment": {
+      "type": "datetime"
+    },
+    "estOrganisme": {
+      "type": "boolean"
+    },
+    "statusPaiment": {
+      "type": "enumeration",
+      "enum": [
+        "notDone",
+        "pending",
+        "success",
+        "error"
+      ]
+    },
+    "klubDonateur": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr-donateur.klubr-donateur",
+      "mappedBy": "klubDon"
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klubr.klubr"
+    },
+    "klub_projet": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-projet.klub-projet"
+    },
+    "montantAjouteAuMontantTotalDuProjet": {
+      "type": "boolean",
+      "default": false,
+      "private": true
+    },
+    "montant": {
+      "type": "decimal"
+    },
+    "deductionFiscale": {
+      "type": "decimal"
+    },
+    "contributionAKlubr": {
+      "type": "decimal"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    },
+    "attestationNumber": {
+      "type": "string",
+      "unique": true
+    },
+    "invoice": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::invoice.invoice",
+      "inversedBy": "klub_dons"
+    },
+    "attestationPath": {
+      "type": "string",
+      "private": true
+    },
+    "recuPath": {
+      "type": "string",
+      "private": true
+    },
+    "klub_don_payments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::klub-don-payment.klub-don-payment",
+      "mappedBy": "klub_don"
+    },
+    "emailSent": {
+      "type": "boolean",
+      "default": false
+    },
+    "invoice_line": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::invoice-line.invoice-line",
+      "inversedBy": "klub_dons"
+    },
+    "withTaxReduction": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "isContributionDonation": {
+      "type": "boolean",
+      "default": false,
+      "required": false
+    },
+    "hasBeenRelaunched": {
+      "type": "boolean",
+      "default": false,
+      "private": true
+    },
+    "relaunchCode": {
+      "type": "integer",
+      "max": 9999,
+      "min": 0
+    },
+    "klub_don_contribution": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-don.klub-don",
+      "inversedBy": "klub_don"
+    },
+    "klub_don": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::klub-don.klub-don",
+      "mappedBy": "klub_don_contribution"
+    }
+  }
+}

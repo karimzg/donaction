@@ -1,0 +1,53 @@
+<h1 #title class="admin-h1">Mes Projets</h1>
+<!-- HEADER -->
+<app-list-header
+  [filtersList]="filtersList()"
+  [(filtersSearch)]="filtersSearch"
+  displaySearch="true"
+  searchPlaceholder="Rechercher un projet"
+  #headerList
+>
+  <ng-container tmplHeaderActions>
+    @if (!permissionsService.memberIsAdminSignal()) {
+      <p-button [routerLink]="['/project', 'listing', { outlets: { modal: ['new-project'] } }]"
+                class="p-button--only-icon-mobile"
+                label="Créer un projet" icon="pi pi-plus-circle" severity="primary"/>
+    }
+  </ng-container>
+  <app-project-filters
+    #filtersComponent
+    [klubrUuid]="klubrUuid()"
+    [klubrInit]="klubrInit()"
+    [projectStatusInit]="projectStatusInit()"
+    (filtersChanged)="filtersList.set($event); headerList.closeDrawer()">
+  </app-project-filters>
+</app-list-header>
+<!-- LIST -->
+<div class="grid-project-listing m-0 gap-3 w-full" appScrollNearEnd (nearEnd)="onNearEndScroll()">
+  @for (project of listing(); track project.uuid) {
+    <app-project-card
+      [projectCard]="project"
+      [profile]="profile()"
+      (onDelete)="onFiltersChanged()"
+      @fade
+    ></app-project-card>
+  }
+</div>
+
+<!-- LOADING / NO RESULT -->
+@if (listing()!.length === 0) {
+  <app-list-loading-no-results
+    label="projet"
+    [hasFilters]="!!hasFilters()"
+    [hideSentence]="!hasFilters()"
+    [loading]="sharedFacade.loading()"
+  >
+    @if (!hasFilters() && !sharedFacade.loading()) {
+      <h3 class="mb-4 text-center">Démarrez votre première kollecte en créant un projet en 3 clics!</h3>
+      <p-button [routerLink]="['/project', 'listing', { outlets: { modal: ['new-project'] } }]"
+                label="Créer un projet" icon="pi pi-plus-circle" severity="primary"/>
+    }
+  </app-list-loading-no-results>
+}
+
+<router-outlet name="modal"></router-outlet>

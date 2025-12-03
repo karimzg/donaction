@@ -1,0 +1,130 @@
+---
+description: Functional guards and resolvers using inject() for route protection, data preloading, and lazy loading with type-safe route configuration in Angular 21
+globs: ["**/*.routes.ts", "**/*.guard.ts", "**/*.resolver.ts"]
+alwaysApply: false
+---
+
+# Angular 21 Routing
+
+## Functional Guards
+
+- Use `CanActivateFn` type
+- Use `inject()` for dependencies
+- Return boolean, `UrlTree`, or Observable
+- No class-based guards
+
+```typescript
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    return true;
+  }
+  return router.createUrlTree(['/login']);
+};
+```
+
+## Functional Resolvers
+
+- Use `ResolveFn<T>` type
+- Return data or Observable/Promise
+- Use `inject()` for services
+- Preload data before route activation
+
+```typescript
+export const profileResolver: ResolveFn<Profile> = (route, state) => {
+  const service = inject(ProfileService);
+  const uuid = route.paramMap.get('uuid')!;
+  return service.getProfile(uuid);
+};
+```
+
+## Route Configuration
+
+- Define routes in `*.routes.ts` files
+- Use `Routes` type
+- Lazy load with `loadComponent`
+- Guards and resolvers inline
+
+```typescript
+export const routes: Routes = [
+  {
+    path: 'profile/:uuid',
+    loadComponent: () => import('./profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard],
+    resolve: { profile: profileResolver }
+  }
+];
+```
+
+## Lazy Loading
+
+- `loadComponent` for standalone components
+- `loadChildren` for feature routes
+- Preloading strategy via config
+- Route-level code splitting
+
+```typescript
+{
+  path: 'admin',
+  loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+  canActivate: [adminGuard]
+}
+```
+
+## Route Parameters
+
+- Access via `ActivatedRoute`
+- `paramMap` for route params
+- `queryParamMap` for query params
+- Convert to signals if needed
+
+```typescript
+export class DetailComponent {
+  private route = inject(ActivatedRoute);
+
+  uuid = signal('');
+
+  ngOnInit() {
+    this.route.paramMap.pipe(
+      takeUntilDestroyed()
+    ).subscribe(params => {
+      this.uuid.set(params.get('uuid') || '');
+    });
+  }
+}
+```
+
+## Navigation
+
+- Use `Router` service
+- Navigate with `navigate()` or `navigateByUrl()`
+- Pass extras for query params
+- Use `createUrlTree()` for guards
+
+```typescript
+export class MyComponent {
+  private router = inject(Router);
+
+  goToProfile(id: string) {
+    this.router.navigate(['/profile', id], {
+      queryParams: { tab: 'details' }
+    });
+  }
+}
+```
+
+## Guard Composition
+
+- Combine multiple guards with array
+- Short-circuit on first failure
+- Guards run in order
+- Return most restrictive result
+
+```typescript
+{
+  path: 'admin/users',
+  canActivate: [authGuard, adminGuard, permissionGuard]
+}
+```

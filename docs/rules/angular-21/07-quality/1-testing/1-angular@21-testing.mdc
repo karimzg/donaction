@@ -1,0 +1,166 @@
+---
+description: Angular 21 testing with Jasmine and Karma for standalone components, signal-based state, TestBed configuration, and testing patterns for modern Angular features
+globs: ["**/*.spec.ts"]
+alwaysApply: false
+---
+
+# Angular 21 Testing
+
+## TestBed Configuration
+
+- Configure for standalone components
+- Import dependencies directly
+- No module declarations
+- Provide services in `providers`
+
+```typescript
+describe('MyComponent', () => {
+  let component: MyComponent;
+  let fixture: ComponentFixture<MyComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MyComponent, CommonModule, ButtonModule],
+      providers: [MyService]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(MyComponent);
+    component = fixture.componentInstance;
+  });
+});
+```
+
+## Signal Testing
+
+- Test signals by calling them
+- Verify computed values
+- Trigger effects manually
+- Check signal updates
+
+```typescript
+it('should update count signal', () => {
+  component.count.set(5);
+  expect(component.count()).toBe(5);
+});
+
+it('should compute doubled value', () => {
+  component.count.set(3);
+  expect(component.doubled()).toBe(6);
+});
+```
+
+## Component Testing
+
+- Use `fixture.detectChanges()`
+- Query DOM with `fixture.debugElement`
+- Test inputs with `fixture.componentRef.setInput()`
+- Verify outputs with spies
+
+```typescript
+it('should render title from input', () => {
+  fixture.componentRef.setInput('title', 'Test Title');
+  fixture.detectChanges();
+
+  const h1 = fixture.debugElement.query(By.css('h1'));
+  expect(h1.nativeElement.textContent).toBe('Test Title');
+});
+```
+
+## Service Testing
+
+- Use `TestBed.inject()` for services
+- Mock HTTP with `HttpTestingController`
+- Test observables with `done` callback
+- Spy on methods
+
+```typescript
+describe('UserService', () => {
+  let service: UserService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [UserService]
+    });
+
+    service = TestBed.inject(UserService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  it('should fetch users', (done) => {
+    service.getUsers().subscribe(users => {
+      expect(users.length).toBe(2);
+      done();
+    });
+
+    const req = httpMock.expectOne('/api/users');
+    req.flush([{id: 1}, {id: 2}]);
+  });
+});
+```
+
+## Guard Testing
+
+- Use `TestBed.runInInjectionContext()`
+- Mock dependencies
+- Test return values
+- Verify navigation
+
+```typescript
+describe('authGuard', () => {
+  it('should allow authenticated users', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { isAuthenticated: () => true } }
+      ]
+    });
+
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
+
+    expect(result).toBe(true);
+  });
+});
+```
+
+## Async Testing
+
+- Use `fakeAsync` and `tick()`
+- Use `waitForAsync` for promises
+- Test observables with `done`
+- Flush microtasks with `flush()`
+
+```typescript
+it('should load data after delay', fakeAsync(() => {
+  component.loadData();
+  tick(1000);
+  expect(component.data()).toBeDefined();
+}));
+```
+
+## Mocking
+
+- Create spy objects
+- Mock service methods
+- Override providers
+- Use fake implementations
+
+```typescript
+const mockService = jasmine.createSpyObj('MyService', ['getData']);
+mockService.getData.and.returnValue(of({ id: 1 }));
+
+TestBed.configureTestingModule({
+  providers: [
+    { provide: MyService, useValue: mockService }
+  ]
+});
+```
+
+## Coverage
+
+- Run with `ng test --code-coverage`
+- Aim for >80% coverage
+- Focus on critical paths
+- Test edge cases

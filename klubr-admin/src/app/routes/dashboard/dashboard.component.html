@@ -1,0 +1,56 @@
+<div class="layout-wrapper" [ngClass]="containerClass">
+  <app-header></app-header>
+  <div class="layout-sidebar">
+    <app-sidebar></app-sidebar>
+  </div>
+  <div class="layout-main-container">
+    @for (msg of mms.messages(); track msg; let i = $index) {
+      <p-message
+        icon="pi pi-sparkles"
+        closable [severity]="msg.type"
+        (onClose)="mms.removeMessage(i)"
+        [ngClass]="{'with-action': msg.action}"
+        class="mb-2"><span [innerHTML]="msg.message"></span>
+        @if (msg.action) {
+          <p-button pButton pRipple [severity]="msg.type | severity2ToSeverity"
+                    icon="pi {{msg.actionIcon || 'pi-refresh'}}"
+                    (click)="msg.action()"
+                    class="ml-2"></p-button>
+        } @else if (msg.actionID) {
+          <p-button pButton pRipple [severity]="msg.type | severity2ToSeverity"
+                    icon="pi {{msg.actionIcon || 'pi-refresh'}}"
+                    (click)="action(msg.actionID)"
+                    class="ml-2"></p-button>
+        }
+      </p-message>
+    }
+    <div class="layout-main">
+      <!--            <button pButton pRipple (click)="test()">test</button>
+                  <br>
+                  <br>-->
+      <!--            <button pButton pRipple (click)="testPDFOpen()">Open PDF</button>-->
+      <!--            <br>-->
+      <!--            <button pButton pRipple (click)="testPDFDownload()">Download PDF</button>-->
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  <div class="layout-mask"></div>
+</div>
+<!--<div id="pedago" class="fixed z-[999] inset-0 w-full h-full bg-[rgba(0,0,0,0.5)]"
+style="
+  clip-path: polygon(
+    0 0, /* top-left corner */
+    100% 0, /* top-right corner */
+    100% 100%, /* bottom-right corner */
+    0 100%, /* bottom-left corner */
+    0 100px, /* top-left of the hole */
+    100px 100px, /* top-right of the hole */
+    100px 150px, /* bottom-right of the hole */
+    150px 150px, /* bottom-left of the hole */
+    150px 100px, /* top-left of the hole */
+    0 100px /* top-left of the hole */
+  );
+"
+></div>-->
+
+<!--h-screen-->

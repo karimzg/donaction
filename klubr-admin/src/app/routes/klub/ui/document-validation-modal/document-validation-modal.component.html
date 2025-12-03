@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-2 w-full">
+  <p>{{ message() }}</p>
+</div>
+<div class="flex gap-3 mt-4 justify-end">
+  <p-button label="Annuler" class="self-end" severity="secondary" (click)="ref.close()"/>
+  <p-button label="Refuser" class="self-end" severity="contrast" (onClick)="ref.close(false)"/>
+  <p-button label="Valider" class="self-end" severity="contrast" (onClick)="ref.close(true)"/>
+</div>

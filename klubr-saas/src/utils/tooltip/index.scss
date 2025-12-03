@@ -1,0 +1,41 @@
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+
+  .trigger {
+    cursor: pointer;
+  }
+
+  .tooltip {
+    position: absolute;
+    z-index: 999999999;
+    background-color: rgba(1, 1, 1, .86);
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    bottom: 100%;
+    left: 50%;
+    right: 50%;
+    max-width: 500px;
+    width: max-content;
+    transform: translateX(-50%);
+    display: initial;
+    pointer-events: none;
+
+    &.md-left-14 {
+      left: -14%;
+      right: unset;
+    }
+
+    @media screen and (max-width: 768px) {
+      max-width: 80dvw;
+      &.md-left-14 {
+        left: 50%;
+        right: 50%;
+      }
+    }
+
+  }
+}
+

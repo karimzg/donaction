@@ -1,0 +1,251 @@
+<div class="app-listing">
+  <h1 #title class="admin-h1">Liste des Dons</h1>
+  <!-- HEADER -->
+  <app-list-header
+    [filtersList]="filtersList()"
+    [(filtersSearch)]="filtersSearch"
+    #headerList
+    displaySearch="true"
+    searchPlaceholder="Recherche par n° d'attestation (ATT-20...) ou par donateur (nom ou raison sociale)"
+  >
+
+    <app-don-filters
+      #filtersComponent
+      (filtersChanged)="filtersList.set($event); headerList.closeDrawer()"
+      [klubrUuid]="klubrUuid()"
+      [klubrInit]="profile()?.role !== 'KlubMember' || profile()?.klubr?.uuid === klubrInit()?.uuid ? klubrInit() : undefined"
+      [projectInit]="projectInit() || undefined"
+      [miscProjectInit]="miscProjectInit()"
+      [invoiceInit]="invoiceInit() || undefined"
+      [miscInvoiceInit]="miscInvoiceInit()"
+      [donationStatusInit]="donationStatusInit() || undefined"
+    >
+    </app-don-filters>
+  </app-list-header>
+
+  <!-- LIST -->
+  @if (listing().length > 0 && pagination()) {
+    @if (deviceService.isDesktop()) {
+      <!-- Desktop -->
+      <p-table [value]="listing()"
+               @fade
+               size="small"
+               class="app-table">
+        <ng-template #header>
+          <tr>
+            @if (permissionsService.memberIsAdminSignal()) {
+              <th pSortableColumn="denomination">Club
+                <p-sortIcon field="denomination"/>
+              </th>
+            }
+            <th>Projet</th>
+            <th>Montant</th>
+            @if (permissionsService.memberIsAdminSignal()) {
+              <th>Contribution</th>
+            }
+            @if (permissionsService.memberIsAdminSignal()) {
+              <th>Est Contrib.</th>
+            }
+            <th>Date</th>
+            <th>Donateur</th>
+            <th>Attestation</th>
+            @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+              <th>Facture</th>
+            }
+            <th>Statut</th>
+            @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+              <th>Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template #body let-donation>
+          <tr>
+            @if (permissionsService.memberIsAdminSignal()) {
+              <td class="max-w-[280px]">
+                <div class="table-content">
+                  <app-klub-infos [klub]="donation.klubr" [displaySport]="true"></app-klub-infos>
+                </div>
+              </td>
+            }
+            <td class="max-w-[450px]">{{ donation.klub_projet?.titre || "Don en faveur du fonctionnement du Klub" }}
+            </td>
+            <td class="max-w-[133px]">
+              <p-tag
+                severity="success"
+              >{{ donation.montant | currency }}
+              </p-tag>
+              @if (donation.withTaxReduction) {
+                <img
+                  alt="Don avec réduction d'impôts"
+                  height="18"
+                  width="20"
+                  class="ml-1 relative top-1"
+                  pTooltip="Don avec réduction d'impôts"
+                  ngSrc="assets/images/icons/subtract.svg"/>
+              }
+            </td>
+            @if (permissionsService.memberIsAdminSignal()) {
+              <td class="max-w-[133px]">
+                <p-tag
+                  [severity]="donation.contributionAKlubr && donation.contributionAKlubr > 0 ? 'info' : 'secondary'"
+                >{{ (donation.contributionAKlubr || 0) | currency }}
+                </p-tag>
+              </td>
+              <td class="max-w-[133px]">
+                <p-tag
+                  [severity]="donation.isContributionDonation ? 'info' : 'secondary'"
+                >{{ donation.isContributionDonation ? 'Oui' : 'Non' }}
+                </p-tag>
+              </td>
+            }
+            <td class="max-w-[129px]">
+          <span class="flex flex-col w-fit">
+            {{ donation.createdAt | date:"dd/MM/yyyy" }}
+            <small class="self-end">{{ donation.createdAt | date:"HH:mm" }}</small>
+          </span>
+            </td>
+            <td class="max-w-[200px]">
+              <div class="table-content">
+                <app-donateur-infos
+                  [donateur]="donation.klubDonateur"
+                ></app-donateur-infos>
+              </div>
+            </td>
+            <td style="max-width: 168px;">
+              {{ donation.attestationNumber }}
+            </td>
+
+            @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+              <td style="max-width: 190px;">{{ donation.invoice?.invoiceNumber }}</td>
+            }
+            <td style="max-width: 146px;">
+              <p-tag [value]="(donation | statusDonBody)?.text" [severity]="(donation | statusDonBody)?.severity"/>
+            </td>
+            @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+              <td class="actions max-w-16">
+                <div class="flex justify-center gap-2 align-items-center">
+                  @if (donation.statusPaiment === 'success') {
+                    <app-download-pdf [uuid]="donation.uuid"
+                                      [withTaxReduction]="!!donation.withTaxReduction"
+                                      [onlyRecu]="!permissionsService.memberIsAdminSignal()"
+                                      [uuidContribution]="donation.klub_don_contribution?.uuid"
+                                      [uuidOriginal]="donation.klub_don?.uuid"
+                                      [isButton]="false"></app-download-pdf>
+                  }
+                  <i class="pi pi-eye cursor-pointer w-6" [routerLink]="['/don', donation.uuid, 'details']"></i>
+                </div>
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+
+    } @else {
+      <!-- Mobile -->
+      <div class="flex flex-col gap-4">
+        @for (donation of listing(); track donation.uuid) {
+          <div class="flex flex-col card-box-shadow	rounded-lg gap-2 pt-4 pb-3">
+            <div class="flex justify-between items-center pl-3 pr-2">
+              @if (permissionsService.memberIsAdminSignal()) {
+                <app-klub-infos [klub]="donation.klubr" [displaySport]="true"></app-klub-infos>
+              } @else {
+                <b class="text-black">{{ donation.klub_projet?.titre || "Don en faveur du fonctionnement du Klub" }}</b>
+              }
+              @if (permissionsService.memberIsAtLeastLeaderSignal()) {
+                <app-don-actions
+                  [donation]="donation"
+                  showDetailLink="true"
+                ></app-don-actions>
+              }
+            </div>
+            <hr class="border-t border-gray-300 mb-1">
+            <div class="px-3">
+              <table>
+                @if (permissionsService.memberIsAdminSignal()) {
+                  <tr class="h-9">
+                    <td class="font-light pr-2">Projet</td>
+                    <td class="text-black font-semibold">
+                      <span>{{ donation.klub_projet?.titre || "Don en faveur du fonctionnement du Klub" }}</span>
+                    </td>
+                  </tr>
+                }
+                <tr class="h-9">
+                  <td class="font-light pr-2">Montant</td>
+                  <td>
+                    <p-tag [value]="(donation.montant | currency)!" pTooltip="Montant du don"
+                           severity="success" class="cursor-pointer font-semibold"></p-tag>
+                    @if (donation.withTaxReduction) {
+                      <img
+                        alt="Don avec réduction d'impôts"
+                        height="18"
+                        width="20"
+                        class="ml-1 relative top-1"
+                        pTooltip="Don avec réduction d'impôts"
+                        ngSrc="assets/images/icons/subtract.svg"/>
+                    }
+                  </td>
+                </tr>
+                @if (permissionsService.memberIsAdminSignal() && (donation.contributionAKlubr || 0) > 0) {
+                  <tr class="h-9">
+                    <td class="font-light pr-2">Contribution</td>
+                    <td>
+                      <p-tag [value]="(donation.contributionAKlubr | currency)!" pTooltip="Montant du don"
+                             severity="info" class="cursor-pointer font-semibold"></p-tag>
+                  </tr>
+                }
+                @if (permissionsService.memberIsAdminSignal() && donation.isContributionDonation) {
+                  <tr class="h-9">
+                    <td class="font-light pr-2">Est contrib</td>
+                    <td>
+                      <p-tag value="Oui"
+                             severity="warn" class="cursor-pointer font-semibold"></p-tag>
+                  </tr>
+                }
+                <tr class="h-9">
+                  <td class="font-light pr-2">Donateur</td>
+                  <td class="text-black font-semibold">
+                    <app-donateur-infos
+                      [donateur]="donation.klubDonateur"
+                    ></app-donateur-infos>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Statut</td>
+                  <td>
+                    <p-tag [value]="(donation | statusDonBody)?.text"
+                           [severity]="(donation | statusDonBody)?.severity"/>
+                  </td>
+                </tr>
+                <tr class="h-9">
+                  <td class="font-light pr-2">Date</td>
+                  <td><span class="text-black font-semibold">{{ donation.createdAt | date:"dd/MM/yyyy" }}
+                    <small class="text-[#777777]">{{ donation.createdAt | date:"HH:mm" }}</small></span></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    <!-- PAGINATION -->
+    @if (pagination()!.total > pageSize()) {
+      <p-paginator
+        class="sticky bottom-0 mt-4 px-3 mx-[-1rem] bg-white block sticky-bottom-box-shadow "
+        [rows]="pageSize()"
+        [rowsPerPageOptions]="[5,10,15,20,50,100]"
+        [totalRecords]="pagination()!.total"
+        [first]="0"
+        (onPageChange)="changePage($event)"
+        [showCurrentPageReport]="false"
+        [showPageLinks]="true"
+        [showJumpToPageDropdown]="false"
+        currentPageReportTemplate="Dons {first} à {last} parmi {totalRecords}"/>
+    }
+  } @else {
+    <!-- LOADING / NO RESULT -->
+    <app-list-loading-no-results
+      label="don"
+      [hasFilters]="!!hasFilters()"
+      [loading]="sharedFacade.loading()"
+    ></app-list-loading-no-results>
+  }</div>

@@ -1,0 +1,23 @@
+.p-popover--no-indicator {
+  &:before, &:after {
+    content: none;
+  }
+}
+
+.p-popover--right-indicator {
+  &:before {
+    margin-right: calc(-1 * var(--p-popover-gutter));
+    margin-left: 0;
+  }
+
+  &:after {
+    margin-right: calc(-1 * (var(--p-popover-gutter) - 1px));
+    margin-left: 0;
+    border-width: calc(var(--p-popover-gutter) - 1px);
+  }
+
+  &:before, &:after {
+    right: var(--p-popover-arrow-offset);
+    left: auto;
+  }
+}

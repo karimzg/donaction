@@ -1,0 +1,12 @@
+.mobile-nav {
+  z-index: 9999;
+  &:after {
+    content: '';
+    display: block;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(6px);
+    z-index: -1;
+  }
+}
