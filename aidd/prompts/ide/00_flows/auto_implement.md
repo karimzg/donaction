@@ -15,12 +15,27 @@ $ARGUMENTS
 
 ## IMPORTANT RULES
 
-- NEVER ASK QUESTIONS - work autonomously, no human intervention
+- NEVER ASK QUESTIONS after initial setup - work autonomously
 - EACH step must be 100% successful before proceeding to next
-- Work in `worktrees/<branch>/` for isolation
-- Use Todo to track progress for each issue
+- Use TodoWrite to track progress for each issue
 
 ## Steps
+
+### 0. Initial Setup
+
+**0.1. Isolation Strategy**
+
+Ask user (checkboxes - single choice):
+- [ ] Use git worktrees (recommended for parallel work)
+- [ ] Work on current branch (simpler, sequential only)
+
+**0.2. Validation Mode**
+
+Ask user (checkboxes - single choice):
+- [ ] Automatic (no validation)
+- [ ] Validate plan only
+- [ ] Validate implementation only
+- [ ] Validate plan + implementation
 
 ### 1. Preparation
 
@@ -33,24 +48,33 @@ $ARGUMENTS
 
 1. Extract issue number and create branch name: `feat/issue-<number>`
 2. Fetch issue details: `gh issue view <number> --json body,title,url`
-3. Create worktree: `git worktree add worktrees/<branch> -b <branch>`
+3. Branch setup:
+   - IF worktree: `git worktree add worktrees/<branch> -b <branch>`
+   - ELSE: `git checkout -b <branch>`
 4. Update todo: mark issue as "in_progress"
 
-**Implementation Phase (all commands with `cwd: worktrees/<branch>`):**
+**Implementation Phase:**
+
+All commands execute in:
+- IF worktree: `cwd: worktrees/<branch>`
+- ELSE: current directory
 
 1. Generate technical plan: Use `/plan <issue-url>`
+   - IF validate plan OR validate both: wait for user approval before continuing
 2. Implement changes: Use `/implement`
+   - IF validate implementation OR validate both: wait for user approval before continuing
 3. Run tests: Execute test suite if applicable
 4. Commit changes: Use `/commit`
 5. Code review: Use `/review_code`
-6. Functional review: Use `/review_functional`
-7. Create PR: Use `/create_github_pull_request`
+6. Create PR: Use `/create_github_pull_request`
 
 **Completion Phase:**
 
 1. Record PR URL and status
 2. Update todo: mark issue as "completed"
-3. Keep worktree (don't delete - needed for PR updates)
+3. Branch handling:
+   - IF worktree: Keep worktree (needed for PR updates)
+   - ELSE: Stay on feature branch
 
 ### 3. Final Report
 
@@ -60,6 +84,10 @@ $ARGUMENTS
 
 ## Notes
 
-- Worktrees remain in `worktrees/` folder (gitignored)
-- Manual cleanup later: `git worktree remove worktrees/<branch>` after PR merge
+- IF worktree mode:
+  - Worktrees remain in `worktrees/` folder (gitignored)
+  - Manual cleanup: `git worktree remove worktrees/<branch>` after PR merge
+- IF direct mode:
+  - User stays on last feature branch
+  - Manual switch: `git checkout main` when done
 - If error occurs: log it, mark todo as failed, continue to next issue
