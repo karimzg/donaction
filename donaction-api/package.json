@@ -1,9 +1,9 @@
 {
-  "name": "klubr-api",
+  "name": "donaction-api",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Klubr Strapi application",
+  "description": "Donaction Strapi API application",
   "author": {
     "name": "Khalfaoui/Chouiref/Zgoulli"
   },

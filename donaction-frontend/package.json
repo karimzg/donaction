@@ -1,7 +1,7 @@
 {
-  "name": "klubr",
+  "name": "donaction-frontend",
   "version": "1.0.0",
-  "description": "klubr web app",
+  "description": "Donaction web app - Frontend Next.js",
   "author": "Nakaa",
   "license": "UNLICENSED",
   "packageManager": "yarn@1.22.19",
