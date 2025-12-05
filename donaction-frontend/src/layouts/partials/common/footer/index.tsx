@@ -88,8 +88,8 @@ const Footer = ({
                 </div>
                 <div className='flex items-center justify-center text-white gap-2 pb-4'>
                     Copyright © {currentYear} - powered by
-                    <Link href={'https://begoodee.fr/'} target={'_blank'}><img src='/images/icons/beGoodee.svg'
-                                                                               alt='BeGoodee logo'
+                    <Link href={'https://nakaa.fr/'} target={'_blank'}><img src='/images/icons/beGoodee.svg'
+                                                                               alt='Nakaa logo'
                                                                                className='mt-1'/></Link>
                 </div>
             </footer>
