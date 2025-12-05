@@ -121,7 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 						defer
 						data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN}
 						src={
-							process.env.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN === 'klubr.fr-local'
+							process.env.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN === 'donaction.fr-local'
 								? 'https://plausible.io/js/script.revenue.local.js'
 								: 'https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js'
 						}

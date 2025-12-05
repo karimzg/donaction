@@ -39,7 +39,7 @@ interface Config {
     apiTokenSalt: 'IGG4b1ZmURiReLHMzm6VOg==',
     apiUrl:  'http://localhost:1337',
     databaseUrl:   'postgres://klubrapi:klubrapi@localhost:5432/strapi?synchronize=true',
-    nextAuthUrl:  'https://re7.klubr.fr',
+    nextAuthUrl:  'https://re7.donaction.fr',
     googleClientId:'1036173262198-n0rq5p6vj4ju6mgdr8j9dmur4i3v7iah.apps.googleusercontent.com',
     googleClientSecret:"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",
     googleSecret:'4kF4QMfpfadDzmPbnAPO7g',

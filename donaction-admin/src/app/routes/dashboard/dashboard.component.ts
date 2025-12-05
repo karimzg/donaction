@@ -138,7 +138,7 @@ export class DashboardComponent implements OnDestroy {
     // ).subscribe((res) => {
     //   console.log(res);
     // });
-    this.http.get('https://re7.klubr.fr/api/auth/session').pipe(
+    this.http.get('https://re7.donaction.fr/api/auth/session').pipe(
     ).subscribe((res) => {
       console.log(res);
     });

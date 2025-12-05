@@ -81,7 +81,7 @@ const Footer = ({
                             <span>FONDS KLUBR</span>
                             <span>10 clos du Golf du Sart</span>
                             <span>59491 VILLENEUVE D’ASCQ</span>
-                            <span>hello&#64;klubr.fr</span>
+                            <span>hello&#64;donaction.fr</span>
                             {/*<span>+33 X XX XX XX XX</span>*/}
                         </div>
                     </div>

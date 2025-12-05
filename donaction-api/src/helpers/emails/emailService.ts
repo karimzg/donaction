@@ -14,7 +14,7 @@ const sendEmailViaStrapiProvider = async (emailPayload) => {
     const { to, from, html, subject, attachments, tags } = emailPayload;
     return await emailService.send({
         to,
-        from: 'hello@klubr.fr',
+        from: 'hello@donaction.fr',
         html,
         subject,
         attachments,
@@ -75,7 +75,7 @@ export default async function sendEmail(emailPayload) {
                       { email: 'k.zgoulli@gmail.com' },
                   ],
         sender: {
-            email: from || 'hello@klubr.fr',
+            email: from || 'hello@donaction.fr',
             name: senderName,
         },
         subject,

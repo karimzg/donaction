@@ -58,7 +58,7 @@ async function updateRecaptchaKey({ host, remove }) {
                     allowedDomains:
                         allowedDomains.length > 0
                             ? allowedDomains
-                            : ['klubr.fr'],
+                            : ['donaction.fr'],
                 },
             });
             resolve(response);

@@ -1,13 +1,13 @@
 {
   "site": {
     "title": "Klubr.",
-    "base_url": "https://www.klubr.fr",
+    "base_url": "https://www.donaction.fr",
     "base_path": "/",
     "trailing_slash": false,
-    "favicon": "https://www.klubr.fr/images/favicon.ico",
-    "favicon_png": "https://www.klubr.fr/images/favicon.png",
-    "logo": "https://www.klubr.fr/images/logo-klubr-black.png",
-    "logo_darkmode": "https://www.klubr.fr/images/logo-klubr-white.png",
+    "favicon": "https://www.donaction.fr/images/favicon.ico",
+    "favicon_png": "https://www.donaction.fr/images/favicon.png",
+    "logo": "https://www.donaction.fr/images/logo-klubr-black.png",
+    "logo_darkmode": "https://www.donaction.fr/images/logo-klubr-white.png",
     "logo_width": "158",
     "logo_height": "36",
     "logo_text": "Klubr."

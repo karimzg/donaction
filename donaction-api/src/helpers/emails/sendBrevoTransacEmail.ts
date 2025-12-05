@@ -33,7 +33,7 @@ async function sendBrevoTransacEmail(props: any) {
             );
             const res = await apiInstance.sendTransacEmail({
                 subject: props.subject,
-                from: props.from || { name: 'Klubr', email: 'hello@klubr.fr' },
+                from: props.from || { name: 'Klubr', email: 'hello@donaction.fr' },
                 to:
                     process.env.EMAIL_BREVO_ENV !== 'prod'
                         ? [

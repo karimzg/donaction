@@ -490,7 +490,7 @@ export default {
             if (dataAnonymization) {
                 const emailListByPass = [
                     'quentinleclerc@live.fr',
-                    'karim@klubr.fr',
+                    'karim@donaction.fr',
                     'k.zgoulli@gmail.com',
                     'dev@nakaa.fr',
                     'hamach78@gmail.com',

@@ -25,8 +25,8 @@ export default ({ env }: { env: any }) => ({
                 },
             },
             settings: {
-                defaultFrom: env('EMAIL_ADDRESS_FROM', 'hello@klubr.fr'),
-                defaultReplyTo: env('EMAIL_ADDRESS_REPLY', 'hello@klubr.fr'),
+                defaultFrom: env('EMAIL_ADDRESS_FROM', 'hello@donaction.fr'),
+                defaultReplyTo: env('EMAIL_ADDRESS_REPLY', 'hello@donaction.fr'),
             },
         },
     },

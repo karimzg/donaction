@@ -395,7 +395,7 @@ export default async function getCertificatePagesData({
                     font: fonts.mvnSemiBoldPdfFont,
                 }),
                 new TextDrawer({
-                    text: 'hello@klubr.fr9999',
+                    text: 'hello@donaction.fr',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),
@@ -405,7 +405,7 @@ export default async function getCertificatePagesData({
                     font: fonts.mvnRegularPdfFont,
                 }),
                 new TextDrawer({
-                    text: 'www.klubr.fr',
+                    text: 'www.donaction.fr',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),

@@ -502,7 +502,7 @@ export default async function getInvoiceClubPagesData({
                     font: fonts.mvnSemiBoldPdfFont,
                 }),
                 new TextDrawer({
-                    text: 'hello@klubr.fr',
+                    text: 'hello@donaction.fr',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),
@@ -512,7 +512,7 @@ export default async function getInvoiceClubPagesData({
                     font: fonts.mvnRegularPdfFont,
                 }),
                 new TextDrawer({
-                    text: 'www.klubr.fr',
+                    text: 'www.donaction.fr',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),

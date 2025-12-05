@@ -1024,8 +1024,8 @@ Configure CORS in `config/middlewares.ts`:
   name: 'strapi::cors',
   config: {
     origin: [
-      'https://www.klubr.fr',
-      'https://klubr.fr',
+      'https://www.donaction.fr',
+      'https://donaction.fr',
       'http://localhost:3000'
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],

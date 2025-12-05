@@ -17,6 +17,6 @@ export const environment = {
   STRIPE_PAYMENT_LINK: "https://dashboard.stripe.com/payments/",
   klubrUuid: '14cec9f0-a43b-4495-a890-93d52c6dea6c',
   enableAnalytics: false,
-  plausibleDomain: 'klubr.fr-local/admin',
+  plausibleDomain: 'donaction.fr-local/admin',
   pwaEnabled: false,
 };

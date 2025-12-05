@@ -33,7 +33,7 @@ export async function forgotPassword(
 
         console.log('RESET_PASSWORD', resetPasswordUrl);
         await sendBrevoTransacEmail({
-            subject: 'Klubr.fr: Réinitialiser votre mot de passe',
+            subject: 'Donaction.fr: Réinitialiser votre mot de passe',
             to: [{ email: user.email }],
             templateId: BREVO_TEMPLATES.FORGOT_PASSWORD,
             params: {

@@ -1,10 +1,10 @@
 export const environment = {
   env: 'prod',
-  baseUrl: 'https://www.klubr.fr/admin',
-  apiUrl: 'https://www.klubr.fr/service/api/',
-  nextJsUrl: 'https://www.klubr.fr/',
-  nextJsUrlSm: 'klubr.fr/',
-  domain: 'www.klubr.fr',
+  baseUrl: 'https://www.donaction.fr/admin',
+  apiUrl: 'https://www.donaction.fr/service/api/',
+  nextJsUrl: 'https://www.donaction.fr/',
+  nextJsUrlSm: 'donaction.fr/',
+  domain: 'www.donaction.fr',
   apiToken: 'XXXXXX',
   apiTokenV1: 'STRAPI_API_TOKEN_ADMIN_PROD_PLACEHOLDER',
   googleClientId: 'GOOGLE_CLIENT_ID_PROD_PLACEHOLDER',
@@ -14,6 +14,6 @@ export const environment = {
   STRIPE_PAYMENT_LINK: "https://dashboard.stripe.com/payments/",
   klubrUuid: 'KLUBR_UUID_PROD_PLACEHOLDER',
   enableAnalytics: false,
-  plausibleDomain: 'klubr.fr/admin',
+  plausibleDomain: 'donaction.fr/admin',
   pwaEnabled: true,
 };

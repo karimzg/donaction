@@ -31,7 +31,7 @@ export default factories.createCoreService(
                 templateId: BREVO_TEMPLATES.MEMBER_INVITATION,
                 to: [{ email: email }],
                 params: {
-                    MESSAGE: `${host.prenom} ${host.nom} vous invite à rejoindre le club ${club.denomination} sur klubr.fr`,
+                    MESSAGE: `${host.prenom} ${host.nom} vous invite à rejoindre le club ${club.denomination} sur donaction.fr`,
                     LOGO_CLUB: checkSvgAndTransform(club?.logo, [
                         MEDIAS_TRANSFORMATIONS.EMAIL_CLUB_LOGO,
                     ]),

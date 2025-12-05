@@ -888,7 +888,7 @@ export default factories.createCoreController(
         async cleanAll() {
             const ctx = strapi.requestContext.get();
             return await sendBrevoTransacEmail({
-                subject: 'Klubr.fr: Réinitialiser votre mot de passe',
+                subject: 'Donaction.fr: Réinitialiser votre mot de passe',
                 to: [{ email: 'user.email' }],
                 templateId: BREVO_TEMPLATES.FORGOT_PASSWORD,
                 params: {

@@ -66,7 +66,7 @@ export default async function getProjectPosterPagesData({
         descriptionText = descriptionText.slice(0, 200) + '...';
     }
 
-    const qrCodeUrl = `https://klubr.fr/${data?.klubr?.slug}/nos-projets/${data?.slug}?PAYEMENT_FORM=true`;
+    const qrCodeUrl = `https://donaction.fr/${data?.klubr?.slug}/nos-projets/${data?.slug}?PAYEMENT_FORM=true`;
     const qrCodeBuffer = await QRCode.toBuffer(
         `${qrCodeUrl}&utm_medium=poster&utm_source=${data?.denomination}&utm_content=${qrCodeUrl}&utm_campaign=${data?.slug}`,
         {
@@ -595,7 +595,7 @@ export default async function getProjectPosterPagesData({
             height: 17.85,
         }),
         new TextDrawer({
-            text: 'www.klubr.fr',
+            text: 'www.donaction.fr',
             size: 13,
             font: fonts.mvnMediumPdfFont,
             x: HPadding + 110,

@@ -93,9 +93,9 @@ export class InvitationPopUpComponent implements OnInit {
   /* SHARE METHODS */
   shareMobile() {
     const text = `${this.sharedFacade.profile()?.prenom} ${this.sharedFacade.profile()?.nom} vous invite à rejoindre `
-      + `${this.sharedFacade.currentKlub()?.denomination} sur klubr.fr. Cliquez sur le lien et connectez-vous pour rejoindre le Klub `;
+      + `${this.sharedFacade.currentKlub()?.denomination} sur donaction.fr. Cliquez sur le lien et connectez-vous pour rejoindre le Klub `;
     const data = {
-      title: 'Envoyer une invitation à rejoindre le Klub sur klubr.fr',
+      title: 'Envoyer une invitation à rejoindre le Klub sur donaction.fr',
       text,
       url: this.invitationLink(),
     };
@@ -119,7 +119,7 @@ export class InvitationPopUpComponent implements OnInit {
   // Not used
   share2(socialNetwork: 'whatsapp' | 'messenger' = 'whatsapp') {
     const message = `${this.sharedFacade.profile()?.prenom} ${this.sharedFacade.profile()?.nom} vous invite à rejoindre `
-      + `${this.sharedFacade.currentKlub()?.denomination} sur klubr.fr. Cliquez sur le lien et connectez-vous pour rejoindre le Klub :` + this.invitationLink();
+      + `${this.sharedFacade.currentKlub()?.denomination} sur donaction.fr. Cliquez sur le lien et connectez-vous pour rejoindre le Klub :` + this.invitationLink();
     let url = '';
     switch (socialNetwork) {
       case 'whatsapp':

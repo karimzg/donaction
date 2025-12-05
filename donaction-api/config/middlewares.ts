@@ -14,7 +14,7 @@ export default [
   // {
   //   name: 'strapi::cors',
   //   config: {
-  //     origin: ['https://re7.klubr.fr', 'https://www.klubr.fr', 'https://klubr.fr', 'http://localhost:3000'],
+  //     origin: ['https://re7.donaction.fr', 'https://www.donaction.fr', 'https://donaction.fr', 'http://localhost:3000'],
   //     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
   //     headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   //     keepHeaderOnError: true,

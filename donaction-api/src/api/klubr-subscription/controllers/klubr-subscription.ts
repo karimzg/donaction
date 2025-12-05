@@ -15,7 +15,7 @@ export default factories.createCoreController(
         async create(ctx) {
             try {
                 //TODO: @Karim; get klubr member details to check if he can create a subscription for this klub ?
-                //TODO: KlubrUuid is optionnal only for klubr.fr, re7.klubr.fr
+                //TODO: KlubrUuid is optionnal only for donaction.fr, re7.donaction.fr
                 if (
                     !ctx.request.body?.data?.web_component ||
                     !ctx.request.body?.data?.host

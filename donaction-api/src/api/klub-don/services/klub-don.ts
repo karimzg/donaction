@@ -58,7 +58,7 @@ export default factories.createCoreService(
             }
 
             return await sendBrevoTransacEmail({
-                from: { name: 'Klubr - Dons', email: 'dons@klubr.fr' },
+                from: { name: 'Klubr - Dons', email: 'dons@donaction.fr' },
                 to: [{ email: don?.klubDonateur?.email }],
                 templateId: BREVO_TEMPLATES.DONATION_DONOR_CONFIRMATION,
                 params: {
@@ -109,7 +109,7 @@ export default factories.createCoreService(
                 don?.klub_projet?.klubr_membre,
             );
             return await sendBrevoTransacEmail({
-                from: { name: 'Klubr - Dons', email: 'dons@klubr.fr' },
+                from: { name: 'Klubr - Dons', email: 'dons@donaction.fr' },
                 to: [{ email: emailDestinataire }],
                 templateId: BREVO_TEMPLATES.DONATION_ADMIN_NOTIFICATION,
                 params: {
@@ -465,7 +465,7 @@ export default factories.createCoreService(
                     // TODO: COMPLETE
                     await sendEmail({
                         to: user.email,
-                        from: 'hello@klubr.fr',
+                        from: 'hello@donaction.fr',
                         html,
                         subject,
                         tags,

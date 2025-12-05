@@ -852,7 +852,7 @@ export default factories.createCoreService(
                     // TODO: CHECK
                     await sendEmail({
                         to: user.email,
-                        from: 'hello@klubr.fr',
+                        from: 'hello@donaction.fr',
                         html,
                         subject,
                         tags,
@@ -894,7 +894,7 @@ export default factories.createCoreService(
             return await Promise.all(
                 klubLeaders.map(async (member) => {
                     const resp = await sendBrevoTransacEmail({
-                        from: { name: 'Klubr - Dons', email: 'dons@klubr.fr' },
+                        from: { name: 'Klubr - Dons', email: 'dons@donaction.fr' },
                         to: [{ email: member.email }],
                         templateId: BREVO_TEMPLATES.CLUB_INVOICE,
                         params: {
