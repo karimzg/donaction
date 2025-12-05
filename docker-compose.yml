@@ -1,7 +1,7 @@
 #version: '3'
 services:
 
-  klubrfrontend:
+  donactionfrontend:
     container_name: ${PROJECT_SLUG}_frontend
     build:
       context: .
@@ -23,7 +23,7 @@ services:
     depends_on:
       - klubrapi
 
-  klubradmin:
+  donactionadmin:
     container_name: ${PROJECT_SLUG}_admin
     build:
       context: .
@@ -45,7 +45,7 @@ services:
     depends_on:
       - klubrapi
 
-  klubrapi:
+  donactionapi:
     container_name: ${PROJECT_SLUG}_backend
     build:
       context: .
@@ -123,10 +123,10 @@ services:
 volumes:
   postgres-data-v5:
   pgadmin-data:
-  klubrfrontend-next:
-  klubrfrontend_node_modules:
-  klubradmin_node_modules:
-  klubrapi_node_modules:
+  donactionfrontend-next:
+  donactionfrontend_node_modules:
+  donactionadmin_node_modules:
+  donactionapi_node_modules:
 
 networks:
   internal:
