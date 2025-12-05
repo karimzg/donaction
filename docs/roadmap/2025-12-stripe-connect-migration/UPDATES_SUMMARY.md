@@ -199,3 +199,45 @@
 | Error handling strategy? | Backend validation primary, frontend defensive secondary |
 | Fee statement priority? | After core features, requires facturation refactor |
 
+
+---
+
+## 🔴 Phase 0 Added: Angular 21 Migration
+
+**Date:** 2025-12-04  
+**Priority:** CRITICAL PREREQUISITE
+
+### Rationale
+
+To leverage the latest Angular 21 features for the entire Stripe Connect Epic:
+- **Signal Forms** for all new form implementations
+- **Enhanced Signals API** for better state management
+- **Performance improvements** with new change detection
+- **Modern patterns** for maintainability
+
+### Impact on Timeline
+
+- **Original Estimate:** 8-10 weeks
+- **Updated Estimate:** 9-11 weeks (includes 1 week for Angular 21 migration)
+
+### Phase 0 Tasks
+
+1. Update dependencies (@angular/*, TypeScript, PrimeNG, NgRx)
+2. Run Angular migration schematics
+3. Refactor to Signal Forms and modern APIs
+4. Update tests and documentation
+5. Team training on new patterns
+
+### Blockers
+
+⚠️ **All other phases (#5-#12) are blocked until Phase 0 is complete**
+
+This ensures:
+- Consistent use of Angular 21 patterns across all new code
+- No need to refactor Phase 1-8 code later
+- Maximum benefit from performance improvements
+- Team alignment on modern Angular practices
+
+### Issue
+
+- Phase 0: #13
