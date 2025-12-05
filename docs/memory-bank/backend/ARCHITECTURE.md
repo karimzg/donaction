@@ -15,7 +15,7 @@
 
 ### Backend
 
-- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @klubr-api/package.json
+- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @donaction-api/package.json
 - **API Style**: REST - Strapi auto-generated endpoints with custom routes
 - **Architecture**: Strapi CMS with content-types, services, controllers, and lifecycles
 - **ORM**: Strapi Query Engine (built-in) - database abstraction layer
@@ -28,15 +28,15 @@
 
 - **Type**: PostgreSQL (production) / SQLite (development)
 - **ORM/Driver**: `pg` v8 driver with Strapi Query Engine
-- **Connection**: Configured via environment variables → @klubr-api/config/database.ts
+- **Connection**: Configured via environment variables → @donaction-api/config/database.ts
 - **Migration**: Strapi built-in migrations (automatic on schema changes)
-- **Seeding**: `strapi import` command with encrypted exports → @klubr-api/data/
+- **Seeding**: `strapi import` command with encrypted exports → @donaction-api/data/
 - **Mock**: No mock database configured
 
 ## Full project structure
 
 ```text
-klubr-api/
+donaction-api/
 ├── config/                     # Strapi configuration
 │   ├── admin.ts               # Admin panel config
 │   ├── api.ts                 # API config
@@ -132,9 +132,9 @@ graph LR
 
 - **Purpose**: CDN and image storage provider
 - **Integration**: Custom Strapi upload provider `strapi-provider-upload-imagekit`
-- **Config**: @klubr-api/config/plugins.ts
+- **Config**: @donaction-api/config/plugins.ts
 - **Usage**: Handles all media uploads with environment-based tagging (production/staging)
-- **Lifecycle**: File metadata updated on `beforeCreate` hook → @klubr-api/src/index.ts
+- **Lifecycle**: File metadata updated on `beforeCreate` hook → @donaction-api/src/index.ts
 
 ```mermaid
 graph LR
@@ -153,8 +153,8 @@ graph LR
 
 - **Purpose**: Transactional email service (invitations, newsletters)
 - **Integration**: `@strapi/provider-email-nodemailer` with Brevo SMTP + `sib-api-v3-sdk` API client
-- **Config**: @klubr-api/config/plugins.ts email provider
-- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @klubr-api/src/helpers/emails/
+- **Config**: @donaction-api/config/plugins.ts email provider
+- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @donaction-api/src/helpers/emails/
 - **Templates**: Predefined template IDs for member invitations, password resets, etc
 
 #### Stripe
@@ -162,4 +162,4 @@ graph LR
 - **Purpose**: Payment processing for donations and subscriptions
 - **Integration**: `stripe` v17 SDK
 - **Config**: API keys via environment variables
-- **Usage**: Invoice generation, payment handling → @klubr-api/src/api/invoice/
+- **Usage**: Invoice generation, payment handling → @donaction-api/src/api/invoice/

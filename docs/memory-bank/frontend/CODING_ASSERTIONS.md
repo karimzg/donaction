@@ -28,7 +28,7 @@ argument-hint: N/A
 
 ## TypeScript Configuration
 
-Config: @klubr-frontend/tsconfig.json
+Config: @donaction-frontend/tsconfig.json
 
 - Strict mode enabled (`"strict": true`)
 - Target ES6
@@ -105,7 +105,7 @@ Config: @klubr-frontend/tsconfig.json
 
 ## Next.js Specifics
 
-Config: @klubr-frontend/next.config.js
+Config: @donaction-frontend/next.config.js
 
 - App Router (Next.js 14)
 - `reactStrictMode: false`
@@ -115,7 +115,7 @@ Config: @klubr-frontend/next.config.js
 
 ## Styling
 
-Config: @klubr-frontend/.prettierrc
+Config: @donaction-frontend/.prettierrc
 
 - Prettier for formatting
 - Tabs for indentation (`"useTabs": true`)

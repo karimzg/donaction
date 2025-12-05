@@ -4,10 +4,10 @@ This part provides detailed information about the database used in the project, 
 
 ## Information
 
-- **Schema path**: @klubr-api/src/api/*/content-types/*/schema.json
+- **Schema path**: @donaction-api/src/api/*/content-types/*/schema.json
 - **Type**: PostgreSQL (production), SQLite (dev), MySQL (supported)
 - **ORM/Driver**: Strapi 5 (built on Knex.js), `pg` driver v8
-- **Connection**: @klubr-api/config/database.ts with multi-client support
+- **Connection**: @donaction-api/config/database.ts with multi-client support
 
 ## Main entities and relationships
 

@@ -7,9 +7,9 @@
 
 ## Design System Files
 
-- **Theme Config**: @klubr-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @klubr-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @klubr-admin/src/assets/layout/ (layout SCSS), @klubr-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @klubr-admin/src/styles.scss (global styles, layer order)
+- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
+- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
+- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
 
 ## Design System
 
@@ -18,14 +18,14 @@
 - **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
 - **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
 
-- **Color Palette**: See @klubr-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
 
   - Primary: Indigo palette (50-950) - primary actions, links, brand
   - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
   - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
   - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
 
-- **Typography**: See @klubr-admin/src/assets/layout/_typography.scss
+- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
   - Primary Font: Inter - body text, UI components
   - Secondary Font: Inter (with font-feature-settings) - branded elements
   - Fallback: sans-serif

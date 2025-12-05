@@ -13,9 +13,9 @@ argument-hint: N/A
 
 ## Design System Files
 
-- **Theme Config**: @klubr-frontend/src/config/theme.json (colors, fonts) + @klubr-frontend/tailwind.config.js (Tailwind configuration)
-- **Design Components**: @klubr-frontend/src/layouts/components (reusable UI components)
-- **Style Guidelines**: @klubr-frontend/src/styles/main.scss (base, buttons, utilities layers)
+- **Theme Config**: @donaction-frontend/src/config/theme.json (colors, fonts) + @donaction-frontend/tailwind.config.js (Tailwind configuration)
+- **Design Components**: @donaction-frontend/src/layouts/components (reusable UI components)
+- **Style Guidelines**: @donaction-frontend/src/styles/main.scss (base, buttons, utilities layers)
 
 ## Design System
 
@@ -24,7 +24,7 @@ argument-hint: N/A
 - **Shadows**: Custom utilities - `shadow-default`, `shadow-xs`, `shadow-sm`, `shadow-md`, `boxBoxShadow` class, `shadow-button` for buttons
 - **Breakpoints**: Custom - `xs: 480px`, `sm: 575px`, `md: 768px`, `lg: 1024px`, `xl: 1320px`
 
-- **Color Palette**: See @klubr-frontend/src/config/theme.json
+- **Color Palette**: See @donaction-frontend/src/config/theme.json
 
   - Primary: `#000` (black) - Main brand, buttons, text headings
   - Secondary: `#73cfa8` (green) - Accent actions
@@ -38,7 +38,7 @@ argument-hint: N/A
   - Text Dark: `#222222` - Dark text
   - Text Light: `#fffefe` - Light text
 
-- **Typography**: See @klubr-frontend/src/config/theme.json
+- **Typography**: See @donaction-frontend/src/config/theme.json
   - Primary Font: Maven Pro (400, 500, 600, 700) - All text
   - Fallback: sans-serif
   - Base size: `16px`, Scale: `1.23` (exponential heading scale)

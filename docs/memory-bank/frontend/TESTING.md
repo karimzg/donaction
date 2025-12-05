@@ -1,6 +1,6 @@
 # Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-frontend.
+This document outlines the testing strategies and guidelines for donaction-frontend.
 
 ## Test Coverage
 

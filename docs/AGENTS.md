@@ -8,10 +8,10 @@ argument-hint: N/A
 
 #### Root Directory
 
-- **klubr-frontend**: Next.js web application for public-facing site
-- **klubr-api**: Strapi CMS backend API
-- **klubr-admin**: Angular admin dashboard application
-- **klubr-saas**: Svelte web components for embeddable widgets
+- **donaction-frontend**: Next.js web application for public-facing site
+- **donaction-api**: Strapi CMS backend API
+- **donaction-admin**: Angular admin dashboard application
+- **donaction-saas**: Svelte web components for embeddable widgets
 - **aidd**: AI-driven development configuration and agents
 - **docs**: Project documentation including agents, rules, flows, memory-bank
 - **cicd**: CI/CD pipeline configurations
@@ -28,7 +28,7 @@ argument-hint: N/A
 - @CLAUDE.md: AI assistant instructions (symlink to AGENTS.md)
 - @AGENTS.md: Main project rules and AI configuration
 
-#### klubr-frontend (Next.js)
+#### donaction-frontend (Next.js)
 
 ##### Tech Stack
 - **Framework**: Next.js 14
@@ -64,13 +64,13 @@ argument-hint: N/A
 - `scripts`: Build and utility scripts
 
 ##### Config Files
-- @klubr-frontend/next.config.js: Next.js configuration
-- @klubr-frontend/tailwind.config.js: TailwindCSS configuration
-- @klubr-frontend/postcss.config.js: PostCSS configuration
-- @klubr-frontend/tsconfig.json: TypeScript configuration
-- @klubr-frontend/package.json: Dependencies and scripts
+- @donaction-frontend/next.config.js: Next.js configuration
+- @donaction-frontend/tailwind.config.js: TailwindCSS configuration
+- @donaction-frontend/postcss.config.js: PostCSS configuration
+- @donaction-frontend/tsconfig.json: TypeScript configuration
+- @donaction-frontend/package.json: Dependencies and scripts
 
-#### klubr-api (Strapi)
+#### donaction-api (Strapi)
 
 ##### Tech Stack
 - **Framework**: Strapi 5
@@ -118,11 +118,11 @@ argument-hint: N/A
 - `types`: TypeScript type definitions
 
 ##### Config Files
-- @klubr-api/package.json: Dependencies and scripts
-- @klubr-api/tsconfig.json: TypeScript configuration
-- @klubr-api/klubr-gcc-config.json: Google Cloud Console config
+- @donaction-api/package.json: Dependencies and scripts
+- @donaction-api/tsconfig.json: TypeScript configuration
+- @donaction-api/klubr-gcc-config.json: Google Cloud Console config
 
-#### klubr-admin (Angular)
+#### donaction-admin (Angular)
 
 ##### Tech Stack
 - **Framework**: Angular 19
@@ -151,13 +151,13 @@ argument-hint: N/A
 - `src/environments`: Environment configurations
 
 ##### Config Files
-- @klubr-admin/angular.json: Angular workspace configuration
-- @klubr-admin/tsconfig.json: TypeScript configuration
-- @klubr-admin/package.json: Dependencies and scripts
-- @klubr-admin/proxy.conf.json: Proxy configuration for development
-- @klubr-admin/ngsw-config.json: Service worker configuration
+- @donaction-admin/angular.json: Angular workspace configuration
+- @donaction-admin/tsconfig.json: TypeScript configuration
+- @donaction-admin/package.json: Dependencies and scripts
+- @donaction-admin/proxy.conf.json: Proxy configuration for development
+- @donaction-admin/ngsw-config.json: Service worker configuration
 
-#### klubr-saas (Svelte)
+#### donaction-saas (Svelte)
 
 ##### Tech Stack
 - **Framework**: Svelte 5 (Web Components)
@@ -187,11 +187,11 @@ argument-hint: N/A
   - `docs`: Documentation files
 
 ##### Config Files
-- @klubr-saas/vite.config.ts: Vite build configuration
-- @klubr-saas/vite.config.development.ts: Development configuration
-- @klubr-saas/svelte.config.js: Svelte configuration
-- @klubr-saas/tsconfig.json: TypeScript configuration
-- @klubr-saas/package.json: Dependencies and scripts
+- @donaction-saas/vite.config.ts: Vite build configuration
+- @donaction-saas/vite.config.development.ts: Development configuration
+- @donaction-saas/svelte.config.js: Svelte configuration
+- @donaction-saas/tsconfig.json: TypeScript configuration
+- @donaction-saas/package.json: Dependencies and scripts
 
 #### AIDD Structure
 
@@ -277,10 +277,10 @@ argument-hint: N/A
 
 ```plaintext
 /repos/klubr/klubr-front/
-├── klubr-admin/          # Angular admin dashboard
-├── klubr-frontend/       # Next.js frontend
-├── klubr-api/            # Strapi API backend
-├── klubr-saas/           # Web components
+├── donaction-admin/          # Angular admin dashboard
+├── donaction-frontend/       # Next.js frontend
+├── donaction-api/            # Strapi API backend
+├── donaction-saas/           # Web components
 ├── docker-compose.yml    # Local dev orchestration
 ├── .gitlab-ci.yml        # CI/CD pipeline
 └── cicd/
@@ -294,10 +294,10 @@ argument-hint: N/A
 ##### Environment Files
 
 - @.env (root)
-- @klubr-admin/.env
-- @klubr-frontend/.env, @klubr-frontend/.env.prod, @klubr-frontend/.env.re7
-- @klubr-api/.env.development, @klubr-api/.env.prod, @klubr-api/.env.re7
-- @klubr-saas/.env.prod, @klubr-saas/.env.re7
+- @donaction-admin/.env
+- @donaction-frontend/.env, @donaction-frontend/.env.prod, @donaction-frontend/.env.re7
+- @donaction-api/.env.development, @donaction-api/.env.prod, @donaction-api/.env.re7
+- @donaction-saas/.env.prod, @donaction-saas/.env.re7
 
 ##### Required Environment Variables
 
@@ -335,8 +335,8 @@ argument-hint: N/A
 
 ```mermaid
 graph TD
-    A[klubr-frontend:3000] -->|depends_on| D[klubr-api:1337]
-    B[klubr-admin:4200] -->|depends_on| D
+    A[donaction-frontend:3000] -->|depends_on| D[donaction-api:1337]
+    B[donaction-admin:4200] -->|depends_on| D
     D -->|depends_on| E[postgres:5432]
     F[pgadmin:5050] -->|connects to| E
 
@@ -349,7 +349,7 @@ graph TD
 
     D -->|volumes| D1[klubrapi_node_modules]
     D -->|volumes| D2[./logs/klubrApi]
-    D -->|volumes| D3[./klubr-api/private-pdf]
+    D -->|volumes| D3[./donaction-api/private-pdf]
 
     E -->|volumes| E1[postgres-data-v5]
     F -->|volumes| F1[pgadmin-data]
@@ -491,9 +491,9 @@ argument-hint: N/A
 
 ### Stack
 
-#### klubr-frontend
+#### donaction-frontend
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - Next.js 14 (React framework)
 - React 18
@@ -508,21 +508,21 @@ argument-hint: N/A
 - Sharp 0.33 (image optimization)
 - Swiper 11 (carousels)
 
-@klubr-frontend/next.config.js
+@donaction-frontend/next.config.js
 
 - Standalone output mode
 - Bundle analyzer support
 - Custom image domains: `googleusercontent.com`, `cloudinary.com`, `imagekit.io`
 
-@klubr-frontend/tsconfig.json
+@donaction-frontend/tsconfig.json
 
 - Target: ES6
 - Path aliases: `@/components/*`, `@/helpers/*`, `@/*`
 - Strict mode enabled
 
-#### klubr-admin
+#### donaction-admin
 
-@klubr-admin/package.json
+@donaction-admin/package.json
 
 - Angular 19
 - TypeScript 5
@@ -536,22 +536,22 @@ argument-hint: N/A
 - ngx-lottie 13 (animations)
 - Jasmine 5 + Karma 6 (testing)
 
-@klubr-admin/angular.json
+@donaction-admin/angular.json
 
 - Builder: `@angular-devkit/build-angular:application`
 - Style preprocessor: SCSS
 - Service worker: PWA enabled via `ngsw-config.json`
 - Multiple environments: `production`, `development`, `re7`
 
-@klubr-admin/tsconfig.json
+@donaction-admin/tsconfig.json
 
 - Target: ES2022
 - Strict mode with all strict flags
 - Path aliases: `@app/*`, `@assets/*`, `@environments/*`, `@shared/*`
 
-#### klubr-saas
+#### donaction-saas
 
-@klubr-saas/package.json
+@donaction-saas/package.json
 
 - Svelte 5 (web components)
 - TypeScript 5
@@ -560,20 +560,20 @@ argument-hint: N/A
 - Stripe JS 4
 - Swiper 11 (carousels)
 
-@klubr-saas/vite.config.ts
+@donaction-saas/vite.config.ts
 
 - Custom element compilation for web components
 - Multiple build modes: INDIVIDUAL (ESM) and IIFE
 - Outputs to `build/klubr-web-components`
 
-@klubr-saas/tsconfig.json
+@donaction-saas/tsconfig.json
 
 - Target: ESNext
 - Extends `@tsconfig/svelte`
 
-#### klubr-api
+#### donaction-api
 
-@klubr-api/package.json
+@donaction-api/package.json
 
 - Strapi 5 (headless CMS)
 - Node.js 18-22
@@ -618,7 +618,7 @@ argument-hint: N/A
 
 ##### Dashboard
 
-- **Framework**: Angular 19 → @klubr-admin/package.json
+- **Framework**: Angular 19 → @donaction-admin/package.json
 - **UI Library**: PrimeNG 19 with custom theme preset - Component library with Tailwind integration via `tailwindcss-primeui`
 - **Routing**: Angular Router with lazy loading - Feature-based routing with guards (`authGuard`, `invitationCodeGuard`)
 - **Data Fetching**: Angular HttpClient with interceptors - JWT auth and error handling interceptors
@@ -631,7 +631,7 @@ argument-hint: N/A
 #### Full project structure
 
 ```text
-klubr-admin/
+donaction-admin/
 ├── src/
 │   ├── app/
 │   │   ├── routes/                          # Feature routes (lazy loaded)
@@ -730,8 +730,8 @@ Flow:
 
 ##### Base Configuration
 
-@klubr-admin/src/environments/environment.ts
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/environments/environment.ts
+@donaction-admin/src/app/app.config.ts
 
 - `environment.apiUrl` for Strapi backend (`http://localhost:1337/api/`)
 - `environment.nextJsUrl` for Next.js SSR routes
@@ -752,7 +752,7 @@ Flow:
 
 ##### Dual Auth Mode
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
 
 **Auth Modes**:
 - `'angular'` - Cookie-based JWT via `JwtService`
@@ -766,7 +766,7 @@ Flow:
 
 ##### Auth Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
 
 **Token Routing**:
 - `apiTokenRoutes` use `environment.apiTokenV1` (e.g., `/api/auth/local`, `/api/auth/google/callback`)
@@ -787,7 +787,7 @@ Flow:
 
 ##### HTTP Errors Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
 
 **Error Types**:
 - `403` - Expired session: show toast, delay 3s, trigger `authFacade.logout()`
@@ -805,7 +805,7 @@ Flow:
 
 ##### Endpoint Organization
 
-@klubr-admin/src/app/shared/utils/config/endpoints.ts
+@donaction-admin/src/app/shared/utils/config/endpoints.ts
 
 **Constants**:
 - Authentication: `LOGIN`, `REGISTER`, `CHANGE_PASSWORD`
@@ -839,7 +839,7 @@ Flow:
 
 ##### Query Building System
 
-@klubr-admin/src/app/shared/utils/helpers/query-helpers.ts
+@donaction-admin/src/app/shared/utils/helpers/query-helpers.ts
 
 **Core Functions**:
 - `getQueryString()` - Combines filters, populate, sort, pagination
@@ -880,7 +880,7 @@ Flow:
 
 ##### NgRx State Management
 
-@klubr-admin/src/app/routes/auth/data-access/+state/
+@donaction-admin/src/app/routes/auth/data-access/+state/
 
 **Features**:
 - `AuthFacade` exposes observables: `token$`, `isAuthenticated$`, `authMode$`
@@ -890,7 +890,7 @@ Flow:
 
 ##### Cache Invalidation
 
-@klubr-admin/src/app/shared/services/invalidate-cache.service.ts
+@donaction-admin/src/app/shared/services/invalidate-cache.service.ts
 
 **Pattern**:
 - Services return `pathsToUnvalidateDataRequest()` with affected routes
@@ -901,7 +901,7 @@ Flow:
 
 ##### Google OAuth
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
 
 - Client ID via `environment.googleClientId`
 - Callback: `${apiUrl}/auth/google/callback?access_token=<token>`
@@ -909,7 +909,7 @@ Flow:
 
 ##### Google Maps
 
-@klubr-admin/src/app/shared/components/form/google-maps/
+@donaction-admin/src/app/shared/components/form/google-maps/
 
 - API key: `environment.GOOGLE_MAPS_API_KEY`
 - Unauthenticated route (no Bearer token)
@@ -917,7 +917,7 @@ Flow:
 
 ##### reCAPTCHA
 
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/app/app.config.ts
 
 - Site key: `environment.ANGULAR_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY`
 - Provided via `RECAPTCHA_V3_SITE_KEY` injection token
@@ -932,14 +932,14 @@ Flow:
 
 ##### Dashboard Cache
 
-@klubr-admin/src/app/shared/services/caching.service.ts
+@donaction-admin/src/app/shared/services/caching.service.ts
 
 - In-memory caching layer
 - Used for repeated queries within session
 
 #### Key Dependencies
 
-@klubr-admin/package.json
+@donaction-admin/package.json
 
 - `@angular/common` ^19 (HttpClient)
 - `@ngrx/store` ^19
@@ -1137,9 +1137,9 @@ argument-hint: N/A
 
 #### Design System Files
 
-- **Theme Config**: @klubr-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @klubr-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @klubr-admin/src/assets/layout/ (layout SCSS), @klubr-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @klubr-admin/src/styles.scss (global styles, layer order)
+- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
+- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
+- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
 
 #### Design System
 
@@ -1148,14 +1148,14 @@ argument-hint: N/A
 - **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
 - **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
 
-- **Color Palette**: See @klubr-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
 
   - Primary: Indigo palette (50-950) - primary actions, links, brand
   - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
   - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
   - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
 
-- **Typography**: See @klubr-admin/src/assets/layout/_typography.scss
+- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
   - Primary Font: Inter - body text, UI components
   - Secondary Font: Inter (with font-feature-settings) - branded elements
   - Fallback: sans-serif
@@ -1463,7 +1463,7 @@ argument-hint: N/A
 
 ### Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-admin.
+This document outlines the testing strategies and guidelines for donaction-admin.
 
 #### Tools and Frameworks
 
@@ -1523,7 +1523,7 @@ argument-hint: N/A
 
 #### Endpoints
 
-- Endpoints file: @klubr-api/src/api/*/routes/*-custom.ts - Custom routes per module
+- Endpoints file: @donaction-api/src/api/*/routes/*-custom.ts - Custom routes per module
 - Base URL: `/api` - Strapi REST API base
 - Versioning: None - Single version API
 - Format: REST - JSON request/response
@@ -1613,12 +1613,12 @@ argument-hint: N/A
 
 ##### Brevo (Email)
 - Email provider: Brevo SMTP relay
-- Configuration: `@klubr-api/config/plugins.ts` email settings
+- Configuration: `@donaction-api/config/plugins.ts` email settings
 - SDK integration: `sib-api-v3-sdk`
 
 ##### ImageKit
 - Upload provider: `strapi-provider-upload-imagekit`
-- Configuration: `@klubr-api/config/plugins.ts` upload settings
+- Configuration: `@donaction-api/config/plugins.ts` upload settings
 - Folder management for avatars and media
 
 ##### Google Cloud
@@ -1643,7 +1643,7 @@ argument-hint: N/A
 
 ##### Backend
 
-- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @klubr-api/package.json
+- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @donaction-api/package.json
 - **API Style**: REST - Strapi auto-generated endpoints with custom routes
 - **Architecture**: Strapi CMS with content-types, services, controllers, and lifecycles
 - **ORM**: Strapi Query Engine (built-in) - database abstraction layer
@@ -1656,15 +1656,15 @@ argument-hint: N/A
 
 - **Type**: PostgreSQL (production) / SQLite (development)
 - **ORM/Driver**: `pg` v8 driver with Strapi Query Engine
-- **Connection**: Configured via environment variables → @klubr-api/config/database.ts
+- **Connection**: Configured via environment variables → @donaction-api/config/database.ts
 - **Migration**: Strapi built-in migrations (automatic on schema changes)
-- **Seeding**: `strapi import` command with encrypted exports → @klubr-api/data/
+- **Seeding**: `strapi import` command with encrypted exports → @donaction-api/data/
 - **Mock**: No mock database configured
 
 #### Full project structure
 
 ```text
-klubr-api/
+donaction-api/
 ├── config/                     # Strapi configuration
 │   ├── admin.ts               # Admin panel config
 │   ├── api.ts                 # API config
@@ -1760,9 +1760,9 @@ graph LR
 
 - **Purpose**: CDN and image storage provider
 - **Integration**: Custom Strapi upload provider `strapi-provider-upload-imagekit`
-- **Config**: @klubr-api/config/plugins.ts
+- **Config**: @donaction-api/config/plugins.ts
 - **Usage**: Handles all media uploads with environment-based tagging (production/staging)
-- **Lifecycle**: File metadata updated on `beforeCreate` hook → @klubr-api/src/index.ts
+- **Lifecycle**: File metadata updated on `beforeCreate` hook → @donaction-api/src/index.ts
 
 ```mermaid
 graph LR
@@ -1781,8 +1781,8 @@ graph LR
 
 - **Purpose**: Transactional email service (invitations, newsletters)
 - **Integration**: `@strapi/provider-email-nodemailer` with Brevo SMTP + `sib-api-v3-sdk` API client
-- **Config**: @klubr-api/config/plugins.ts email provider
-- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @klubr-api/src/helpers/emails/
+- **Config**: @donaction-api/config/plugins.ts email provider
+- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @donaction-api/src/helpers/emails/
 - **Templates**: Predefined template IDs for member invitations, password resets, etc
 
 ###### Stripe
@@ -1790,7 +1790,7 @@ graph LR
 - **Purpose**: Payment processing for donations and subscriptions
 - **Integration**: `stripe` v17 SDK
 - **Config**: API keys via environment variables
-- **Usage**: Invoice generation, payment handling → @klubr-api/src/api/invoice/
+- **Usage**: Invoice generation, payment handling → @donaction-api/src/api/invoice/
 
 
 ---
@@ -1969,10 +1969,10 @@ This part provides detailed information about the database used in the project, 
 
 #### Information
 
-- **Schema path**: @klubr-api/src/api/*/content-types/*/schema.json
+- **Schema path**: @donaction-api/src/api/*/content-types/*/schema.json
 - **Type**: PostgreSQL (production), SQLite (dev), MySQL (supported)
 - **ORM/Driver**: Strapi 5 (built on Knex.js), `pg` driver v8
-- **Connection**: @klubr-api/config/database.ts with multi-client support
+- **Connection**: @donaction-api/config/database.ts with multi-client support
 
 #### Main entities and relationships
 
@@ -2061,7 +2061,7 @@ argument-hint: N/A
 
 #### Tools and Frameworks
 
-**Currently not configured** - No testing framework is set up in klubr-api.
+**Currently not configured** - No testing framework is set up in donaction-api.
 
 #### Testing Strategy
 
@@ -2071,7 +2071,7 @@ argument-hint: N/A
 
 #### Test Execution Process
 
-No test scripts available in @klubr-api/package.json
+No test scripts available in @donaction-api/package.json
 
 #### Mocking and Stubbing
 
@@ -2101,7 +2101,7 @@ argument-hint: N/A
 
 ##### Frontend
 
-- **Framework**: Next.js 14 (App Router) → @klubr-frontend/package.json
+- **Framework**: Next.js 14 (App Router) → @donaction-frontend/package.json
 - **UI Library**: TailwindCSS + SCSS - Utility-first CSS with custom theme system
 - **Routing**: Next.js App Router - File-based routing with route groups
 - **Data Fetching**: Native `fetch` with `HttpService` wrapper - Custom service layer handling SSR/CSR
@@ -2114,7 +2114,7 @@ argument-hint: N/A
 #### Full project structure
 
 ```text
-klubr-frontend/
+donaction-frontend/
 ├── src/
 │   ├── app/                      # Next.js App Router pages
 │   │   ├── (main)/              # Route group for public pages
@@ -2268,8 +2268,8 @@ graph TD
 
 ##### Base Configuration
 
-@klubr-frontend/src/core/services/endpoints.ts
-@klubr-frontend/src/core/services/index.ts
+@donaction-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/index.ts
 
 - Environment URLs via `process.env`
 - `NEXT_PUBLIC_API_URL` for Strapi backend
@@ -2309,7 +2309,7 @@ ExecutorInterface {
 
 ##### NextAuth Integration
 
-@klubr-frontend/src/app/api/auth/[...nextauth]/route.ts
+@donaction-frontend/src/app/api/auth/[...nextauth]/route.ts
 
 **Providers**:
 - Google OAuth via `GoogleProvider`
@@ -2329,7 +2329,7 @@ ExecutorInterface {
 
 ##### Auth Service Layer
 
-@klubr-frontend/src/core/services/auth/index.ts
+@donaction-frontend/src/core/services/auth/index.ts
 
 **Endpoints**:
 - `me()` - GET `/api/users/me` with role, klubr_membres, avatar
@@ -2346,7 +2346,7 @@ ExecutorInterface {
 
 ##### State Management
 
-@klubr-frontend/src/core/store/modules/authSlice.ts
+@donaction-frontend/src/core/store/modules/authSlice.ts
 
 - Redux Toolkit slice for session state
 - Stores NextAuth session data
@@ -2356,7 +2356,7 @@ ExecutorInterface {
 
 ##### Endpoint Organization
 
-@klubr-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/endpoints.ts
 
 **Strapi Entities**:
 - Clubs: `/api/klubrs`
@@ -2410,7 +2410,7 @@ ExecutorInterface {
 
 ##### Hybrid: Next.js API Routes as Proxy
 
-@klubr-frontend/src/app/api/[...fetch]/route.ts
+@donaction-frontend/src/app/api/[...fetch]/route.ts
 
 **Purpose**: Unified proxy for all Strapi requests
 
@@ -2435,7 +2435,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 ##### Stripe Payment
 
-@klubr-frontend/src/app/api/create-payment-intent/route.ts
+@donaction-frontend/src/app/api/create-payment-intent/route.ts
 
 - Endpoint: `/api/create-payment-intent`
 - Creates Stripe PaymentIntent via server-side Stripe SDK
@@ -2464,7 +2464,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 #### Key Dependencies
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - `next` ^14
 - `next-auth` ^4
@@ -2505,7 +2505,7 @@ argument-hint: N/A
 
 #### TypeScript Configuration
 
-Config: @klubr-frontend/tsconfig.json
+Config: @donaction-frontend/tsconfig.json
 
 - Strict mode enabled (`"strict": true`)
 - Target ES6
@@ -2582,7 +2582,7 @@ Config: @klubr-frontend/tsconfig.json
 
 #### Next.js Specifics
 
-Config: @klubr-frontend/next.config.js
+Config: @donaction-frontend/next.config.js
 
 - App Router (Next.js 14)
 - `reactStrictMode: false`
@@ -2592,7 +2592,7 @@ Config: @klubr-frontend/next.config.js
 
 #### Styling
 
-Config: @klubr-frontend/.prettierrc
+Config: @donaction-frontend/.prettierrc
 
 - Prettier for formatting
 - Tabs for indentation (`"useTabs": true`)
@@ -2661,9 +2661,9 @@ argument-hint: N/A
 
 #### Design System Files
 
-- **Theme Config**: @klubr-frontend/src/config/theme.json (colors, fonts) + @klubr-frontend/tailwind.config.js (Tailwind configuration)
-- **Design Components**: @klubr-frontend/src/layouts/components (reusable UI components)
-- **Style Guidelines**: @klubr-frontend/src/styles/main.scss (base, buttons, utilities layers)
+- **Theme Config**: @donaction-frontend/src/config/theme.json (colors, fonts) + @donaction-frontend/tailwind.config.js (Tailwind configuration)
+- **Design Components**: @donaction-frontend/src/layouts/components (reusable UI components)
+- **Style Guidelines**: @donaction-frontend/src/styles/main.scss (base, buttons, utilities layers)
 
 #### Design System
 
@@ -2672,7 +2672,7 @@ argument-hint: N/A
 - **Shadows**: Custom utilities - `shadow-default`, `shadow-xs`, `shadow-sm`, `shadow-md`, `boxBoxShadow` class, `shadow-button` for buttons
 - **Breakpoints**: Custom - `xs: 480px`, `sm: 575px`, `md: 768px`, `lg: 1024px`, `xl: 1320px`
 
-- **Color Palette**: See @klubr-frontend/src/config/theme.json
+- **Color Palette**: See @donaction-frontend/src/config/theme.json
 
   - Primary: `#000` (black) - Main brand, buttons, text headings
   - Secondary: `#73cfa8` (green) - Accent actions
@@ -2686,7 +2686,7 @@ argument-hint: N/A
   - Text Dark: `#222222` - Dark text
   - Text Light: `#fffefe` - Light text
 
-- **Typography**: See @klubr-frontend/src/config/theme.json
+- **Typography**: See @donaction-frontend/src/config/theme.json
   - Primary Font: Maven Pro (400, 500, 600, 700) - All text
   - Fallback: sans-serif
   - Base size: `16px`, Scale: `1.23` (exponential heading scale)
@@ -2783,7 +2783,7 @@ graph TD
 
 ### Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-frontend.
+This document outlines the testing strategies and guidelines for donaction-frontend.
 
 #### Test Coverage
 
@@ -2836,7 +2836,7 @@ This document outlines the testing strategies and guidelines for klubr-frontend.
 
 ##### Frontend
 
-- **Framework**: Svelte 5 → @klubr-saas/package.json
+- **Framework**: Svelte 5 → @donaction-saas/package.json
 - **Component Type**: Web Components (Custom Elements)
 - **Routing**: N/A - Single component module
 - **Data Fetching**: Custom fetch util with event bus pattern
@@ -2849,7 +2849,7 @@ This document outlines the testing strategies and guidelines for klubr-frontend.
 #### Full project structure
 
 ```text
-klubr-saas/
+donaction-saas/
 ├── src/
 │   ├── assets/           # Static assets
 │   │   ├── animations/   # Lottie JSON files
@@ -2958,7 +2958,7 @@ argument-hint: N/A
 
 #### TypeScript Configuration
 
-Config: @klubr-saas/tsconfig.json
+Config: @donaction-saas/tsconfig.json
 
 - Extends `@tsconfig/svelte`
 - Target: ESNext
@@ -3036,7 +3036,7 @@ Config: @klubr-saas/tsconfig.json
 
 #### Vite Specifics
 
-Config: @klubr-saas/vite.config.ts
+Config: @donaction-saas/vite.config.ts
 
 - Plugin: `@sveltejs/vite-plugin-svelte`
 - Preprocess: `svelte-preprocess` with TypeScript
@@ -3046,7 +3046,7 @@ Config: @klubr-saas/vite.config.ts
 
 #### Styling
 
-Config: @klubr-saas/.prettierrc
+Config: @donaction-saas/.prettierrc
 
 - Prettier for formatting
 - Tabs: 2 spaces (`"tabWidth": 2`)
@@ -3101,7 +3101,7 @@ src/
 
 ### Testing Guidelines
 
-Testing strategy and configuration for klubr-saas module.
+Testing strategy and configuration for donaction-saas module.
 
 #### Tools and Frameworks
 
@@ -3127,7 +3127,7 @@ Testing strategy and configuration for klubr-saas module.
 
 ##### File Structure
 - Tests in `__tests__` subdirectories
-- Example: @klubr-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
+- Example: @donaction-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
 
 ##### Common Patterns
 - Mock external dependencies (`Fetch`, `document.querySelectorAll`)

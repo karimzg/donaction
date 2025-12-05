@@ -4,8 +4,8 @@
 
 ### Base Configuration
 
-@klubr-frontend/src/core/services/endpoints.ts
-@klubr-frontend/src/core/services/index.ts
+@donaction-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/index.ts
 
 - Environment URLs via `process.env`
 - `NEXT_PUBLIC_API_URL` for Strapi backend
@@ -45,7 +45,7 @@ ExecutorInterface {
 
 ### NextAuth Integration
 
-@klubr-frontend/src/app/api/auth/[...nextauth]/route.ts
+@donaction-frontend/src/app/api/auth/[...nextauth]/route.ts
 
 **Providers**:
 - Google OAuth via `GoogleProvider`
@@ -65,7 +65,7 @@ ExecutorInterface {
 
 ### Auth Service Layer
 
-@klubr-frontend/src/core/services/auth/index.ts
+@donaction-frontend/src/core/services/auth/index.ts
 
 **Endpoints**:
 - `me()` - GET `/api/users/me` with role, klubr_membres, avatar
@@ -82,7 +82,7 @@ ExecutorInterface {
 
 ### State Management
 
-@klubr-frontend/src/core/store/modules/authSlice.ts
+@donaction-frontend/src/core/store/modules/authSlice.ts
 
 - Redux Toolkit slice for session state
 - Stores NextAuth session data
@@ -92,7 +92,7 @@ ExecutorInterface {
 
 ### Endpoint Organization
 
-@klubr-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/endpoints.ts
 
 **Strapi Entities**:
 - Clubs: `/api/klubrs`
@@ -146,7 +146,7 @@ ExecutorInterface {
 
 ### Hybrid: Next.js API Routes as Proxy
 
-@klubr-frontend/src/app/api/[...fetch]/route.ts
+@donaction-frontend/src/app/api/[...fetch]/route.ts
 
 **Purpose**: Unified proxy for all Strapi requests
 
@@ -171,7 +171,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 ### Stripe Payment
 
-@klubr-frontend/src/app/api/create-payment-intent/route.ts
+@donaction-frontend/src/app/api/create-payment-intent/route.ts
 
 - Endpoint: `/api/create-payment-intent`
 - Creates Stripe PaymentIntent via server-side Stripe SDK
@@ -200,7 +200,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 ## Key Dependencies
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - `next` ^14
 - `next-auth` ^4

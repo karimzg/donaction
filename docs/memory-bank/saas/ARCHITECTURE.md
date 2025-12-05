@@ -15,7 +15,7 @@
 
 ### Frontend
 
-- **Framework**: Svelte 5 → @klubr-saas/package.json
+- **Framework**: Svelte 5 → @donaction-saas/package.json
 - **Component Type**: Web Components (Custom Elements)
 - **Routing**: N/A - Single component module
 - **Data Fetching**: Custom fetch util with event bus pattern
@@ -28,7 +28,7 @@
 ## Full project structure
 
 ```text
-klubr-saas/
+donaction-saas/
 ├── src/
 │   ├── assets/           # Static assets
 │   │   ├── animations/   # Lottie JSON files

@@ -6,7 +6,7 @@ argument-hint: N/A
 
 # Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-admin.
+This document outlines the testing strategies and guidelines for donaction-admin.
 
 ## Tools and Frameworks
 

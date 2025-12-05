@@ -6,9 +6,9 @@ argument-hint: N/A
 
 # Stack
 
-## klubr-frontend
+## donaction-frontend
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - Next.js 14 (React framework)
 - React 18
@@ -23,21 +23,21 @@ argument-hint: N/A
 - Sharp 0.33 (image optimization)
 - Swiper 11 (carousels)
 
-@klubr-frontend/next.config.js
+@donaction-frontend/next.config.js
 
 - Standalone output mode
 - Bundle analyzer support
 - Custom image domains: `googleusercontent.com`, `cloudinary.com`, `imagekit.io`
 
-@klubr-frontend/tsconfig.json
+@donaction-frontend/tsconfig.json
 
 - Target: ES6
 - Path aliases: `@/components/*`, `@/helpers/*`, `@/*`
 - Strict mode enabled
 
-## klubr-admin
+## donaction-admin
 
-@klubr-admin/package.json
+@donaction-admin/package.json
 
 - Angular 19
 - TypeScript 5
@@ -51,22 +51,22 @@ argument-hint: N/A
 - ngx-lottie 13 (animations)
 - Jasmine 5 + Karma 6 (testing)
 
-@klubr-admin/angular.json
+@donaction-admin/angular.json
 
 - Builder: `@angular-devkit/build-angular:application`
 - Style preprocessor: SCSS
 - Service worker: PWA enabled via `ngsw-config.json`
 - Multiple environments: `production`, `development`, `re7`
 
-@klubr-admin/tsconfig.json
+@donaction-admin/tsconfig.json
 
 - Target: ES2022
 - Strict mode with all strict flags
 - Path aliases: `@app/*`, `@assets/*`, `@environments/*`, `@shared/*`
 
-## klubr-saas
+## donaction-saas
 
-@klubr-saas/package.json
+@donaction-saas/package.json
 
 - Svelte 5 (web components)
 - TypeScript 5
@@ -75,20 +75,20 @@ argument-hint: N/A
 - Stripe JS 4
 - Swiper 11 (carousels)
 
-@klubr-saas/vite.config.ts
+@donaction-saas/vite.config.ts
 
 - Custom element compilation for web components
 - Multiple build modes: INDIVIDUAL (ESM) and IIFE
 - Outputs to `build/klubr-web-components`
 
-@klubr-saas/tsconfig.json
+@donaction-saas/tsconfig.json
 
 - Target: ESNext
 - Extends `@tsconfig/svelte`
 
-## klubr-api
+## donaction-api
 
-@klubr-api/package.json
+@donaction-api/package.json
 
 - Strapi 5 (headless CMS)
 - Node.js 18-22

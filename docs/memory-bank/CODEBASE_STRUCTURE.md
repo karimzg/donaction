@@ -8,10 +8,10 @@ argument-hint: N/A
 
 ## Root Directory
 
-- **klubr-frontend**: Next.js web application for public-facing site
-- **klubr-api**: Strapi CMS backend API
-- **klubr-admin**: Angular admin dashboard application
-- **klubr-saas**: Svelte web components for embeddable widgets
+- **donaction-frontend**: Next.js web application for public-facing site
+- **donaction-api**: Strapi CMS backend API
+- **donaction-admin**: Angular admin dashboard application
+- **donaction-saas**: Svelte web components for embeddable widgets
 - **aidd**: AI-driven development configuration and agents
 - **docs**: Project documentation including agents, rules, flows, memory-bank
 - **cicd**: CI/CD pipeline configurations
@@ -28,7 +28,7 @@ argument-hint: N/A
 - @CLAUDE.md: AI assistant instructions (symlink to AGENTS.md)
 - @AGENTS.md: Main project rules and AI configuration
 
-## klubr-frontend (Next.js)
+## donaction-frontend (Next.js)
 
 ### Tech Stack
 - **Framework**: Next.js 14
@@ -64,13 +64,13 @@ argument-hint: N/A
 - `scripts`: Build and utility scripts
 
 ### Config Files
-- @klubr-frontend/next.config.js: Next.js configuration
-- @klubr-frontend/tailwind.config.js: TailwindCSS configuration
-- @klubr-frontend/postcss.config.js: PostCSS configuration
-- @klubr-frontend/tsconfig.json: TypeScript configuration
-- @klubr-frontend/package.json: Dependencies and scripts
+- @donaction-frontend/next.config.js: Next.js configuration
+- @donaction-frontend/tailwind.config.js: TailwindCSS configuration
+- @donaction-frontend/postcss.config.js: PostCSS configuration
+- @donaction-frontend/tsconfig.json: TypeScript configuration
+- @donaction-frontend/package.json: Dependencies and scripts
 
-## klubr-api (Strapi)
+## donaction-api (Strapi)
 
 ### Tech Stack
 - **Framework**: Strapi 5
@@ -118,11 +118,11 @@ argument-hint: N/A
 - `types`: TypeScript type definitions
 
 ### Config Files
-- @klubr-api/package.json: Dependencies and scripts
-- @klubr-api/tsconfig.json: TypeScript configuration
-- @klubr-api/klubr-gcc-config.json: Google Cloud Console config
+- @donaction-api/package.json: Dependencies and scripts
+- @donaction-api/tsconfig.json: TypeScript configuration
+- @donaction-api/klubr-gcc-config.json: Google Cloud Console config
 
-## klubr-admin (Angular)
+## donaction-admin (Angular)
 
 ### Tech Stack
 - **Framework**: Angular 19
@@ -151,13 +151,13 @@ argument-hint: N/A
 - `src/environments`: Environment configurations
 
 ### Config Files
-- @klubr-admin/angular.json: Angular workspace configuration
-- @klubr-admin/tsconfig.json: TypeScript configuration
-- @klubr-admin/package.json: Dependencies and scripts
-- @klubr-admin/proxy.conf.json: Proxy configuration for development
-- @klubr-admin/ngsw-config.json: Service worker configuration
+- @donaction-admin/angular.json: Angular workspace configuration
+- @donaction-admin/tsconfig.json: TypeScript configuration
+- @donaction-admin/package.json: Dependencies and scripts
+- @donaction-admin/proxy.conf.json: Proxy configuration for development
+- @donaction-admin/ngsw-config.json: Service worker configuration
 
-## klubr-saas (Svelte)
+## donaction-saas (Svelte)
 
 ### Tech Stack
 - **Framework**: Svelte 5 (Web Components)
@@ -187,11 +187,11 @@ argument-hint: N/A
   - `docs`: Documentation files
 
 ### Config Files
-- @klubr-saas/vite.config.ts: Vite build configuration
-- @klubr-saas/vite.config.development.ts: Development configuration
-- @klubr-saas/svelte.config.js: Svelte configuration
-- @klubr-saas/tsconfig.json: TypeScript configuration
-- @klubr-saas/package.json: Dependencies and scripts
+- @donaction-saas/vite.config.ts: Vite build configuration
+- @donaction-saas/vite.config.development.ts: Development configuration
+- @donaction-saas/svelte.config.js: Svelte configuration
+- @donaction-saas/tsconfig.json: TypeScript configuration
+- @donaction-saas/package.json: Dependencies and scripts
 
 ## AIDD Structure
 

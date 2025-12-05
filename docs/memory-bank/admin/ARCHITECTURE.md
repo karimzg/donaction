@@ -17,7 +17,7 @@ argument-hint: N/A
 
 ### Dashboard
 
-- **Framework**: Angular 19 → @klubr-admin/package.json
+- **Framework**: Angular 19 → @donaction-admin/package.json
 - **UI Library**: PrimeNG 19 with custom theme preset - Component library with Tailwind integration via `tailwindcss-primeui`
 - **Routing**: Angular Router with lazy loading - Feature-based routing with guards (`authGuard`, `invitationCodeGuard`)
 - **Data Fetching**: Angular HttpClient with interceptors - JWT auth and error handling interceptors
@@ -30,7 +30,7 @@ argument-hint: N/A
 ## Full project structure
 
 ```text
-klubr-admin/
+donaction-admin/
 ├── src/
 │   ├── app/
 │   │   ├── routes/                          # Feature routes (lazy loaded)

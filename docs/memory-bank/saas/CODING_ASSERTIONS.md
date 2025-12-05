@@ -27,7 +27,7 @@ argument-hint: N/A
 
 ## TypeScript Configuration
 
-Config: @klubr-saas/tsconfig.json
+Config: @donaction-saas/tsconfig.json
 
 - Extends `@tsconfig/svelte`
 - Target: ESNext
@@ -105,7 +105,7 @@ Config: @klubr-saas/tsconfig.json
 
 ## Vite Specifics
 
-Config: @klubr-saas/vite.config.ts
+Config: @donaction-saas/vite.config.ts
 
 - Plugin: `@sveltejs/vite-plugin-svelte`
 - Preprocess: `svelte-preprocess` with TypeScript
@@ -115,7 +115,7 @@ Config: @klubr-saas/vite.config.ts
 
 ## Styling
 
-Config: @klubr-saas/.prettierrc
+Config: @donaction-saas/.prettierrc
 
 - Prettier for formatting
 - Tabs: 2 spaces (`"tabWidth": 2`)

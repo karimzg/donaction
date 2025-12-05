@@ -4,8 +4,8 @@
 
 ### Base Configuration
 
-@klubr-admin/src/environments/environment.ts
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/environments/environment.ts
+@donaction-admin/src/app/app.config.ts
 
 - `environment.apiUrl` for Strapi backend (`http://localhost:1337/api/`)
 - `environment.nextJsUrl` for Next.js SSR routes
@@ -26,7 +26,7 @@
 
 ### Dual Auth Mode
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
 
 **Auth Modes**:
 - `'angular'` - Cookie-based JWT via `JwtService`
@@ -40,7 +40,7 @@
 
 ### Auth Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
 
 **Token Routing**:
 - `apiTokenRoutes` use `environment.apiTokenV1` (e.g., `/api/auth/local`, `/api/auth/google/callback`)
@@ -61,7 +61,7 @@
 
 ### HTTP Errors Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
 
 **Error Types**:
 - `403` - Expired session: show toast, delay 3s, trigger `authFacade.logout()`
@@ -79,7 +79,7 @@
 
 ### Endpoint Organization
 
-@klubr-admin/src/app/shared/utils/config/endpoints.ts
+@donaction-admin/src/app/shared/utils/config/endpoints.ts
 
 **Constants**:
 - Authentication: `LOGIN`, `REGISTER`, `CHANGE_PASSWORD`
@@ -113,7 +113,7 @@
 
 ### Query Building System
 
-@klubr-admin/src/app/shared/utils/helpers/query-helpers.ts
+@donaction-admin/src/app/shared/utils/helpers/query-helpers.ts
 
 **Core Functions**:
 - `getQueryString()` - Combines filters, populate, sort, pagination
@@ -154,7 +154,7 @@
 
 ### NgRx State Management
 
-@klubr-admin/src/app/routes/auth/data-access/+state/
+@donaction-admin/src/app/routes/auth/data-access/+state/
 
 **Features**:
 - `AuthFacade` exposes observables: `token$`, `isAuthenticated$`, `authMode$`
@@ -164,7 +164,7 @@
 
 ### Cache Invalidation
 
-@klubr-admin/src/app/shared/services/invalidate-cache.service.ts
+@donaction-admin/src/app/shared/services/invalidate-cache.service.ts
 
 **Pattern**:
 - Services return `pathsToUnvalidateDataRequest()` with affected routes
@@ -175,7 +175,7 @@
 
 ### Google OAuth
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
 
 - Client ID via `environment.googleClientId`
 - Callback: `${apiUrl}/auth/google/callback?access_token=<token>`
@@ -183,7 +183,7 @@
 
 ### Google Maps
 
-@klubr-admin/src/app/shared/components/form/google-maps/
+@donaction-admin/src/app/shared/components/form/google-maps/
 
 - API key: `environment.GOOGLE_MAPS_API_KEY`
 - Unauthenticated route (no Bearer token)
@@ -191,7 +191,7 @@
 
 ### reCAPTCHA
 
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/app/app.config.ts
 
 - Site key: `environment.ANGULAR_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY`
 - Provided via `RECAPTCHA_V3_SITE_KEY` injection token
@@ -206,14 +206,14 @@
 
 ### Dashboard Cache
 
-@klubr-admin/src/app/shared/services/caching.service.ts
+@donaction-admin/src/app/shared/services/caching.service.ts
 
 - In-memory caching layer
 - Used for repeated queries within session
 
 ## Key Dependencies
 
-@klubr-admin/package.json
+@donaction-admin/package.json
 
 - `@angular/common` ^19 (HttpClient)
 - `@ngrx/store` ^19
