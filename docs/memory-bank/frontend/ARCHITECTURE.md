@@ -21,7 +21,7 @@ argument-hint: N/A
 
 ### Frontend
 
-- **Framework**: Next.js 14 (App Router) → @klubr-frontend/package.json
+- **Framework**: Next.js 14 (App Router) → @donaction-frontend/package.json
 - **UI Library**: TailwindCSS + SCSS - Utility-first CSS with custom theme system
 - **Routing**: Next.js App Router - File-based routing with route groups
 - **Data Fetching**: Native `fetch` with `HttpService` wrapper - Custom service layer handling SSR/CSR
@@ -34,7 +34,7 @@ argument-hint: N/A
 ## Full project structure
 
 ```text
-klubr-frontend/
+donaction-frontend/
 ├── src/
 │   ├── app/                      # Next.js App Router pages
 │   │   ├── (main)/              # Route group for public pages

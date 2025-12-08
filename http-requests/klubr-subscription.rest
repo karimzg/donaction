@@ -1,5 +1,5 @@
 ### GET tous les klubrs
-GET http://localhost:1337/api/klubr
+GET http://localhost:1437/api/klubr
 Accept: application/json
 Authorization: Bearer {{api_token-website}}
 Connection: close

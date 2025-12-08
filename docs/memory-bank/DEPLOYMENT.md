@@ -63,10 +63,10 @@ argument-hint: N/A
 
 ```plaintext
 /repos/klubr/klubr-front/
-├── klubr-admin/          # Angular admin dashboard
-├── klubr-frontend/       # Next.js frontend
-├── klubr-api/            # Strapi API backend
-├── klubr-saas/           # Web components
+├── donaction-admin/          # Angular admin dashboard
+├── donaction-frontend/       # Next.js frontend
+├── donaction-api/            # Strapi API backend
+├── donaction-saas/           # Web components
 ├── docker-compose.yml    # Local dev orchestration
 ├── .gitlab-ci.yml        # CI/CD pipeline
 └── cicd/
@@ -80,10 +80,10 @@ argument-hint: N/A
 ### Environment Files
 
 - @.env (root)
-- @klubr-admin/.env
-- @klubr-frontend/.env, @klubr-frontend/.env.prod, @klubr-frontend/.env.re7
-- @klubr-api/.env.development, @klubr-api/.env.prod, @klubr-api/.env.re7
-- @klubr-saas/.env.prod, @klubr-saas/.env.re7
+- @donaction-admin/.env
+- @donaction-frontend/.env, @donaction-frontend/.env.prod, @donaction-frontend/.env.re7
+- @donaction-api/.env.development, @donaction-api/.env.prod, @donaction-api/.env.re7
+- @donaction-saas/.env.prod, @donaction-saas/.env.re7
 
 ### Required Environment Variables
 
@@ -110,7 +110,7 @@ argument-hint: N/A
 
 - **Development**:
 
-  - URL: localhost:3000 (frontend), localhost:4200 (admin), localhost:1337 (api)
+  - URL: localhost:3100 (frontend), localhost:4300 (admin), localhost:1437 (api)
   - Purpose: Local development with docker-compose
 
 - **Production**:
@@ -121,10 +121,10 @@ argument-hint: N/A
 
 ```mermaid
 graph TD
-    A[klubr-frontend:3000] -->|depends_on| D[klubr-api:1337]
-    B[klubr-admin:4200] -->|depends_on| D
-    D -->|depends_on| E[postgres:5432]
-    F[pgadmin:5050] -->|connects to| E
+    A[donaction-frontend:3100] -->|depends_on| D[donaction-api:1437]
+    B[donaction-admin:4300] -->|depends_on| D
+    D -->|depends_on| E[postgres:5532]
+    F[pgadmin:5150] -->|connects to| E
 
     A -->|volumes| A1[klubrfrontend_node_modules]
     A -->|volumes| A2[klubrfrontend-next]
@@ -135,7 +135,7 @@ graph TD
 
     D -->|volumes| D1[klubrapi_node_modules]
     D -->|volumes| D2[./logs/klubrApi]
-    D -->|volumes| D3[./klubr-api/private-pdf]
+    D -->|volumes| D3[./donaction-api/private-pdf]
 
     E -->|volumes| E1[postgres-data-v5]
     F -->|volumes| F1[pgadmin-data]

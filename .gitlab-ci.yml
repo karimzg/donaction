@@ -67,15 +67,15 @@ package_admin:dev:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-admin/docker/recette/Dockerfile"
-    IMAGE_NAME: "nakaadev/admin"
+    DOCKER_FILE_PATH: "donaction-admin/docker/recette/Dockerfile"
+    IMAGE_NAME: "nakaadev/donaction-admin"
     TAG: "dev"
   before_script:
     - !reference [ .docker_buildx_template, before_script ]
     - ls -la cicd/env/
     - chmod +x cicd/env/set-angular-env-vars.sh
     - cicd/env/set-angular-env-vars.sh re7
-    - cp version.ts klubr-admin/src/environments/version.ts
+    - cp version.ts donaction-admin/src/environments/version.ts
   script:
     - |
       docker buildx build \
@@ -91,7 +91,7 @@ package_admin:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-admin/**/*
+        - donaction-admin/**/*
 
 package_admin:prod:
   extends: .docker_buildx_template
@@ -99,14 +99,14 @@ package_admin:prod:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-admin/docker/production/Dockerfile"
-    IMAGE_NAME: "nakaadev/admin"
+    DOCKER_FILE_PATH: "donaction-admin/docker/production/Dockerfile"
+    IMAGE_NAME: "nakaadev/donaction-admin"
     TAG: "prod"
   before_script:
     - !reference [ .docker_buildx_template, before_script ]
     - chmod +x cicd/env/set-angular-env-vars.sh
     - cicd/env/set-angular-env-vars.sh prod
-    - cp version.ts klubr-admin/src/environments/version.ts
+    - cp version.ts donaction-admin/src/environments/version.ts
   script:
     - |
       docker buildx build \
@@ -122,7 +122,7 @@ package_admin:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-admin/**/*
+        - donaction-admin/**/*
 
 # frontend section
 package_frontend:dev:
@@ -131,8 +131,8 @@ package_frontend:dev:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-frontend/docker/recette/Dockerfile_front"
-    IMAGE_NAME: "nakaadev/frontend"
+    DOCKER_FILE_PATH: "donaction-frontend/docker/recette/Dockerfile_front"
+    IMAGE_NAME: "nakaadev/donaction-frontend"
     TAG: "dev"
   script:
     - |
@@ -146,7 +146,7 @@ package_frontend:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-frontend/**/*
+        - donaction-frontend/**/*
 
 package_frontend:prod:
   extends: .docker_buildx_template
@@ -154,8 +154,8 @@ package_frontend:prod:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-frontend/docker/production/Dockerfile_front"
-    IMAGE_NAME: "nakaadev/frontend"
+    DOCKER_FILE_PATH: "donaction-frontend/docker/production/Dockerfile_front"
+    IMAGE_NAME: "nakaadev/donaction-frontend"
     TAG: "prod"
   script:
     - |
@@ -169,7 +169,7 @@ package_frontend:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-frontend/**/*
+        - donaction-frontend/**/*
 
 # api section
 package_api:dev:
@@ -178,8 +178,8 @@ package_api:dev:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-api/docker/recette/Dockerfile_api"
-    IMAGE_NAME: "nakaadev/api"
+    DOCKER_FILE_PATH: "donaction-api/docker/recette/Dockerfile_api"
+    IMAGE_NAME: "nakaadev/donaction-api"
     TAG: "dev"
   script:
     - |
@@ -193,7 +193,7 @@ package_api:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-api/**/*
+        - donaction-api/**/*
 
 package_api:prod:
   extends: .docker_buildx_template
@@ -201,8 +201,8 @@ package_api:prod:
   #  tags:
   #    - gitlab-org
   variables:
-    DOCKER_FILE_PATH: "klubr-api/docker/production/Dockerfile_api"
-    IMAGE_NAME: "nakaadev/api"
+    DOCKER_FILE_PATH: "donaction-api/docker/production/Dockerfile_api"
+    IMAGE_NAME: "nakaadev/donaction-api"
     TAG: "prod"
   script:
     - |
@@ -216,7 +216,7 @@ package_api:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-api/**/*
+        - donaction-api/**/*
 
 # deploy
 
@@ -226,7 +226,7 @@ deploy_admin:dev:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_STG'
-    SHELL_COMMAND: "docker pull nakaadev/admin:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d "
+    SHELL_COMMAND: "docker pull nakaadev/donaction-admin:dev && cd /home/debian/donaction-service/development && docker-compose down && docker-compose up -d "
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -237,7 +237,7 @@ deploy_admin:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-admin/**/*
+        - donaction-admin/**/*
 
 deploy_admin:prod:
   stage: Deploy
@@ -245,7 +245,7 @@ deploy_admin:prod:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_PROD'
-    SHELL_COMMAND: "docker pull nakaadev/admin:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d "
+    SHELL_COMMAND: "docker pull nakaadev/donaction-admin:prod && cd /home/debian/donaction-service/production && docker-compose down && docker-compose up -d "
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -256,7 +256,7 @@ deploy_admin:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-amin/**/*
+        - donaction-admin/**/*
 
 deploy_API:dev:
   stage: Deploy
@@ -264,7 +264,7 @@ deploy_API:dev:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_STG'
-    SHELL_COMMAND: "docker pull nakaadev/api:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    SHELL_COMMAND: "docker pull nakaadev/donaction-api:dev && cd /home/debian/donaction-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -275,7 +275,7 @@ deploy_API:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-api/**/*
+        - donaction-api/**/*
 
 deploy_FRONT:dev:
   stage: Deploy
@@ -283,7 +283,7 @@ deploy_FRONT:dev:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_STG'
-    SHELL_COMMAND: "docker pull nakaadev/frontend:dev && cd /home/debian/klubr-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    SHELL_COMMAND: "docker pull nakaadev/donaction-frontend:dev && cd /home/debian/donaction-service/development && docker-compose down && docker-compose up -d && docker image prune -a -f"
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -294,7 +294,7 @@ deploy_FRONT:dev:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^demo\//'
       changes:
-        - klubr-frontend/**/*
+        - donaction-frontend/**/*
 
 deploy_API:prod:
   stage: Deploy
@@ -302,7 +302,7 @@ deploy_API:prod:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_PROD'
-    SHELL_COMMAND: "docker pull nakaadev/api:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    SHELL_COMMAND: "docker pull nakaadev/donaction-api:prod && cd /home/debian/donaction-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -313,7 +313,7 @@ deploy_API:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-api/**/*
+        - donaction-api/**/*
 
 deploy_FRONT:prod:
   stage: Deploy
@@ -321,7 +321,7 @@ deploy_FRONT:prod:
   #    - gitlab-org
   variables:
     TARGET_HOST: '$HOST_PROD'
-    SHELL_COMMAND: "docker pull nakaadev/frontend:prod && cd /home/debian/klubr-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
+    SHELL_COMMAND: "docker pull nakaadev/donaction-frontend:prod && cd /home/debian/donaction-service/production && docker-compose down && docker-compose up -d && docker image prune -a -f"
     IMAGE_TAG: 3
   extends: .ssh
   dependencies:
@@ -332,4 +332,4 @@ deploy_FRONT:prod:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\//'
       changes:
-        - klubr-frontend/**/*
+        - donaction-frontend/**/*

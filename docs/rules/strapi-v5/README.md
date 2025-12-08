@@ -47,7 +47,7 @@
 
 1. **Read** [Strapi v5 Coding Rules](./strapi-v5-coding-rules.md) from start to finish
 2. **Bookmark** [Quick Reference](./quick-reference.md) for daily use
-3. **Review** existing `klubr-api` code to see patterns in action
+3. **Review** existing `donaction-api` code to see patterns in action
 4. **Consult** official [Strapi v5 Documentation](https://docs.strapi.io/) for deep dives
 
 ### For Experienced Developers
@@ -250,7 +250,7 @@ When Strapi is updated or new patterns are discovered:
 2. Update [quick-reference.md](./quick-reference.md) if applicable
 3. Update version number and "Last Updated" date
 4. Document breaking changes clearly
-5. Add examples from klubr-api codebase
+5. Add examples from donaction-api codebase
 
 ### Suggesting Improvements
 

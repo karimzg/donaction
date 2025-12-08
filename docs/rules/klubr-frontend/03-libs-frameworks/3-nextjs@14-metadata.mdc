@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 metadata and SEO patterns including static metadata objects, dynamic generateMetadata function, Open Graph configuration, Twitter cards, JSON-LD structured data, robots.txt, and sitemap generation for optimal search engine visibility.
-globs: ["klubr-frontend/src/app/**/layout.tsx", "klubr-frontend/src/app/**/page.tsx"]
+globs: ["donaction-frontend/src/app/**/layout.tsx", "donaction-frontend/src/app/**/page.tsx"]
 alwaysApply: false
 ---
 
@@ -15,7 +15,7 @@ alwaysApply: false
 - Configure icons and app metadata
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 - Automatically merges with parent metadata
 
 ```tsx
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateMetadata({
   params
 }: {
@@ -75,7 +75,7 @@ export async function generateMetadata({
 - Use Open Graph debugger to validate
 
 ```tsx
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateMetadata({ params }) {
   const klub = await getClubDetailBySlug(params.slug);
   const klubHouse = await getClubHouse(klub.klubr_house.uuid);
@@ -129,7 +129,7 @@ export const metadata: Metadata = {
 - Render as script tag with type application/ld+json
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 import { WebSite, WithContext } from 'schema-dts';
 
 const jsonLd: WithContext<WebSite> = {
@@ -164,7 +164,7 @@ const jsonLd: WithContext<WebSite> = {
 - Use BreadcrumbList for navigation
 
 ```tsx
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SportsClub',
@@ -245,7 +245,7 @@ export const metadata: Metadata = {
 - Specify content language headers
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 export const metadata: Metadata = {
   formatDetection: {
     email: false,

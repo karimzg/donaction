@@ -14,7 +14,7 @@ argument-hint: N/A
 
 #### Endpoints
 
-- Endpoints file: @klubr-api/src/api/*/routes/*-custom.ts - Custom routes per module
+- Endpoints file: @donaction-api/src/api/*/routes/*-custom.ts - Custom routes per module
 - Base URL: `/api` - Strapi REST API base
 - Versioning: None - Single version API
 - Format: REST - JSON request/response
@@ -104,12 +104,12 @@ argument-hint: N/A
 
 ##### Brevo (Email)
 - Email provider: Brevo SMTP relay
-- Configuration: `@klubr-api/config/plugins.ts` email settings
+- Configuration: `@donaction-api/config/plugins.ts` email settings
 - SDK integration: `sib-api-v3-sdk`
 
 ##### ImageKit
 - Upload provider: `strapi-provider-upload-imagekit`
-- Configuration: `@klubr-api/config/plugins.ts` upload settings
+- Configuration: `@donaction-api/config/plugins.ts` upload settings
 - Folder management for avatars and media
 
 ##### Google Cloud
@@ -134,7 +134,7 @@ argument-hint: N/A
 
 ##### Backend
 
-- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @klubr-api/package.json
+- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @donaction-api/package.json
 - **API Style**: REST - Strapi auto-generated endpoints with custom routes
 - **Architecture**: Strapi CMS with content-types, services, controllers, and lifecycles
 - **ORM**: Strapi Query Engine (built-in) - database abstraction layer
@@ -147,15 +147,15 @@ argument-hint: N/A
 
 - **Type**: PostgreSQL (production) / SQLite (development)
 - **ORM/Driver**: `pg` v8 driver with Strapi Query Engine
-- **Connection**: Configured via environment variables → @klubr-api/config/database.ts
+- **Connection**: Configured via environment variables → @donaction-api/config/database.ts
 - **Migration**: Strapi built-in migrations (automatic on schema changes)
-- **Seeding**: `strapi import` command with encrypted exports → @klubr-api/data/
+- **Seeding**: `strapi import` command with encrypted exports → @donaction-api/data/
 - **Mock**: No mock database configured
 
 #### Full project structure
 
 ```text
-klubr-api/
+donaction-api/
 ├── config/                     # Strapi configuration
 │   ├── admin.ts               # Admin panel config
 │   ├── api.ts                 # API config
@@ -251,9 +251,9 @@ graph LR
 
 - **Purpose**: CDN and image storage provider
 - **Integration**: Custom Strapi upload provider `strapi-provider-upload-imagekit`
-- **Config**: @klubr-api/config/plugins.ts
+- **Config**: @donaction-api/config/plugins.ts
 - **Usage**: Handles all media uploads with environment-based tagging (production/staging)
-- **Lifecycle**: File metadata updated on `beforeCreate` hook → @klubr-api/src/index.ts
+- **Lifecycle**: File metadata updated on `beforeCreate` hook → @donaction-api/src/index.ts
 
 ```mermaid
 graph LR
@@ -272,8 +272,8 @@ graph LR
 
 - **Purpose**: Transactional email service (invitations, newsletters)
 - **Integration**: `@strapi/provider-email-nodemailer` with Brevo SMTP + `sib-api-v3-sdk` API client
-- **Config**: @klubr-api/config/plugins.ts email provider
-- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @klubr-api/src/helpers/emails/
+- **Config**: @donaction-api/config/plugins.ts email provider
+- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @donaction-api/src/helpers/emails/
 - **Templates**: Predefined template IDs for member invitations, password resets, etc
 
 ###### Stripe
@@ -281,7 +281,7 @@ graph LR
 - **Purpose**: Payment processing for donations and subscriptions
 - **Integration**: `stripe` v17 SDK
 - **Config**: API keys via environment variables
-- **Usage**: Invoice generation, payment handling → @klubr-api/src/api/invoice/
+- **Usage**: Invoice generation, payment handling → @donaction-api/src/api/invoice/
 
 
 ---
@@ -460,10 +460,10 @@ This part provides detailed information about the database used in the project, 
 
 #### Information
 
-- **Schema path**: @klubr-api/src/api/*/content-types/*/schema.json
+- **Schema path**: @donaction-api/src/api/*/content-types/*/schema.json
 - **Type**: PostgreSQL (production), SQLite (dev), MySQL (supported)
 - **ORM/Driver**: Strapi 5 (built on Knex.js), `pg` driver v8
-- **Connection**: @klubr-api/config/database.ts with multi-client support
+- **Connection**: @donaction-api/config/database.ts with multi-client support
 
 #### Main entities and relationships
 
@@ -552,7 +552,7 @@ argument-hint: N/A
 
 #### Tools and Frameworks
 
-**Currently not configured** - No testing framework is set up in klubr-api.
+**Currently not configured** - No testing framework is set up in donaction-api.
 
 #### Testing Strategy
 
@@ -562,7 +562,7 @@ argument-hint: N/A
 
 #### Test Execution Process
 
-No test scripts available in @klubr-api/package.json
+No test scripts available in @donaction-api/package.json
 
 #### Mocking and Stubbing
 

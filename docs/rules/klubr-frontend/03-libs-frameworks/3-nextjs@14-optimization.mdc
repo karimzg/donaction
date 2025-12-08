@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 performance optimization covering next/image best practices, next/font configuration, bundle analysis, code splitting, lazy loading, script optimization, and build output configuration for production deployments.
-globs: ["klubr-frontend/src/**/*.{ts,tsx}", "klubr-frontend/next.config.js"]
+globs: ["donaction-frontend/src/**/*.{ts,tsx}", "donaction-frontend/next.config.js"]
 alwaysApply: false
 ---
 
@@ -15,7 +15,7 @@ alwaysApply: false
 - Enable dangerouslyAllowSVG if needed
 
 ```javascript
-// @klubr-frontend/next.config.js
+// @donaction-frontend/next.config.js
 images: {
   dangerouslyAllowSVG: true,
   remotePatterns: [
@@ -65,7 +65,7 @@ import Image from 'next/image';
 - Cache transformed images on CDN
 
 ```typescript
-// @klubr-frontend/src/core/helpers/srcLoader.ts
+// @donaction-frontend/src/core/helpers/srcLoader.ts
 export default function srcLoader(src: string, transform?: string) {
   if (!src) return '';
 
@@ -89,7 +89,7 @@ const optimizedUrl = srcLoader(image.url, 'tr:w-1200,ar-1.91-1');
 - Define fallback fonts
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 <head>
   <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
   <link
@@ -108,7 +108,7 @@ const optimizedUrl = srcLoader(image.url, 'tr:w-1200,ar-1.91-1');
 - Code split large modules
 
 ```javascript
-// @klubr-frontend/next.config.js
+// @donaction-frontend/next.config.js
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -144,7 +144,7 @@ const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
 - Inline critical scripts in head
 
 ```tsx
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 import Script from 'next/script';
 
 <Script
@@ -164,7 +164,7 @@ import Script from 'next/script';
 - Use lazyOnload strategy when possible
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 {process.env.NEXT_PUBLIC_ACTIVATE_ANALYTICS === 'true' && (
   <script
     defer
@@ -183,7 +183,7 @@ import Script from 'next/script';
 - Disable features not in use
 
 ```javascript
-// @klubr-frontend/next.config.js
+// @donaction-frontend/next.config.js
 module.exports = {
   output: 'standalone',
   productionBrowserSourceMaps: true,
@@ -204,7 +204,7 @@ module.exports = {
 - Re-enable when library issues resolved
 
 ```javascript
-// @klubr-frontend/next.config.js
+// @donaction-frontend/next.config.js
 module.exports = {
   reactStrictMode: false, // Disabled due to PrimeReact compatibility
 };
@@ -219,7 +219,7 @@ module.exports = {
 - Configure robots and sitemap
 
 ```tsx
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -245,7 +245,7 @@ export const metadata: Metadata = {
 - Include potentialAction for donations
 
 ```tsx
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SportsClub',

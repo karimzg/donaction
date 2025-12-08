@@ -8,7 +8,7 @@ argument-hint: N/A
 
 ## Tools and Frameworks
 
-**Currently not configured** - No testing framework is set up in klubr-api.
+**Currently not configured** - No testing framework is set up in donaction-api.
 
 ## Testing Strategy
 
@@ -18,7 +18,7 @@ argument-hint: N/A
 
 ## Test Execution Process
 
-No test scripts available in @klubr-api/package.json
+No test scripts available in @donaction-api/package.json
 
 ## Mocking and Stubbing
 

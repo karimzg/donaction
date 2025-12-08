@@ -1,6 +1,6 @@
 # Testing Guidelines
 
-Testing strategy and configuration for klubr-saas module.
+Testing strategy and configuration for donaction-saas module.
 
 ## Tools and Frameworks
 
@@ -26,7 +26,7 @@ Testing strategy and configuration for klubr-saas module.
 
 ### File Structure
 - Tests in `__tests__` subdirectories
-- Example: @klubr-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
+- Example: @donaction-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
 
 ### Common Patterns
 - Mock external dependencies (`Fetch`, `document.querySelectorAll`)

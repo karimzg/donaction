@@ -29,7 +29,7 @@ import { InputTextModule } from 'primeng/inputtext';
 - Disable ripple for cleaner UX
 - CSS layer order matters
 
-Reference: @klubr-admin/src/app/shared/utils/theme/theme.preset.ts
+Reference: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
 
 ```typescript
 providePrimeNG({
@@ -491,4 +491,4 @@ uppercase = computed(() => this.value().toUpperCase());
 - Signal forms compatible
 - Template-driven forms supported
 
-Reference: @klubr-admin/src/app/app.config.ts for global configuration
+Reference: @donaction-admin/src/app/app.config.ts for global configuration

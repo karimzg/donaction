@@ -14,7 +14,7 @@ argument-hint: N/A
 
 ## Endpoints
 
-- Endpoints file: @klubr-api/src/api/*/routes/*-custom.ts - Custom routes per module
+- Endpoints file: @donaction-api/src/api/*/routes/*-custom.ts - Custom routes per module
 - Base URL: `/api` - Strapi REST API base
 - Versioning: None - Single version API
 - Format: REST - JSON request/response
@@ -104,12 +104,12 @@ argument-hint: N/A
 
 ### Brevo (Email)
 - Email provider: Brevo SMTP relay
-- Configuration: `@klubr-api/config/plugins.ts` email settings
+- Configuration: `@donaction-api/config/plugins.ts` email settings
 - SDK integration: `sib-api-v3-sdk`
 
 ### ImageKit
 - Upload provider: `strapi-provider-upload-imagekit`
-- Configuration: `@klubr-api/config/plugins.ts` upload settings
+- Configuration: `@donaction-api/config/plugins.ts` upload settings
 - Folder management for avatars and media
 
 ### Google Cloud

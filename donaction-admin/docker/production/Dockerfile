@@ -1,0 +1,23 @@
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY /donaction-admin/package*.json ./
+
+RUN npm install --legacy-peer-deps
+
+COPY /donaction-admin .
+
+RUN sed -i 's/<!--<link rel="manifest" href="\/public\/manifest.webmanifest">-->/<link rel="manifest" href="\/admin\/public\/manifest.webmanifest">/' /app/src/index.html
+RUN npm run build -- --configuration=production --base-href=/admin/
+
+FROM nginx:latest
+
+COPY --from=builder /app/dist/donaction-admin/browser /usr/share/nginx/html/admin
+COPY /donaction-admin/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+#EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]
+#comment
