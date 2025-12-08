@@ -28,6 +28,7 @@ coverage/
 
 # Environment
 .env*
+donaction-gcc-config.json
 
 # Ne pas ignorer l'exemple
 !.env.example

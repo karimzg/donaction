@@ -129,5 +129,6 @@ dist
 build
 .strapi-updater.json
 .strapi-cloud.json
+donaction-gcc-config.json
 
 /private-pdf
