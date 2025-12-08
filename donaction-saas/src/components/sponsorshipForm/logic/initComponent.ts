@@ -7,8 +7,8 @@ export async function initComponent(klubrUuid?: string, projectUuid?: string) {
       const script = Array.from(document.querySelectorAll('script')).find((script) =>
         script.src.includes(
           // TODO: @Med make this conditional
-          // '/KlubrSponsorshipForm.es.js' // For local tests
-          '/klubr-web-components/components/KlubrSponsorshipForm.es.js' // For integration with other sites
+          '/KlubrSponsorshipForm.es.js' // For local tests
+          // '/donaction-web-components/components/KlubrSponsorshipForm.es.js' // For integration with other sites
         )
       );
 

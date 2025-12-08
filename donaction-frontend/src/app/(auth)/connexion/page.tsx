@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: 'On ne se connait pas encore! Créez votre compte.',
 		url: `${new URL(SITE_URL)}/connexion`,
-		siteName: 'Klubr',
+		siteName: 'Donaction',
 		images: [
 			{
 				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,

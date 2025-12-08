@@ -2,15 +2,15 @@
 const fs = require("fs");
 const path = require("path");
 
-const destinationFolder = "../../klubr-frontend/src/types/strapi";
+const destinationFolder = "../../donaction-frontend/src/types/strapi";
 
 const files = [
     {
-        src: path.join(__dirname, "../../klubr-api/types/generated/contentTypes.d.ts"),
+        src: path.join(__dirname, "../../donaction-api/types/generated/contentTypes.d.ts"),
         dest: path.join(__dirname, `/${destinationFolder}/contentTypes.d.ts`),
     },
     {
-        src: path.join(__dirname, "../../klubr-api/types/generated/components.d.ts"),
+        src: path.join(__dirname, "../../donaction-api/types/generated/components.d.ts"),
         dest: path.join(__dirname, `/${destinationFolder}/components.d.ts`),
     },
 ];

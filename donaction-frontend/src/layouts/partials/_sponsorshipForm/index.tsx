@@ -16,7 +16,7 @@ const SponsorshipForm: React.FC<{
 		<>
 			<Script
 				type={'module'}
-				src={`/klubr-web-components/components/KlubrSponsorshipForm.es.js?apiToken=${process.env.NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN}`}
+				src={`/donaction-web-components/components/KlubrSponsorshipForm.es.js?apiToken=${process.env.NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN}`}
 			/>
 			<klubr-sponsorship-form klubrUuid={props.klubrUuid} projectUuid={props.projectUuid}>
 				<div slot='stripe-payment-form'></div>

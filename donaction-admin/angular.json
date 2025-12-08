@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "klubr-admin": {
+    "donaction-admin": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/klubr-admin",
+            "outputPath": "dist/donaction-admin",
             "baseHref": "/admin/",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -121,13 +121,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "klubr-admin:build:production"
+              "buildTarget": "donaction-admin:build:production"
             },
             "development": {
-              "buildTarget": "klubr-admin:build:development"
+              "buildTarget": "donaction-admin:build:development"
             },
             "re7": {
-              "buildTarget": "klubr-admin:build:re7"
+              "buildTarget": "donaction-admin:build:re7"
             }
           },
           "defaultConfiguration": "development"
@@ -135,7 +135,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "klubr-admin:build"
+            "buildTarget": "donaction-admin:build"
           }
         },
         "test": {

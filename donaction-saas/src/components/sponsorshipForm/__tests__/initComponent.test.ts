@@ -10,7 +10,7 @@
 //
 // describe('initComponent', () => {
 //   const mockScript = {
-//     src: 'https://example.com/klubr-web-components/components/KlubrSponsorshipForm.es.js?apiToken=testToken',
+//     src: 'https://example.com/donaction-web-components/components/KlubrSponsorshipForm.es.js?apiToken=testToken',
 //   };
 //
 //   beforeEach(() => {

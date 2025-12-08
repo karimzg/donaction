@@ -83,7 +83,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "1437:1337"
+      - "1437:1437"
 
   postgres:
     image: postgres:16.0-alpine

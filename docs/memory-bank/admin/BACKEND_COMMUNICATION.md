@@ -7,7 +7,7 @@
 @donaction-admin/src/environments/environment.ts
 @donaction-admin/src/app/app.config.ts
 
-- `environment.apiUrl` for Strapi backend (`http://localhost:1337/api/`)
+- `environment.apiUrl` for Strapi backend (`http://localhost:1437/api/`)
 - `environment.nextJsUrl` for Next.js SSR routes
 - `environment.apiTokenV1` for API-level authentication
 - Native Angular `HttpClient` via `provideHttpClient()`

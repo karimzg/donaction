@@ -3,12 +3,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY ./klubr-admin/package*.json ./
+COPY ./donaction-admin/package*.json ./
 #COPY ./.env ./
 
 RUN npm install --legacy-peer-deps
 
-COPY ./klubr-admin .
+COPY ./donaction-admin .
 
 EXPOSE 4200
 

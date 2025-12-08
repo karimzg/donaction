@@ -79,7 +79,7 @@ argument-hint: N/A
 
 - Custom element compilation for web components
 - Multiple build modes: INDIVIDUAL (ESM) and IIFE
-- Outputs to `build/klubr-web-components`
+- Outputs to `build/donaction-web-components`
 
 @donaction-saas/tsconfig.json
 

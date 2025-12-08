@@ -9,54 +9,54 @@
 ## Existing files
 
 ### Backend (Strapi)
-- @klubr-api/src/api/klubr/content-types/klubr/schema.json
-- @klubr-api/src/api/klubr/services/klubr.ts
-- @klubr-api/src/api/klubr/controllers/klubr.ts
-- @klubr-api/src/api/klubr/routes/klubr-custom.ts
-- @klubr-api/src/api/klub-don/content-types/klub-don/schema.json
-- @klubr-api/src/api/klub-don/services/klub-don.ts
-- @klubr-api/src/api/klub-don-payment/controllers/klub-don-payment.ts
-- @klubr-api/src/api/klub-don-payment/routes/klub-don-payment.ts
-- @klubr-api/src/api/trade-policy/content-types/trade-policy/schema.json
-- @klubr-api/src/helpers/emails/sendBrevoTransacEmail.ts
-- @klubr-api/src/helpers/klubrPDF/
-- @klubr-api/config/database.ts
-- @klubr-api/package.json
+- @donaction-api/src/api/klubr/content-types/klubr/schema.json
+- @donaction-api/src/api/klubr/services/klubr.ts
+- @donaction-api/src/api/klubr/controllers/klubr.ts
+- @donaction-api/src/api/klubr/routes/klubr-custom.ts
+- @donaction-api/src/api/klub-don/content-types/klub-don/schema.json
+- @donaction-api/src/api/klub-don/services/klub-don.ts
+- @donaction-api/src/api/klub-don-payment/controllers/klub-don-payment.ts
+- @donaction-api/src/api/klub-don-payment/routes/klub-don-payment.ts
+- @donaction-api/src/api/trade-policy/content-types/trade-policy/schema.json
+- @donaction-api/src/helpers/emails/sendBrevoTransacEmail.ts
+- @donaction-api/src/helpers/klubrPDF/
+- @donaction-api/config/database.ts
+- @donaction-api/package.json
 
 ### Frontend (Next.js)
-- @klubr-frontend/src/app/(main)/auth/register/page.tsx
-- @klubr-frontend/src/core/services/auth/index.ts
-- @klubr-frontend/src/core/services/club/index.ts
-- @klubr-frontend/src/core/services/endpoints.ts
+- @donaction-frontend/src/app/(main)/auth/register/page.tsx
+- @donaction-frontend/src/core/services/auth/index.ts
+- @donaction-frontend/src/core/services/club/index.ts
+- @donaction-frontend/src/core/services/endpoints.ts
 
 ### Admin Dashboard (Angular)
-- @klubr-admin/src/app/routes/dashboard/ui/dashboard.component.ts
-- @klubr-admin/src/app/routes/klub/ui/
-- @klubr-admin/src/app/routes/don/ui/
-- @klubr-admin/src/app/shared/services/entities/
-- @klubr-admin/src/app/shared/utils/models/klubr.ts
-- @klubr-admin/src/app/shared/data-access/repositories/shared.service.ts
+- @donaction-admin/src/app/routes/dashboard/ui/dashboard.component.ts
+- @donaction-admin/src/app/routes/klub/ui/
+- @donaction-admin/src/app/routes/don/ui/
+- @donaction-admin/src/app/shared/services/entities/
+- @donaction-admin/src/app/shared/utils/models/klubr.ts
+- @donaction-admin/src/app/shared/data-access/repositories/shared.service.ts
 
 ### Donation Widget (Svelte)
-- @klubr-saas/src/components/sponsorshipForm/logic/api.ts
-- @klubr-saas/src/components/sponsorshipForm/logic/stripe.ts
-- @klubr-saas/src/components/sponsorshipForm/index.svelte
+- @donaction-saas/src/components/sponsorshipForm/logic/api.ts
+- @donaction-saas/src/components/sponsorshipForm/logic/stripe.ts
+- @donaction-saas/src/components/sponsorshipForm/index.svelte
 
 ### New files to create
 
-- klubr-api/src/api/connected-account/ (content-type, service, controller, routes)
-- klubr-api/src/api/webhook-log/ (content-type, service, controller)
-- klubr-api/src/api/financial-audit-log/ (content-type, service, controller)
-- klubr-api/src/api/receipt-cancellation/ (content-type, service, controller, routes)
-- klubr-api/src/api/stripe-connect/ (service for Stripe Connect API calls)
-- klubr-api/src/api/refund-manager/ (service, controller, routes)
-- klubr-api/src/helpers/stripe-connect-helper.ts
-- klubr-admin/src/app/routes/payment-setup/
-- klubr-admin/src/app/routes/payment-status/
-- klubr-admin/src/app/routes/trade-policy/
-- klubr-admin/src/app/routes/connected-accounts/
-- klubr-admin/src/app/routes/refunds/
-- klubr-admin/src/app/shared/components/klub-completion-widget/
+- donaction-api/src/api/connected-account/ (content-type, service, controller, routes)
+- donaction-api/src/api/webhook-log/ (content-type, service, controller)
+- donaction-api/src/api/financial-audit-log/ (content-type, service, controller)
+- donaction-api/src/api/receipt-cancellation/ (content-type, service, controller, routes)
+- donaction-api/src/api/stripe-connect/ (service for Stripe Connect API calls)
+- donaction-api/src/api/refund-manager/ (service, controller, routes)
+- donaction-api/src/helpers/stripe-connect-helper.ts
+- donaction-admin/src/app/routes/payment-setup/
+- donaction-admin/src/app/routes/payment-status/
+- donaction-admin/src/app/routes/trade-policy/
+- donaction-admin/src/app/routes/connected-accounts/
+- donaction-admin/src/app/routes/refunds/
+- donaction-admin/src/app/shared/components/klub-completion-widget/
 - Database migration files for schema changes
 
 ## Implementation phases
@@ -71,7 +71,7 @@
 4. Create Strapi content type for `webhook-log` with event type enum
 5. Create Strapi content type for `financial-audit-log` with metadata JSONB field
 6. Create Strapi content type for `receipt-cancellation` with status workflow enum
-7. Update Stripe SDK to v17 in klubr-api package.json
+7. Update Stripe SDK to v17 in donaction-api package.json
 8. Create `stripe-connect-helper.ts` utility file with Express account creation, onboarding link generation, account status fetch functions
 9. Run database migrations and test schema changes
 

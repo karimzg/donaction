@@ -111,7 +111,7 @@ Config: @donaction-saas/vite.config.ts
 - Preprocess: `svelte-preprocess` with TypeScript
 - Custom elements: `customElement: true`
 - Build mode: `BUILD_MODE=INDIVIDUAL` for separate component builds
-- Output: ES modules to `build/klubr-web-components/components/`
+- Output: ES modules to `build/donaction-web-components/components/`
 
 ## Styling
 

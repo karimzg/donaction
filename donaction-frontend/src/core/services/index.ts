@@ -35,7 +35,7 @@ const HttpService = {
 					delete fetchOptions.body;
 				}
 				const response = await fetch(
-					`${conf.isFormData || conf.useDefaultHttp ? getStrapiUrl() : process.env.NEXT_PUBLIC_SITE_URL}${conf.endPoint}`,
+					`${conf.isFormData || conf.useDefaultHttp ? getStrapiUrl() : process.env.NEXT_CONTAINER_SITE_URL}${conf.endPoint}`,
 					fetchOptions,
 				);
 

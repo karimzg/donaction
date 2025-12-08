@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 form handling patterns including client-side form management, validation strategies, progressive enhancement, Server Actions (future), error handling, and integration with external APIs like Stripe for payment processing.
-globs: ["klubr-frontend/src/**/*.{ts,tsx}"]
+globs: ["donaction-frontend/src/**/*.{ts,tsx}"]
 alwaysApply: false
 ---
 
@@ -200,7 +200,7 @@ export default function PaymentForm() {
 - Validate amount before creating intent
 
 ```typescript
-// @klubr-frontend/src/app/api/create-payment-intent/route.ts
+// @donaction-frontend/src/app/api/create-payment-intent/route.ts
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -312,7 +312,7 @@ const handleSubmit = async () => {
 ## Server Actions (Future)
 
 - Next.js 14 supports Server Actions
-- Not currently used in klubr-frontend
+- Not currently used in donaction-frontend
 - Enable with experimental.serverActions flag
 - Use for progressive enhancement
 - Replace API routes for mutations

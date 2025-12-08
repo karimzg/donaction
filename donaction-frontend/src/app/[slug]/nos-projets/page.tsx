@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 		openGraph: {
 			title: `${klub?.denomination || ''} | Nos projets`,
 			url: `${new URL(SITE_URL)}/${params.slug}/nos-projets`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: srcLoader(klub?.logo?.url, 'tr:w-1200,ar-1.91-1'),

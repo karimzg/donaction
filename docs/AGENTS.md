@@ -120,7 +120,7 @@ argument-hint: N/A
 ##### Config Files
 - @donaction-api/package.json: Dependencies and scripts
 - @donaction-api/tsconfig.json: TypeScript configuration
-- @donaction-api/klubr-gcc-config.json: Google Cloud Console config
+- @donaction-api/donaction-gcc-config.json: Google Cloud Console config
 
 #### donaction-admin (Angular)
 
@@ -324,7 +324,7 @@ argument-hint: N/A
 
 - **Development**:
 
-  - URL: localhost:3000 (frontend), localhost:4200 (admin), localhost:1337 (api)
+  - URL: localhost:3100 (frontend), localhost:4300 (admin), localhost:1437 (api)
   - Purpose: Local development with docker-compose
 
 - **Production**:
@@ -335,10 +335,10 @@ argument-hint: N/A
 
 ```mermaid
 graph TD
-    A[donaction-frontend:3000] -->|depends_on| D[donaction-api:1337]
-    B[donaction-admin:4200] -->|depends_on| D
-    D -->|depends_on| E[postgres:5432]
-    F[pgadmin:5050] -->|connects to| E
+    A[donaction-frontend:3100] -->|depends_on| D[donaction-api:1437]
+    B[donaction-admin:4300] -->|depends_on| D
+    D -->|depends_on| E[postgres:5532]
+    F[pgadmin:5150] -->|connects to| E
 
     A -->|volumes| A1[klubrfrontend_node_modules]
     A -->|volumes| A2[klubrfrontend-next]
@@ -564,7 +564,7 @@ argument-hint: N/A
 
 - Custom element compilation for web components
 - Multiple build modes: INDIVIDUAL (ESM) and IIFE
-- Outputs to `build/klubr-web-components`
+- Outputs to `build/donaction-web-components`
 
 @donaction-saas/tsconfig.json
 
@@ -733,7 +733,7 @@ Flow:
 @donaction-admin/src/environments/environment.ts
 @donaction-admin/src/app/app.config.ts
 
-- `environment.apiUrl` for Strapi backend (`http://localhost:1337/api/`)
+- `environment.apiUrl` for Strapi backend (`http://localhost:1437/api/`)
 - `environment.nextJsUrl` for Next.js SSR routes
 - `environment.apiTokenV1` for API-level authentication
 - Native Angular `HttpClient` via `provideHttpClient()`
@@ -2865,7 +2865,7 @@ donaction-saas/
 │   ├── utils/            # Shared utilities (eventBus, fetch, analytics)
 │   └── main.ts           # Entry point
 ├── build/                # Build output
-│   └── klubr-web-components/
+│   └── donaction-web-components/
 │       └── components/   # Individual component builds
 ├── vite.config.ts              # Production build config
 └── vite.config.development.ts  # Development build config
@@ -3042,7 +3042,7 @@ Config: @donaction-saas/vite.config.ts
 - Preprocess: `svelte-preprocess` with TypeScript
 - Custom elements: `customElement: true`
 - Build mode: `BUILD_MODE=INDIVIDUAL` for separate component builds
-- Output: ES modules to `build/klubr-web-components/components/`
+- Output: ES modules to `build/donaction-web-components/components/`
 
 #### Styling
 

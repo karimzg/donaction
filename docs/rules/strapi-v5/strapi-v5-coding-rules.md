@@ -2,7 +2,7 @@
 
 > **Version**: Strapi 5.13.0
 > **Last Updated**: 2025-12-03
-> **Sources**: [Official Strapi v5 Documentation](https://docs.strapi.io/), klubr-api codebase analysis
+> **Sources**: [Official Strapi v5 Documentation](https://docs.strapi.io/), donaction-api codebase analysis
 
 ---
 
@@ -1026,7 +1026,7 @@ Configure CORS in `config/middlewares.ts`:
     origin: [
       'https://www.donaction.fr',
       'https://donaction.fr',
-      'http://localhost:3000'
+      'http://localhost:3100'
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
     headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
@@ -1176,4 +1176,4 @@ const nodeEnv = process.env.NODE_ENV;
 
 **Last Updated**: 2025-12-03
 **Strapi Version**: 5.13.0
-**Maintained by**: klubr-api development team
+**Maintained by**: donaction-api development team

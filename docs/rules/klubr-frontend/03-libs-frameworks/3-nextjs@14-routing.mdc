@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 App Router patterns including file conventions, route groups, layouts, loading states, error boundaries, and navigation. Essential for building feature-based routes with proper separation and shared UI.
-globs: ["klubr-frontend/src/app/**/*.{ts,tsx}"]
+globs: ["donaction-frontend/src/app/**/*.{ts,tsx}"]
 alwaysApply: false
 ---
 
@@ -47,7 +47,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 - Pass children prop typed as `React.ReactNode`
 
 ```typescript
-// @klubr-frontend/src/app/layout.tsx
+// @donaction-frontend/src/app/layout.tsx
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 - Handle notFound with `notFound()`
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   const slugsResp = await getAllClubsSlugs(undefined, true);
   return slugsResp;
@@ -92,7 +92,7 @@ export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
 - Preserve query params when redirecting
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 import { notFound, redirect } from 'next/navigation';
 
 const klub = await getClubDetailBySlug(params.slug).catch((error) => {
@@ -115,7 +115,7 @@ const klub = await getClubDetailBySlug(params.slug).catch((error) => {
 - Handle OPTIONS for CORS preflight
 
 ```typescript
-// @klubr-frontend/src/middleware.ts
+// @donaction-frontend/src/middleware.ts
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const isProtectedAuth = paths.protected_auth.some((_) =>
@@ -134,5 +134,5 @@ export async function middleware(request: NextRequest) {
 
 - Use `@folder` for parallel routes
 - Use `(.)folder` for intercepting routes
-- Not currently used in klubr-frontend
+- Not currently used in donaction-frontend
 - Reserve for modals and multi-panels

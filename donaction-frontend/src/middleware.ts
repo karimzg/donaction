@@ -9,7 +9,7 @@ const paths = {
 	protected_no_auth: ['/connexion', '/reset-password'],
 	public: ['/*'],
 	ignored: ['/_next', '/api', '/images', '/animations'],
-	web_components: '/klubr-web-components',
+	web_components: '/donaction-web-components',
 };
 export async function middleware(request: NextRequest) {
 	if (

@@ -44,7 +44,7 @@ donaction-saas/
 │   ├── utils/            # Shared utilities (eventBus, fetch, analytics)
 │   └── main.ts           # Entry point
 ├── build/                # Build output
-│   └── klubr-web-components/
+│   └── donaction-web-components/
 │       └── components/   # Individual component builds
 ├── vite.config.ts              # Production build config
 └── vite.config.development.ts  # Development build config

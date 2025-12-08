@@ -2,7 +2,7 @@ import cronTasks from './cronTasks';
 
 export default ({ env }: { env: any }) => ({
     host: env('HOST', '0.0.0.0'),
-    port: env.int('PORT', 1337),
+    port: env.int('PORT', 1437),
     app: {
         keys: env.array('APP_KEYS', ['myKeyA', 'myKeyB']),
     },

@@ -92,7 +92,7 @@ export async function generateMetadata(
 				projet.metaDescription ||
 				`${projet.klubr.denomination} - Soutenez le projet "${projet.titre}"`,
 			url: `${new URL(SITE_URL)}/${params.slug}/nos-projets/${params.projectSlug}`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: srcLoader(projet?.couverture?.url, 'tr:w-1200,ar-1.91-1'),

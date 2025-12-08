@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			title: `Créez le compte de votre Klub`,
 			description: `Laissez-nous vos coordonnées et nous vous recontacterons rapidement.`,
 			url: `${new URL(SITE_URL)}/new-club`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/klubr_home_page_a7944e5376_gyyKlN99P.jpg?updatedAt=1717622748902',

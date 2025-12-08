@@ -120,7 +120,7 @@ argument-hint: N/A
 ### Config Files
 - @donaction-api/package.json: Dependencies and scripts
 - @donaction-api/tsconfig.json: TypeScript configuration
-- @donaction-api/klubr-gcc-config.json: Google Cloud Console config
+- @donaction-api/donaction-gcc-config.json: Google Cloud Console config
 
 ## donaction-admin (Angular)
 

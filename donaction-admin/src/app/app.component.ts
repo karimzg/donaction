@@ -22,7 +22,7 @@ export class AppComponent {
   analyticsService = inject(AnalyticsService);
   SWService = inject(ServiceWorkerService);
   logUpdateService = inject(LogUpdateService);
-  title = 'klubr-admin';
+  title = 'donaction-admin';
 
   constructor() {
     console.log('AppComponent VERSION', version);

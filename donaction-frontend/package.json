@@ -12,6 +12,7 @@
     "dev:stripe": "sh ./scripts/stripe-dev.sh",
     "dev:saas": "LOOP=true sh ./scripts/saas-dev.sh",
     "build:saas": "LOOP=false sh ./scripts/saas-dev.sh",
+    "build:saas:local": "cd /repos/klubr/donaction/donaction-frontend && npm run build:saas",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

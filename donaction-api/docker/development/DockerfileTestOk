@@ -6,7 +6,7 @@ ENV NODE_ENV=${NODE_ENV}
 ARG ENV=development
 
 WORKDIR /opt/
-COPY ./klubr-api/package.json ./klubr-api/package-lock.json ./
+COPY ./donaction-api/package.json ./donaction-api/package-lock.json ./
 RUN npm install -g node-gyp
 RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
 ENV PATH=/opt/node_modules/.bin:$PATH
@@ -14,8 +14,8 @@ WORKDIR /opt/app
 RUN echo 'Environment'
 RUN echo ${ENV}
 RUN ls -l
-COPY ./klubr-api/ .
-COPY ./klubr-api/.env.${ENV} ./.env
+COPY ./donaction-api/ .
+COPY ./donaction-api/.env.${ENV} ./.env
 RUN npm run build
 
 # Creating final production image
@@ -32,5 +32,5 @@ ENV PATH=/opt/node_modules/.bin:$PATH
 
 RUN chown -R node:node /opt/app
 USER node
-EXPOSE 1337
+EXPOSE 1437
 CMD ["npm", "run", "start"]

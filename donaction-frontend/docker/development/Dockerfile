@@ -14,19 +14,19 @@ RUN apk add --no-cache \
 RUN stripe --version
 
 WORKDIR /app-saas
-COPY ./klubr-saas/package*.json ./
-COPY ./klubr-saas/.env ./
+COPY ./donaction-saas/package*.json ./
+COPY ./donaction-saas/.env ./
 RUN npm install
-COPY ./klubr-saas .
+COPY ./donaction-saas .
 
 WORKDIR /app
 
 ENV PORT=3000
-COPY ./klubr-frontend/package*.json ./
-COPY ./klubr-frontend/.env ./
+COPY ./donaction-frontend/package*.json ./
+COPY ./donaction-frontend/.env ./
 # TODO: check --legacy-peer-deps in other envs
 RUN npm install --legacy-peer-deps
-COPY ./klubr-frontend .
+COPY ./donaction-frontend .
 EXPOSE 3000
 
 CMD ["npm", "run", "dev"]

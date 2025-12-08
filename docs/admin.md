@@ -17,7 +17,7 @@ argument-hint: N/A
 
 ##### Dashboard
 
-- **Framework**: Angular 19 → @klubr-admin/package.json
+- **Framework**: Angular 19 → @donaction-admin/package.json
 - **UI Library**: PrimeNG 19 with custom theme preset - Component library with Tailwind integration via `tailwindcss-primeui`
 - **Routing**: Angular Router with lazy loading - Feature-based routing with guards (`authGuard`, `invitationCodeGuard`)
 - **Data Fetching**: Angular HttpClient with interceptors - JWT auth and error handling interceptors
@@ -30,7 +30,7 @@ argument-hint: N/A
 #### Full project structure
 
 ```text
-klubr-admin/
+donaction-admin/
 ├── src/
 │   ├── app/
 │   │   ├── routes/                          # Feature routes (lazy loaded)
@@ -129,10 +129,10 @@ Flow:
 
 ##### Base Configuration
 
-@klubr-admin/src/environments/environment.ts
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/environments/environment.ts
+@donaction-admin/src/app/app.config.ts
 
-- `environment.apiUrl` for Strapi backend (`http://localhost:1337/api/`)
+- `environment.apiUrl` for Strapi backend (`http://localhost:1437/api/`)
 - `environment.nextJsUrl` for Next.js SSR routes
 - `environment.apiTokenV1` for API-level authentication
 - Native Angular `HttpClient` via `provideHttpClient()`
@@ -151,7 +151,7 @@ Flow:
 
 ##### Dual Auth Mode
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/auth.service.ts
 
 **Auth Modes**:
 - `'angular'` - Cookie-based JWT via `JwtService`
@@ -165,7 +165,7 @@ Flow:
 
 ##### Auth Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/auth.interceptor.ts
 
 **Token Routing**:
 - `apiTokenRoutes` use `environment.apiTokenV1` (e.g., `/api/auth/local`, `/api/auth/google/callback`)
@@ -186,7 +186,7 @@ Flow:
 
 ##### HTTP Errors Interceptor
 
-@klubr-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
+@donaction-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
 
 **Error Types**:
 - `403` - Expired session: show toast, delay 3s, trigger `authFacade.logout()`
@@ -204,7 +204,7 @@ Flow:
 
 ##### Endpoint Organization
 
-@klubr-admin/src/app/shared/utils/config/endpoints.ts
+@donaction-admin/src/app/shared/utils/config/endpoints.ts
 
 **Constants**:
 - Authentication: `LOGIN`, `REGISTER`, `CHANGE_PASSWORD`
@@ -238,7 +238,7 @@ Flow:
 
 ##### Query Building System
 
-@klubr-admin/src/app/shared/utils/helpers/query-helpers.ts
+@donaction-admin/src/app/shared/utils/helpers/query-helpers.ts
 
 **Core Functions**:
 - `getQueryString()` - Combines filters, populate, sort, pagination
@@ -279,7 +279,7 @@ Flow:
 
 ##### NgRx State Management
 
-@klubr-admin/src/app/routes/auth/data-access/+state/
+@donaction-admin/src/app/routes/auth/data-access/+state/
 
 **Features**:
 - `AuthFacade` exposes observables: `token$`, `isAuthenticated$`, `authMode$`
@@ -289,7 +289,7 @@ Flow:
 
 ##### Cache Invalidation
 
-@klubr-admin/src/app/shared/services/invalidate-cache.service.ts
+@donaction-admin/src/app/shared/services/invalidate-cache.service.ts
 
 **Pattern**:
 - Services return `pathsToUnvalidateDataRequest()` with affected routes
@@ -300,7 +300,7 @@ Flow:
 
 ##### Google OAuth
 
-@klubr-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
+@donaction-admin/src/app/routes/auth/data-access/repositories/google-auth.service.ts
 
 - Client ID via `environment.googleClientId`
 - Callback: `${apiUrl}/auth/google/callback?access_token=<token>`
@@ -308,7 +308,7 @@ Flow:
 
 ##### Google Maps
 
-@klubr-admin/src/app/shared/components/form/google-maps/
+@donaction-admin/src/app/shared/components/form/google-maps/
 
 - API key: `environment.GOOGLE_MAPS_API_KEY`
 - Unauthenticated route (no Bearer token)
@@ -316,7 +316,7 @@ Flow:
 
 ##### reCAPTCHA
 
-@klubr-admin/src/app/app.config.ts
+@donaction-admin/src/app/app.config.ts
 
 - Site key: `environment.ANGULAR_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY`
 - Provided via `RECAPTCHA_V3_SITE_KEY` injection token
@@ -331,14 +331,14 @@ Flow:
 
 ##### Dashboard Cache
 
-@klubr-admin/src/app/shared/services/caching.service.ts
+@donaction-admin/src/app/shared/services/caching.service.ts
 
 - In-memory caching layer
 - Used for repeated queries within session
 
 #### Key Dependencies
 
-@klubr-admin/package.json
+@donaction-admin/package.json
 
 - `@angular/common` ^19 (HttpClient)
 - `@ngrx/store` ^19
@@ -536,9 +536,9 @@ argument-hint: N/A
 
 #### Design System Files
 
-- **Theme Config**: @klubr-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @klubr-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @klubr-admin/src/assets/layout/ (layout SCSS), @klubr-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @klubr-admin/src/styles.scss (global styles, layer order)
+- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
+- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
+- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
 
 #### Design System
 
@@ -547,14 +547,14 @@ argument-hint: N/A
 - **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
 - **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
 
-- **Color Palette**: See @klubr-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
 
   - Primary: Indigo palette (50-950) - primary actions, links, brand
   - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
   - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
   - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
 
-- **Typography**: See @klubr-admin/src/assets/layout/_typography.scss
+- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
   - Primary Font: Inter - body text, UI components
   - Secondary Font: Inter (with font-feature-settings) - branded elements
   - Fallback: sans-serif
@@ -862,7 +862,7 @@ argument-hint: N/A
 
 ### Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-admin.
+This document outlines the testing strategies and guidelines for donaction-admin.
 
 #### Tools and Frameworks
 

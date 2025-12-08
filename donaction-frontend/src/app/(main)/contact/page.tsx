@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Contactez-nous'}`,
 			description: `${res?.data?.attributes?.metaDescription || 'Laissez-nous vos coordonnées et votre message et nous vous recontacterons rapidement.'}`,
 			url: `${new URL(SITE_URL)}/contact`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: srcLoader(imageUrl, 'tr:w-1200,ar-1.91-1'),

@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 			description:
 				klubHouse.metaDescription || `${klub.denomination} - Soutenez nous grâce au mécénat!`,
 			url: `${new URL(SITE_URL)}/${params.slug}`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [...getOgAsset()],
 			locale: 'fr_FR',
 			type: 'website',

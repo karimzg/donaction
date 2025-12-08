@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 component architecture covering Server Components (default), Client Component boundaries, composition patterns, props serialization, and when to use 'use client' directive. Critical for optimal performance and proper SSR/CSR separation.
-globs: ["klubr-frontend/src/**/*.{ts,tsx}"]
+globs: ["donaction-frontend/src/**/*.{ts,tsx}"]
 alwaysApply: false
 ---
 
@@ -15,7 +15,7 @@ alwaysApply: false
 - Access cookies and headers directly
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export default async function club({ params }: { params: { slug: string } }) {
   const cookieStore = cookies();
   const klub = await getClubDetailBySlug(params.slug, cookieStore.toString());
@@ -85,7 +85,7 @@ export default function PopAuth() {
 - Event handlers require 'use client'
 
 ```typescript
-// @klubr-frontend/src/app/Providers.tsx
+// @donaction-frontend/src/app/Providers.tsx
 'use client';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -106,7 +106,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 - PrimeReact context requires client boundary
 
 ```typescript
-// @klubr-frontend/src/app/layout.tsx (Server)
+// @donaction-frontend/src/app/layout.tsx (Server)
 export default function RootLayout({ children }) {
   return (
     <html>
@@ -117,7 +117,7 @@ export default function RootLayout({ children }) {
   );
 }
 
-// @klubr-frontend/src/app/Providers.tsx (Client)
+// @donaction-frontend/src/app/Providers.tsx (Client)
 'use client';
 export default function Providers({ children }) {
   return (

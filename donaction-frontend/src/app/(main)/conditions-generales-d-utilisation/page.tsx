@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || "Conditions Générales d'Utilisation"}`,
 			description: `${res?.data?.attributes?.metaDescription || ''}`,
 			url: `${new URL(SITE_URL)}/conditions-generales-d-utilisation`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/klubr_home_page_a7944e5376_gyyKlN99P.jpg?updatedAt=1717622748902',

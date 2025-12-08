@@ -6,11 +6,11 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Uncomment ``<!--<link rel="manifest" href="/public/manifest.webmanifest">-->`` in index.html
 Run `npm run watch` to build the project and watch for changes
-Run `httpserver klubr-admin/dist/klubr-admin/browser -c-1 -P http://localhost:3000 .` from a terminal
+Run `httpserver donaction-admin/dist/donaction-admin/browser -c-1 -P http://localhost:3100 .` from a terminal
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `ng serve` for a dev server. Navigate to `http://localhost:4300/`. The application will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 

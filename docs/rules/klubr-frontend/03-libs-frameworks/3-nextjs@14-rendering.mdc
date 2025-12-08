@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 rendering strategies including Static Site Generation (SSG), Server-Side Rendering (SSR), Incremental Static Regeneration (ISR), streaming, and Suspense patterns. Critical for optimizing page load performance and choosing the right rendering strategy per route.
-globs: ["klubr-frontend/src/app/**/*.{ts,tsx}"]
+globs: ["donaction-frontend/src/app/**/*.{ts,tsx}"]
 alwaysApply: false
 ---
 
@@ -15,7 +15,7 @@ alwaysApply: false
 - Best for content that changes infrequently
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   const slugsResp = await getAllClubsSlugs(undefined, true);
   return slugsResp;
@@ -37,7 +37,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 - Higher server load than static
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export default async function club({ params }) {
   const cookieStore = cookies(); // Forces dynamic rendering
   const isPreview = !!cookieStore.get('isPreviewMode')?.value;
@@ -94,7 +94,7 @@ export default async function club({ params }) {
 - Use tags for fine-grained control
 
 ```typescript
-// @klubr-frontend/src/app/api/revalidate/route.ts
+// @donaction-frontend/src/app/api/revalidate/route.ts
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function POST(request: Request) {
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
 
 ## Streaming & Suspense
 
-- Not currently used in klubr-frontend
+- Not currently used in donaction-frontend
 - Stream slow components with Suspense
 - Use `loading.tsx` for route-level loading
 - Stream non-critical data after initial load
@@ -160,7 +160,7 @@ export const fetchCache = 'default-cache'; // or 'force-cache', 'force-no-store'
 - Show preview indicator to editors
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 const cookieStore = cookies();
 const isPreview = !!cookieStore.get('isPreviewMode')?.value;
 
@@ -180,7 +180,7 @@ const klub = await getClubDetailBySlug(
 - Return typed Metadata object
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateMetadata({
   params
 }: {
@@ -235,7 +235,7 @@ export default async function ProfilePage() {
 - Monitor bundle size with `@next/bundle-analyzer`
 
 ```javascript
-// @klubr-frontend/next.config.js
+// @donaction-frontend/next.config.js
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });

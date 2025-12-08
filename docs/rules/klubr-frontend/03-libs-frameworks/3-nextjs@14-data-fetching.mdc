@@ -1,6 +1,6 @@
 ---
 description: Next.js 14 data fetching strategies including Server Component patterns, client-side fetching, cache management, revalidation tags, parallel and sequential loading, and cookie forwarding for authenticated requests. Essential for optimizing data flow and cache invalidation.
-globs: ["klubr-frontend/src/**/*.{ts,tsx}", "klubr-frontend/src/core/services/**/*.ts"]
+globs: ["donaction-frontend/src/**/*.{ts,tsx}", "donaction-frontend/src/core/services/**/*.ts"]
 alwaysApply: false
 ---
 
@@ -15,7 +15,7 @@ alwaysApply: false
 - Sequential fetches block rendering
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export default async function club({ params }: { params: { slug: string } }) {
   const klub = await getClubDetailBySlug(params.slug, cookies().toString());
   const projects = await getProjetsByKlub(klub.uuid, cookies().toString());
@@ -33,7 +33,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 - Support FormData and JSON requests
 
 ```typescript
-// @klubr-frontend/src/core/services/index.ts
+// @donaction-frontend/src/core/services/index.ts
 const HttpService = {
   async ExecuteRequest(conf: ExecutorInterface): Promise<any> {
     const getStrapiUrl = () => {
@@ -65,7 +65,7 @@ const HttpService = {
 - Import tags from centralized enum
 
 ```typescript
-// @klubr-frontend/src/core/services/club/index.ts
+// @donaction-frontend/src/core/services/club/index.ts
 export const getClubDetailBySlug = async (slug: string) => {
   return HttpService.ExecuteRequest({
     endPoint: GET_KLUB_BY_SLUG(slug),
@@ -84,7 +84,7 @@ export const getClubDetailBySlug = async (slug: string) => {
 - Use tags for fine-grained invalidation
 
 ```typescript
-// @klubr-frontend/src/core/services/index.ts
+// @donaction-frontend/src/core/services/index.ts
 cache: !!conf?.cookies ? 'no-cache' : conf.noCache ? 'no-cache' : 'default',
 ```
 
@@ -97,7 +97,7 @@ cache: !!conf?.cookies ? 'no-cache' : conf.noCache ? 'no-cache' : 'default',
 - Store session data in cookies
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 const cookieStore = cookies();
 const klub = await getClubDetailBySlug(
   params.slug,
@@ -137,7 +137,7 @@ const donors = await getDonsByKlubOrProjet(klubUuid);
 - Provide fallback data on error
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 const klub = await getClubDetailBySlug(params.slug).catch((error) => {
   switch (error?.error?.status) {
     case 401:
@@ -182,7 +182,7 @@ const handleSubmit = async () => {
 - Return typed responses from services
 
 ```typescript
-// @klubr-frontend/src/core/services/club/index.ts
+// @donaction-frontend/src/core/services/club/index.ts
 export const getClubDetailBySlug = async (
   slug: string,
   isPreview?: boolean,
@@ -206,7 +206,7 @@ export const getClubDetailBySlug = async (
 - Use for frequently accessed pages
 
 ```typescript
-// @klubr-frontend/src/app/[slug]/page.tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   const slugsResp = await getAllClubsSlugs(undefined, true).catch((error) => {
     console.error('Error fetching clubs slugs', error);

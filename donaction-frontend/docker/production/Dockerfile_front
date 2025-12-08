@@ -5,15 +5,15 @@ FROM node:18-alpine AS builder
 ARG ENV=prod
 
 WORKDIR /app-saas
-COPY ./klubr-saas ./
+COPY ./donaction-saas ./
 RUN npm install
 RUN cp .env.${ENV} .env
 RUN npm run build
 
 WORKDIR /app-build
-COPY ./klubr-frontend ./
+COPY ./donaction-frontend ./
 RUN cp .env.${ENV} .env && yarn install  && yarn run build
-RUN cp -R ../app-saas/build/klubr-web-components public/klubr-web-components
+RUN cp -R ../app-saas/build/donaction-web-components public/donaction-web-components
 
 FROM node:18-alpine AS runner
 WORKDIR /app

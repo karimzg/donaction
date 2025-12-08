@@ -14,7 +14,7 @@ alwaysApply: true
 - `noImplicitAny` for type inference
 - No `any` type unless absolutely necessary
 
-Reference config at @klubr-admin/tsconfig.json
+Reference config at @donaction-admin/tsconfig.json
 
 ## Type Definitions
 
@@ -146,4 +146,4 @@ this.items.set(newArray);
 - Barrel exports from folders
 - Clear file naming conventions
 
-Reference structure at @klubr-admin/src/app/shared/utils/models/
+Reference structure at @donaction-admin/src/app/shared/utils/models/

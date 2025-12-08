@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: 'Réinitialiser votre mot de passe.',
 		url: `${new URL(SITE_URL)}/reset-password`,
-		siteName: 'Klubr',
+		siteName: 'Donaction',
 		images: [
 			{
 				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,

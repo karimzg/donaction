@@ -27,7 +27,7 @@ export default defineConfig({
               KlubrSponsorshipForm: '/src/components/sponsorshipForm/index.svelte'
             },
             output: {
-              dir: 'build/klubr-web-components/components',
+              dir: 'build/donaction-web-components/components',
               format: 'esm',
               entryFileNames: '[name].[format].js',
               inlineDynamicImports: false
@@ -35,7 +35,7 @@ export default defineConfig({
           }
         : {
             output: {
-              dir: 'build/klubr-web-components',
+              dir: 'build/donaction-web-components',
               inlineDynamicImports: true
             }
           }

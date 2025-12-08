@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 		title: `Des projets de clubs sportifs à soutenir`,
 		description: `Découvrez tous les projets des clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets.`,
 		url: `${new URL(SITE_URL)}/projets`,
-		siteName: 'Klubr',
+		siteName: 'Donaction',
 		images: [
 			{
 				url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/klubr_home_page_a7944e5376_gyyKlN99P.jpg?updatedAt=1717622748902',

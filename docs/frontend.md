@@ -21,7 +21,7 @@ argument-hint: N/A
 
 ##### Frontend
 
-- **Framework**: Next.js 14 (App Router) → @klubr-frontend/package.json
+- **Framework**: Next.js 14 (App Router) → @donaction-frontend/package.json
 - **UI Library**: TailwindCSS + SCSS - Utility-first CSS with custom theme system
 - **Routing**: Next.js App Router - File-based routing with route groups
 - **Data Fetching**: Native `fetch` with `HttpService` wrapper - Custom service layer handling SSR/CSR
@@ -34,7 +34,7 @@ argument-hint: N/A
 #### Full project structure
 
 ```text
-klubr-frontend/
+donaction-frontend/
 ├── src/
 │   ├── app/                      # Next.js App Router pages
 │   │   ├── (main)/              # Route group for public pages
@@ -188,8 +188,8 @@ graph TD
 
 ##### Base Configuration
 
-@klubr-frontend/src/core/services/endpoints.ts
-@klubr-frontend/src/core/services/index.ts
+@donaction-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/index.ts
 
 - Environment URLs via `process.env`
 - `NEXT_PUBLIC_API_URL` for Strapi backend
@@ -229,7 +229,7 @@ ExecutorInterface {
 
 ##### NextAuth Integration
 
-@klubr-frontend/src/app/api/auth/[...nextauth]/route.ts
+@donaction-frontend/src/app/api/auth/[...nextauth]/route.ts
 
 **Providers**:
 - Google OAuth via `GoogleProvider`
@@ -249,7 +249,7 @@ ExecutorInterface {
 
 ##### Auth Service Layer
 
-@klubr-frontend/src/core/services/auth/index.ts
+@donaction-frontend/src/core/services/auth/index.ts
 
 **Endpoints**:
 - `me()` - GET `/api/users/me` with role, klubr_membres, avatar
@@ -266,7 +266,7 @@ ExecutorInterface {
 
 ##### State Management
 
-@klubr-frontend/src/core/store/modules/authSlice.ts
+@donaction-frontend/src/core/store/modules/authSlice.ts
 
 - Redux Toolkit slice for session state
 - Stores NextAuth session data
@@ -276,7 +276,7 @@ ExecutorInterface {
 
 ##### Endpoint Organization
 
-@klubr-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/endpoints.ts
 
 **Strapi Entities**:
 - Clubs: `/api/klubrs`
@@ -330,7 +330,7 @@ ExecutorInterface {
 
 ##### Hybrid: Next.js API Routes as Proxy
 
-@klubr-frontend/src/app/api/[...fetch]/route.ts
+@donaction-frontend/src/app/api/[...fetch]/route.ts
 
 **Purpose**: Unified proxy for all Strapi requests
 
@@ -355,7 +355,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 ##### Stripe Payment
 
-@klubr-frontend/src/app/api/create-payment-intent/route.ts
+@donaction-frontend/src/app/api/create-payment-intent/route.ts
 
 - Endpoint: `/api/create-payment-intent`
 - Creates Stripe PaymentIntent via server-side Stripe SDK
@@ -384,7 +384,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 #### Key Dependencies
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - `next` ^14
 - `next-auth` ^4
@@ -425,7 +425,7 @@ argument-hint: N/A
 
 #### TypeScript Configuration
 
-Config: @klubr-frontend/tsconfig.json
+Config: @donaction-frontend/tsconfig.json
 
 - Strict mode enabled (`"strict": true`)
 - Target ES6
@@ -502,7 +502,7 @@ Config: @klubr-frontend/tsconfig.json
 
 #### Next.js Specifics
 
-Config: @klubr-frontend/next.config.js
+Config: @donaction-frontend/next.config.js
 
 - App Router (Next.js 14)
 - `reactStrictMode: false`
@@ -512,7 +512,7 @@ Config: @klubr-frontend/next.config.js
 
 #### Styling
 
-Config: @klubr-frontend/.prettierrc
+Config: @donaction-frontend/.prettierrc
 
 - Prettier for formatting
 - Tabs for indentation (`"useTabs": true`)
@@ -581,9 +581,9 @@ argument-hint: N/A
 
 #### Design System Files
 
-- **Theme Config**: @klubr-frontend/src/config/theme.json (colors, fonts) + @klubr-frontend/tailwind.config.js (Tailwind configuration)
-- **Design Components**: @klubr-frontend/src/layouts/components (reusable UI components)
-- **Style Guidelines**: @klubr-frontend/src/styles/main.scss (base, buttons, utilities layers)
+- **Theme Config**: @donaction-frontend/src/config/theme.json (colors, fonts) + @donaction-frontend/tailwind.config.js (Tailwind configuration)
+- **Design Components**: @donaction-frontend/src/layouts/components (reusable UI components)
+- **Style Guidelines**: @donaction-frontend/src/styles/main.scss (base, buttons, utilities layers)
 
 #### Design System
 
@@ -592,7 +592,7 @@ argument-hint: N/A
 - **Shadows**: Custom utilities - `shadow-default`, `shadow-xs`, `shadow-sm`, `shadow-md`, `boxBoxShadow` class, `shadow-button` for buttons
 - **Breakpoints**: Custom - `xs: 480px`, `sm: 575px`, `md: 768px`, `lg: 1024px`, `xl: 1320px`
 
-- **Color Palette**: See @klubr-frontend/src/config/theme.json
+- **Color Palette**: See @donaction-frontend/src/config/theme.json
 
   - Primary: `#000` (black) - Main brand, buttons, text headings
   - Secondary: `#73cfa8` (green) - Accent actions
@@ -606,7 +606,7 @@ argument-hint: N/A
   - Text Dark: `#222222` - Dark text
   - Text Light: `#fffefe` - Light text
 
-- **Typography**: See @klubr-frontend/src/config/theme.json
+- **Typography**: See @donaction-frontend/src/config/theme.json
   - Primary Font: Maven Pro (400, 500, 600, 700) - All text
   - Fallback: sans-serif
   - Base size: `16px`, Scale: `1.23` (exponential heading scale)
@@ -703,7 +703,7 @@ graph TD
 
 ### Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-frontend.
+This document outlines the testing strategies and guidelines for donaction-frontend.
 
 #### Test Coverage
 

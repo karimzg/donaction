@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Politique de confidentialité'}`,
 			description: `${res?.data?.attributes?.metaDescription || ''}`,
 			url: `${new URL(SITE_URL)}/mecenat`,
-			siteName: 'Klubr',
+			siteName: 'Donaction',
 			images: [
 				{
 					url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/mecenat-klubr.png?updatedAt=1728301399306',
