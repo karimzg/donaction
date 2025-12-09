@@ -1,0 +1,83 @@
+---
+description: Use Angular 19 modern features including signals, computed values, effects, and new control flow syntax for reactive and maintainable code
+globs: ["**/*.component.ts", "**/*.html"]
+alwaysApply: true
+---
+
+# Angular Modern Syntax
+
+## Signals API
+
+- Use `signal()`, `computed()`, `effect()` from `@angular/core`
+- Use `input()` and `model()` for component inputs
+- Use `viewChild()` for view queries
+- Use `toSignal()` from `@angular/core/rxjs-interop` for Observable conversion
+
+```typescript
+export class UserComponent {
+  // Signals for local state
+  isLoading = signal(false);
+  user = signal<User | null>(null);
+
+  // Computed values
+  displayName = computed(() => {
+    const u = this.user();
+    return u ? `${u.firstName} ${u.lastName}` : 'Guest';
+  });
+
+  // Component inputs
+  userId = input.required<string>();
+
+  // View queries
+  submitButton = viewChild<ElementRef>('submitBtn');
+
+  // Effects for side effects
+  constructor() {
+    effect(() => {
+      console.log('User changed:', this.user());
+    });
+  }
+}
+```
+
+## Control Flow Syntax
+
+- Use `@if`, `@for`, `@switch` in templates (not `*ngIf`, `*ngFor`)
+- Modern syntax is more performant and readable
+
+```html
+<!-- Good: Modern syntax -->
+@if (user()) {
+  <div>{{ user().name }}</div>
+} @else {
+  <div>Loading...</div>
+}
+
+@for (item of items(); track item.id) {
+  <div>{{ item.name }}</div>
+}
+
+<!-- Bad: Old syntax -->
+<div *ngIf="user$ | async as user">{{ user.name }}</div>
+<div *ngFor="let item of items">{{ item.name }}</div>
+```
+
+## RxJS Interop
+
+- Convert Observables to signals with `toSignal()`
+- Use `takeUntilDestroyed()` for cleanup (no manual `takeUntil`)
+
+```typescript
+export class ProfileComponent {
+  private authFacade = inject(AuthFacade);
+
+  // Convert Observable to signal
+  user = toSignal(this.authFacade.user$, { initialValue: null });
+
+  loadData() {
+    this.http.get('/data')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => this.data.set(data));
+  }
+}
+```

@@ -1,0 +1,31 @@
+---
+description: Enforce standalone components architecture in Angular 19 - all components must be standalone with explicit imports, no NgModule declarations except legacy code
+globs: ["**/*.component.ts"]
+alwaysApply: true
+---
+
+# Standalone Components
+
+## Component Declaration
+
+- Use `standalone: true` in `@Component` decorator
+- Declare all imports in `imports` array
+- No `NgModule` declarations (except @donaction-admin/src/app/shared/components/form/google-maps/google-maps-utils.module.ts)
+- Component prefix: `app-` (configured in @angular.json)
+
+```typescript
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule],
+  templateUrl: './login.component.html'
+})
+export class LoginComponent {}
+```
+
+## File Naming
+
+- Components: `*.component.ts`
+- Services: `*.service.ts`
+- Pipes: `*.pipe.ts`
+- Guards: `*.guard.ts`

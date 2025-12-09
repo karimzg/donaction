@@ -1,0 +1,68 @@
+---
+description: Use RxJS best practices with proper operators, automatic cleanup via takeUntilDestroyed, and observable naming conventions
+globs: ["**/*.ts"]
+alwaysApply: false
+---
+
+# RxJS Patterns
+
+## Subscription Cleanup
+
+- Use `takeUntilDestroyed()` from `@angular/core/rxjs-interop`
+- No manual `takeUntil(destroyed$)` pattern
+- Automatic cleanup when component destroys
+
+```typescript
+export class UserComponent {
+  private destroyRef = inject(DestroyRef);
+  private http = inject(HttpClient);
+
+  loadData() {
+    this.http.get('/users')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(users => this.users.set(users));
+  }
+}
+```
+
+## Common Operators
+
+- Use standard operators: `map`, `tap`, `switchMap`, `catchError`, `filter`, `take`
+- Combine observables with `combineLatest`, `merge`, `forkJoin`
+
+```typescript
+loadUserProfile(userId: string): Observable<UserProfile> {
+  return this.http.get<User>(`/users/${userId}`).pipe(
+    switchMap(user =>
+      combineLatest([
+        of(user),
+        this.http.get(`/users/${userId}/settings`)
+      ])
+    ),
+    map(([user, settings]) => ({ user, settings })),
+    catchError(error => {
+      this.toastService.showError('Failed to load profile');
+      return throwError(() => error);
+    })
+  );
+}
+```
+
+## Observable Composition
+
+- Chain operators for data transformation
+- Use `tap` for side effects (logging, debugging)
+- Use `filter` to skip unwanted values
+
+```typescript
+searchUsers(term: string): Observable<User[]> {
+  return this.searchTerm$.pipe(
+    filter(term => term.length >= 3),
+    debounceTime(300),
+    distinctUntilChanged(),
+    tap(term => console.log('Searching:', term)),
+    switchMap(term => this.http.get<User[]>(`/users?search=${term}`)),
+    catchError(() => of([]))
+  );
+}
+```

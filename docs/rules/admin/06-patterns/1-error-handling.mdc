@@ -1,0 +1,72 @@
+---
+description: Mandatory error handling for all HTTP calls and async operations - use interceptors for centralized handling, toast notifications for user feedback, never silent failures
+globs: ["**/*.ts"]
+alwaysApply: true
+---
+
+# Error Handling
+
+## Centralized HTTP Errors
+
+- HTTP errors caught in @donaction-admin/src/app/shared/utils/interceptors/http-errors.interceptor.ts
+- Toast notifications via `ToastService.showErrorToast()`
+- Never silent failures
+
+```typescript
+export class UserService {
+  private http = inject(HttpClient);
+  private toastService = inject(ToastService);
+
+  getUser(id: string): Observable<User> {
+    return this.http.get<User>(`/users/${id}`).pipe(
+      catchError(error => {
+        this.toastService.showErrorToast('Failed to load user');
+        return throwError(() => error);
+      })
+    );
+  }
+}
+```
+
+## Error Types Handling
+
+- `403`: Expired session → show toast, trigger logout
+- `400`: Validation error → extract error message, show toast
+- `504`: Gateway timeout → show network toast
+- Blob errors: parse via `FileReader`, extract details
+
+## Component Error Handling
+
+- Try/catch for async operations
+- User-friendly error messages
+- Throw errors early
+
+```typescript
+export class ProfileComponent {
+  private toastService = inject(ToastService);
+
+  async saveProfile() {
+    try {
+      await this.profileService.update(this.form.value);
+      this.toastService.showSuccess('Profile updated');
+    } catch (error) {
+      this.toastService.showErrorToast('Failed to update profile');
+      throw error; // Re-throw for logging
+    }
+  }
+}
+```
+
+## Interceptor Integration
+
+- Global error handling in `httpErrorsInterceptor`
+- Automatic token refresh on 401
+- Error response parsing and formatting
+
+```typescript
+// In interceptor
+if (error.status === 403) {
+  this.toastService.showErrorToast('Session expired');
+  setTimeout(() => this.authFacade.logout(), 3000);
+}
+```

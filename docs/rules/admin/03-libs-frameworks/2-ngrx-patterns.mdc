@@ -1,0 +1,94 @@
+---
+description: Follow NgRx architecture with facades pattern, actions/effects for side effects, and signals integration for reactive state management
+globs: ["**/*.ts"]
+alwaysApply: false
+---
+
+# NgRx Patterns
+
+## State Organization
+
+- Feature state in @donaction-admin/src/app/routes/{feature}/data-access/+state/
+- Structure: actions, reducers, effects, selectors, facade
+- Facades expose state via `selectSignal()` and `toSignal()`
+
+```
+routes/auth/data-access/
+└── +state/
+    ├── auth.actions.ts
+    ├── auth.reducer.ts
+    ├── auth.effects.ts
+    ├── auth.selectors.ts
+    └── auth.facade.ts
+```
+
+## Facade Pattern
+
+- Services expose state and dispatch actions
+- Components interact only with facades
+- Use signals for reactive state access
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AuthFacade {
+  private store = inject(Store);
+
+  // Expose state as signals
+  token$ = this.store.select(selectToken);
+  token = toSignal(this.token$);
+  isAuthenticated$ = this.store.select(selectIsAuthenticated);
+  isAuthenticated = toSignal(this.isAuthenticated$, { initialValue: false });
+
+  // Actions
+  login(credentials: Credentials) {
+    this.store.dispatch(AuthActions.login({ credentials }));
+  }
+
+  logout() {
+    this.store.dispatch(AuthActions.logout());
+  }
+}
+```
+
+## Effects Pattern
+
+- Side effects in effects files
+- Actions trigger effects
+- Effects call services and dispatch success/failure actions
+
+```typescript
+export class AuthEffects {
+  private actions$ = inject(Actions);
+  private authService = inject(AuthService);
+
+  login$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.login),
+      switchMap(({ credentials }) =>
+        this.authService.login(credentials).pipe(
+          map(user => AuthActions.loginSuccess({ user })),
+          catchError(error => of(AuthActions.loginFailure({ error })))
+        )
+      )
+    )
+  );
+}
+```
+
+## Component Usage
+
+- Inject facade, not store directly
+- Use signals or observables from facade
+- Dispatch actions via facade methods
+
+```typescript
+export class LoginComponent {
+  private authFacade = inject(AuthFacade);
+
+  isAuthenticated = this.authFacade.isAuthenticated;
+
+  login(credentials: Credentials) {
+    this.authFacade.login(credentials);
+  }
+}
+```
