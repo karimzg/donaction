@@ -3,7 +3,6 @@
 - [Language/Framework](#languageframework)
   - [Frontend](#frontend)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Form Workflow](#form-workflow)
   - [External Services](#external-services)
@@ -49,15 +48,6 @@ donaction-saas/
 ├── vite.config.ts              # Production build config
 └── vite.config.development.ts  # Development build config
 ```
-
-### Naming Conventions
-
-- **Files**: kebab-case for directories, PascalCase for components
-- **Components**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE
-- **Types/Interfaces**: PascalCase
 
 ## Services communication
 

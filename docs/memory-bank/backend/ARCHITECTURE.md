@@ -4,7 +4,6 @@
   - [Backend](#backend)
     - [Database](#database)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [External Services](#external-services)
     - [ImageKit](#imagekit)
@@ -94,14 +93,6 @@ donaction-api/
 ├── data/                      # Database exports/imports (encrypted)
 └── private-pdf/               # PDF template storage
 ```
-
-### Naming Conventions
-
-- **Files**: kebab-case for routes/controllers/services, PascalCase for types
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_SNAKE_CASE
-- **Types/Interfaces**: PascalCase with `Entity` suffix for Strapi entities
 
 ## Services communication
 

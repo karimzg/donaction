@@ -9,7 +9,6 @@ argument-hint: N/A
 - [Language/Framework](#languageframework)
   - [Dashboard](#dashboard)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Component to API Flow](#component-to-api-flow)
 
@@ -84,15 +83,6 @@ donaction-admin/
 ├── tsconfig.json                            # TypeScript config
 └── package.json                             # Dependencies
 ```
-
-### Naming Conventions
-
-- **Files**: kebab-case with suffix (e.g., `auth.service.ts`, `login.component.ts`)
-- **Components**: PascalCase (e.g., `LoginComponent`)
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE (e.g., `AUTH_FEATURE_KEY`)
-- **Types/Interfaces**: PascalCase
 
 ## Services communication
 
