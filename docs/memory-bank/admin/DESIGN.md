@@ -1,49 +1,63 @@
-# DESIGN.md
+---
+name: design
+description: Design system reference for donaction-admin
+argument-hint: N/A
+---
 
-## Design Implementation
+# Admin Design System Reference
 
-- **Design System Approach**: PrimeNG Aura preset with custom klubr theme, TailwindCSS utility classes, layered CSS architecture
-- **Styling Method**: Hybrid - PrimeNG components styled via theme preset, TailwindCSS for layout/spacing, SCSS for custom components
+> **Note:** Design rules have been extracted to `docs/rules/admin/03-libs-frameworks/` and design patterns to `aidd/skills/code/`. This document serves as a reference for design system files and configuration.
+
+## Design System Approach
+
+- **Method**: Hybrid - PrimeNG Aura preset + TailwindCSS utilities + SCSS for custom components
+- **Theme**: Custom klubr theme with layered CSS architecture
 
 ## Design System Files
 
-- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
+### Theme Configuration
 
-## Design System
+- **PrimeNG Theme**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (Aura preset with custom colors)
+- **Theme Provider**: @donaction-admin/src/app/app.config.ts (application-level configuration)
 
-- **Spacing Scale**: See PrimeNG theme preset - uses TailwindCSS spacing (1rem base)
-- **Border Radius**: `12px` for layout elements (cards, sidebar), `6px` for form controls, `32px` for rounded pills
-- **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
-- **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
+### Styling Files
 
-- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Layout Styles**: @donaction-admin/src/assets/layout/ (typography, spacing, layout patterns)
+- **Theme Overrides**: @donaction-admin/src/assets/theme/ (PrimeNG component customizations)
+- **Global Styles**: @donaction-admin/src/styles.scss (layer order, base styles)
 
-  - Primary: Indigo palette (50-950) - primary actions, links, brand
-  - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
-  - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
-  - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
+## Color Palette
 
-- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
-  - Primary Font: Inter - body text, UI components
-  - Secondary Font: Inter (with font-feature-settings) - branded elements
-  - Fallback: sans-serif
+See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts for complete color definitions:
 
-## Component Standards and Variantes
+- **Primary**: Indigo palette (50-950)
+- **Secondary**: Zinc (light mode), Slate (dark mode)
+- **Accent**: Orange-400
+- **Surface**: Gray variants (0, 50-950)
 
-- **Button Variants**: PrimeNG buttons with `pButton` directive, severity variants (primary/secondary/success/danger), ripple disabled
-- **Input States**: PrimeNG input components, outlined style default, focus/error/disabled states from theme preset
-- **Card Patterns**: `.card` class (2rem padding, 12px radius, border, shadow), `surface-card` background, `surface-border` borders
+## Typography
 
-## Layout System
+See @donaction-admin/src/assets/layout/_typography.scss for typography system:
 
-- **Grid System**: CSS Grid with utility classes (`.grid-member-listing`, `.grid-project-listing`, `.grid-user-listing`), auto-fill responsive columns
-- **Container Widths**: 1504px max width above 1960px breakpoint, fluid below with 1rem horizontal padding
-- **Spacing Rules**: PrimeNG scale 14 (base 14px), TailwindCSS spacing utilities (`px-`, `py-`, `gap-`), consistent 1rem padding on mobile
+- **Primary Font**: Inter
+- **Fallback**: sans-serif
+- **Font Features**: Configured for branded elements
+
+## Tokens Reference
+
+Design tokens (spacing, radius, shadows, breakpoints) are documented in:
+- `docs/rules/admin/03-libs-frameworks/5-design-system-tokens.mdc`
+
+## Component Patterns
+
+UI component patterns and variants are documented in:
+- `docs/rules/admin/03-libs-frameworks/6-primeng-theme-usage.mdc`
+- `docs/rules/admin/03-libs-frameworks/7-button-variants.mdc`
+- `docs/rules/admin/03-libs-frameworks/8-card-patterns.mdc`
+- `docs/rules/admin/03-libs-frameworks/9-grid-layouts.mdc`
+- `docs/rules/admin/03-libs-frameworks/10-input-states.mdc`
 
 ## Accessibility
 
-- **Color Contrast**: Uses PrimeNG theme contrast ratios, semantic color tokens for status
-- **Focus Management**: Focus outline/box-shadow disabled globally (`:focus { outline: none !important; }`), keyboard navigation via PrimeNG
-- **Screen Reader**: PrimeNG components include ARIA labels, custom components need manual ARIA
+Accessibility requirements documented in:
+- `docs/rules/admin/07-quality/2-accessibility.mdc`

@@ -1,0 +1,75 @@
+---
+description: Use consistent design tokens for spacing, border radius, shadows, and breakpoints across all components for visual coherence
+globs: ["**/*.scss", "**/*.component.ts", "**/*.html"]
+alwaysApply: true
+---
+
+# Design System Tokens
+
+## Spacing Scale
+
+- Use PrimeNG scale 14 (base 14px)
+- Use TailwindCSS spacing utilities: `px-`, `py-`, `gap-`, `m-`, `p-`
+- Consistent 1rem padding on mobile
+- Base rem unit: 1rem = 16px
+
+## Border Radius
+
+- Layout elements (cards, sidebar): `12px`
+- Form controls: `6px`
+- Rounded pills: `32px`
+
+```scss
+.card {
+  border-radius: 12px;
+}
+
+.btn {
+  border-radius: 6px;
+}
+
+.badge {
+  border-radius: 32px;
+}
+```
+
+## Shadows
+
+- Card elevation: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)`
+- Use PrimeNG theme elevation system
+- Consistent shadow for depth hierarchy
+
+```scss
+.card {
+  box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12);
+}
+```
+
+## Breakpoints
+
+- Mobile: `768px`
+- Tablet: `992px`
+- Max layout width: `1960px`
+- Container max-width: `1504px` above 1960px
+
+```scss
+@media (max-width: 768px) {
+  // Mobile styles
+}
+
+@media (min-width: 768px) and (max-width: 992px) {
+  // Tablet styles
+}
+
+@media (min-width: 1960px) {
+  .container {
+    max-width: 1504px;
+  }
+}
+```
+
+## Container Widths
+
+- Above 1960px: `max-width: 1504px`
+- Below 1960px: fluid with `1rem` horizontal padding
+- Responsive padding adjustments

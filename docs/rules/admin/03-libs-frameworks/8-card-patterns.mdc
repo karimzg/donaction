@@ -1,0 +1,62 @@
+---
+description: Use standardized card component pattern with consistent padding, radius, border, and shadow for content containers
+globs: ["**/*.scss", "**/*.html"]
+alwaysApply: true
+---
+
+# Card Patterns
+
+## Card Structure
+
+- Class: `.card`
+- Padding: `2rem`
+- Border radius: `12px`
+- Border: `surface-border` color
+- Shadow: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)`
+- Background: `surface-card` color
+
+```scss
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12);
+}
+```
+
+```html
+<div class="card">
+  <h2>Card Title</h2>
+  <p>Card content goes here</p>
+</div>
+```
+
+## Card Variants
+
+- Default: White background with border
+- Elevated: Increased shadow for prominence
+- Flat: No shadow, border only
+- Interactive: Hover states for clickable cards
+
+```scss
+.card-elevated {
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.15);
+}
+
+.card-flat {
+  box-shadow: none;
+}
+
+.card-interactive:hover {
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.14);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+```
+
+## Surface Colors
+
+- `surface-card`: Card background
+- `surface-border`: Card borders
+- `surface-0` to `surface-950`: Surface hierarchy

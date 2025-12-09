@@ -1,0 +1,47 @@
+---
+description: Use PrimeNG Aura preset with custom klubr theme, TailwindCSS utilities, and layered CSS architecture for consistent styling
+globs: ["**/*.scss", "**/*.ts", "**/*.html"]
+alwaysApply: true
+---
+
+# PrimeNG Theme Usage
+
+## Theme Configuration
+
+- Use PrimeNG Aura preset from @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
+- Theme provider configured in @donaction-admin/src/app/app.config.ts
+- Hybrid approach: PrimeNG + TailwindCSS + SCSS
+
+## Color Palette
+
+- Primary: Indigo palette (50-950) - primary actions, links, brand
+- Secondary: Zinc (light), Slate (dark) - surfaces, borders
+- Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
+- Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
+
+```typescript
+// Reference theme tokens
+import { theme } from '@shared/utils/theme/theme.preset';
+
+const primaryColor = 'var(--primary-color)';
+const surfaceCard = 'var(--surface-card)';
+```
+
+## Typography
+
+- Primary Font: Inter (body text, UI components)
+- Secondary Font: Inter with font-feature-settings (branded elements)
+- Fallback: sans-serif
+- Typography defined in @donaction-admin/src/assets/layout/_typography.scss
+
+```scss
+body {
+  font-family: Inter, sans-serif;
+}
+```
+
+## Layer Order
+
+- Global styles defined in @donaction-admin/src/styles.scss
+- Layout styles in @donaction-admin/src/assets/layout/
+- Theme overrides in @donaction-admin/src/assets/theme/

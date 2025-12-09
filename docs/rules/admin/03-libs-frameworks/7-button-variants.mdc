@@ -1,0 +1,56 @@
+---
+description: Use PrimeNG button variants with pButton directive and severity attributes for consistent button styling across the application
+globs: ["**/*.html", "**/*.component.ts"]
+alwaysApply: true
+---
+
+# Button Variants
+
+## PrimeNG Button Directive
+
+- Use `pButton` directive on buttons
+- Disable ripple effect globally
+- Apply severity variants for semantic meaning
+
+## Severity Variants
+
+- `primary`: Main actions
+- `secondary`: Secondary actions
+- `success`: Positive confirmation
+- `danger`: Destructive actions
+- `warning`: Caution actions
+- `info`: Informational actions
+
+```html
+<button pButton label="Save" severity="primary"></button>
+<button pButton label="Cancel" severity="secondary"></button>
+<button pButton label="Confirm" severity="success"></button>
+<button pButton label="Delete" severity="danger"></button>
+```
+
+## Button States
+
+- Default: Outlined style from theme preset
+- Focus: Theme-defined focus states
+- Disabled: `[disabled]="true"` attribute
+- Loading: `[loading]="isLoading()"` for async actions
+
+```html
+<button
+  pButton
+  label="Submit"
+  [disabled]="form.invalid"
+  [loading]="loading()"
+  (click)="onSubmit()"
+></button>
+```
+
+## Icon Buttons
+
+- Use `icon` attribute for icon-only buttons
+- Combine with `[text]="true"` or `[rounded]="true"`
+
+```html
+<button pButton icon="pi pi-check" [rounded]="true"></button>
+<button pButton icon="pi pi-trash" [text]="true" severity="danger"></button>
+```
