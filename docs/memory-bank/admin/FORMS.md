@@ -48,198 +48,50 @@ This part describe how dashboard forms are handled in the project, including lib
 
 ## GenericUpdateComponent Pattern
 
-### Overview
+**Pattern CRUD** pour formulaires create/update avec gestion automatique de validation, uploads, cache et navigation.
 
-`GenericUpdateComponent<T>` - Base class for CRUD forms handling both create and update operations
+**Location**: @donaction-admin/src/app/shared/components/generics/generic-update/generic-update.component.ts
 
-**Location**: @shared/components/generics/generic-update/generic-update.component.ts
+**Documentation complète**:
+- 📋 Règle: `docs/rules/admin/06-patterns/2-generic-update-component.mdc`
+- 🎯 Skill: `aidd/skills/code/generic-update-component.md`
 
-### Key Features
+**Méthodes obligatoires**: `initForm()`, `formFields()`, `serviceUpdate()`, `serviceCreate()`
 
-- Automatic edit/create mode detection based on entity presence
-- Form lifecycle management (init, reset, validation)
-- File upload integration via `updateFile()` hook
-- Cache invalidation after successful updates
-- Analytics tracking with custom properties
-- Loading states and error handling
-- Automatic navigation after create/update
-
-### Core Properties
-
-**Injected Services**:
-- `sharedFacade` - NgRx state management
-- `router`, `route` - Navigation
-- `toastService` - User notifications
-- `analyticsService` - Event tracking
-- `invalidateCacheService` - Cache management
-- `permissionsService` - Permission checks
-
-**Form State Signals**:
-- `isSubmitted: WritableSignal<boolean>` - Tracks submission state
-- `loading: WritableSignal<boolean>` - Loading indicator
-- `isReady: WritableSignal<boolean>` - Form ready state
-- `entitySignal: WritableSignal<T | null>` - Current entity state
-
-**Modes**:
-- `editMode: boolean` - `true` for update, `false` for create
-
-### Methods to Override
-
-#### Required Overrides
-
-**`initForm(): void`** - Initialize form structure with controls and validators
+**Pattern rapide**:
 ```typescript
-protected override initForm(): void {
-  const entity = untracked(this.entitySignal);
-  this.entityForm = new FormGroup({
-    name: new FormControl(entity?.name, Validators.required),
-    email: new FormControl(entity?.email, [Validators.required, Validators.email])
-  });
-}
-```
-
-**`formFields(): { [key: string]: any }`** - Transform form values before submission
-```typescript
-protected override formFields(): { [key: string]: any } {
-  return {
-    ...this.entityForm.value,
-    klubr: this.sharedFacade.profile()!.klubr.uuid
-  };
-}
-```
-
-**`serviceUpdate(uuid: string, formValues: any): Observable<T>`** - Update API call
-```typescript
-protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
-  this.sharedFacade.updateProfile(uuid, formValues);
-  return this.actions$.pipe(
-    ofType(SharedActions.updateProfileSuccess),
-    map(({profile}) => profile),
-    take(1)
-  );
-}
-```
-
-**`serviceCreate(formValues: any): Observable<T>`** - Create API call
-```typescript
-protected override serviceCreate(formValues: any): Observable<Member> {
-  return this.profileService.createProfile(formValues).pipe(
-    map((response) => response.data as Member)
-  );
-}
-```
-
-#### Optional Overrides
-
-**`getEntityForCreateMode(entity: T | null): T | null`** - Provide default values for create mode
-```typescript
-protected override getEntityForCreateMode(member: Member | null): Member | null {
-  return {
-    uuid: '',
-    nom: '',
-    prenom: '',
-    role: 'KlubMember',
-    klubr: untracked(this.sharedFacade.profile)!.klubr
-  };
-}
-```
-
-**`updateFile(entity: T): Observable<T>`** - Handle file uploads after form submission
-```typescript
-protected override updateFile(member: Member): Observable<Member> {
-  if (this.entityForm.get('avatar')?.dirty && this.entityForm.get('avatar')?.value) {
-    const formData = new FormData();
-    formData.append('avatar', this.entityForm.get('avatar')!.value);
-    return this.avatarService.newMediaProfileFile(entity.uuid, formData);
-  }
-  return of(member);
-}
-```
-
-**`resetForm(): void`** - Reset form to initial entity values
-**`preUpdateHook(formValues): any`** - Transform values before update
-**`preCreateHook(formValues): any`** - Transform values before create
-**`cacheToUnvalidate(entity: T): void`** - Clear relevant cache entries
-**`pathsToUnvalidateDataRequest(entity: T): string[]`** - Next.js ISR paths to revalidate
-**`redirectAfterCreate(entity: T): void`** - Custom navigation after create
-**`redirectAfterUpdate(entity: T): void`** - Custom navigation after update
-**`reloadEntity(entity: T): Observable<T>`** - Refetch entity (for Strapi components)
-
-### Implementation Example
-
-```typescript
-@Component({
-  selector: 'app-member-update',
-  templateUrl: './member-update.component.html'
-})
 export class MemberUpdateComponent extends GenericUpdateComponent<Member> {
   protected override successMsg = 'Le profil a été mis à jour';
-  protected override errorUpdateMsg = 'Le profil n\'a pas pu être modifié';
   protected override routePrefix = '/profile';
 
   constructor() {
     super();
-    this.entity.set(this.config.data.profile); // Pass entity via DynamicDialogConfig
+    this.entity.set(this.config.data.profile);
   }
 
   protected override initForm(): void {
     const entity = untracked(this.entitySignal);
     this.entityForm = new FormGroup({
-      nom: new FormControl(entity?.nom, Validators.required),
-      prenom: new FormControl(entity?.prenom, Validators.required),
-      role: new FormControl(entity?.role, Validators.required)
+      nom: new FormControl(entity?.nom, Validators.required)
     });
   }
 
   protected override formFields(): { [key: string]: any } {
-    return {
-      ...this.entityForm.value,
-      klubr: this.sharedFacade.profile()!.klubr.uuid
-    };
+    return { ...this.entityForm.value };
   }
 
   protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
     this.sharedFacade.updateProfile(uuid, formValues);
-    return this.actions$.pipe(
-      ofType(SharedActions.updateProfileSuccess),
-      map(({profile}) => profile),
-      take(1)
-    );
+    return this.actions$.pipe(ofType(SharedActions.updateProfileSuccess), map(({profile}) => profile), take(1));
   }
 
   protected override serviceCreate(formValues: any): Observable<Member> {
-    return this.profileService.createProfile(formValues).pipe(
-      map((response) => response.data as Member)
-    );
+    return this.profileService.createProfile(formValues).pipe(map(res => res.data as Member));
   }
 }
 ```
 
-### Submission Flow
-
-1. User calls `onSubmit()`
-2. Form validation runs, marks all controls as touched
-3. If invalid, show error toast and abort
-4. Get form values via `formFields()`
-5. If edit mode, clean values (only dirty fields)
-6. Call `preCreateHook()` or `preUpdateHook()`
-7. Execute `serviceCreate()` or `serviceUpdate()`
-8. Call `updateFile()` for file uploads
-9. Call `reloadEntity()` to refresh entity
-10. Call `cacheToUnvalidate()` and `pathsToUnvalidateDataRequest()`
-11. Show success toast, reset form, redirect
-12. Track analytics event
-
-### Best Practices
-
-- Always set `entity` model in constructor (from route data or dialog config)
-- Override `successMsg`, `errorUpdateMsg`, `errorCreateMsg` for user-friendly messages
-- Use `untracked()` when reading signals in form initialization
-- Call `super()` in constructor before any logic
-- Return only dirty fields in edit mode via `cleanFormValues()`
-- Use `take(1)` with NgRx actions to prevent memory leaks
-- Implement `cacheToUnvalidate()` to invalidate affected cache entries
-- Set `routePrefix` for correct redirection after create
+**Voir la règle/skill pour exemples complets, hooks optionnels et best practices.**
 
 ## Form Flow
 
