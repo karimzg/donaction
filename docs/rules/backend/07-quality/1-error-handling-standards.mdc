@@ -1,0 +1,43 @@
+---
+description: Use Strapi context methods for consistent error responses in API controllers and middlewares with proper HTTP status codes
+globs: donaction-api/src/**/*.ts
+alwaysApply: false
+---
+
+# Error Handling Standards
+
+## Error Response Methods
+
+- Use `ctx.badRequest()` for validation errors (400)
+- Use `ctx.unauthorized()` for auth failures (401)
+- Use `ctx.notFound()` for missing resources (404)
+- Use `ctx.forbidden()` for permission denials (403)
+- Use `ctx.internalServerError()` for server errors (500)
+- Never throw generic errors without context
+
+## Error Format
+
+- Return JSON with `error.status` and `error.message`
+- Include descriptive error messages in French
+- Preserve Strapi standard error format
+- Log errors before returning response
+
+## Example
+
+```typescript
+// Good - Strapi context methods
+async find(ctx) {
+  const user = ctx.state.user;
+  if (!user) {
+    return ctx.unauthorized('Utilisateur non authentifié');
+  }
+
+  try {
+    const data = await strapi.service('api::klubr.klubr').find(ctx.query);
+    return this.sanitizeOutput(data, ctx);
+  } catch (error) {
+    console.error('Error fetching klubr:', error);
+    return ctx.internalServerError('Erreur lors de la récupération');
+  }
+}
+```

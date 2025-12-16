@@ -1,35 +1,16 @@
 ---
 name: api-docs
-description: API documentation and specifications
+description: API endpoint reference and external integrations
 argument-hint: N/A
 ---
 
 # API Documentation
 
-## Authentication & Authorization
-
-- **Authentication**: JWT - Strapi users-permissions plugin with JWT token authentication
-- **Authorization**: Role-based with custom middlewares - Profile-based permissions (`owner-or-admin`, `admin-editor-or-admin`, `klubr-membre`)
-- **Session Management**: JWT tokens - Token stored in user state, validated via `ctx.state.user`
-
 ## Endpoints
 
-- Endpoints file: @donaction-api/src/api/*/routes/*-custom.ts - Custom routes per module
 - Base URL: `/api` - Strapi REST API base
 - Versioning: None - Single version API
-- Format: REST - JSON request/response
-- Protocol: HTTPS - Production, HTTP in development
-
-## Request/Response Formats
-
-- Request format: JSON - Standard REST JSON bodies, multipart/form-data for file uploads
-- Response format: JSON - Strapi standard response format with `data`, `meta`, pagination
-
-## Error Handling
-
-- Error format: JSON - Standard Strapi error format with `error.status`, `error.message`
-- Status codes: HTTP standard - 400 (BadRequest), 401 (Unauthorized), 404 (NotFound), 500 (ServerError)
-- Error responses: `ctx.badRequest()`, `ctx.unauthorized()`, `ctx.notFound()` - Strapi context methods
+- Protocol: HTTPS (production), HTTP (development)
 
 ## Key Endpoints
 
@@ -91,8 +72,8 @@ argument-hint: N/A
 
 ## Rate Limiting
 
-- Default limit: 25 - Records per page
-- Max limit: 100 - Maximum records per page
+- Default limit: 25 records per page
+- Max limit: 100 records per page
 - Pagination: Enabled with count - `withCount: true`
 
 ## External Integrations
@@ -104,12 +85,12 @@ argument-hint: N/A
 
 ### Brevo (Email)
 - Email provider: Brevo SMTP relay
-- Configuration: `@donaction-api/config/plugins.ts` email settings
+- Configuration: @donaction-api/config/plugins.ts
 - SDK integration: `sib-api-v3-sdk`
 
 ### ImageKit
 - Upload provider: `strapi-provider-upload-imagekit`
-- Configuration: `@donaction-api/config/plugins.ts` upload settings
+- Configuration: @donaction-api/config/plugins.ts
 - Folder management for avatars and media
 
 ### Google Cloud
