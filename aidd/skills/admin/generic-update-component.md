@@ -1,7 +1,7 @@
 ---
 name: "generic-update-component"
 description: "Generate CRUD form component extending GenericUpdateComponent for create/update operations with validation, file uploads, and cache management"
-triggers: ["GenericUpdateComponent", "CRUD form", "create update form", "generic update", "form pattern", "update component"]
+triggers: ["GenericUpdateComponent", "CRUD form", "create update form", "generic update", "form pattern", "update component", "edit form", "create form", "entity form", "admin form"]
 tags: ["angular", "forms", "crud", "ngrx", "pattern"]
 priority: high
 scope: file

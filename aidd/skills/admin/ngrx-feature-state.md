@@ -1,7 +1,7 @@
 ---
 name: "ngrx-feature-state"
 description: "Generate complete NgRx feature state with actions, reducer, effects, selectors, and facade pattern"
-triggers: ["create NgRx state", "add NgRx feature", "state management", "create facade", "NgRx setup"]
+triggers: ["create NgRx state", "add NgRx feature", "state management", "create facade", "NgRx setup", "redux store", "actions reducer", "effects selectors", "feature state"]
 tags: ["angular", "ngrx", "state-management", "typescript"]
 priority: high
 scope: module

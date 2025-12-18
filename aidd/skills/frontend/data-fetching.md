@@ -1,7 +1,7 @@
 ---
 name: "nextjs-data-fetching"
 description: "Fetch data from Strapi API with caching, revalidation, and authentication handling"
-triggers: ["fetch data", "api call", "HttpService", "revalidate", "cache", "strapi fetch"]
+triggers: ["fetch data", "api call", "HttpService", "revalidate", "cache", "strapi fetch", "server component data", "get data", "load data", "api request"]
 tags: ["nextjs", "api", "frontend", "typescript", "fetch"]
 priority: high
 scope: file
