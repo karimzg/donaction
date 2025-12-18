@@ -1,7 +1,10 @@
 ---
 description: Server-Side Rendering and hydration with provideClientHydration, hybrid rendering modes, performance optimization, and SSR best practices for Angular 21 applications
-globs: ["**/*.config.ts", "**/*.routes.ts", "**/app.config.server.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.config.ts"
+  - "donaction-admin/**/*.routes.ts"
+  - "donaction-admin/**/app.config.server.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Server-Side Rendering

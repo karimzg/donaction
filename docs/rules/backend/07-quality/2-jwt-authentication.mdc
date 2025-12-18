@@ -1,7 +1,8 @@
 ---
 description: JWT token authentication using Strapi users-permissions plugin with validation via ctx.state.user in controllers and middlewares
-globs: donaction-api/src/**/*.ts
-alwaysApply: false
+globs:
+  - "donaction-api/src/**/*.ts"
+  - "!donaction-api/node_modules/**"
 ---
 
 # JWT Authentication Pattern

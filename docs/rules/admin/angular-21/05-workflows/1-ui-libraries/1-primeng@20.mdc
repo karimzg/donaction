@@ -1,7 +1,10 @@
 ---
 description: PrimeNG 20 component usage with custom Aura preset theming, standalone imports, and accessibility best practices for Angular 21 applications
-globs: ["**/*.component.ts", "**/*.component.html", "**/theme/*.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.component.html"
+  - "donaction-admin/**/theme/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # PrimeNG 20

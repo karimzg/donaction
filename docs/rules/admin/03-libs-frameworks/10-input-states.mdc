@@ -1,7 +1,9 @@
 ---
 description: Use PrimeNG input components with outlined style and consistent focus/error/disabled states from theme preset
-globs: ["**/*.html", "**/*.component.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.component.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Input States

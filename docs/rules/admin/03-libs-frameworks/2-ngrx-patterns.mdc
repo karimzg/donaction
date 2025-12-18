@@ -1,7 +1,8 @@
 ---
 description: Follow NgRx architecture with facades pattern, actions/effects for side effects, and signals integration for reactive state management
-globs: ["**/*.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # NgRx Patterns

@@ -1,7 +1,9 @@
 ---
 description: Next.js 14 Route Handlers (API Routes) patterns including request/response handling, middleware usage, authentication, CORS configuration, Edge vs Node runtime selection, and proxy patterns for backend communication.
-globs: ["donaction-frontend/src/app/api/**/*.ts", "donaction-frontend/src/middleware.ts"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/app/api/**/*.ts"
+  - "donaction-frontend/src/middleware.ts"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 API Routes

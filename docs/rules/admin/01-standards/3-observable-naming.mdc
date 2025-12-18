@@ -1,7 +1,8 @@
 ---
 description: Suffix all Observable variable names with $ for clear identification of async streams throughout the codebase
-globs: ["**/*.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Observable Naming

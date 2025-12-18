@@ -1,7 +1,10 @@
 ---
 description: Functional guards and resolvers using inject() for route protection, data preloading, and lazy loading with type-safe route configuration in Angular 21
-globs: ["**/*.routes.ts", "**/*.guard.ts", "**/*.resolver.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.routes.ts"
+  - "donaction-admin/**/*.guard.ts"
+  - "donaction-admin/**/*.resolver.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Angular 21 Routing

@@ -1,7 +1,8 @@
 ---
 description: Use JSON for standard API requests, multipart/form-data for file uploads, and Strapi standard response format with data, meta, and pagination
-globs: donaction-api/src/**/*.ts
-alwaysApply: false
+globs:
+  - "donaction-api/src/**/*.ts"
+  - "!donaction-api/node_modules/**"
 ---
 
 # Request/Response Format Standards

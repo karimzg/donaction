@@ -1,7 +1,9 @@
 ---
 description: Use Angular Reactive Forms with FormGroup, FormControl, proper validation, and custom pipes for type-safe form access
-globs: ["**/*.component.ts", "**/*.html"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Reactive Forms Patterns

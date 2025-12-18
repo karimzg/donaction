@@ -1,7 +1,8 @@
 ---
 description: TypeScript strict mode patterns, error handling, type safety, and performance best practices for Angular 21 applications with comprehensive typing and null safety
-globs: ["**/*.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # TypeScript Quality

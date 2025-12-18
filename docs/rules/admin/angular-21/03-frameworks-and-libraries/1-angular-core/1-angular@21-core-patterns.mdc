@@ -1,7 +1,11 @@
 ---
 description: Angular 21 standalone components using inject(), signals, modern control flow (@if, @for, @switch), and reactive patterns with takeUntilDestroyed() for building type-safe, reactive applications
-globs: ["**/*.component.ts", "**/*.service.ts", "**/*.directive.ts", "**/*.pipe.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.service.ts"
+  - "donaction-admin/**/*.directive.ts"
+  - "donaction-admin/**/*.pipe.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Angular 21 Core Patterns

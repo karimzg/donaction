@@ -1,7 +1,8 @@
 ---
 description: Next.js 14 form handling patterns including client-side form management, validation strategies, progressive enhancement, Server Actions (future), error handling, and integration with external APIs like Stripe for payment processing.
-globs: ["donaction-frontend/src/**/*.{ts,tsx}"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Forms & Mutations

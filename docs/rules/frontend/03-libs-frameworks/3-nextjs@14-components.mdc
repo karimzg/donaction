@@ -1,7 +1,8 @@
 ---
 description: Next.js 14 component architecture covering Server Components (default), Client Component boundaries, composition patterns, props serialization, and when to use 'use client' directive. Critical for optimal performance and proper SSR/CSR separation.
-globs: ["donaction-frontend/src/**/*.{ts,tsx}"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Components

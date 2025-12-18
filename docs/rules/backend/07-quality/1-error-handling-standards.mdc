@@ -1,7 +1,8 @@
 ---
 description: Use Strapi context methods for consistent error responses in API controllers and middlewares with proper HTTP status codes
-globs: donaction-api/src/**/*.ts
-alwaysApply: false
+globs:
+  - "donaction-api/src/**/*.ts"
+  - "!donaction-api/node_modules/**"
 ---
 
 # Error Handling Standards

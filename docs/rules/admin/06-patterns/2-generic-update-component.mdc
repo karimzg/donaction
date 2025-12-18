@@ -1,7 +1,10 @@
 ---
 description: Pattern for CRUD forms using GenericUpdateComponent base class - handles create/update modes, validation, file uploads, cache invalidation, and navigation automatically
-globs: ["**/ui/**/*.component.ts", "**/*-update.component.ts", "**/*-create.component.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/ui/**/*.component.ts"
+  - "donaction-admin/**/*-update.component.ts"
+  - "donaction-admin/**/*-create.component.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # GenericUpdateComponent Pattern

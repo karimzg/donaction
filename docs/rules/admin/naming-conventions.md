@@ -1,7 +1,10 @@
 ---
-name: naming-conventions
 description: Naming conventions for donaction-admin (Angular 19)
-argument-hint: N/A
+globs:
+  - "donaction-admin/**/*.ts"
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.scss"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Naming Conventions - Admin Dashboard

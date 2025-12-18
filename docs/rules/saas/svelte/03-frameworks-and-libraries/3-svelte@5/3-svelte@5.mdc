@@ -1,7 +1,10 @@
 ---
 description: Svelte 5 best practices covering runes, reactivity, web components, TypeScript integration, and performance optimization for building reactive UI components
-globs: **/*.svelte, **/*.svelte.ts, **/*.svelte.js
-alwaysApply: false
+globs:
+  - "donaction-saas/**/*.svelte"
+  - "donaction-saas/**/*.svelte.ts"
+  - "donaction-saas/**/*.svelte.js"
+  - "!donaction-saas/node_modules/**"
 ---
 
 # Svelte 5 Best Practices

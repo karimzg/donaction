@@ -1,7 +1,9 @@
 ---
 description: Signal-based forms using @angular/forms/signals for automatic two-way binding, type-safe field access, and schema-based validation with form() and Field directive in Angular 21+ (experimental API)
-globs: ["**/*.component.ts", "**/forms/**/*.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/forms/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Angular 21 Signal Forms

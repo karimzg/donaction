@@ -1,7 +1,11 @@
 ---
 description: Use modern Angular dependency injection with inject() function instead of constructor injection for cleaner and more flexible code
-globs: ["**/*.component.ts", "**/*.service.ts", "**/*.pipe.ts", "**/*.guard.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.service.ts"
+  - "donaction-admin/**/*.pipe.ts"
+  - "donaction-admin/**/*.guard.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Dependency Injection

@@ -1,7 +1,8 @@
 ---
 description: Enforce standalone components architecture in Angular 19 - all components must be standalone with explicit imports, no NgModule declarations except legacy code
-globs: ["**/*.component.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Standalone Components

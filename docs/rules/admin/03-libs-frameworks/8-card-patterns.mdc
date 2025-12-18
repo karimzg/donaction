@@ -1,7 +1,9 @@
 ---
 description: Use standardized card component pattern with consistent padding, radius, border, and shadow for content containers
-globs: ["**/*.scss", "**/*.html"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.scss"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Card Patterns

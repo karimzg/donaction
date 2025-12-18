@@ -1,7 +1,9 @@
 ---
 description: Next.js 14 metadata and SEO patterns including static metadata objects, dynamic generateMetadata function, Open Graph configuration, Twitter cards, JSON-LD structured data, robots.txt, and sitemap generation for optimal search engine visibility.
-globs: ["donaction-frontend/src/app/**/layout.tsx", "donaction-frontend/src/app/**/page.tsx"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/app/**/layout.tsx"
+  - "donaction-frontend/src/app/**/page.tsx"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Metadata & SEO

@@ -1,7 +1,9 @@
 ---
 description: Use Angular 19 modern features including signals, computed values, effects, and new control flow syntax for reactive and maintainable code
-globs: ["**/*.component.ts", "**/*.html"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Angular Modern Syntax

@@ -1,7 +1,10 @@
 ---
 description: TailwindCSS utility-first styling with custom configuration, PrimeUI integration, responsive design, and CSS layer management for Angular 21 applications
-globs: ["**/*.component.html", "**/*.component.scss", "**/tailwind.config.js"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.component.html"
+  - "donaction-admin/**/*.component.scss"
+  - "donaction-admin/**/tailwind.config.js"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # TailwindCSS

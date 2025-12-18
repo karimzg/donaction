@@ -1,7 +1,8 @@
 ---
 description: Next.js 14 rendering strategies including Static Site Generation (SSG), Server-Side Rendering (SSR), Incremental Static Regeneration (ISR), streaming, and Suspense patterns. Critical for optimizing page load performance and choosing the right rendering strategy per route.
-globs: ["donaction-frontend/src/app/**/*.{ts,tsx}"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/app/**/*.{ts,tsx}"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Rendering Strategies

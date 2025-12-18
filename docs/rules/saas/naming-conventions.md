@@ -1,7 +1,9 @@
 ---
-name: naming-conventions
 description: Naming conventions for donaction-saas (Svelte 5 Web Components)
-argument-hint: N/A
+globs:
+  - "donaction-saas/**/*.ts"
+  - "donaction-saas/**/*.svelte"
+  - "!donaction-saas/node_modules/**"
 ---
 
 # Naming Conventions - SaaS Web Components

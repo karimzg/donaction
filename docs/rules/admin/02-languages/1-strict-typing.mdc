@@ -1,7 +1,8 @@
 ---
 description: Enforce strict TypeScript typing with no any types unless absolutely unavoidable - use proper types, interfaces, and generics for type safety
-globs: ["**/*.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Strict TypeScript Typing

@@ -1,7 +1,9 @@
 ---
 description: Next.js 14 data fetching strategies including Server Component patterns, client-side fetching, cache management, revalidation tags, parallel and sequential loading, and cookie forwarding for authenticated requests. Essential for optimizing data flow and cache invalidation.
-globs: ["donaction-frontend/src/**/*.{ts,tsx}", "donaction-frontend/src/core/services/**/*.ts"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "donaction-frontend/src/core/services/**/*.ts"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Data Fetching

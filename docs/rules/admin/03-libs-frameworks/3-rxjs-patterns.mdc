@@ -1,7 +1,8 @@
 ---
 description: Use RxJS best practices with proper operators, automatic cleanup via takeUntilDestroyed, and observable naming conventions
-globs: ["**/*.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # RxJS Patterns

@@ -1,7 +1,10 @@
 ---
 description: State management using NgRx Signal Store or custom signal-based services with rxResource, linkedSignal, and computed values for reactive, type-safe state in Angular 21
-globs: ["**/*.store.ts", "**/*+state/*.ts", "**/*.service.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.store.ts"
+  - "donaction-admin/**/*+state/*.ts"
+  - "donaction-admin/**/*.service.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # State Management

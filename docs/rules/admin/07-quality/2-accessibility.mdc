@@ -1,7 +1,10 @@
 ---
 description: Ensure accessibility compliance with proper color contrast, keyboard navigation, and ARIA labels for all interactive components
-globs: ["**/*.html", "**/*.component.ts", "**/*.scss"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.scss"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Accessibility Requirements

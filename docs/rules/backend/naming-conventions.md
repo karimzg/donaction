@@ -1,7 +1,9 @@
 ---
-name: naming-conventions
 description: Naming conventions for donaction-api (Strapi v5)
-argument-hint: N/A
+globs:
+  - "donaction-api/**/*.ts"
+  - "donaction-api/**/*.js"
+  - "!donaction-api/node_modules/**"
 ---
 
 # Naming Conventions - Backend API

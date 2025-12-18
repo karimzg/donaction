@@ -1,7 +1,10 @@
 ---
 description: Mandatory quality checks before completing any feature implementation - ensures no code duplication, proper reusability, passing tests, and successful builds
-globs: ["**/*.ts", "**/*.html", "**/*.scss"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.ts"
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.scss"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Code Quality Checklist

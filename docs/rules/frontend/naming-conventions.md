@@ -1,7 +1,9 @@
 ---
-name: naming-conventions
 description: Naming conventions for donaction-frontend (Next.js 14)
-argument-hint: N/A
+globs:
+  - "donaction-frontend/**/*.ts"
+  - "donaction-frontend/**/*.tsx"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Naming Conventions - Frontend

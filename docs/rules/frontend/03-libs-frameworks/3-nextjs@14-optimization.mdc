@@ -1,7 +1,9 @@
 ---
 description: Next.js 14 performance optimization covering next/image best practices, next/font configuration, bundle analysis, code splitting, lazy loading, script optimization, and build output configuration for production deployments.
-globs: ["donaction-frontend/src/**/*.{ts,tsx}", "donaction-frontend/next.config.js"]
-alwaysApply: false
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "donaction-frontend/next.config.js"
+  - "!donaction-frontend/node_modules/**"
 ---
 
 # Next.js 14 Optimization

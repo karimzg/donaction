@@ -1,7 +1,10 @@
 ---
 description: Use consistent design tokens for spacing, border radius, shadows, and breakpoints across all components for visual coherence
-globs: ["**/*.scss", "**/*.component.ts", "**/*.html"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.scss"
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Design System Tokens

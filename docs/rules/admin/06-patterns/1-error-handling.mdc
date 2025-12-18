@@ -1,7 +1,8 @@
 ---
 description: Mandatory error handling for all HTTP calls and async operations - use interceptors for centralized handling, toast notifications for user feedback, never silent failures
-globs: ["**/*.ts"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Error Handling

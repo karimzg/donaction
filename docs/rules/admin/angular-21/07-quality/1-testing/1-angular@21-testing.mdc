@@ -1,7 +1,8 @@
 ---
 description: Angular 21 testing with Jasmine and Karma for standalone components, signal-based state, TestBed configuration, and testing patterns for modern Angular features
-globs: ["**/*.spec.ts"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.spec.ts"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Angular 21 Testing

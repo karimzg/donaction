@@ -1,7 +1,9 @@
 ---
 description: Use CSS Grid utility classes with auto-fill responsive columns for consistent grid layouts across listing pages
-globs: ["**/*.scss", "**/*.html"]
-alwaysApply: false
+globs:
+  - "donaction-admin/**/*.scss"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # Grid Layout Patterns

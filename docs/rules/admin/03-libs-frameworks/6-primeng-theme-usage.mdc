@@ -1,7 +1,10 @@
 ---
 description: Use PrimeNG Aura preset with custom klubr theme, TailwindCSS utilities, and layered CSS architecture for consistent styling
-globs: ["**/*.scss", "**/*.ts", "**/*.html"]
-alwaysApply: true
+globs:
+  - "donaction-admin/**/*.scss"
+  - "donaction-admin/**/*.ts"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
 ---
 
 # PrimeNG Theme Usage
