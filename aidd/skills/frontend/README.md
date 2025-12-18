@@ -64,3 +64,12 @@ See `/docs/rules/frontend/naming-conventions.md` for:
 - Components: `PascalCase`
 - Functions: `camelCase`
 - Constants: `UPPER_CASE`
+
+## Maintenance
+
+### Keeping Skills Current
+
+1. **Monitor Next.js updates**: Track App Router evolution and React Server Components changes
+2. **Validate examples**: Ensure code examples work with current Next.js version
+3. **Sync with AGENTS.md**: Keep skills aligned with `/docs/memory-bank/frontend/AGENTS.md` rules
+4. **Add new patterns**: Use `/ide:01_onboard:generate_skill` to create skills for emerging patterns

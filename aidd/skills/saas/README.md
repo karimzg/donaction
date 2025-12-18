@@ -69,3 +69,12 @@ See `/docs/rules/saas/naming-conventions.md` for:
 - Svelte components: `PascalCase.svelte`
 - Functions: `camelCase`
 - Constants: `SCREAMING_SNAKE_CASE`
+
+## Maintenance
+
+### Keeping Skills Current
+
+1. **Monitor Svelte updates**: Track Svelte 5 runes API evolution and web component improvements
+2. **Validate examples**: Ensure code examples work with current Svelte version
+3. **Sync with AGENTS.md**: Keep skills aligned with `/docs/memory-bank/saas/AGENTS.md` rules
+4. **Add new patterns**: Use `/ide:01_onboard:generate_skill` to create skills for emerging patterns

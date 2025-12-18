@@ -62,3 +62,12 @@ See `/docs/rules/admin/naming-conventions.md` for:
 - Components: `PascalCase`
 - Functions: `camelCase`
 - Constants: `UPPER_CASE`
+
+## Maintenance
+
+### Keeping Skills Current
+
+1. **Monitor Angular updates**: When Angular releases new patterns, update affected skills
+2. **Validate examples**: Ensure code examples compile and follow latest best practices
+3. **Sync with AGENTS.md**: Keep skills aligned with `/docs/memory-bank/admin/AGENTS.md` rules
+4. **Add new patterns**: Use `/ide:01_onboard:generate_skill` to create skills for emerging patterns
