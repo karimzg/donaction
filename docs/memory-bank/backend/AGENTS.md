@@ -182,6 +182,13 @@ const results = await strapi.db.query('api::klubr.klubr').findMany({
 | `API_DOCS.md` | Endpoint list, middlewares, rate limits |
 | `DATABASE.md` | Entity relationships, schema, migrations |
 
+## Critical Strapi v5 Documentation
+| File | Purpose |
+|------|---------|
+| `@docs/rules/backend/strapi-v5/strapi-v5-coding-rules.md` | Comprehensive patterns, breaking changes, best practices |
+| `@docs/rules/backend/strapi-v5/quick-reference.md` | Fast lookup for controllers, services, Document Service API, common filters |
+| `@docs/rules/backend/strapi-v5/README.md` | Overview, decision trees, version history |
+
 ## Skills
 Detailed patterns in `@aidd/skills/backend/`:
 - `controllers.md` - Controller patterns
