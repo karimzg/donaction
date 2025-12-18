@@ -17,7 +17,7 @@ import { MessageService, Translation } from 'primeng/api';
 import { NgxEditorModule } from 'ngx-editor';
 import { httpErrorsInterceptor } from "@shared/utils/interceptors/http-errors.interceptor";
 import { provideLottieOptions } from "ngx-lottie";
-import { RECAPTCHA_V3_SITE_KEY, RecaptchaV3Module } from 'ng-recaptcha';
+import { RECAPTCHA_V3_SITE_KEY, RecaptchaV3Module } from 'ng-recaptcha-2';
 import { registerLocaleData } from "@angular/common";
 import localeFr from '@angular/common/locales/fr';
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";

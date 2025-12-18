@@ -9,7 +9,7 @@ import { InputTextModule } from "primeng/inputtext";
 import { PaginatorModule } from "primeng/paginator";
 import { ReactiveFormsModule } from "@angular/forms";
 import { TextareaModule } from "primeng/textarea";
-import { RecaptchaFormsModule, RecaptchaModule } from "ng-recaptcha";
+import { RecaptchaFormsModule, RecaptchaModule } from "ng-recaptcha-2";
 import { ToastModule } from "primeng/toast";
 import { ContactFormComponent } from "@shared/components/contact-form/contact-form.component";
 import { fadeAnimation } from "@shared/utils/animations/animations";
