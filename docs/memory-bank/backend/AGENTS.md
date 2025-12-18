@@ -189,6 +189,8 @@ const results = await strapi.db.query('api::klubr.klubr').findMany({
 | `@docs/rules/backend/strapi-v5/quick-reference.md` | Fast lookup for controllers, services, Document Service API, common filters |
 | `@docs/rules/backend/strapi-v5/README.md` | Overview, decision trees, version history |
 
+**⚠️ When in doubt**: Always consult Strapi v5 rules first before implementing controllers, services, or middlewares. The comprehensive rules are the source of truth for all backend patterns.
+
 ## Skills
 Detailed patterns in `@aidd/skills/backend/`:
 - `controllers.md` - Controller patterns
