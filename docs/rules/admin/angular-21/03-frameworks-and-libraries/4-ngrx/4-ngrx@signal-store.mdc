@@ -117,7 +117,7 @@ export class UserStateService {
 
   // Resource for async data
   private usersResource = rxResource({
-    loader: () => this.http.get<User[]>('/api/users')
+    stream: () => this.http.get<User[]>('/api/users')
   });
 
   // Computed state
@@ -156,8 +156,8 @@ export class ProductService {
 
   // Resource reloads when categoryId changes
   productsResource = rxResource({
-    request: () => ({ categoryId: this.categoryId() }),
-    loader: ({ request, abortSignal }) =>
+    params: () => ({ categoryId: this.categoryId() }),
+    stream: ({ request, abortSignal }) =>
       this.http.get<Product[]>(`/api/products?cat=${request.categoryId}`, {
         context: new HttpContext().set(ABORT_SIGNAL, abortSignal)
       })
@@ -221,11 +221,11 @@ export class ProductStateService {
 
   // Data fetching with rxResource
   private productsResource = rxResource({
-    request: () => ({
+    params: () => ({
       category: this.categoryFilter(),
       search: this.searchQuery()
     }),
-    loader: ({ request }) => this.http.get<Product[]>('/api/products', {
+    stream: ({ request }) => this.http.get<Product[]>('/api/products', {
       params: {
         ...(request.category && { category: request.category }),
         ...(request.search && { search: request.search })
@@ -289,5 +289,6 @@ export class ProductStateService {
 References:
 - [Angular Signals](https://angular.dev/guide/signals)
 - [rxResource](https://angular.dev/guide/signals/resource)
+- [RxResourceOptions API](https://angular.dev/api/core/rxjs-interop/RxResourceOptions)
 - [linkedSignal](https://angular.dev/guide/signals/linked-signal)
 - [NgRx Signal Store](https://ngrx.io/guide/signals/signal-store)
