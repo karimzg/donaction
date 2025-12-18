@@ -1,3 +1,13 @@
+---
+name: "svelte-stores"
+description: "Create Svelte stores for cross-component shared state with writable, readable, and derived patterns"
+triggers: ["svelte store", "writable", "readable", "derived", "shared state", "store pattern"]
+tags: ["svelte", "saas", "state", "typescript"]
+priority: medium
+scope: file
+output: code
+---
+
 # Skill: Svelte Stores
 
 ## When to use

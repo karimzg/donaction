@@ -1,3 +1,13 @@
+---
+name: "svelte-custom-elements"
+description: "Create embeddable Svelte web components with custom elements for third-party sites"
+triggers: ["custom element", "web component", "embed widget", "shadow DOM", "customElement"]
+tags: ["svelte", "saas", "web-components", "typescript"]
+priority: high
+scope: file
+output: code
+---
+
 # Skill: Svelte Web Components (Custom Elements)
 
 ## When to use

@@ -1,3 +1,13 @@
+---
+name: "svelte-runes"
+description: "Use Svelte 5 runes ($state, $derived, $effect, $props) for reactive components"
+triggers: ["$state", "$derived", "$effect", "$props", "svelte 5", "runes", "reactive"]
+tags: ["svelte", "saas", "reactivity", "typescript"]
+priority: high
+scope: file
+output: code
+---
+
 # Skill: Svelte 5 Runes
 
 ## When to use

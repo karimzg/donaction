@@ -1,3 +1,13 @@
+---
+name: "nextjs-data-fetching"
+description: "Fetch data from Strapi API with caching, revalidation, and authentication handling"
+triggers: ["fetch data", "api call", "HttpService", "revalidate", "cache", "strapi fetch"]
+tags: ["nextjs", "api", "frontend", "typescript", "fetch"]
+priority: high
+scope: file
+output: code
+---
+
 # Skill: Next.js Data Fetching
 
 ## When to use

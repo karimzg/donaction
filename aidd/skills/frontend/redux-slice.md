@@ -1,3 +1,13 @@
+---
+name: "redux-toolkit-slice"
+description: "Create Redux Toolkit slices for global client-side state management"
+triggers: ["redux", "slice", "createSlice", "state management", "global state", "auth state"]
+tags: ["nextjs", "redux", "frontend", "typescript", "state"]
+priority: medium
+scope: file
+output: code
+---
+
 # Skill: Redux Toolkit Slices
 
 ## When to use

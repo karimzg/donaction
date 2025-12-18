@@ -1,3 +1,13 @@
+---
+name: "nextjs-client-components"
+description: "Create Next.js client components with hooks, event handlers, and browser APIs"
+triggers: ["client component", "use client", "useState", "useEffect", "interactive", "onClick"]
+tags: ["nextjs", "react", "frontend", "typescript", "client"]
+priority: high
+scope: file
+output: code
+---
+
 # Skill: Next.js Client Components
 
 ## When to use

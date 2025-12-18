@@ -1,3 +1,13 @@
+---
+name: "strapi-controllers"
+description: "Create Strapi controllers with factory pattern, sanitization, and custom routes"
+triggers: ["controller", "strapi controller", "custom endpoint", "override crud", "route handler"]
+tags: ["strapi", "backend", "controller", "api", "typescript"]
+priority: high
+scope: module
+output: code
+---
+
 # Skill: Strapi Controllers
 
 ## When to use

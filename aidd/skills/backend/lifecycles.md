@@ -1,3 +1,13 @@
+---
+name: "strapi-lifecycles"
+description: "Use Strapi lifecycle hooks for database-level operations like field transformation and logging"
+triggers: ["lifecycle", "beforeCreate", "afterCreate", "beforeUpdate", "hook", "database event"]
+tags: ["strapi", "backend", "lifecycle", "hooks", "typescript"]
+priority: medium
+scope: file
+output: code
+---
+
 # Skill: Strapi Lifecycle Hooks
 
 ## When to use
