@@ -1,6 +1,6 @@
 # Strapi v5 Quick Reference Checklist
 
-> Quick reference for common Strapi v5 patterns. See [full rules](./strapi-v5-coding-rules.md) for details.
+> Quick reference for common Strapi v5 patterns. See [full rules](strapi-v5-coding-rules.md) for details.
 
 ---
 
@@ -436,7 +436,7 @@ When something goes wrong:
 
 ## Resources
 
-- 📖 [Full Coding Rules](./strapi-v5-coding-rules.md)
+- 📖 [Full Coding Rules](strapi-v5-coding-rules.md)
 - 🌐 [Official Strapi v5 Docs](https://docs.strapi.io/)
 - 🔧 [Document Service API](https://docs.strapi.io/cms/api/document-service)
 - 🎯 [Controllers](https://docs.strapi.io/cms/backend-customization/controllers)

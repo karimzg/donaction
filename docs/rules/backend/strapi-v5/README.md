@@ -6,7 +6,7 @@
 
 ## 📚 Documentation Structure
 
-### 1. [Strapi v5 Coding Rules](./strapi-v5-coding-rules.md) (Main Reference)
+### 1. [Strapi v5 Coding Rules](strapi-v5-coding-rules.md) (Main Reference)
 
 **Complete guide covering**:
 - Core architecture patterns
@@ -24,7 +24,7 @@
 
 ---
 
-### 2. [Quick Reference Checklist](./quick-reference.md)
+### 2. [Quick Reference Checklist](quick-reference.md)
 
 **Fast lookup for**:
 - Controller action templates
@@ -45,15 +45,15 @@
 
 ### For New Developers
 
-1. **Read** [Strapi v5 Coding Rules](./strapi-v5-coding-rules.md) from start to finish
-2. **Bookmark** [Quick Reference](./quick-reference.md) for daily use
+1. **Read** [Strapi v5 Coding Rules](strapi-v5-coding-rules.md) from start to finish
+2. **Bookmark** [Quick Reference](quick-reference.md) for daily use
 3. **Review** existing `donaction-api` code to see patterns in action
 4. **Consult** official [Strapi v5 Documentation](https://docs.strapi.io/) for deep dives
 
 ### For Experienced Developers
 
-1. **Skim** [Strapi v5 Coding Rules](./strapi-v5-coding-rules.md) focusing on "Breaking Changes" sections
-2. **Use** [Quick Reference](./quick-reference.md) as your daily companion
+1. **Skim** [Strapi v5 Coding Rules](strapi-v5-coding-rules.md) focusing on "Breaking Changes" sections
+2. **Use** [Quick Reference](quick-reference.md) as your daily companion
 3. **Pay attention** to Document Service API vs Query Engine differences
 
 ---
@@ -246,8 +246,8 @@ async create() {
 
 When Strapi is updated or new patterns are discovered:
 
-1. Update [strapi-v5-coding-rules.md](./strapi-v5-coding-rules.md)
-2. Update [quick-reference.md](./quick-reference.md) if applicable
+1. Update [strapi-v5-coding-rules.md](strapi-v5-coding-rules.md)
+2. Update [quick-reference.md](quick-reference.md) if applicable
 3. Update version number and "Last Updated" date
 4. Document breaking changes clearly
 5. Add examples from donaction-api codebase
