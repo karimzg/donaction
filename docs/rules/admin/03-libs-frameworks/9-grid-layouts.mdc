@@ -1,0 +1,63 @@
+---
+description: Use CSS Grid utility classes with auto-fill responsive columns for consistent grid layouts across listing pages
+globs:
+  - "donaction-admin/**/*.scss"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Grid Layout Patterns
+
+## Grid Utility Classes
+
+- `.grid-member-listing`: Member list grid
+- `.grid-project-listing`: Project list grid
+- `.grid-user-listing`: User list grid
+- Auto-fill responsive columns
+- Consistent gap spacing
+
+```scss
+.grid-member-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-project-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.grid-user-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+```
+
+## Responsive Grid
+
+- Auto-fill: columns adjust to container width
+- Min-width: minimum item width before wrapping
+- Gap: consistent spacing between items
+
+```html
+<div class="grid-project-listing">
+  @for (project of projects(); track project.id) {
+    <app-project-card [project]="project" />
+  }
+</div>
+```
+
+## TailwindCSS Grid
+
+- Use Tailwind grid utilities for simple layouts
+- `grid`, `grid-cols-{n}`, `gap-{n}`
+- Responsive variants: `md:grid-cols-3`, `lg:grid-cols-4`
+
+```html
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <!-- Grid items -->
+</div>
+```

@@ -1,0 +1,42 @@
+---
+description: Use modern Angular dependency injection with inject() function instead of constructor injection for cleaner and more flexible code
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.service.ts"
+  - "donaction-admin/**/*.pipe.ts"
+  - "donaction-admin/**/*.guard.ts"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Dependency Injection
+
+## Injection Pattern
+
+- Use `inject()` function in component/service body
+- No constructor injection
+- Private for internal services
+- Public when needed in template
+
+```typescript
+export class LoginComponent {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  public toastService = inject(ToastService); // Used in template
+
+  login() {
+    this.http.post(/* ... */);
+  }
+}
+```
+
+## Service Registration
+
+- Services use `providedIn: 'root'`
+- Inject dependencies via `inject()`
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private http = inject(HttpClient);
+}
+```

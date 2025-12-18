@@ -1,0 +1,54 @@
+---
+description: JWT token authentication using Strapi users-permissions plugin with validation via ctx.state.user in controllers and middlewares
+globs:
+  - "donaction-api/src/**/*.ts"
+  - "!donaction-api/node_modules/**"
+---
+
+# JWT Authentication Pattern
+
+## Token Validation
+
+- Access authenticated user via `ctx.state.user`
+- Check user existence before processing request
+- Return `ctx.unauthorized()` if user missing
+- Store JWT in client state/cookies
+- Token managed by Strapi users-permissions plugin
+
+## Authentication Flow
+
+- Frontend sends `Authorization: Bearer <token>` header
+- Strapi middleware validates token automatically
+- Populated `ctx.state.user` object available in controllers
+- Check permissions based on `ctx.state.user.role`
+- Use custom middlewares for additional auth logic
+
+## Example
+
+```typescript
+// Controller with JWT validation
+async update(ctx) {
+  const user = ctx.state.user;
+
+  if (!user) {
+    return ctx.unauthorized('Non authentifié');
+  }
+
+  const { uuid } = ctx.params;
+  const klubr = await strapi.db.query('api::klubr.klubr').findOne({
+    where: { uuid }
+  });
+
+  if (!klubr) {
+    return ctx.notFound('Club non trouvé');
+  }
+
+  // Check ownership
+  const isMember = await isUserKlubrMember(user, klubr);
+  if (!isMember) {
+    return ctx.forbidden('Accès refusé');
+  }
+
+  // Process update...
+}
+```

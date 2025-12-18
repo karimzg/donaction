@@ -1,0 +1,90 @@
+---
+description: Use Angular Reactive Forms with FormGroup, FormControl, proper validation, and custom pipes for type-safe form access
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.html"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Reactive Forms Patterns
+
+## Form Structure
+
+- Use `FormGroup`, `FormControl`, `Validators`
+- Custom `FormControlPipe` to access controls type-safely
+- Helper functions in @donaction-admin/src/app/shared/utils/helpers/form-helpers.ts
+- Display validation errors via @donaction-admin/src/app/shared/components/atoms/error-display/error-display.component.ts
+
+```typescript
+export class LoginComponent {
+  loginForm = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(8)])
+  });
+
+  onSubmit() {
+    if (this.loginForm.valid) {
+      const { email, password } = this.loginForm.value;
+      this.authService.login(email!, password!);
+    }
+  }
+}
+```
+
+## Template Usage
+
+- Use `FormControlPipe` to access controls: `form | formControl:'fieldName'`
+- Bind with `[formControl]` directive
+- Display errors with `ErrorDisplayComponent`
+
+```html
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <input
+    pInputText
+    [formControl]="loginForm | formControl:'email'"
+    placeholder="Email"
+  />
+  <app-error-display [control]="loginForm | formControl:'email'" />
+
+  <input
+    pInputText
+    type="password"
+    [formControl]="loginForm | formControl:'password'"
+    placeholder="Password"
+  />
+  <app-error-display [control]="loginForm | formControl:'password'" />
+
+  <button type="submit" [disabled]="loginForm.invalid">Login</button>
+</form>
+```
+
+## Custom Validators
+
+- Validators in @donaction-admin/src/app/shared/utils/validators/
+- Reusable across forms
+
+```typescript
+export class ProfileComponent {
+  profileForm = new FormGroup({
+    nom: new FormControl('', Validators.required),
+    prenom: new FormControl('', Validators.required),
+    password: new FormControl('', passwordStrengthValidator()),
+    confirmPassword: new FormControl('')
+  }, { validators: passwordMatchValidator });
+}
+```
+
+## Form Helpers
+
+- Use helpers from `form-helpers.ts`
+- Async operations: `urlToFormData()`
+- Type-safe control access
+
+```typescript
+import { urlToFormData } from '@shared/utils/helpers/form-helpers';
+
+async prepareFormData() {
+  const avatar = await urlToFormData(this.avatarUrl, 'avatar.jpg');
+  formData.append('avatar', avatar);
+}
+```

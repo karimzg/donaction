@@ -1,0 +1,231 @@
+---
+description: Signal-based forms using @angular/forms/signals for automatic two-way binding, type-safe field access, and schema-based validation with form() and Field directive in Angular 21+ (experimental API)
+globs:
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/forms/**/*.ts"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Angular 21 Signal Forms
+
+⚠️ **Status**: Experimental API - may change before stable release
+
+## Setup
+
+- Import from `@angular/forms/signals`
+- Requires Angular v21+
+- Include `Field` directive in component imports
+- Create writable signals for form models
+
+```typescript
+import { form, Field, required, email } from '@angular/forms/signals';
+```
+
+## Form Creation Pattern
+
+### Step 1: Define Model Interface
+
+```typescript
+interface LoginData {
+  email: string;
+  password: string;
+}
+```
+
+### Step 2: Create Signal Model
+
+```typescript
+loginModel = signal<LoginData>({
+  email: '',
+  password: ''
+});
+```
+
+### Step 3: Generate FieldTree with form()
+
+```typescript
+loginForm = form(this.loginModel);
+```
+
+### Step 4: Bind Fields in Template
+
+```typescript
+@Component({
+  imports: [Field],
+  template: `
+    <input type="email" [field]="loginForm.email" />
+    <input type="password" [field]="loginForm.password" />
+  `
+})
+```
+
+## Field State Access
+
+- Call field as function: `loginForm.email()`
+- Returns `FieldState` object with signals
+- Access value: `loginForm.email().value()`
+- Check validity: `loginForm.email().valid()`
+- User interaction: `loginForm.email().touched()`
+
+```typescript
+// Read current value
+const emailValue = loginForm.email().value();
+
+// Set value programmatically
+loginForm.email().value.set('user@example.com');
+// Updates both field AND underlying signal
+```
+
+## Validation
+
+- Apply validators via schema function
+- Pass to `form()` as second argument
+- Validators run on value changes
+- Access errors via `errors()` signal
+
+```typescript
+loginForm = form(this.loginModel, (schema) => {
+  required(schema.email, { message: 'Email required' });
+  email(schema.email, { message: 'Invalid email format' });
+  minLength(schema.password, 8, { message: 'Min 8 characters' });
+});
+```
+
+### Built-in Validators
+
+- `required()` - non-empty value
+- `email()` - email format
+- `min()`, `max()` - numeric ranges
+- `minLength()`, `maxLength()` - string/array length
+- `pattern()` - regex validation
+
+## Field State Signals
+
+| Signal | Type | Description |
+|--------|------|-------------|
+| `value()` | T | Current field value |
+| `valid()` | boolean | Validation passes |
+| `invalid()` | boolean | Validation fails |
+| `touched()` | boolean | User interacted |
+| `dirty()` | boolean | Value changed |
+| `disabled()` | boolean | Field disabled |
+| `readonly()` | boolean | Read-only mode |
+| `pending()` | boolean | Async validation running |
+| `errors()` | Error[] | Validation errors |
+
+## Error Display Pattern
+
+```typescript
+@if (loginForm.email().touched() && loginForm.email().invalid()) {
+  @for (error of loginForm.email().errors(); track $index) {
+    <small class="error">{{ error.message }}</small>
+  }
+}
+```
+
+## Nested Forms
+
+- Use dot notation: `userForm.profile.firstName`
+- Mirrors model structure
+- Type-safe access
+- Initialize all nested fields
+
+```typescript
+interface UserData {
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+  address: {
+    street: string;
+    city: string;
+  };
+}
+
+userModel = signal<UserData>({
+  profile: { firstName: '', lastName: '' },
+  address: { street: '', city: '' }
+});
+
+userForm = form(this.userModel);
+```
+
+```html
+<input [field]="userForm.profile.firstName" />
+<input [field]="userForm.address.city" />
+```
+
+## Array Handling
+
+- Arrays receive automatic tracking identities
+- Maintain state during reordering
+- Index-based access
+
+```typescript
+interface OrderData {
+  items: Array<{ product: string; quantity: number }>;
+}
+
+orderModel = signal<OrderData>({
+  items: [{ product: '', quantity: 0 }]
+});
+
+orderForm = form(this.orderModel);
+```
+
+```html
+@for (item of orderForm.items(); track $index) {
+  <input [field]="orderForm.items[$index].product" />
+  <input type="number" [field]="orderForm.items[$index].quantity" />
+}
+```
+
+## Input Type Support
+
+| Type | Binding | Value Storage |
+|------|---------|---------------|
+| text, email, url | `[field]` | string |
+| number | `[field]` | number (auto-converted) |
+| date | `[field]` | `YYYY-MM-DD` string |
+| time | `[field]` | `HH:mm` string |
+| checkbox | `[field]` | boolean |
+| radio | `[field]` | Shared field for group |
+| select | `[field]` | Selected option value |
+| textarea | `[field]` | string |
+
+## Form Submission
+
+- Access complete model via signal
+- Check form-level validity
+- Prevent default submit behavior
+
+```typescript
+onSubmit(event: Event) {
+  event.preventDefault();
+
+  if (this.loginForm().valid()) {
+    const data = this.loginModel();
+    this.apiService.login(data).subscribe();
+  }
+}
+```
+
+## Best Practices
+
+- Define explicit interfaces for type safety
+- Initialize all fields in model
+- Use schema validation over manual checks
+- Display errors only after `touched()`
+- Keep models focused on single forms
+- Group related fields with nesting
+- Use `FieldState` for dynamic UI
+
+## Migration from Reactive Forms
+
+- No direct FormGroup/FormControl
+- Replace `formGroup` with `[field]` directive
+- Validators defined in schema, not inline
+- Two-way sync automatic, no `valueChanges`
+- Signal-based state access
+
+Reference: [Angular Signal Forms](https://angular.dev/guide/forms/signals/overview)

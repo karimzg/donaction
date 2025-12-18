@@ -1,0 +1,69 @@
+---
+description: Use JSON for standard API requests, multipart/form-data for file uploads, and Strapi standard response format with data, meta, and pagination
+globs:
+  - "donaction-api/src/**/*.ts"
+  - "!donaction-api/node_modules/**"
+---
+
+# Request/Response Format Standards
+
+## Request Content Types
+
+- JSON for standard POST/PUT requests
+- `multipart/form-data` for file uploads
+- URL-encoded for simple form submissions
+- Body size limit: 20MB max
+
+## Response Structure
+
+- Use Strapi format: `{ data, meta }` structure
+- Include pagination: `{ data, meta: { pagination } }`
+- Single resource: `{ data: {...} }`
+- Collection: `{ data: [...], meta: { pagination: { page, pageSize, total } } }`
+- Sanitize output using `this.sanitizeOutput(data, ctx)`
+
+## Pagination
+
+- Default: 25 records per page
+- Maximum: 100 records per page
+- Always include count: `withCount: true`
+- Return `meta.pagination` with page info
+
+## Example
+
+```typescript
+// Standard response
+async find(ctx) {
+  await this.validateQuery(ctx);
+  const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+  const { results, pagination } = await strapi
+    .service('api::klubr.klubr')
+    .find(sanitizedQuery);
+
+  return this.sanitizeOutput({
+    data: results,
+    meta: { pagination }
+  }, ctx);
+}
+
+// File upload controller
+async uploadDocument(ctx) {
+  const { files } = ctx.request;
+  const { uuid } = ctx.params;
+
+  if (!files || !files.document) {
+    return ctx.badRequest('Aucun fichier fourni');
+  }
+
+  const uploaded = await strapi
+    .plugin('upload')
+    .service('upload')
+    .upload({
+      data: { ref: 'api::klubr.klubr', refId: uuid },
+      files: files.document
+    });
+
+  return { data: uploaded };
+}
+```

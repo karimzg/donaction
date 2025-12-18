@@ -1,0 +1,166 @@
+---
+description: Next.js 14 component architecture covering Server Components (default), Client Component boundaries, composition patterns, props serialization, and when to use 'use client' directive. Critical for optimal performance and proper SSR/CSR separation.
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "!donaction-frontend/node_modules/**"
+---
+
+# Next.js 14 Components
+
+## Server Components (Default)
+
+- All components are Server Components by default
+- Async components allowed in Server Components
+- Direct database/API calls in Server Components
+- No useState, useEffect, or event handlers
+- Access cookies and headers directly
+
+```typescript
+// @donaction-frontend/src/app/[slug]/page.tsx
+export default async function club({ params }: { params: { slug: string } }) {
+  const cookieStore = cookies();
+  const klub = await getClubDetailBySlug(params.slug, cookieStore.toString());
+
+  return <ClubIntroduction {...klub} />;
+}
+```
+
+## Client Components
+
+- Add `'use client'` at file top
+- Use for interactivity and hooks
+- Use for browser-only APIs
+- Minimize Client Component boundaries
+- Keep client components small and focused
+
+```typescript
+// src/layouts/partials/authentication/popAuth/index.tsx
+'use client';
+
+import { useAppDispatch } from '@/core/store/hooks';
+import { useEffect } from 'react';
+
+export default function PopAuth() {
+  const dispatch = useAppDispatch();
+  // ... client-side logic
+}
+```
+
+## Component Composition
+
+- Pass Server Components as children to Client
+- Import Client Components into Server Components
+- Don't import Server into Client directly
+- Compose at boundaries for best performance
+- Use children prop for composition
+
+```typescript
+// Server Component passing to Client Component
+<Providers>
+  <ServerSideContent />
+</Providers>
+```
+
+## Props Serialization
+
+- Props must be JSON-serializable
+- No functions, classes, or Dates as props
+- Convert Date to ISO string
+- Use plain objects and primitives
+- Serialize data before passing to Client
+
+```typescript
+// ❌ Bad - non-serializable
+<ClientComponent onSubmit={handleSubmit} />
+
+// ✅ Good - serializable
+<ClientComponent data={{ id: '123', timestamp: date.toISOString() }} />
+```
+
+## Use Client Boundaries
+
+- Place 'use client' as high as needed
+- Don't mark entire app as client
+- Interactive forms need 'use client'
+- Redux/Context consumers need 'use client'
+- Event handlers require 'use client'
+
+```typescript
+// @donaction-frontend/src/app/Providers.tsx
+'use client';
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <SessionProvider>
+      <ReduxProvider>{children}</ReduxProvider>
+    </SessionProvider>
+  );
+}
+```
+
+## Context Providers
+
+- Mark providers with 'use client'
+- Wrap app in root layout
+- Redux Provider is client-side only
+- Session Provider from NextAuth needs client
+- PrimeReact context requires client boundary
+
+```typescript
+// @donaction-frontend/src/app/layout.tsx (Server)
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+
+// @donaction-frontend/src/app/Providers.tsx (Client)
+'use client';
+export default function Providers({ children }) {
+  return (
+    <SessionProvider>
+      <PrimeReactProvider>{children}</PrimeReactProvider>
+    </SessionProvider>
+  );
+}
+```
+
+## Shared Components
+
+- Keep layouts in partials directory
+- Server-only logic in separate files
+- Client-only UI in components directory
+- Shared types in models directory
+- Colocate related components together
+
+```typescript
+// Structure:
+// layouts/partials/ - page-specific sections
+// layouts/components/ - reusable UI components
+// core/models/ - shared types
+```
+
+## TypeScript Patterns
+
+- Type page params explicitly
+- Type async component return types
+- Use Metadata type for metadata exports
+- Type children as React.ReactNode
+- Define interfaces for complex props
+
+```typescript
+export async function generateMetadata({
+  params
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  return {
+    title: 'Page Title',
+    description: 'Description',
+  };
+}
+```

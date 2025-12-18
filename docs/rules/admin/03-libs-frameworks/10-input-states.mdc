@@ -1,0 +1,67 @@
+---
+description: Use PrimeNG input components with outlined style and consistent focus/error/disabled states from theme preset
+globs:
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.component.ts"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Input States
+
+## PrimeNG Input Components
+
+- Use PrimeNG input directives: `pInputText`, `pInputTextarea`, `pDropdown`, etc.
+- Outlined style: default from theme preset
+- Consistent states across all inputs
+
+```html
+<input pInputText [(ngModel)]="value" />
+<textarea pInputTextarea [(ngModel)]="text"></textarea>
+<p-dropdown [options]="items" [(ngModel)]="selected"></p-dropdown>
+```
+
+## Input States
+
+- **Default**: Outlined border, surface background
+- **Focus**: Primary color border, focus ring from theme
+- **Error**: Danger color border, error message below
+- **Disabled**: Reduced opacity, no interaction
+
+```html
+<!-- Error state with validation -->
+<input
+  pInputText
+  [formControl]="form | formControl:'email'"
+  [class.ng-invalid]="form.get('email')?.invalid"
+  [class.ng-touched]="form.get('email')?.touched"
+/>
+<app-error-display [control]="form | formControl:'email'" />
+
+<!-- Disabled state -->
+<input pInputText [disabled]="true" placeholder="Disabled input" />
+```
+
+## Form Control Integration
+
+- Use with `FormControl` and `formControl` directive
+- Validation states automatically applied
+- Error display via `ErrorDisplayComponent`
+
+```typescript
+emailControl = new FormControl('', [Validators.required, Validators.email]);
+```
+
+```html
+<input
+  pInputText
+  [formControl]="emailControl"
+  placeholder="Email"
+/>
+<app-error-display [control]="emailControl" />
+```
+
+## Styling Classes
+
+- `.ng-invalid.ng-touched`: Red border for errors
+- `.ng-valid`: Green check icon (optional)
+- `.p-disabled`: Disabled styling

@@ -1,0 +1,58 @@
+---
+description: Enforce strict TypeScript typing with no any types unless absolutely unavoidable - use proper types, interfaces, and generics for type safety
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Strict TypeScript Typing
+
+## Type Safety
+
+- No `any` unless unavoidable
+- Use strict typing everywhere
+- Prefer `Partial<T>` for partial updates
+- Import types from @donaction-admin/src/app/shared/utils/models/
+
+```typescript
+// Good
+interface User {
+  id: string;
+  name: string;
+}
+
+function updateUser(id: string, data: Partial<User>): Observable<User> {
+  return this.http.put<User>(`/users/${id}`, data);
+}
+
+// Bad
+function updateUser(id: any, data: any): any {
+  return this.http.put(`/users/${id}`, data);
+}
+```
+
+## Model Organization
+
+- Models in @donaction-admin/src/app/shared/utils/models/
+- Files: `klubr.ts`, `user-details.ts`, `media.ts`, `misc.ts`
+- Type imports from models
+
+```typescript
+import { User } from '@shared/utils/models/user-details';
+import { Klubr } from '@shared/utils/models/klubr';
+```
+
+## Generic Types
+
+- Use generics for reusable components/services
+- Type parameters explicit and meaningful
+
+```typescript
+export class GenericUpdateComponent<T> {
+  entitySignal: WritableSignal<T | null>;
+
+  protected serviceUpdate(uuid: string, data: Partial<T>): Observable<T> {
+    // implementation
+  }
+}
+```

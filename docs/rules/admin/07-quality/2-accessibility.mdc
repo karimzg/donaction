@@ -1,0 +1,124 @@
+---
+description: Ensure accessibility compliance with proper color contrast, keyboard navigation, and ARIA labels for all interactive components
+globs:
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.component.ts"
+  - "donaction-admin/**/*.scss"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Accessibility Requirements
+
+## Color Contrast
+
+- Use PrimeNG theme contrast ratios (WCAG AA compliant)
+- Semantic color tokens for status indicators
+- Sufficient contrast between text and background
+
+```scss
+// Theme provides accessible colors
+.text-primary {
+  color: var(--primary-color); // Meets WCAG AA
+}
+
+.text-on-surface {
+  color: var(--text-color); // Meets WCAG AA on surface-card
+}
+```
+
+## Keyboard Navigation
+
+- PrimeNG components: built-in keyboard navigation
+- Custom components: add `tabindex` and keyboard handlers
+- Focus states: disabled globally but PrimeNG handles internally
+
+```html
+<!-- PrimeNG handles keyboard navigation -->
+<p-button label="Click me" (onClick)="action()"></p-button>
+
+<!-- Custom interactive element -->
+<div
+  role="button"
+  tabindex="0"
+  (click)="action()"
+  (keydown.enter)="action()"
+  (keydown.space)="action()"
+>
+  Custom Button
+</div>
+```
+
+## Focus Management
+
+- Global focus outline disabled: `:focus { outline: none !important; }`
+- PrimeNG provides accessible focus styles
+- Use focus-visible for custom focus indicators
+
+```scss
+// Custom focus for non-PrimeNG elements
+.custom-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+```
+
+## ARIA Labels
+
+- PrimeNG components: built-in ARIA labels
+- Custom components: add `aria-label`, `aria-labelledby`, `aria-describedby`
+- Form inputs: associate labels with `for` attribute
+
+```html
+<!-- Accessible form input -->
+<label for="email">Email Address</label>
+<input
+  id="email"
+  pInputText
+  [formControl]="emailControl"
+  aria-describedby="email-error"
+/>
+<small id="email-error" *ngIf="emailControl.invalid">
+  Invalid email address
+</small>
+
+<!-- Icon button with ARIA label -->
+<button
+  pButton
+  icon="pi pi-trash"
+  aria-label="Delete item"
+  (click)="delete()"
+></button>
+
+<!-- Custom interactive element -->
+<div
+  role="button"
+  aria-label="Toggle menu"
+  tabindex="0"
+  (click)="toggleMenu()"
+>
+  <i class="pi pi-bars"></i>
+</div>
+```
+
+## Screen Reader Support
+
+- Semantic HTML: use proper heading hierarchy
+- Status messages: use `role="status"` or `role="alert"`
+- Live regions: `aria-live` for dynamic content
+
+```html
+<!-- Semantic heading hierarchy -->
+<h1>Page Title</h1>
+<h2>Section Title</h2>
+<h3>Subsection</h3>
+
+<!-- Status message -->
+<div role="status" aria-live="polite">
+  {{ statusMessage() }}
+</div>
+
+<!-- Alert message -->
+<div role="alert" aria-live="assertive">
+  {{ errorMessage() }}
+</div>
+```

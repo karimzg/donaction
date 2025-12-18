@@ -1,0 +1,1 @@
+../docs/memory-bank/admin/AGENTS.md

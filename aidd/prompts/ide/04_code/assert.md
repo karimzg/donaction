@@ -18,11 +18,18 @@ $ARGUMENTS
 
 ## Ressources
 
-### Coding assertions to strictly follow
+### Coding rules to strictly follow
 
 ```markdown
-@docs/CODING_ASSERTIONS.md
+@docs/memory-bank/AGENTS.md
 ```
+
+### App-specific rules (choose based on context)
+
+- Admin: `@docs/memory-bank/admin/AGENTS.md`
+- Backend: `@docs/memory-bank/backend/AGENTS.md`
+- Frontend: `@docs/memory-bank/frontend/AGENTS.md`
+- SaaS: `@docs/memory-bank/saas/AGENTS.md`
 
 ### Tracking issue template
 

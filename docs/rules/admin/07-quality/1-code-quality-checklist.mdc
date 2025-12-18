@@ -1,0 +1,26 @@
+---
+description: Mandatory quality checks before completing any feature implementation - ensures no code duplication, proper reusability, passing tests, and successful builds
+globs:
+  - "donaction-admin/**/*.ts"
+  - "donaction-admin/**/*.html"
+  - "donaction-admin/**/*.scss"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Code Quality Checklist
+
+## Pre-completion Requirements
+
+**A feature is ONLY completed when ALL checks pass:**
+
+- Check no code duplication exists
+- Ensure code is reusable across features
+- Run `ng test` - all unit tests pass
+- Run `ng build` - build succeeds without errors
+
+## Validation Process
+
+- Execute checks in order listed above
+- Fix issues immediately when found
+- Re-run failed checks until green
+- Never skip checks to "save time"
