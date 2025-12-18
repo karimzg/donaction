@@ -1,7 +1,7 @@
 ---
 name: "strapi-services"
 description: "Create Strapi services with factory pattern for reusable business logic"
-triggers: ["service", "strapi service", "business logic", "helper functions", "cross-entity"]
+triggers: ["service", "strapi service", "business logic", "helper functions", "cross-entity", "reusable logic", "extract service", "shared function"]
 tags: ["strapi", "backend", "service", "typescript"]
 priority: high
 scope: module

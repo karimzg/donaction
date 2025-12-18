@@ -1,7 +1,7 @@
 ---
 name: "primeng-styled-component"
 description: "Create Angular component styled with PrimeNG components, TailwindCSS utilities, and custom SCSS"
-triggers: ["PrimeNG component", "styled component", "UI component", "PrimeNG table", "PrimeNG dialog"]
+triggers: ["PrimeNG component", "styled component", "UI component", "PrimeNG table", "PrimeNG dialog", "create table", "add dialog", "primeng button"]
 tags: ["angular", "primeng", "tailwind", "scss", "ui"]
 priority: medium
 scope: file

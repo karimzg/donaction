@@ -1,7 +1,7 @@
 ---
 name: "angular-reactive-form"
 description: "Create Angular reactive form with FormGroup, FormControl, validators, and error display component"
-triggers: ["create form", "reactive form", "form validation", "Angular form", "FormGroup"]
+triggers: ["create form", "reactive form", "form validation", "Angular form", "FormGroup", "form builder", "input validation", "form submit"]
 tags: ["angular", "forms", "validation", "typescript"]
 priority: high
 scope: file

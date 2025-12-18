@@ -1,7 +1,7 @@
 ---
 name: "nextjs-server-components"
 description: "Create Next.js server components with async data fetching and no client-side interactivity"
-triggers: ["server component", "async component", "fetch data", "page component", "layout"]
+triggers: ["server component", "async component", "fetch data", "page component", "layout", "SSR component", "static page", "server render"]
 tags: ["nextjs", "react", "frontend", "typescript", "server"]
 priority: high
 scope: file

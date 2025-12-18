@@ -1,7 +1,7 @@
 ---
 name: "card-component-variants"
 description: "Create card component with multiple style variants (default, elevated, flat, interactive) following design system patterns"
-triggers: ["card component", "card variants", "card styles", "content container"]
+triggers: ["card component", "card variants", "card styles", "content container", "create card", "card design", "container component", "display card"]
 tags: ["component", "card", "design-system", "ui"]
 priority: medium
 scope: file

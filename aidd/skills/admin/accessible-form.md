@@ -1,7 +1,7 @@
 ---
 name: "accessible-form-component"
 description: "Create accessible form component with proper ARIA labels, keyboard navigation, and screen reader support"
-triggers: ["accessible form", "ARIA labels", "form accessibility", "keyboard navigation", "screen reader"]
+triggers: ["accessible form", "ARIA labels", "form accessibility", "keyboard navigation", "screen reader", "a11y form", "wcag compliance", "form semantics"]
 tags: ["accessibility", "forms", "aria", "a11y", "angular"]
 priority: medium
 scope: file

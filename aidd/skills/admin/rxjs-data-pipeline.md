@@ -1,7 +1,7 @@
 ---
 name: "rxjs-data-pipeline"
 description: "Create RxJS observable stream with proper operators, error handling, and automatic cleanup using takeUntilDestroyed"
-triggers: ["create observable", "RxJS stream", "data pipeline", "observable chain", "switchMap"]
+triggers: ["create observable", "RxJS stream", "data pipeline", "observable chain", "switchMap", "handle stream", "async data", "operator chain"]
 tags: ["rxjs", "angular", "observable", "typescript"]
 priority: medium
 scope: file

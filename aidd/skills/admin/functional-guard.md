@@ -1,7 +1,7 @@
 ---
 name: "angular-functional-guard"
 description: "Create Angular functional route guard with CanActivateFn for authentication, authorization, and navigation control"
-triggers: ["create guard", "route guard", "auth guard", "functional guard", "CanActivateFn"]
+triggers: ["create guard", "route guard", "auth guard", "functional guard", "CanActivateFn", "protect route", "navigation guard", "can activate"]
 tags: ["angular", "routing", "guard", "security", "typescript"]
 priority: medium
 scope: file

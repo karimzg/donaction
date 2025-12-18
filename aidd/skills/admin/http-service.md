@@ -1,7 +1,7 @@
 ---
 name: "angular-http-service"
 description: "Create Angular HTTP service with proper error handling, interceptors integration, and Observable patterns"
-triggers: ["create service", "HTTP service", "API service", "create repository", "data service"]
+triggers: ["create service", "HTTP service", "API service", "create repository", "data service", "fetch data", "call api", "HTTP client"]
 tags: ["angular", "http", "service", "rxjs", "typescript"]
 priority: high
 scope: file

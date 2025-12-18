@@ -1,7 +1,7 @@
 ---
 name: "responsive-grid-layout"
 description: "Create responsive CSS Grid layout with auto-fill columns and consistent gap spacing for listing pages"
-triggers: ["responsive grid", "grid layout", "listing grid", "auto-fill columns", "CSS Grid"]
+triggers: ["responsive grid", "grid layout", "listing grid", "auto-fill columns", "CSS Grid", "create grid", "card grid", "responsive layout"]
 tags: ["css", "grid", "responsive", "layout"]
 priority: medium
 scope: file
