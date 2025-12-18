@@ -59,14 +59,21 @@ All commands execute in:
 - IF worktree: `cwd: worktrees/<branch>`
 - ELSE: current directory
 
-1. Generate technical plan: Use `/plan <issue-url>`
+1. Detect and load context:
+   - Parse issue to detect affected apps (see @aidd/prompts/ide/helpers/detect-app-context.md)
+   - Build context file list based on detected apps
+   - Present detection results to user with file list
+   - If ambiguous: ask user to clarify apps
+   - Wait for user approval to proceed with context
+   - Load approved context files into memory
+2. Generate technical plan: Use `/plan <issue-url>` with loaded context
    - IF validate plan OR validate both: wait for user approval before continuing
-2. Implement changes: Use `/implement`
+3. Implement changes: Use `/implement`
    - IF validate implementation OR validate both: wait for user approval before continuing
-3. Run tests: Execute test suite if applicable
-4. Commit changes: Use `/commit`
-5. Code review: Use `/review_code`
-6. Create PR: Use `/create_github_pull_request`
+4. Run tests: Execute test suite if applicable
+5. Commit changes: Use `/commit`
+6. Code review: Use `/review_code`
+7. Create PR: Use `/create_github_pull_request`
 
 **Completion Phase:**
 
