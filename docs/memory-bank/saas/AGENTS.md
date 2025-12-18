@@ -1,5 +1,7 @@
 # SaaS Widgets - Donaction
 
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+
 ## Context
 Svelte 5 web components (custom elements) for embedding donation forms on third-party websites. Handles sponsorship flow, Stripe payments, and analytics.
 

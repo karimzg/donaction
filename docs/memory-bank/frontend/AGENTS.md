@@ -1,5 +1,7 @@
 # Frontend - Donaction
 
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+
 ## Context
 Next.js 14 public-facing website for donors. Handles club discovery, donation flows, payment processing via Stripe, user authentication via NextAuth, and donor dashboards.
 

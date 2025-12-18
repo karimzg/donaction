@@ -1,5 +1,7 @@
 # Admin Dashboard - Donaction
 
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+
 ## Context
 Angular 19 admin dashboard for association managers. Handles club configuration, member management, donation tracking, project creation, and invoice generation.
 

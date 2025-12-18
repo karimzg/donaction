@@ -1,5 +1,7 @@
 # Donaction Platform
 
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18 | **Doc Restructure**: Skills System
+
 ## Project
 Multi-application donation platform enabling associations (Klubrs) to receive sponsorships/donations from individuals and companies, with payment processing via Stripe, donor management, and tax receipt generation.
 

@@ -1,5 +1,7 @@
 # Backend API - Donaction
 
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+
 ## Context
 Strapi 5 headless CMS providing REST API for all frontend applications. Handles clubs, donations, members, projects, invoices, and integrations with Stripe, ImageKit, and Brevo.
 
