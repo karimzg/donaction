@@ -1,7 +1,7 @@
 # Strapi v5 Coding Rules & Best Practices
 
 > **Version**: Strapi 5.13.0
-> **Last Updated**: 2025-12-03
+> **Last Updated**: 2025-12-18
 > **Sources**: [Official Strapi v5 Documentation](https://docs.strapi.io/), donaction-api codebase analysis
 
 ---
@@ -18,7 +18,8 @@
 8. [TypeScript Patterns](#typescript-patterns)
 9. [Error Handling](#error-handling)
 10. [Security & Permissions](#security--permissions)
-11. [Configuration](#configuration)
+11. [Email Handling](#email-handling)
+12. [Configuration](#configuration)
 
 ---
 
@@ -1053,6 +1054,55 @@ Configure CORS in `config/middlewares.ts`:
     },
   },
 }
+```
+
+---
+
+## Email Handling
+
+### Brevo Email Service
+
+Use `sendBrevoTransacEmail()` helper for all transactional emails:
+
+```typescript
+// helpers/emails/sendBrevoTransacEmail.ts
+import { BREVO_TEMPLATES } from '../constants';
+
+await sendBrevoTransacEmail({
+  to: [{ email: 'user@example.com', name: 'User Name' }],
+  templateId: BREVO_TEMPLATES.MEMBER_INVITATION,
+  params: {
+    CLUB_NAME: 'My Club',
+    INVITATION_CODE: code,
+    INVITATION_LINK: `${host}/invitation/${code}`,
+  },
+  tags: ['invitation', 'member'],
+  attachment: [
+    { filename: 'document.pdf', path: '/path/to/file.pdf' },
+  ],
+});
+```
+
+### Email Best Practices
+
+- **Template IDs**: Use `BREVO_TEMPLATES` enum constants
+- **Tags**: Include array for categorization and analytics
+- **Attachments**: Array of `{ filename, path }` objects
+- **Dynamic Params**: Template variables for personalization
+- **Error Handling**: Wrap in try-catch, log failures
+- **Testing**: Use test email addresses in development
+
+### Common Email Templates
+
+```typescript
+// constants.ts
+export const BREVO_TEMPLATES = {
+  MEMBER_INVITATION: 1,
+  PASSWORD_RESET: 2,
+  DONATION_CONFIRMATION: 3,
+  TAX_RECEIPT: 4,
+  NEWSLETTER: 5,
+};
 ```
 
 ---
