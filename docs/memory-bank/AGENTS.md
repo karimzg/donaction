@@ -65,4 +65,4 @@ Each app has detailed rules in its own `AGENTS.md`:
 - `docs/memory-bank/saas/AGENTS.md` → Svelte patterns
 
 ## Skills
-Detailed code patterns in `aidd/skills/{app}/`
+Detailed code patterns in `@aidd/skills/{app}/`
