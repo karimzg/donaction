@@ -40,6 +40,9 @@ src/
 
 ## Rules
 
+### Naming Conventions
+See `@docs/rules/backend/naming-conventions.md` for file, function, variable, constant, and type naming standards.
+
 ### Critical: documentId vs id
 - [CRITICAL] Use `documentId` for ALL document operations, NOT `id`
 - [CRITICAL] `documentId` is 24-char alphanumeric string

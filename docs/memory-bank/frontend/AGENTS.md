@@ -40,6 +40,9 @@ src/
 
 ## Rules
 
+### Naming Conventions
+See `@docs/rules/frontend/naming-conventions.md` for file, component, function, variable, constant, and type naming standards.
+
 ### Server vs Client Components
 - [COMP] All components are Server Components by default
 - [COMP] Add `'use client'` only when needed for interactivity

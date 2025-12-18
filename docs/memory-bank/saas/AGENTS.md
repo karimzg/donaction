@@ -34,6 +34,9 @@ src/
 
 ## Rules
 
+### Naming Conventions
+See `@docs/rules/saas/naming-conventions.md` for file, component, function, variable, constant, and type naming standards.
+
 ### Runes & Reactivity
 - [RUNE] Use `$state()` for reactive local state
 - [RUNE] Use `$derived()` for computed values

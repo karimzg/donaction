@@ -35,6 +35,9 @@ src/app/
 
 ## Rules
 
+### Naming Conventions
+See `@docs/rules/admin/naming-conventions.md` for file, component, function, variable, constant, and type naming standards.
+
 ### Architecture
 - [ARCH] Feature modules in `routes/{feature}/` with lazy loading
 - [ARCH] State in `data-access/+state/` (actions, reducer, effects, selectors, facade)
