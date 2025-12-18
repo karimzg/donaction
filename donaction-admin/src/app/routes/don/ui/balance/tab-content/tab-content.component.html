@@ -1,11 +1,12 @@
 <div class="flex flex-col gap-4">
-  <div *ngIf="isLoading(); else templateIsLoaded" class="w-full flex justify-center items-center">
-    <ng-lottie
-      width="350px"
-      [options]="{path: 'assets/animations/loading.json'}">
-    </ng-lottie>
-  </div>
-  <ng-template #templateIsLoaded>
+  @if (isLoading()) {
+    <div class="w-full flex justify-center items-center">
+      <ng-lottie
+        width="350px"
+        [options]="{path: 'assets/animations/loading.json'}">
+      </ng-lottie>
+    </div>
+  } @else {
     @if (TAB().context === 'PROJETS') {
       <div class="don-projects--filters">
         <p-select
@@ -16,7 +17,7 @@
           optionLabel="label"
           placeholder="Choisir un mois"
           emptyMessage="Aucun projet trouvé"
-        >
+          >
         </p-select>
       </div>
       @if (permissionsService.memberIsAdminSignal()) {
@@ -26,39 +27,37 @@
       }
     }
     @if (TAB().content.length) {
-
       @for (content of TAB().content; track content.contextDetail.version) {
         <app-balance-don-line [content]="content" [context]="TAB().context" [dataUpdated]="dataUpdated()" @fade
-                              (onAction)="actionHandler($event.action, $event.event)"></app-balance-don-line>
+        (onAction)="actionHandler($event.action, $event.event)"></app-balance-don-line>
       }
       @if (paginationEnabled()) {
         @if (pagination() && pagination()!.page < pagination()!.pageCount) {
           <div class="flex mt-4 justify-center">
             <p-button (click)="changePage(pagination()!.page + 1)" [loading]="isLoading()"
-                      label="Voir +" class="self-end" severity="contrast"/>
-          </div>
+              label="Voir +" class="self-end" severity="contrast"/>
+            </div>
+          }
         }
+      } @else {
+        <div class="w-full flex flex-column justify-center items-center">
+          <ng-lottie
+            width="350px"
+            [options]="{path: 'assets/animations/loading-2.json'}">
+          </ng-lottie>
+          @if (TAB().context === 'PROJETS') {
+            <p>Aucun projet à afficher</p>
+          } @else if (TAB().context === 'CLUB') {
+            <p>Aucun don pour le Klub à afficher</p>
+          } @else {
+            <p>Aucune facture à afficher</p>
+          }
+        </div>
       }
-    } @else {
-      <div class="w-full flex flex-column justify-center items-center">
-
-        <ng-lottie
-          width="350px"
-          [options]="{path: 'assets/animations/loading-2.json'}">
-        </ng-lottie>
-        @if (TAB().context === 'PROJETS') {
-          <p>Aucun projet à afficher</p>
-        } @else if (TAB().context === 'CLUB') {
-          <p>Aucun don pour le Klub à afficher</p>
-        } @else {
-          <p>Aucune facture à afficher</p>
-        }
-      </div>
     }
-  </ng-template>
 
-  @if (selectedContent()) {
-    <app-tab-content-sidebar [SIDEBAR]="{context: TAB().context, content: selectedContent()!}"
-                             (onCloseSideBar)="controlSideBar()"/>
-  }
-</div>
+    @if (selectedContent()) {
+      <app-tab-content-sidebar [SIDEBAR]="{context: TAB().context, content: selectedContent()!}"
+        (onCloseSideBar)="controlSideBar()"/>
+      }
+    </div>

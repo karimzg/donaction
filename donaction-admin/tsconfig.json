@@ -19,7 +19,7 @@
     "inlineSources": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
@@ -29,10 +29,6 @@
     "noEmitOnError": true,
     "resolveJsonModule": true,
     "declarationMap": true,
-    "lib": [
-      "ES2022",
-      "dom"
-    ],
     "types": [
       "google.maps"
     ],

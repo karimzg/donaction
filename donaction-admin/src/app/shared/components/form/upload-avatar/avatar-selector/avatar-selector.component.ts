@@ -73,7 +73,7 @@ export class AvatarSelectorComponent {
       }
     });
 
-    ref.onClose.pipe(
+    ref?.onClose.pipe(
       take(1),
       filter((avatar: Media) => !!avatar),
     ).subscribe({

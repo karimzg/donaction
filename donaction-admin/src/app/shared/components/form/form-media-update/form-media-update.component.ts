@@ -187,7 +187,7 @@ export class FormMediaUpdateComponent implements OnInit {
           footer: ImageCropperDialogFooterComponent,
         },
       });
-      ref.onClose.pipe(
+      ref?.onClose.pipe(
         take(1),
       ).subscribe((response: {
         action: 'crop' | 'cancel' | 'useOriginal',

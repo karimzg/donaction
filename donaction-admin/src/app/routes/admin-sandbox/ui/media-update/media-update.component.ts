@@ -20,17 +20,16 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { TOKEN_NAME } from "@shared/utils/config/global-settings";
 import { CookieService } from "ngx-cookie-service";
 import { PermissionsService } from "@shared/services/permissions.service";
-import { CommonModule } from "@angular/common";
+
 import { ToastService } from "@shared/services/misc/toast.service";
 import { environment } from "@environments/environment";
 
 @Component({
   selector: 'app-media-update',
   imports: [
-    CommonModule,
     ButtonDirective,
     FileUploadModule
-  ],
+],
   templateUrl: './media-update.component.html',
   styleUrl: './media-update.component.scss',
   host: {'class': 'card block'}

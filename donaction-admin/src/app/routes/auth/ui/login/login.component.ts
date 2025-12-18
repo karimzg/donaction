@@ -3,7 +3,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, }
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
 import { InputTextModule } from 'primeng/inputtext';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthFacade } from '../../data-access/+state/auth.facade';
 import { ProgressBarModule } from 'primeng/progressbar';
@@ -14,7 +14,6 @@ import { PasswordModule } from 'primeng/password';
 @Component({
   selector: 'app-login',
   imports: [
-    CommonModule,
     FormsModule,
     PanelModule,
     InputTextModule,
@@ -22,10 +21,8 @@ import { PasswordModule } from 'primeng/password';
     ReactiveFormsModule,
     ProgressBarModule,
     PasswordModule,
-    RouterModule,
-    // SocialLoginModule,
-    // GoogleSigninButtonModule
-  ],
+    RouterModule
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

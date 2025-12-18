@@ -11,14 +11,14 @@ import {
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { FormErrorHandlingService } from '@shared/services/form-error-handling.service';
-import { CommonModule } from '@angular/common';
+
 import { distinctUntilChanged, tap } from "rxjs/operators";
 import { Subscription } from "rxjs";
 import { AbstractControlWarn } from "@shared/utils/validators/warning/warning.validator";
 
 @Component({
   selector: 'app-error-display',
-  imports: [CommonModule],
+  imports: [],
   template: ` @if (shouldDisplayError()) {
     <small class="p-error flex"><i class="pi pi-exclamation-circle mr-1"></i>{{ errorMessage() }}</small>
   }

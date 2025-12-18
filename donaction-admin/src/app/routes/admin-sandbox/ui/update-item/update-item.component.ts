@@ -1,7 +1,7 @@
 import { Component, DestroyRef, effect, inject, signal, WritableSignal, } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { switchMap, take, tap } from "rxjs/operators";
-import { CommonModule } from "@angular/common";
+
 import { ButtonModule } from "primeng/button";
 import { RippleModule } from "primeng/ripple";
 import { EMPTY, Observable } from "rxjs";
@@ -12,13 +12,12 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 @Component({
     selector: 'app-update-klubr',
     imports: [
-        CommonModule,
-        ButtonModule,
-        RippleModule,
-        FileUploadModule,
-        ReactiveFormsModule,
-        FormsModule,
-    ],
+    ButtonModule,
+    RippleModule,
+    FileUploadModule,
+    ReactiveFormsModule,
+    FormsModule
+],
     template: ''
 })
 export class UpdateItemComponent<T, U> {

@@ -179,7 +179,7 @@ export class ProjectStateDropdownComponent {
           message: `Afin de republier votre projet, veuillez choisir une nouvelle date limite de financement.`
         }
       });
-      ref.onClose.pipe(
+      ref?.onClose.pipe(
         take(1),
       ).subscribe((dateLimiteFinancementProjet: Date | undefined) => {
         if (dateLimiteFinancementProjet) {

@@ -36,13 +36,13 @@ export class KlubStatsComponent {
   klubUuid = input<string>();
 
   public klubrsStats = rxResource({
-    request: () => ({
+    params: () => ({
       uuid: this.klubUuid(),
       displayAll: this.displayAll(),
     }),
-    loader: ({request}) =>
-      request.displayAll
+    stream: ({params}) =>
+      params.displayAll
         ? this.statsService.getAllKlubsStats()
-        : request.uuid ? this.statsService.getKlubStats(request.uuid) : NEVER
+        : params.uuid ? this.statsService.getKlubStats(params.uuid) : NEVER
   });
 }
