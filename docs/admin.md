@@ -9,7 +9,6 @@ argument-hint: N/A
 - [Language/Framework](#languageframework)
   - [Dashboard](#dashboard)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Component to API Flow](#component-to-api-flow)
 
@@ -84,15 +83,6 @@ donaction-admin/
 ├── tsconfig.json                            # TypeScript config
 └── package.json                             # Dependencies
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case with suffix (e.g., `auth.service.ts`, `login.component.ts`)
-- **Components**: PascalCase (e.g., `LoginComponent`)
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE (e.g., `AUTH_FEATURE_KEY`)
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
@@ -349,146 +339,13 @@ Flow:
 
 ---
 name: coding-assertions
-description: Code quality verification checklist
+description: Technical reference for donaction-admin stack and configuration
 argument-hint: N/A
 ---
 
-### Coding Guidelines
+### Admin Technical Reference
 
-> Those rules must be minimal because the MUST be checked after EVERY CODE GENERATION.
-
-#### Requirements to complete a feature
-
-**A feature is really completed if ALL of the above are satisfied: if not, iterate to fix all until all are green.**
-
-#### Steps to follow
-
-1. Check their is no duplication
-2. Ensure code is re-used
-3. Run all those commands, in order to ensure code is perfect:
-
-```markdown
-| Order | Command    | Description                |
-|-------|------------|----------------------------|
-| 1     | ng test    | Run unit tests with Karma |
-| 2     | ng build   | Build application          |
-```
-
-#### Angular Coding Patterns
-
-##### Component Architecture
-- Use **standalone components** (no `NgModule` except legacy `google-maps-utils.module.ts`)
-- Components declare imports in `@Component` decorator `imports` array
-- Use `inject()` function for dependency injection (not constructor injection)
-- File naming: `*.component.ts`, `*.service.ts`, `*.pipe.ts`, `*.guard.ts`
-- Component prefix: `app-` (configured in @angular.json)
-
-##### Modern Angular Features
-- Use `signal()`, `computed()`, `effect()` from `@angular/core`
-- Use `input()` and `model()` for component inputs
-- Use `viewChild()` for view queries
-- Control flow: `@if`, `@for`, `@switch` in templates (modern syntax)
-- Use `toSignal()` from `@angular/core/rxjs-interop` for signal conversion
-- Use `takeUntilDestroyed()` for subscription cleanup (no manual `takeUntil`)
-
-##### State Management
-- NgRx Store for global state with signals integration
-- Facades pattern: services expose state via `selectSignal()` and `toSignal()`
-- Actions/Effects pattern for side effects
-- Services use `providedIn: 'root'`
-
-##### Forms
-- Reactive forms with `FormGroup`, `FormControl`, `Validators`
-- Custom `FormControlPipe` to access controls: `form | formControl:'fieldName'`
-- Helper functions in `form-helpers.ts`
-- Validation errors displayed via `ErrorDisplayComponent`
-
-##### RxJS Patterns
-- Prefer `takeUntilDestroyed()` over manual `takeUntil(destroyed$)`
-- Use operators: `map`, `tap`, `switchMap`, `catchError`, `filter`, `take`
-- Observable naming: suffix with `$` (e.g., `me$`, `isAuthenticated$`)
-- Combine observables with `combineLatest`, `merge`
-
-##### HTTP & API
-- Services inject `HttpClient` via `inject(HttpClient)`
-- Interceptors: `httpErrorsInterceptor` for centralized error handling
-- Guards: functional guards with `CanActivateFn` (e.g., `authGuard`)
-- Query helpers in `query-helpers.ts` for API filters/pagination
-- Environment config via `@environments/environment`
-
-##### Error Handling
-- HTTP errors caught in `httpErrorsInterceptor`
-- Toast notifications via `ToastService.showErrorToast()`
-- Errors thrown early, never silent
-- Blob responses parsed for error details
-
-##### Routing
-- Functional guards: `authGuard`, `invitationCodeGuard`, `linkMemberGuard`
-- Resolvers for data preloading
-- Routes defined in `*.routes.ts` files
-- Base href: `/admin/` (configured in @angular.json)
-
-##### Services Organization
-- `data-access/repositories`: API calls
-- `data-access/+state`: NgRx state (actions, effects, selectors, facade)
-- `shared/services`: reusable services
-- `shared/utils`: helpers, interceptors, guards, models
-
-##### Styling
-- SCSS with `styleUrl` in components
-- PrimeNG v19 with PrimeFlex v4
-- Tailwind CSS with `tailwindcss-primeui`
-- Animations: `fadeAnimation` from `animations.ts`
-
-##### Change Detection
-- Most components use default change detection
-- `OnPush` used sparingly (e.g., `klub-house-update.component.ts`)
-
-#### TypeScript Usage
-
-##### Types & Interfaces
-- Models in `shared/utils/models/`: `klubr.ts`, `user-details.ts`, `media.ts`, `misc.ts`
-- Strict typing, no `any` unless unavoidable
-- Use `Partial<T>` for partial updates
-- Type imports from models
-
-##### Dependency Injection
-- Use `inject()` function in component/service body
-- Private services: `private http = inject(HttpClient)`
-- Public when needed in template: `public toastService = inject(ToastService)`
-
-##### Async/Await
-- Helper functions use `async/await` (e.g., `urlToFormData` in `form-helpers.ts`)
-- Services prefer observables over promises
-
-#### Code Organization
-
-##### Component Structure
-- Template-driven with reactive forms
-- Component extends base classes when needed (e.g., `GenericListingComponent`)
-- Lifecycle hooks: `ngOnInit`, `AfterViewInit`
-- Signals for local state
-- Facade for global state
-
-##### Service Structure
-- Injectable with `providedIn: 'root'`
-- Methods return `Observable<T>`
-- Inject dependencies via `inject()`
-- Actions dispatched via facade or store
-
-##### File Structure
-- Feature modules: `routes/{feature}/ui`, `routes/{feature}/data-access`, `routes/{feature}/model`
-- Shared: `shared/components`, `shared/services`, `shared/pipes`, `shared/utils`
-- Config: `shared/utils/config/` (endpoints, settings)
-- Helpers: `shared/utils/helpers/` (query, form, pdf, html, type)
-
-#### Testing
-
-##### Test Framework
-- Jasmine with Karma
-- Test files: `*.spec.ts`
-- Component tests check basic rendering
-- Service tests mock dependencies
+> **Note:** Coding rules have been extracted to `docs/rules/admin/` and reusable patterns to `aidd/skills/code/`. This document serves as a technical reference for the stack.
 
 #### Key Libraries
 
@@ -521,61 +378,106 @@ argument-hint: N/A
 - plausible-tracker
 
 #### Configuration Files
+
 - @angular.json: build config, base href `/admin/`
 - @tsconfig.app.json: TypeScript config
 - @package.json: dependencies
 - @proxy.conf.json: dev proxy
 
+#### File Structure
 
-### DESIGN.md
+##### Feature Organization
+- Feature modules: `routes/{feature}/ui`, `routes/{feature}/data-access`, `routes/{feature}/model`
+- Shared: `shared/components`, `shared/services`, `shared/pipes`, `shared/utils`
+- Config: `shared/utils/config/` (endpoints, settings)
+- Helpers: `shared/utils/helpers/` (query, form, pdf, html, type)
 
-#### Design Implementation
+##### State Management Organization
+- `data-access/repositories`: API calls
+- `data-access/+state`: NgRx state (actions, effects, selectors, facade)
+- `shared/services`: reusable services
+- `shared/utils`: helpers, interceptors, guards, models
 
-- **Design System Approach**: PrimeNG Aura preset with custom klubr theme, TailwindCSS utility classes, layered CSS architecture
-- **Styling Method**: Hybrid - PrimeNG components styled via theme preset, TailwindCSS for layout/spacing, SCSS for custom components
+#### Testing
+
+##### Test Framework
+- Jasmine with Karma
+- Test files: `*.spec.ts`
+- Component tests check basic rendering
+- Service tests mock dependencies
+
+#### Build & Validation
+
+##### Commands
+| Order | Command    | Description                |
+|-------|------------|----------------------------|
+| 1     | ng test    | Run unit tests with Karma |
+| 2     | ng build   | Build application          |
+
+
+---
+name: design
+description: Design system reference for donaction-admin
+argument-hint: N/A
+---
+
+### Admin Design System Reference
+
+> **Note:** Design rules have been extracted to `docs/rules/admin/03-libs-frameworks/` and design patterns to `aidd/skills/code/`. This document serves as a reference for design system files and configuration.
+
+#### Design System Approach
+
+- **Method**: Hybrid - PrimeNG Aura preset + TailwindCSS utilities + SCSS for custom components
+- **Theme**: Custom klubr theme with layered CSS architecture
 
 #### Design System Files
 
-- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
+##### Theme Configuration
 
-#### Design System
+- **PrimeNG Theme**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (Aura preset with custom colors)
+- **Theme Provider**: @donaction-admin/src/app/app.config.ts (application-level configuration)
 
-- **Spacing Scale**: See PrimeNG theme preset - uses TailwindCSS spacing (1rem base)
-- **Border Radius**: `12px` for layout elements (cards, sidebar), `6px` for form controls, `32px` for rounded pills
-- **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
-- **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
+##### Styling Files
 
-- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Layout Styles**: @donaction-admin/src/assets/layout/ (typography, spacing, layout patterns)
+- **Theme Overrides**: @donaction-admin/src/assets/theme/ (PrimeNG component customizations)
+- **Global Styles**: @donaction-admin/src/styles.scss (layer order, base styles)
 
-  - Primary: Indigo palette (50-950) - primary actions, links, brand
-  - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
-  - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
-  - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
+#### Color Palette
 
-- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
-  - Primary Font: Inter - body text, UI components
-  - Secondary Font: Inter (with font-feature-settings) - branded elements
-  - Fallback: sans-serif
+See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts for complete color definitions:
 
-#### Component Standards and Variantes
+- **Primary**: Indigo palette (50-950)
+- **Secondary**: Zinc (light mode), Slate (dark mode)
+- **Accent**: Orange-400
+- **Surface**: Gray variants (0, 50-950)
 
-- **Button Variants**: PrimeNG buttons with `pButton` directive, severity variants (primary/secondary/success/danger), ripple disabled
-- **Input States**: PrimeNG input components, outlined style default, focus/error/disabled states from theme preset
-- **Card Patterns**: `.card` class (2rem padding, 12px radius, border, shadow), `surface-card` background, `surface-border` borders
+#### Typography
 
-#### Layout System
+See @donaction-admin/src/assets/layout/_typography.scss for typography system:
 
-- **Grid System**: CSS Grid with utility classes (`.grid-member-listing`, `.grid-project-listing`, `.grid-user-listing`), auto-fill responsive columns
-- **Container Widths**: 1504px max width above 1960px breakpoint, fluid below with 1rem horizontal padding
-- **Spacing Rules**: PrimeNG scale 14 (base 14px), TailwindCSS spacing utilities (`px-`, `py-`, `gap-`), consistent 1rem padding on mobile
+- **Primary Font**: Inter
+- **Fallback**: sans-serif
+- **Font Features**: Configured for branded elements
+
+#### Tokens Reference
+
+Design tokens (spacing, radius, shadows, breakpoints) are documented in:
+- `docs/rules/admin/03-libs-frameworks/5-design-system-tokens.mdc`
+
+#### Component Patterns
+
+UI component patterns and variants are documented in:
+- `docs/rules/admin/03-libs-frameworks/6-primeng-theme-usage.mdc`
+- `docs/rules/admin/03-libs-frameworks/7-button-variants.mdc`
+- `docs/rules/admin/03-libs-frameworks/8-card-patterns.mdc`
+- `docs/rules/admin/03-libs-frameworks/9-grid-layouts.mdc`
+- `docs/rules/admin/03-libs-frameworks/10-input-states.mdc`
 
 #### Accessibility
 
-- **Color Contrast**: Uses PrimeNG theme contrast ratios, semantic color tokens for status
-- **Focus Management**: Focus outline/box-shadow disabled globally (`:focus { outline: none !important; }`), keyboard navigation via PrimeNG
-- **Screen Reader**: PrimeNG components include ARIA labels, custom components need manual ARIA
+Accessibility requirements documented in:
+- `docs/rules/admin/07-quality/2-accessibility.mdc`
 
 
 ---
@@ -628,198 +530,50 @@ This part describe how dashboard forms are handled in the project, including lib
 
 #### GenericUpdateComponent Pattern
 
-##### Overview
+**Pattern CRUD** pour formulaires create/update avec gestion automatique de validation, uploads, cache et navigation.
 
-`GenericUpdateComponent<T>` - Base class for CRUD forms handling both create and update operations
+**Location**: @donaction-admin/src/app/shared/components/generics/generic-update/generic-update.component.ts
 
-**Location**: @shared/components/generics/generic-update/generic-update.component.ts
+**Documentation complète**:
+- 📋 Règle: `docs/rules/admin/06-patterns/2-generic-update-component.mdc`
+- 🎯 Skill: `aidd/skills/code/generic-update-component.md`
 
-##### Key Features
+**Méthodes obligatoires**: `initForm()`, `formFields()`, `serviceUpdate()`, `serviceCreate()`
 
-- Automatic edit/create mode detection based on entity presence
-- Form lifecycle management (init, reset, validation)
-- File upload integration via `updateFile()` hook
-- Cache invalidation after successful updates
-- Analytics tracking with custom properties
-- Loading states and error handling
-- Automatic navigation after create/update
-
-##### Core Properties
-
-**Injected Services**:
-- `sharedFacade` - NgRx state management
-- `router`, `route` - Navigation
-- `toastService` - User notifications
-- `analyticsService` - Event tracking
-- `invalidateCacheService` - Cache management
-- `permissionsService` - Permission checks
-
-**Form State Signals**:
-- `isSubmitted: WritableSignal<boolean>` - Tracks submission state
-- `loading: WritableSignal<boolean>` - Loading indicator
-- `isReady: WritableSignal<boolean>` - Form ready state
-- `entitySignal: WritableSignal<T | null>` - Current entity state
-
-**Modes**:
-- `editMode: boolean` - `true` for update, `false` for create
-
-##### Methods to Override
-
-###### Required Overrides
-
-**`initForm(): void`** - Initialize form structure with controls and validators
+**Pattern rapide**:
 ```typescript
-protected override initForm(): void {
-  const entity = untracked(this.entitySignal);
-  this.entityForm = new FormGroup({
-    name: new FormControl(entity?.name, Validators.required),
-    email: new FormControl(entity?.email, [Validators.required, Validators.email])
-  });
-}
-```
-
-**`formFields(): { [key: string]: any }`** - Transform form values before submission
-```typescript
-protected override formFields(): { [key: string]: any } {
-  return {
-    ...this.entityForm.value,
-    klubr: this.sharedFacade.profile()!.klubr.uuid
-  };
-}
-```
-
-**`serviceUpdate(uuid: string, formValues: any): Observable<T>`** - Update API call
-```typescript
-protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
-  this.sharedFacade.updateProfile(uuid, formValues);
-  return this.actions$.pipe(
-    ofType(SharedActions.updateProfileSuccess),
-    map(({profile}) => profile),
-    take(1)
-  );
-}
-```
-
-**`serviceCreate(formValues: any): Observable<T>`** - Create API call
-```typescript
-protected override serviceCreate(formValues: any): Observable<Member> {
-  return this.profileService.createProfile(formValues).pipe(
-    map((response) => response.data as Member)
-  );
-}
-```
-
-###### Optional Overrides
-
-**`getEntityForCreateMode(entity: T | null): T | null`** - Provide default values for create mode
-```typescript
-protected override getEntityForCreateMode(member: Member | null): Member | null {
-  return {
-    uuid: '',
-    nom: '',
-    prenom: '',
-    role: 'KlubMember',
-    klubr: untracked(this.sharedFacade.profile)!.klubr
-  };
-}
-```
-
-**`updateFile(entity: T): Observable<T>`** - Handle file uploads after form submission
-```typescript
-protected override updateFile(member: Member): Observable<Member> {
-  if (this.entityForm.get('avatar')?.dirty && this.entityForm.get('avatar')?.value) {
-    const formData = new FormData();
-    formData.append('avatar', this.entityForm.get('avatar')!.value);
-    return this.avatarService.newMediaProfileFile(entity.uuid, formData);
-  }
-  return of(member);
-}
-```
-
-**`resetForm(): void`** - Reset form to initial entity values
-**`preUpdateHook(formValues): any`** - Transform values before update
-**`preCreateHook(formValues): any`** - Transform values before create
-**`cacheToUnvalidate(entity: T): void`** - Clear relevant cache entries
-**`pathsToUnvalidateDataRequest(entity: T): string[]`** - Next.js ISR paths to revalidate
-**`redirectAfterCreate(entity: T): void`** - Custom navigation after create
-**`redirectAfterUpdate(entity: T): void`** - Custom navigation after update
-**`reloadEntity(entity: T): Observable<T>`** - Refetch entity (for Strapi components)
-
-##### Implementation Example
-
-```typescript
-@Component({
-  selector: 'app-member-update',
-  templateUrl: './member-update.component.html'
-})
 export class MemberUpdateComponent extends GenericUpdateComponent<Member> {
   protected override successMsg = 'Le profil a été mis à jour';
-  protected override errorUpdateMsg = 'Le profil n\'a pas pu être modifié';
   protected override routePrefix = '/profile';
 
   constructor() {
     super();
-    this.entity.set(this.config.data.profile); // Pass entity via DynamicDialogConfig
+    this.entity.set(this.config.data.profile);
   }
 
   protected override initForm(): void {
     const entity = untracked(this.entitySignal);
     this.entityForm = new FormGroup({
-      nom: new FormControl(entity?.nom, Validators.required),
-      prenom: new FormControl(entity?.prenom, Validators.required),
-      role: new FormControl(entity?.role, Validators.required)
+      nom: new FormControl(entity?.nom, Validators.required)
     });
   }
 
   protected override formFields(): { [key: string]: any } {
-    return {
-      ...this.entityForm.value,
-      klubr: this.sharedFacade.profile()!.klubr.uuid
-    };
+    return { ...this.entityForm.value };
   }
 
   protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
     this.sharedFacade.updateProfile(uuid, formValues);
-    return this.actions$.pipe(
-      ofType(SharedActions.updateProfileSuccess),
-      map(({profile}) => profile),
-      take(1)
-    );
+    return this.actions$.pipe(ofType(SharedActions.updateProfileSuccess), map(({profile}) => profile), take(1));
   }
 
   protected override serviceCreate(formValues: any): Observable<Member> {
-    return this.profileService.createProfile(formValues).pipe(
-      map((response) => response.data as Member)
-    );
+    return this.profileService.createProfile(formValues).pipe(map(res => res.data as Member));
   }
 }
 ```
 
-##### Submission Flow
-
-1. User calls `onSubmit()`
-2. Form validation runs, marks all controls as touched
-3. If invalid, show error toast and abort
-4. Get form values via `formFields()`
-5. If edit mode, clean values (only dirty fields)
-6. Call `preCreateHook()` or `preUpdateHook()`
-7. Execute `serviceCreate()` or `serviceUpdate()`
-8. Call `updateFile()` for file uploads
-9. Call `reloadEntity()` to refresh entity
-10. Call `cacheToUnvalidate()` and `pathsToUnvalidateDataRequest()`
-11. Show success toast, reset form, redirect
-12. Track analytics event
-
-##### Best Practices
-
-- Always set `entity` model in constructor (from route data or dialog config)
-- Override `successMsg`, `errorUpdateMsg`, `errorCreateMsg` for user-friendly messages
-- Use `untracked()` when reading signals in form initialization
-- Call `super()` in constructor before any logic
-- Return only dirty fields in edit mode via `cleanFormValues()`
-- Use `take(1)` with NgRx actions to prevent memory leaks
-- Implement `cacheToUnvalidate()` to invalidate affected cache entries
-- Set `routePrefix` for correct redirection after create
+**Voir la règle/skill pour exemples complets, hooks optionnels et best practices.**
 
 #### Form Flow
 

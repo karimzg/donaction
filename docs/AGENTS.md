@@ -610,7 +610,6 @@ argument-hint: N/A
 - [Language/Framework](#languageframework)
   - [Dashboard](#dashboard)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Component to API Flow](#component-to-api-flow)
 
@@ -685,15 +684,6 @@ donaction-admin/
 ├── tsconfig.json                            # TypeScript config
 └── package.json                             # Dependencies
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case with suffix (e.g., `auth.service.ts`, `login.component.ts`)
-- **Components**: PascalCase (e.g., `LoginComponent`)
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE (e.g., `AUTH_FEATURE_KEY`)
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
@@ -950,146 +940,13 @@ Flow:
 
 ---
 name: coding-assertions
-description: Code quality verification checklist
+description: Technical reference for donaction-admin stack and configuration
 argument-hint: N/A
 ---
 
-### Coding Guidelines
+### Admin Technical Reference
 
-> Those rules must be minimal because the MUST be checked after EVERY CODE GENERATION.
-
-#### Requirements to complete a feature
-
-**A feature is really completed if ALL of the above are satisfied: if not, iterate to fix all until all are green.**
-
-#### Steps to follow
-
-1. Check their is no duplication
-2. Ensure code is re-used
-3. Run all those commands, in order to ensure code is perfect:
-
-```markdown
-| Order | Command    | Description                |
-|-------|------------|----------------------------|
-| 1     | ng test    | Run unit tests with Karma |
-| 2     | ng build   | Build application          |
-```
-
-#### Angular Coding Patterns
-
-##### Component Architecture
-- Use **standalone components** (no `NgModule` except legacy `google-maps-utils.module.ts`)
-- Components declare imports in `@Component` decorator `imports` array
-- Use `inject()` function for dependency injection (not constructor injection)
-- File naming: `*.component.ts`, `*.service.ts`, `*.pipe.ts`, `*.guard.ts`
-- Component prefix: `app-` (configured in @angular.json)
-
-##### Modern Angular Features
-- Use `signal()`, `computed()`, `effect()` from `@angular/core`
-- Use `input()` and `model()` for component inputs
-- Use `viewChild()` for view queries
-- Control flow: `@if`, `@for`, `@switch` in templates (modern syntax)
-- Use `toSignal()` from `@angular/core/rxjs-interop` for signal conversion
-- Use `takeUntilDestroyed()` for subscription cleanup (no manual `takeUntil`)
-
-##### State Management
-- NgRx Store for global state with signals integration
-- Facades pattern: services expose state via `selectSignal()` and `toSignal()`
-- Actions/Effects pattern for side effects
-- Services use `providedIn: 'root'`
-
-##### Forms
-- Reactive forms with `FormGroup`, `FormControl`, `Validators`
-- Custom `FormControlPipe` to access controls: `form | formControl:'fieldName'`
-- Helper functions in `form-helpers.ts`
-- Validation errors displayed via `ErrorDisplayComponent`
-
-##### RxJS Patterns
-- Prefer `takeUntilDestroyed()` over manual `takeUntil(destroyed$)`
-- Use operators: `map`, `tap`, `switchMap`, `catchError`, `filter`, `take`
-- Observable naming: suffix with `$` (e.g., `me$`, `isAuthenticated$`)
-- Combine observables with `combineLatest`, `merge`
-
-##### HTTP & API
-- Services inject `HttpClient` via `inject(HttpClient)`
-- Interceptors: `httpErrorsInterceptor` for centralized error handling
-- Guards: functional guards with `CanActivateFn` (e.g., `authGuard`)
-- Query helpers in `query-helpers.ts` for API filters/pagination
-- Environment config via `@environments/environment`
-
-##### Error Handling
-- HTTP errors caught in `httpErrorsInterceptor`
-- Toast notifications via `ToastService.showErrorToast()`
-- Errors thrown early, never silent
-- Blob responses parsed for error details
-
-##### Routing
-- Functional guards: `authGuard`, `invitationCodeGuard`, `linkMemberGuard`
-- Resolvers for data preloading
-- Routes defined in `*.routes.ts` files
-- Base href: `/admin/` (configured in @angular.json)
-
-##### Services Organization
-- `data-access/repositories`: API calls
-- `data-access/+state`: NgRx state (actions, effects, selectors, facade)
-- `shared/services`: reusable services
-- `shared/utils`: helpers, interceptors, guards, models
-
-##### Styling
-- SCSS with `styleUrl` in components
-- PrimeNG v19 with PrimeFlex v4
-- Tailwind CSS with `tailwindcss-primeui`
-- Animations: `fadeAnimation` from `animations.ts`
-
-##### Change Detection
-- Most components use default change detection
-- `OnPush` used sparingly (e.g., `klub-house-update.component.ts`)
-
-#### TypeScript Usage
-
-##### Types & Interfaces
-- Models in `shared/utils/models/`: `klubr.ts`, `user-details.ts`, `media.ts`, `misc.ts`
-- Strict typing, no `any` unless unavoidable
-- Use `Partial<T>` for partial updates
-- Type imports from models
-
-##### Dependency Injection
-- Use `inject()` function in component/service body
-- Private services: `private http = inject(HttpClient)`
-- Public when needed in template: `public toastService = inject(ToastService)`
-
-##### Async/Await
-- Helper functions use `async/await` (e.g., `urlToFormData` in `form-helpers.ts`)
-- Services prefer observables over promises
-
-#### Code Organization
-
-##### Component Structure
-- Template-driven with reactive forms
-- Component extends base classes when needed (e.g., `GenericListingComponent`)
-- Lifecycle hooks: `ngOnInit`, `AfterViewInit`
-- Signals for local state
-- Facade for global state
-
-##### Service Structure
-- Injectable with `providedIn: 'root'`
-- Methods return `Observable<T>`
-- Inject dependencies via `inject()`
-- Actions dispatched via facade or store
-
-##### File Structure
-- Feature modules: `routes/{feature}/ui`, `routes/{feature}/data-access`, `routes/{feature}/model`
-- Shared: `shared/components`, `shared/services`, `shared/pipes`, `shared/utils`
-- Config: `shared/utils/config/` (endpoints, settings)
-- Helpers: `shared/utils/helpers/` (query, form, pdf, html, type)
-
-#### Testing
-
-##### Test Framework
-- Jasmine with Karma
-- Test files: `*.spec.ts`
-- Component tests check basic rendering
-- Service tests mock dependencies
+> **Note:** Coding rules have been extracted to `docs/rules/admin/` and reusable patterns to `aidd/skills/code/`. This document serves as a technical reference for the stack.
 
 #### Key Libraries
 
@@ -1122,61 +979,106 @@ argument-hint: N/A
 - plausible-tracker
 
 #### Configuration Files
+
 - @angular.json: build config, base href `/admin/`
 - @tsconfig.app.json: TypeScript config
 - @package.json: dependencies
 - @proxy.conf.json: dev proxy
 
+#### File Structure
 
-### DESIGN.md
+##### Feature Organization
+- Feature modules: `routes/{feature}/ui`, `routes/{feature}/data-access`, `routes/{feature}/model`
+- Shared: `shared/components`, `shared/services`, `shared/pipes`, `shared/utils`
+- Config: `shared/utils/config/` (endpoints, settings)
+- Helpers: `shared/utils/helpers/` (query, form, pdf, html, type)
 
-#### Design Implementation
+##### State Management Organization
+- `data-access/repositories`: API calls
+- `data-access/+state`: NgRx state (actions, effects, selectors, facade)
+- `shared/services`: reusable services
+- `shared/utils`: helpers, interceptors, guards, models
 
-- **Design System Approach**: PrimeNG Aura preset with custom klubr theme, TailwindCSS utility classes, layered CSS architecture
-- **Styling Method**: Hybrid - PrimeNG components styled via theme preset, TailwindCSS for layout/spacing, SCSS for custom components
+#### Testing
+
+##### Test Framework
+- Jasmine with Karma
+- Test files: `*.spec.ts`
+- Component tests check basic rendering
+- Service tests mock dependencies
+
+#### Build & Validation
+
+##### Commands
+| Order | Command    | Description                |
+|-------|------------|----------------------------|
+| 1     | ng test    | Run unit tests with Karma |
+| 2     | ng build   | Build application          |
+
+
+---
+name: design
+description: Design system reference for donaction-admin
+argument-hint: N/A
+---
+
+### Admin Design System Reference
+
+> **Note:** Design rules have been extracted to `docs/rules/admin/03-libs-frameworks/` and design patterns to `aidd/skills/code/`. This document serves as a reference for design system files and configuration.
+
+#### Design System Approach
+
+- **Method**: Hybrid - PrimeNG Aura preset + TailwindCSS utilities + SCSS for custom components
+- **Theme**: Custom klubr theme with layered CSS architecture
 
 #### Design System Files
 
-- **Theme Config**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (PrimeNG Aura preset), @donaction-admin/src/app/app.config.ts (theme provider)
-- **Design Components**: @donaction-admin/src/assets/layout/ (layout SCSS), @donaction-admin/src/assets/theme/ (theme overrides)
-- **Style Guidelines**: @donaction-admin/src/styles.scss (global styles, layer order)
+##### Theme Configuration
 
-#### Design System
+- **PrimeNG Theme**: @donaction-admin/src/app/shared/utils/theme/theme.preset.ts (Aura preset with custom colors)
+- **Theme Provider**: @donaction-admin/src/app/app.config.ts (application-level configuration)
 
-- **Spacing Scale**: See PrimeNG theme preset - uses TailwindCSS spacing (1rem base)
-- **Border Radius**: `12px` for layout elements (cards, sidebar), `6px` for form controls, `32px` for rounded pills
-- **Shadows**: `box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.12)` for cards, elevation via PrimeNG theme
-- **Breakpoints**: 768px (mobile), 992px (tablet), 1960px (max layout width)
+##### Styling Files
 
-- **Color Palette**: See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts
+- **Layout Styles**: @donaction-admin/src/assets/layout/ (typography, spacing, layout patterns)
+- **Theme Overrides**: @donaction-admin/src/assets/theme/ (PrimeNG component customizations)
+- **Global Styles**: @donaction-admin/src/styles.scss (layer order, base styles)
 
-  - Primary: Indigo palette (50-950) - primary actions, links, brand
-  - Secondary: Zinc palette (light mode), Slate (dark mode) - surfaces, borders
-  - Accent: Orange-400 (`#FFF0C5` bg, `#FFBB00` text) - warnings, notifications
-  - Gray: Surface variants (0, 50-950) - backgrounds, borders, text hierarchy
+#### Color Palette
 
-- **Typography**: See @donaction-admin/src/assets/layout/_typography.scss
-  - Primary Font: Inter - body text, UI components
-  - Secondary Font: Inter (with font-feature-settings) - branded elements
-  - Fallback: sans-serif
+See @donaction-admin/src/app/shared/utils/theme/theme.preset.ts for complete color definitions:
 
-#### Component Standards and Variantes
+- **Primary**: Indigo palette (50-950)
+- **Secondary**: Zinc (light mode), Slate (dark mode)
+- **Accent**: Orange-400
+- **Surface**: Gray variants (0, 50-950)
 
-- **Button Variants**: PrimeNG buttons with `pButton` directive, severity variants (primary/secondary/success/danger), ripple disabled
-- **Input States**: PrimeNG input components, outlined style default, focus/error/disabled states from theme preset
-- **Card Patterns**: `.card` class (2rem padding, 12px radius, border, shadow), `surface-card` background, `surface-border` borders
+#### Typography
 
-#### Layout System
+See @donaction-admin/src/assets/layout/_typography.scss for typography system:
 
-- **Grid System**: CSS Grid with utility classes (`.grid-member-listing`, `.grid-project-listing`, `.grid-user-listing`), auto-fill responsive columns
-- **Container Widths**: 1504px max width above 1960px breakpoint, fluid below with 1rem horizontal padding
-- **Spacing Rules**: PrimeNG scale 14 (base 14px), TailwindCSS spacing utilities (`px-`, `py-`, `gap-`), consistent 1rem padding on mobile
+- **Primary Font**: Inter
+- **Fallback**: sans-serif
+- **Font Features**: Configured for branded elements
+
+#### Tokens Reference
+
+Design tokens (spacing, radius, shadows, breakpoints) are documented in:
+- `docs/rules/admin/03-libs-frameworks/5-design-system-tokens.mdc`
+
+#### Component Patterns
+
+UI component patterns and variants are documented in:
+- `docs/rules/admin/03-libs-frameworks/6-primeng-theme-usage.mdc`
+- `docs/rules/admin/03-libs-frameworks/7-button-variants.mdc`
+- `docs/rules/admin/03-libs-frameworks/8-card-patterns.mdc`
+- `docs/rules/admin/03-libs-frameworks/9-grid-layouts.mdc`
+- `docs/rules/admin/03-libs-frameworks/10-input-states.mdc`
 
 #### Accessibility
 
-- **Color Contrast**: Uses PrimeNG theme contrast ratios, semantic color tokens for status
-- **Focus Management**: Focus outline/box-shadow disabled globally (`:focus { outline: none !important; }`), keyboard navigation via PrimeNG
-- **Screen Reader**: PrimeNG components include ARIA labels, custom components need manual ARIA
+Accessibility requirements documented in:
+- `docs/rules/admin/07-quality/2-accessibility.mdc`
 
 
 ---
@@ -1229,198 +1131,50 @@ This part describe how dashboard forms are handled in the project, including lib
 
 #### GenericUpdateComponent Pattern
 
-##### Overview
+**Pattern CRUD** pour formulaires create/update avec gestion automatique de validation, uploads, cache et navigation.
 
-`GenericUpdateComponent<T>` - Base class for CRUD forms handling both create and update operations
+**Location**: @donaction-admin/src/app/shared/components/generics/generic-update/generic-update.component.ts
 
-**Location**: @shared/components/generics/generic-update/generic-update.component.ts
+**Documentation complète**:
+- 📋 Règle: `docs/rules/admin/06-patterns/2-generic-update-component.mdc`
+- 🎯 Skill: `aidd/skills/code/generic-update-component.md`
 
-##### Key Features
+**Méthodes obligatoires**: `initForm()`, `formFields()`, `serviceUpdate()`, `serviceCreate()`
 
-- Automatic edit/create mode detection based on entity presence
-- Form lifecycle management (init, reset, validation)
-- File upload integration via `updateFile()` hook
-- Cache invalidation after successful updates
-- Analytics tracking with custom properties
-- Loading states and error handling
-- Automatic navigation after create/update
-
-##### Core Properties
-
-**Injected Services**:
-- `sharedFacade` - NgRx state management
-- `router`, `route` - Navigation
-- `toastService` - User notifications
-- `analyticsService` - Event tracking
-- `invalidateCacheService` - Cache management
-- `permissionsService` - Permission checks
-
-**Form State Signals**:
-- `isSubmitted: WritableSignal<boolean>` - Tracks submission state
-- `loading: WritableSignal<boolean>` - Loading indicator
-- `isReady: WritableSignal<boolean>` - Form ready state
-- `entitySignal: WritableSignal<T | null>` - Current entity state
-
-**Modes**:
-- `editMode: boolean` - `true` for update, `false` for create
-
-##### Methods to Override
-
-###### Required Overrides
-
-**`initForm(): void`** - Initialize form structure with controls and validators
+**Pattern rapide**:
 ```typescript
-protected override initForm(): void {
-  const entity = untracked(this.entitySignal);
-  this.entityForm = new FormGroup({
-    name: new FormControl(entity?.name, Validators.required),
-    email: new FormControl(entity?.email, [Validators.required, Validators.email])
-  });
-}
-```
-
-**`formFields(): { [key: string]: any }`** - Transform form values before submission
-```typescript
-protected override formFields(): { [key: string]: any } {
-  return {
-    ...this.entityForm.value,
-    klubr: this.sharedFacade.profile()!.klubr.uuid
-  };
-}
-```
-
-**`serviceUpdate(uuid: string, formValues: any): Observable<T>`** - Update API call
-```typescript
-protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
-  this.sharedFacade.updateProfile(uuid, formValues);
-  return this.actions$.pipe(
-    ofType(SharedActions.updateProfileSuccess),
-    map(({profile}) => profile),
-    take(1)
-  );
-}
-```
-
-**`serviceCreate(formValues: any): Observable<T>`** - Create API call
-```typescript
-protected override serviceCreate(formValues: any): Observable<Member> {
-  return this.profileService.createProfile(formValues).pipe(
-    map((response) => response.data as Member)
-  );
-}
-```
-
-###### Optional Overrides
-
-**`getEntityForCreateMode(entity: T | null): T | null`** - Provide default values for create mode
-```typescript
-protected override getEntityForCreateMode(member: Member | null): Member | null {
-  return {
-    uuid: '',
-    nom: '',
-    prenom: '',
-    role: 'KlubMember',
-    klubr: untracked(this.sharedFacade.profile)!.klubr
-  };
-}
-```
-
-**`updateFile(entity: T): Observable<T>`** - Handle file uploads after form submission
-```typescript
-protected override updateFile(member: Member): Observable<Member> {
-  if (this.entityForm.get('avatar')?.dirty && this.entityForm.get('avatar')?.value) {
-    const formData = new FormData();
-    formData.append('avatar', this.entityForm.get('avatar')!.value);
-    return this.avatarService.newMediaProfileFile(entity.uuid, formData);
-  }
-  return of(member);
-}
-```
-
-**`resetForm(): void`** - Reset form to initial entity values
-**`preUpdateHook(formValues): any`** - Transform values before update
-**`preCreateHook(formValues): any`** - Transform values before create
-**`cacheToUnvalidate(entity: T): void`** - Clear relevant cache entries
-**`pathsToUnvalidateDataRequest(entity: T): string[]`** - Next.js ISR paths to revalidate
-**`redirectAfterCreate(entity: T): void`** - Custom navigation after create
-**`redirectAfterUpdate(entity: T): void`** - Custom navigation after update
-**`reloadEntity(entity: T): Observable<T>`** - Refetch entity (for Strapi components)
-
-##### Implementation Example
-
-```typescript
-@Component({
-  selector: 'app-member-update',
-  templateUrl: './member-update.component.html'
-})
 export class MemberUpdateComponent extends GenericUpdateComponent<Member> {
   protected override successMsg = 'Le profil a été mis à jour';
-  protected override errorUpdateMsg = 'Le profil n\'a pas pu être modifié';
   protected override routePrefix = '/profile';
 
   constructor() {
     super();
-    this.entity.set(this.config.data.profile); // Pass entity via DynamicDialogConfig
+    this.entity.set(this.config.data.profile);
   }
 
   protected override initForm(): void {
     const entity = untracked(this.entitySignal);
     this.entityForm = new FormGroup({
-      nom: new FormControl(entity?.nom, Validators.required),
-      prenom: new FormControl(entity?.prenom, Validators.required),
-      role: new FormControl(entity?.role, Validators.required)
+      nom: new FormControl(entity?.nom, Validators.required)
     });
   }
 
   protected override formFields(): { [key: string]: any } {
-    return {
-      ...this.entityForm.value,
-      klubr: this.sharedFacade.profile()!.klubr.uuid
-    };
+    return { ...this.entityForm.value };
   }
 
   protected override serviceUpdate(uuid: string, formValues: any): Observable<Member> {
     this.sharedFacade.updateProfile(uuid, formValues);
-    return this.actions$.pipe(
-      ofType(SharedActions.updateProfileSuccess),
-      map(({profile}) => profile),
-      take(1)
-    );
+    return this.actions$.pipe(ofType(SharedActions.updateProfileSuccess), map(({profile}) => profile), take(1));
   }
 
   protected override serviceCreate(formValues: any): Observable<Member> {
-    return this.profileService.createProfile(formValues).pipe(
-      map((response) => response.data as Member)
-    );
+    return this.profileService.createProfile(formValues).pipe(map(res => res.data as Member));
   }
 }
 ```
 
-##### Submission Flow
-
-1. User calls `onSubmit()`
-2. Form validation runs, marks all controls as touched
-3. If invalid, show error toast and abort
-4. Get form values via `formFields()`
-5. If edit mode, clean values (only dirty fields)
-6. Call `preCreateHook()` or `preUpdateHook()`
-7. Execute `serviceCreate()` or `serviceUpdate()`
-8. Call `updateFile()` for file uploads
-9. Call `reloadEntity()` to refresh entity
-10. Call `cacheToUnvalidate()` and `pathsToUnvalidateDataRequest()`
-11. Show success toast, reset form, redirect
-12. Track analytics event
-
-##### Best Practices
-
-- Always set `entity` model in constructor (from route data or dialog config)
-- Override `successMsg`, `errorUpdateMsg`, `errorCreateMsg` for user-friendly messages
-- Use `untracked()` when reading signals in form initialization
-- Call `super()` in constructor before any logic
-- Return only dirty fields in edit mode via `cleanFormValues()`
-- Use `take(1)` with NgRx actions to prevent memory leaks
-- Implement `cacheToUnvalidate()` to invalidate affected cache entries
-- Set `routePrefix` for correct redirection after create
+**Voir la règle/skill pour exemples complets, hooks optionnels et best practices.**
 
 #### Form Flow
 
@@ -1509,36 +1263,17 @@ Types of tests implemented:
 
 ---
 name: api-docs
-description: API documentation and specifications
+description: API endpoint reference and external integrations
 argument-hint: N/A
 ---
 
 ### API Documentation
 
-#### Authentication & Authorization
-
-- **Authentication**: JWT - Strapi users-permissions plugin with JWT token authentication
-- **Authorization**: Role-based with custom middlewares - Profile-based permissions (`owner-or-admin`, `admin-editor-or-admin`, `klubr-membre`)
-- **Session Management**: JWT tokens - Token stored in user state, validated via `ctx.state.user`
-
 #### Endpoints
 
-- Endpoints file: @donaction-api/src/api/*/routes/*-custom.ts - Custom routes per module
 - Base URL: `/api` - Strapi REST API base
 - Versioning: None - Single version API
-- Format: REST - JSON request/response
-- Protocol: HTTPS - Production, HTTP in development
-
-#### Request/Response Formats
-
-- Request format: JSON - Standard REST JSON bodies, multipart/form-data for file uploads
-- Response format: JSON - Strapi standard response format with `data`, `meta`, pagination
-
-#### Error Handling
-
-- Error format: JSON - Standard Strapi error format with `error.status`, `error.message`
-- Status codes: HTTP standard - 400 (BadRequest), 401 (Unauthorized), 404 (NotFound), 500 (ServerError)
-- Error responses: `ctx.badRequest()`, `ctx.unauthorized()`, `ctx.notFound()` - Strapi context methods
+- Protocol: HTTPS (production), HTTP (development)
 
 #### Key Endpoints
 
@@ -1600,8 +1335,8 @@ argument-hint: N/A
 
 #### Rate Limiting
 
-- Default limit: 25 - Records per page
-- Max limit: 100 - Maximum records per page
+- Default limit: 25 records per page
+- Max limit: 100 records per page
 - Pagination: Enabled with count - `withCount: true`
 
 #### External Integrations
@@ -1613,12 +1348,12 @@ argument-hint: N/A
 
 ##### Brevo (Email)
 - Email provider: Brevo SMTP relay
-- Configuration: `@donaction-api/config/plugins.ts` email settings
+- Configuration: @donaction-api/config/plugins.ts
 - SDK integration: `sib-api-v3-sdk`
 
 ##### ImageKit
 - Upload provider: `strapi-provider-upload-imagekit`
-- Configuration: `@donaction-api/config/plugins.ts` upload settings
+- Configuration: @donaction-api/config/plugins.ts
 - Folder management for avatars and media
 
 ##### Google Cloud
@@ -1632,7 +1367,6 @@ argument-hint: N/A
   - [Backend](#backend)
     - [Database](#database)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [External Services](#external-services)
     - [ImageKit](#imagekit)
@@ -1723,14 +1457,6 @@ donaction-api/
 └── private-pdf/               # PDF template storage
 ```
 
-##### Naming Conventions
-
-- **Files**: kebab-case for routes/controllers/services, PascalCase for types
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_SNAKE_CASE
-- **Types/Interfaces**: PascalCase with `Entity` suffix for Strapi entities
-
 #### Services communication
 
 ##### Strapi Request Flow
@@ -1801,166 +1527,34 @@ argument-hint: N/A
 
 ### Coding Guidelines
 
-> Those rules must be minimal because the MUST be checked after EVERY CODE GENERATION.
+> **These rules must be minimal - checked after EVERY CODE GENERATION.**
 
-#### Requirements to complete a feature
+#### Feature Completion Requirements
 
-**A feature is really completed if ALL of the above are satisfied: if not, iterate to fix all until all are green.**
+**A feature is ONLY complete when ALL checks pass.**
 
-#### Steps to follow
+#### Quality Verification
 
-1. Check their is no duplication
-2. Ensure code is re-used
-3. Run all those commands, in order to ensure code is perfect:
+Use the **backend-quality-verification** skill to run automated checks:
 
-```markdown
-| Order | Command               | Description                  |
-|-------|-----------------------|------------------------------|
-| 1     | `npm run gen:types`   | Generate TypeScript types    |
-| 2     | TypeScript check      | Verify no type errors        |
-| 3     | `npm run build`       | Build Strapi application     |
-```
+1. ✅ Check for code duplication
+2. ✅ Ensure code is reused (no duplicate logic)
+3. ✅ Run `npm run gen:types` (generate TypeScript types)
+4. ✅ Verify TypeScript compilation (no type errors)
+5. ✅ Run `npm run build` (Strapi builds successfully)
 
-#### Backend-Specific Coding Patterns
+**Trigger**: Ask Claude to "verify backend quality" or "run backend quality checks"
 
-##### Framework & Architecture
+#### Coding Patterns
 
-- Strapi v5 headless CMS using `@strapi/strapi`
-- TypeScript with `strict: false` but `noImplicitThis: true`
-- Node.js runtime with CommonJS modules
-- PostgreSQL database (production), SQLite (dev)
+**All detailed coding rules are in**: @docs/rules/strapi-v5/strapi-v5-coding-rules.md
 
-##### Core Dependencies
-
-- `@strapi/strapi` v5
-- `stripe` for payments
-- `sib-api-v3-sdk` for Brevo email service
-- `pdf-lib` for PDF generation
-- `pg` v8 for PostgreSQL
-- `imagekit` for media handling
-
-##### TypeScript Usage
-
-- Use Strapi generated types from `@strapi/strapi`
-- Entity types defined in `@/src/_types.ts` using `Data.ContentType<>`
-- Use `Core.Strapi` type for strapi instance
-- Context type from `koa`
-- `@ts-ignore` used sparingly for Strapi API limitations
-- Use generic types with `factories.createCoreController()` and `factories.createCoreService()`
-
-##### Controllers Pattern
-
-- Use `factories.createCoreController()` from `@strapi/strapi`
-- Access context via `strapi.requestContext.get()`
-- Return sanitized data using `this.sanitizeOutput()`
-- Use helper `removeId()` to remove internal ids from responses
-- Use `ctx.badRequest()`, `ctx.notFound()`, `ctx.unauthorized()`, `ctx.forbidden()` for errors
-- Always validate query params with `await this.validateQuery(ctx)`
-- Always sanitize query params with `await this.sanitizeQuery(ctx)`
-
-##### Services Pattern
-
-- Use `factories.createCoreService()` from `@strapi/strapi`
-- Business logic separated from controllers
-- Pure functions for data transformations
-- Helper functions like `countEmptyFields()`, `countDocs()` as private module functions
-
-##### Database Access
-
-- Use `strapi.db.query()` for direct database queries with populate
-- Use `strapi.documents()` for CRUD operations on content types
-- Use `strapi.service()` to access services
-- Always specify populate when needed
-- Use `where` clauses with operators like `$eq`, `$ne`, `$in`, `$notIn`, `$and`, `$or`
-- Use `findOne()`, `findMany()`, `findWithCount()`, `create()`, `update()` methods
-
-##### Middlewares Pattern
-
-- Export default function with `config` and `{ strapi }`
-- Return async function with `ctx, next` parameters
-- Check permissions using helpers from `@/src/helpers/permissions.ts`
-- Always call `await next()` when passing to next middleware
-- Use `ctx.unauthorized()` or `ctx.forbidden()` for auth failures
-
-##### Lifecycle Hooks
-
-- Implement in `content-types/<name>/lifecycles.ts`
-- Export object with lifecycle methods: `beforeCreate`, `beforeUpdate`, `afterCreate`, etc.
-- Receive `LifecycleEvent<T>` with `params.data`, `params.where`, `result`
-- Modify `event.params.data` to change data before save
-- Use for UUID generation, data validation, side effects
-
-##### Error Handling
-
-- Use `try/catch` blocks in controllers
-- Log errors with `console.error()` or `console.log()`
-- Return appropriate HTTP status via context methods
-- No silent failures - always throw or return error response
-- Use `ctx.internalServerError()` for unexpected errors
-
-##### Code Organization
-
-- Controllers in `@/src/api/<entity>/controllers/`
-- Services in `@/src/api/<entity>/services/`
-- Routes in `@/src/api/<entity>/routes/`
-- Middlewares in `@/src/api/<entity>/middlewares/`
-- Helpers in `@/src/helpers/`
-- Types in `@/src/_types.ts`
-- Config files in `@/config/` using TypeScript
-
-##### Helper Functions
-
-- Pure functions exported from `@/src/helpers/`
-- Permission checks in `permissions.ts`
-- Sanitization functions in `sanitizeHelpers.ts`
-- Email sending in `emails/sendBrevoTransacEmail.ts`
-- Media transformations in `medias.ts`
-- Constants for roles, statuses in dedicated files
-
-##### Email Handling
-
-- Use `sendBrevoTransacEmail()` from helpers
-- Template IDs from `BREVO_TEMPLATES` enum
-- Include `tags` array for categorization
-- Attachments as array of `{ filename, path }`
-- Dynamic params for template variables
-
-##### Configuration Files
-
-- @config/database.ts for database config
-- @config/middlewares.ts for middleware stack
-- @config/api.ts for API settings
-- @config/plugins.ts for plugin configuration
-- All use arrow functions with `({ env })` parameter
-
-##### Naming Conventions
-
-- Entity types: `EntityNameEntity` (e.g., `KlubrEntity`)
-- Service methods: descriptive verbs (e.g., `sendInvitationEmail`)
-- Private helpers: camelCase module-level functions
-- Database fields: camelCase
-- Constants: UPPER_SNAKE_CASE
-
-##### Security Practices
-
-- Always check user permissions in middlewares
-- Sanitize all inputs and outputs
-- Remove sensitive fields (`removeId`, `removeCodes`)
-- Use environment variables for secrets
-- Validate all external data
-- CORS configured in middlewares
-- Content Security Policy configured
-
-##### Best Practices
-
-- No code duplication - extract to helpers
-- Single responsibility per function
-- Explicit error messages in French for user-facing errors
-- Console logs for debugging (not production-ready)
-- Use destructuring for cleaner code
-- Prefer `async/await` over promises
-- Keep controllers thin, logic in services
-- Use TypeScript for type safety despite `strict: false`
+**Quick Reference**:
+- Use `factories.createCoreController()` and `factories.createCoreService()`
+- Always validate & sanitize: `validateQuery()`, `sanitizeQuery()`, `sanitizeOutput()`
+- Use `strapi.documents()` for CRUD, `strapi.db.query()` for complex queries
+- Extract business logic to services, keep controllers thin
+- Security: check permissions, sanitize inputs/outputs, remove sensitive fields
 
 
 ### Database
@@ -2089,7 +1683,6 @@ argument-hint: N/A
 - [Language/Framework](#languageframework)
   - [Frontend](#frontend)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Data Flow](#data-flow)
   - [External Services](#external-services)
@@ -2116,85 +1709,250 @@ argument-hint: N/A
 ```text
 donaction-frontend/
 ├── src/
-│   ├── app/                      # Next.js App Router pages
-│   │   ├── (main)/              # Route group for public pages
-│   │   │   ├── clubs/           # Clubs listing
-│   │   │   ├── projets/         # Projects listing
-│   │   │   ├── mecenat/         # Sponsorship info
-│   │   │   ├── mes-dons/        # User donations
-│   │   │   └── page.tsx         # Homepage
-│   │   ├── (auth)/              # Route group for auth pages
-│   │   ├── [slug]/              # Dynamic club pages
-│   │   ├── api/                 # API routes
-│   │   │   ├── auth/[...nextauth]/  # NextAuth handler
-│   │   │   ├── create-payment-intent/  # Stripe integration
-│   │   │   └── [...fetch]/      # Proxy to backend
-│   │   ├── layout.tsx           # Root layout with providers
-│   │   └── Providers.tsx        # Redux + NextAuth + PrimeReact providers
-│   ├── core/                    # Business logic layer
-│   │   ├── services/            # API communication
-│   │   │   ├── club/            # Club-related API calls
-│   │   │   ├── don/             # Donation API calls
-│   │   │   ├── projet/          # Project API calls
-│   │   │   ├── auth/            # Authentication API calls
-│   │   │   ├── donateur/        # Donor API calls
-│   │   │   ├── cms/             # CMS content API calls
-│   │   │   ├── index.ts         # HttpService wrapper
-│   │   │   └── endpoints.ts     # All API endpoint definitions
-│   │   ├── store/               # Redux store
-│   │   │   ├── modules/         # Redux slices
+│   ├── app/                                    # Next.js App Router pages
+│   │   ├── (auth)/                            # Route group for auth pages
+│   │   │   ├── connexion/                     # Login page
+│   │   │   │   └── page.tsx
+│   │   │   ├── reset-password/                # Password reset
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx                     # Auth layout
+│   │   ├── (main)/                            # Route group for public pages
+│   │   │   ├── clubs/                         # Clubs listing
+│   │   │   │   └── page.tsx
+│   │   │   ├── conditions-generales-d-utilisation/
+│   │   │   │   └── page.tsx
+│   │   │   ├── contact/                       # Contact form
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── page.scss
+│   │   │   ├── mecenat/                       # Sponsorship info
+│   │   │   │   └── page.tsx
+│   │   │   ├── mes-dons/                      # User donations
+│   │   │   │   ├── [uuid]/                    # Donation detail
+│   │   │   │   └── page.tsx
+│   │   │   ├── new-club/                      # Club creation
+│   │   │   │   ├── congratulations/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── page.scss
+│   │   │   ├── politique-de-confidentialite/  # Privacy policy
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/                       # User profile
+│   │   │   │   └── page.tsx
+│   │   │   ├── projets/                       # Projects listing
+│   │   │   │   └── page.tsx
+│   │   │   ├── page.tsx                       # Homepage
+│   │   │   └── layout.tsx                     # Main layout
+│   │   ├── [slug]/                            # Dynamic club pages
+│   │   │   ├── nos-projets/                   # Club projects
+│   │   │   │   ├── [projectSlug]/             # Project detail
+│   │   │   │   └── page.tsx
+│   │   │   ├── page.tsx                       # Club detail
+│   │   │   ├── layout.tsx
+│   │   │   └── index.scss
+│   │   ├── api/                               # API routes
+│   │   │   ├── [...fetch]/                    # Proxy to Strapi backend
+│   │   │   │   └── route.ts
+│   │   │   ├── auth/
+│   │   │   │   └── [...nextauth]/             # NextAuth handler
+│   │   │   │       └── route.ts
+│   │   │   ├── create-payment-intent/         # Stripe integration
+│   │   │   │   └── route.ts
+│   │   │   └── revalidate/                    # ISR revalidation
+│   │   │       └── route.ts
+│   │   ├── utils/
+│   │   │   └── config.ts
+│   │   ├── Providers.tsx                      # Redux + NextAuth + PrimeReact providers
+│   │   ├── layout.tsx                         # Root layout
+│   │   ├── not-found.tsx                      # 404 page
+│   │   ├── forbidden/                         # 403 page
+│   │   │   └── page.tsx
+│   │   ├── google-signin/                     # Google OAuth callback
+│   │   │   └── page.tsx
+│   │   ├── robots.tsx                         # Robots.txt generator
+│   │   └── sitemap.tsx                        # Sitemap generator
+│   ├── core/                                  # Business logic layer
+│   │   ├── services/                          # API communication
+│   │   │   ├── auth/                          # Authentication API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── club/                          # Club-related API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── cms/                           # CMS content API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── don/                           # Donation API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── don-pdf/                       # PDF generation
+│   │   │   │   └── index.ts
+│   │   │   ├── donateur/                      # Donor API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── projet/                        # Project API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── index.ts                       # HttpService wrapper
+│   │   │   ├── endpoints.ts                   # All API endpoint definitions
+│   │   │   └── entities.ts                    # Entity type definitions
+│   │   ├── store/                             # Redux store
+│   │   │   ├── modules/                       # Redux slices
 │   │   │   │   ├── authSlice.ts
 │   │   │   │   ├── projectSlice.ts
 │   │   │   │   ├── sponsorsSlice.ts
 │   │   │   │   └── rootSlice.ts
-│   │   │   └── index.ts         # Store configuration
-│   │   ├── models/              # TypeScript interfaces/types
+│   │   │   ├── hooks.ts                       # Typed Redux hooks
+│   │   │   └── index.ts                       # Store configuration
+│   │   ├── models/                            # TypeScript interfaces/types
 │   │   │   ├── club/
+│   │   │   │   └── index.ts
+│   │   │   ├── cms/
+│   │   │   │   └── index.ts
+│   │   │   ├── hp/
+│   │   │   │   └── index.ts
 │   │   │   ├── klub-don/
+│   │   │   │   └── index.ts
 │   │   │   ├── klub-project/
+│   │   │   │   └── index.ts
 │   │   │   ├── klubr-donateur/
-│   │   │   ├── user/
-│   │   │   └── cms/
-│   │   ├── hooks/               # Custom React hooks
-│   │   ├── helpers/             # Utility functions
-│   │   ├── constants/           # Application constants
-│   │   └── enum/                # Enumerations
-│   ├── layouts/                 # UI components
-│   │   ├── partials/            # Page sections
-│   │   │   ├── clubPage/
-│   │   │   ├── projectPage/
-│   │   │   ├── mecenatPage/
-│   │   │   ├── profilePage/
-│   │   │   ├── sponsorshipForm/
-│   │   │   ├── authentication/
-│   │   │   └── common/
-│   │   └── components/          # Reusable UI components
+│   │   │   │   └── index.ts
+│   │   │   ├── klubr-membre/
+│   │   │   │   └── index.ts
+│   │   │   ├── misc/
+│   │   │   │   └── index.ts
+│   │   │   ├── strapi-component/
+│   │   │   │   └── index.ts
+│   │   │   └── user/
+│   │   │       └── index.ts
+│   │   ├── hooks/                             # Custom React hooks
+│   │   │   └── useWindow.ts
+│   │   ├── helpers/                           # Utility functions
+│   │   │   ├── currency/
+│   │   │   │   └── CurrencyHelpers.ts
+│   │   │   ├── color.ts
+│   │   │   ├── getClientCookie.ts
+│   │   │   ├── getCookie.ts
+│   │   │   ├── getServerCookie.ts
+│   │   │   ├── getFileNameFromContentDisposition.ts
+│   │   │   ├── getURL.ts
+│   │   │   ├── objEqObj.ts
+│   │   │   ├── scrollIntoForm.ts
+│   │   │   ├── sendGaEvent.ts
+│   │   │   └── srcLoader.ts
+│   │   ├── constants/                         # Application constants
+│   │   │   ├── dons.ts
+│   │   │   └── toBeDeleted.ts
+│   │   ├── enum/                              # Enumerations
+│   │   │   └── tagsEnum.ts
+│   │   ├── types/
+│   │   │   └── index.d.ts
+│   │   └── README.md
+│   ├── layouts/                               # UI components
+│   │   ├── partials/                          # Page sections
+│   │   │   ├── authentication/                # Auth components
+│   │   │   │   ├── connexionForm/
+│   │   │   │   ├── contactUsForm/
+│   │   │   │   ├── googleForm/
+│   │   │   │   ├── loginForm/
+│   │   │   │   ├── magicLink/
+│   │   │   │   ├── newClubForm/
+│   │   │   │   ├── popAuth/
+│   │   │   │   ├── registerForm/
+│   │   │   │   └── resetPasswordForm/
+│   │   │   ├── clubPage/                      # Club page sections
+│   │   │   │   ├── clubCard/
+│   │   │   │   ├── clubDescription/
+│   │   │   │   ├── clubIntroduction/
+│   │   │   │   ├── gMaps/
+│   │   │   │   ├── ourSponsors/
+│   │   │   │   ├── projectCard/
+│   │   │   │   └── quote/
+│   │   │   ├── common/                        # Shared sections
+│   │   │   │   ├── accordion/
+│   │   │   │   ├── breadcrumb/
+│   │   │   │   ├── cookiesConsent/
+│   │   │   │   ├── donateButton/
+│   │   │   │   ├── downloadPdf/
+│   │   │   │   ├── faqItems/
+│   │   │   │   ├── footer/
+│   │   │   │   ├── header/
+│   │   │   │   ├── invoice/
+│   │   │   │   ├── newslettersForm/
+│   │   │   │   ├── paginatedKlubsList/
+│   │   │   │   ├── paginatedProjectsList/
+│   │   │   │   ├── pagination/
+│   │   │   │   ├── plusProjects/
+│   │   │   │   ├── previewMode/
+│   │   │   │   ├── sections/
+│   │   │   │   ├── statusIndicator/
+│   │   │   │   └── templateReference/
+│   │   │   ├── mecenatPage/                   # Sponsorship page sections
+│   │   │   │   ├── avantageMecenat/
+│   │   │   │   ├── conclusion/
+│   │   │   │   ├── descriptionMecenat/
+│   │   │   │   ├── manifestMecenat/
+│   │   │   │   ├── needHelp/
+│   │   │   │   ├── slideMecenat/
+│   │   │   │   └── statsMecenat/
+│   │   │   ├── myDonations/                   # User donations view
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── index.scss
+│   │   │   ├── profilePage/                   # User profile
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── useProfileForm.ts
+│   │   │   ├── projectPage/                   # Project page sections
+│   │   │   │   ├── authorCard/
+│   │   │   │   ├── milestone/
+│   │   │   │   ├── projectDecription/
+│   │   │   │   └── slides/
+│   │   │   ├── sponsorshipForm/               # Donation form
+│   │   │   │   ├── steps/
+│   │   │   │   ├── logic/
+│   │   │   │   ├── badgeRescritFiscale.tsx
+│   │   │   │   ├── formBanners.tsx
+│   │   │   │   ├── formBody.tsx
+│   │   │   │   ├── formNavigation.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── index.scss
+│   │   │   └── _sponsorshipForm/              # Legacy sponsorship form
+│   │   │       ├── index.tsx
+│   │   │       ├── requests.ts
+│   │   │       └── useSponsorshipForm.ts
+│   │   └── components/                        # Reusable UI components
 │   │       ├── dropdownList/
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── media/                         # Media components
+│   │       │   ├── ImageHtml.tsx
+│   │       │   ├── ImageKit.tsx
+│   │       │   ├── MediaExtraProps.ts
+│   │       │   └── VideoKit.tsx
 │   │       ├── popUp/
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── spinnerButton/
+│   │       │   └── index.tsx
 │   │       ├── toaster/
-│   │       └── media/
-│   ├── config/                  # Configuration files
-│   │   ├── config.json          # Site configuration
-│   │   └── theme.json           # Theme configuration
-│   ├── styles/                  # Global styles
-│   │   ├── main.scss            # Main stylesheet entry
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── Counter.tsx
+│   │       ├── KillCookie.tsx
+│   │       ├── KlubrLogo.tsx
+│   │       ├── LottieAnimation.tsx
+│   │       ├── ProgresBar.tsx
+│   │       ├── RichTextBlock.tsx
+│   │       └── Share.tsx
+│   ├── config/                                # Configuration files
+│   │   ├── config.json                        # Site configuration
+│   │   └── theme.json                         # Theme configuration
+│   ├── styles/                                # Global styles
+│   │   ├── main.scss                          # Main stylesheet entry
 │   │   ├── base.scss
 │   │   ├── buttons.scss
 │   │   └── utilities.scss
-│   └── types/                   # Global TypeScript types
-├── next.config.js               # Next.js configuration
-├── tailwind.config.js           # TailwindCSS configuration
-└── tsconfig.json                # TypeScript configuration
+│   ├── types/                                 # Global TypeScript types
+│   │   ├── global.d.ts
+│   │   └── next-auth.d.ts
+│   └── middleware.ts                          # Next.js middleware
+├── next.config.js                             # Next.js configuration
+├── tailwind.config.js                         # TailwindCSS configuration
+├── postcss.config.js                          # PostCSS configuration
+├── tsconfig.json                              # TypeScript configuration
+└── package.json                               # Dependencies
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case for pages, camelCase for components
-- **Components**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
@@ -2824,7 +2582,6 @@ This document outlines the testing strategies and guidelines for donaction-front
 - [Language/Framework](#languageframework)
   - [Frontend](#frontend)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Form Workflow](#form-workflow)
   - [External Services](#external-services)
@@ -2870,15 +2627,6 @@ donaction-saas/
 ├── vite.config.ts              # Production build config
 └── vite.config.development.ts  # Development build config
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case for directories, PascalCase for components
-- **Components**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
