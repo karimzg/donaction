@@ -20,6 +20,8 @@ output: code
 - Use `take(1)` with NgRx actions to prevent memory leaks
 - Implement optional hooks: `updateFile()`, `cacheToUnvalidate()`, navigation redirects
 - Set `routePrefix` for post-submission navigation
+- Base class provides `firstInput` and `firstHeading` as signal queries (Angular 21)
+- Use signal function call syntax when accessing view queries: `this.firstInput()`
 
 ## Example
 
@@ -175,6 +177,21 @@ export class MemberUpdateComponent extends GenericUpdateComponent<Member> {
 ## Optional Hooks
 
 ```typescript
+// Use view queries from base class (Angular 21 signals)
+override ngAfterViewInit(): void {
+  super.ngAfterViewInit();
+
+  // firstInput and firstHeading are signal queries
+  if (this.firstInput()?.nativeElement) {
+    this.firstInput()!.nativeElement.focus();
+  }
+
+  if (this.firstHeading()?.nativeElement) {
+    const title = this.firstHeading()!.nativeElement.textContent;
+    console.log('Form title:', title);
+  }
+}
+
 // Pre-submission data transformation
 protected override preUpdateHook(formValues: any): any {
   return {

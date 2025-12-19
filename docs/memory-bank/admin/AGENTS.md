@@ -1,16 +1,25 @@
 # Admin Dashboard - Donaction
 
-> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+> **Version**: 2.1.0 | **Last Updated**: 2025-12-19 | **Angular 21 Migration**: ✅ Complete
 
 ## Context
-Angular 19 admin dashboard for association managers. Handles club configuration, member management, donation tracking, project creation, and invoice generation.
+Angular 21 admin dashboard for association managers. Handles club configuration, member management, donation tracking, project creation, and invoice generation.
 
 ## Stack
-- **Framework**: Angular 19
+- **Framework**: Angular 21.0.6
 - **UI**: PrimeNG 19, TailwindCSS 3, PrimeFlex 4
 - **State**: NgRx 19 (store, effects, signals)
 - **Forms**: Reactive Forms + custom validators
 - **Auth**: JWT + Google OAuth via angularx-social-login
+
+## Angular 21 Migration
+Migrated from Angular 19 → 21 with modern signal-based APIs (Dec 2025):
+- ✅ Signal inputs: `input()` and `input.required<T>()` replace `@Input()`
+- ✅ Signal queries: `viewChild()` replaces `@ViewChild()`
+- ✅ Automatic cleanup: `takeUntilDestroyed()` replaces manual `Subject/ngOnDestroy`
+- ✅ Bundle size: 1.62 MB (unchanged)
+- ⏳ PrimeNG v21: Deferred (breaking changes, future PR)
+- See commits: `5f7d371` (packages), `3706967` (signals)
 
 ## Commands
 | Command | Description |
