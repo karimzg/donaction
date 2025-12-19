@@ -1,0 +1,367 @@
+---
+description: Next.js 14 form handling patterns including client-side form management, validation strategies, progressive enhancement, Server Actions (future), error handling, and integration with external APIs like Stripe for payment processing.
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "!donaction-frontend/node_modules/**"
+---
+
+# Next.js 14 Forms & Mutations
+
+## Client-Side Form Pattern
+
+- Use 'use client' for interactive forms
+- Manage state with useState hook
+- Handle submission with async functions
+- Call service layer for API requests
+- Show loading states during submission
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function DonationForm() {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const data = await postDonateur(formData);
+      // Success handling
+    } catch (error) {
+      // Error handling
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return <form onSubmit={handleSubmit}>...</form>;
+}
+```
+
+## Form State Management
+
+- Use custom hooks for complex forms
+- Store form values in local state
+- Track validation errors separately
+- Use refs for validation feedback tracking
+- Implement multi-step form state
+
+```typescript
+// Custom form hook pattern
+export const useLoginForm = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const receivedFeedbacks = useRef<FeedbackParamsType[]>([]);
+
+  return { formData, setFormData, errors, receivedFeedbacks };
+};
+```
+
+## Validation Patterns
+
+- Validate on blur for better UX
+- Show errors after first interaction
+- Use custom validation functions
+- Track validation state with refs
+- Aggregate feedback before submission
+
+```typescript
+const handleBlur = (field: string) => {
+  const error = validateField(field, formData[field]);
+  if (error) {
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  }
+};
+```
+
+## Redux Integration
+
+- Dispatch actions on form success
+- Update global state after mutations
+- Use Redux for auth and user data
+- Keep form state local when possible
+- Show toast notifications via Redux
+
+```typescript
+import { useAppDispatch } from '@/core/store/hooks';
+
+const dispatch = useAppDispatch();
+
+const handleSubmit = async () => {
+  const result = await login(credentials);
+  dispatch(setSession(result));
+  dispatch(pushToast({ severity: 'success', summary: 'Login successful' }));
+};
+```
+
+## API Service Integration
+
+- Call service layer functions from forms
+- Pass cookies for authenticated requests
+- Handle errors with try-catch blocks
+- Never call fetch directly from components
+- Return typed responses from services
+
+```typescript
+import { postDonateur } from '@/core/services/donateur';
+
+const handleSubmit = async () => {
+  try {
+    const donateur = await postDonateur({
+      email: formData.email,
+      nom: formData.nom,
+    });
+
+    // Handle success
+  } catch (error) {
+    // Handle error
+  }
+};
+```
+
+## Progressive Enhancement
+
+- Forms work without JavaScript (future consideration)
+- Use formAction for Server Actions when ready
+- Provide loading indicators for better UX
+- Handle network errors gracefully
+- Show confirmation before destructive actions
+
+## Error Handling
+
+- Show inline field errors below inputs
+- Display form-level errors at top
+- Toast notifications for API errors
+- Preserve form data on error
+- Validate before API call
+
+```tsx
+{errors.email && <small className="error">{errors.email}</small>}
+
+{formError && (
+  <div className="form-error">
+    {formError}
+  </div>
+)}
+```
+
+## File Upload Forms
+
+- Use FormData for file uploads
+- Mark HttpService request as FormData
+- Show upload progress when possible
+- Validate file size and type client-side
+- Handle large files with body size limit
+
+```typescript
+const handleFileUpload = async (file: File) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  const result = await updateUserImg(uuid, formData);
+};
+```
+
+## Stripe Payment Forms
+
+- Use @stripe/react-stripe-js for client integration
+- Create payment intent via API route
+- Never expose Stripe secret key to client
+- Use Elements component for secure input
+- Handle payment confirmation with hooks
+
+```typescript
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+export default function PaymentForm() {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutForm />
+    </Elements>
+  );
+}
+```
+
+## Payment Intent Creation
+
+- Create intent in API route not client
+- Convert amount to cents for Stripe
+- Return client_secret to frontend
+- Use server-side Stripe SDK
+- Validate amount before creating intent
+
+```typescript
+// @donaction-frontend/src/app/api/create-payment-intent/route.ts
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+export async function POST(request: Request) {
+  const { amount } = await request.json();
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Math.round(amount * 100), // Convert to cents
+    currency: 'eur',
+  });
+
+  return NextResponse.json({
+    clientSecret: paymentIntent.client_secret,
+  });
+}
+```
+
+## Multi-Step Forms
+
+- Track current step with state
+- Store form data across steps
+- Validate each step before proceeding
+- Allow navigation between completed steps
+- Submit all data on final step
+
+```typescript
+const [currentStep, setCurrentStep] = useState(0);
+const [formData, setFormData] = useState({
+  step1: {},
+  step2: {},
+  step3: {},
+});
+
+const handleNextStep = () => {
+  if (validateCurrentStep()) {
+    setCurrentStep((prev) => prev + 1);
+  }
+};
+```
+
+## reCAPTCHA Integration
+
+- Load reCAPTCHA script in root layout
+- Create token before form submission
+- Validate token on server side
+- Use enterprise reCAPTCHA for better security
+- Handle token creation errors
+
+```typescript
+const createToken = async () => {
+  if (typeof window !== 'undefined' && window.grecaptcha) {
+    const token = await window.grecaptcha.enterprise.execute(
+      process.env.NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY,
+      { action: 'submit' }
+    );
+    return token;
+  }
+  throw new Error('reCAPTCHA not loaded');
+};
+
+const handleSubmit = async () => {
+  const token = await createToken();
+  await submitForm({ ...formData, recaptchaToken: token });
+};
+```
+
+## Form Reset
+
+- Reset form after successful submission
+- Clear errors on reset
+- Restore initial values
+- Redirect to success page when appropriate
+- Preserve data for multi-step forms
+
+```typescript
+const resetForm = () => {
+  setFormData(initialValues);
+  setErrors({});
+  receivedFeedbacks.current = [];
+};
+
+const handleSubmit = async () => {
+  const result = await submitForm(formData);
+  if (result.success) {
+    resetForm();
+    router.push('/success');
+  }
+};
+```
+
+## Loading States
+
+- Show loading spinner during submission
+- Disable submit button when loading
+- Prevent double submission
+- Show inline loading per field for async validation
+- Use skeleton loaders for better UX
+
+```tsx
+<button
+  type="submit"
+  disabled={loading || !isValid}
+>
+  {loading ? 'Submitting...' : 'Submit'}
+</button>
+```
+
+## Server Actions (Future)
+
+- Next.js 14 supports Server Actions
+- Not currently used in donaction-frontend
+- Enable with experimental.serverActions flag
+- Use for progressive enhancement
+- Replace API routes for mutations
+
+```tsx
+// Future pattern with Server Actions
+'use server';
+
+export async function createDonation(formData: FormData) {
+  const amount = formData.get('amount');
+  // Server-side mutation
+  revalidatePath('/donations');
+}
+
+// Client component
+<form action={createDonation}>
+  <input name="amount" />
+  <button type="submit">Submit</button>
+</form>
+```
+
+## Form Libraries
+
+- Currently no form library (native React state)
+- Consider react-hook-form for complex forms
+- Consider Zod for schema validation
+- PrimeReact components for UI
+- Custom validation pattern with feedback refs
+
+## Accessibility
+
+- Use semantic HTML form elements
+- Associate labels with inputs via htmlFor
+- Provide ARIA labels when needed
+- Show error messages with aria-describedby
+- Focus first error field on validation failure
+
+```tsx
+<label htmlFor="email">Email</label>
+<input
+  id="email"
+  type="email"
+  aria-describedby="email-error"
+  aria-invalid={!!errors.email}
+/>
+{errors.email && (
+  <small id="email-error" role="alert">
+    {errors.email}
+  </small>
+)}
+```

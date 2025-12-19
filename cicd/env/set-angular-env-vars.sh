@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-ENV_FILE="klubr-admin/src/environments/environment.$1.ts"
+ENV_FILE="donaction-admin/src/environments/environment.$1.ts"
 
 ENV_MAJ=$(echo "$1" | tr '[:lower:]' '[:upper:]')
 echo "ENV_MAJ: $ENV_MAJ"

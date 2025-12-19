@@ -9,7 +9,6 @@ argument-hint: N/A
 - [Language/Framework](#languageframework)
   - [Frontend](#frontend)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Data Flow](#data-flow)
   - [External Services](#external-services)
@@ -21,7 +20,7 @@ argument-hint: N/A
 
 ##### Frontend
 
-- **Framework**: Next.js 14 (App Router) → @klubr-frontend/package.json
+- **Framework**: Next.js 14 (App Router) → @donaction-frontend/package.json
 - **UI Library**: TailwindCSS + SCSS - Utility-first CSS with custom theme system
 - **Routing**: Next.js App Router - File-based routing with route groups
 - **Data Fetching**: Native `fetch` with `HttpService` wrapper - Custom service layer handling SSR/CSR
@@ -34,87 +33,252 @@ argument-hint: N/A
 #### Full project structure
 
 ```text
-klubr-frontend/
+donaction-frontend/
 ├── src/
-│   ├── app/                      # Next.js App Router pages
-│   │   ├── (main)/              # Route group for public pages
-│   │   │   ├── clubs/           # Clubs listing
-│   │   │   ├── projets/         # Projects listing
-│   │   │   ├── mecenat/         # Sponsorship info
-│   │   │   ├── mes-dons/        # User donations
-│   │   │   └── page.tsx         # Homepage
-│   │   ├── (auth)/              # Route group for auth pages
-│   │   ├── [slug]/              # Dynamic club pages
-│   │   ├── api/                 # API routes
-│   │   │   ├── auth/[...nextauth]/  # NextAuth handler
-│   │   │   ├── create-payment-intent/  # Stripe integration
-│   │   │   └── [...fetch]/      # Proxy to backend
-│   │   ├── layout.tsx           # Root layout with providers
-│   │   └── Providers.tsx        # Redux + NextAuth + PrimeReact providers
-│   ├── core/                    # Business logic layer
-│   │   ├── services/            # API communication
-│   │   │   ├── club/            # Club-related API calls
-│   │   │   ├── don/             # Donation API calls
-│   │   │   ├── projet/          # Project API calls
-│   │   │   ├── auth/            # Authentication API calls
-│   │   │   ├── donateur/        # Donor API calls
-│   │   │   ├── cms/             # CMS content API calls
-│   │   │   ├── index.ts         # HttpService wrapper
-│   │   │   └── endpoints.ts     # All API endpoint definitions
-│   │   ├── store/               # Redux store
-│   │   │   ├── modules/         # Redux slices
+│   ├── app/                                    # Next.js App Router pages
+│   │   ├── (auth)/                            # Route group for auth pages
+│   │   │   ├── connexion/                     # Login page
+│   │   │   │   └── page.tsx
+│   │   │   ├── reset-password/                # Password reset
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx                     # Auth layout
+│   │   ├── (main)/                            # Route group for public pages
+│   │   │   ├── clubs/                         # Clubs listing
+│   │   │   │   └── page.tsx
+│   │   │   ├── conditions-generales-d-utilisation/
+│   │   │   │   └── page.tsx
+│   │   │   ├── contact/                       # Contact form
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── page.scss
+│   │   │   ├── mecenat/                       # Sponsorship info
+│   │   │   │   └── page.tsx
+│   │   │   ├── mes-dons/                      # User donations
+│   │   │   │   ├── [uuid]/                    # Donation detail
+│   │   │   │   └── page.tsx
+│   │   │   ├── new-club/                      # Club creation
+│   │   │   │   ├── congratulations/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── page.scss
+│   │   │   ├── politique-de-confidentialite/  # Privacy policy
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/                       # User profile
+│   │   │   │   └── page.tsx
+│   │   │   ├── projets/                       # Projects listing
+│   │   │   │   └── page.tsx
+│   │   │   ├── page.tsx                       # Homepage
+│   │   │   └── layout.tsx                     # Main layout
+│   │   ├── [slug]/                            # Dynamic club pages
+│   │   │   ├── nos-projets/                   # Club projects
+│   │   │   │   ├── [projectSlug]/             # Project detail
+│   │   │   │   └── page.tsx
+│   │   │   ├── page.tsx                       # Club detail
+│   │   │   ├── layout.tsx
+│   │   │   └── index.scss
+│   │   ├── api/                               # API routes
+│   │   │   ├── [...fetch]/                    # Proxy to Strapi backend
+│   │   │   │   └── route.ts
+│   │   │   ├── auth/
+│   │   │   │   └── [...nextauth]/             # NextAuth handler
+│   │   │   │       └── route.ts
+│   │   │   ├── create-payment-intent/         # Stripe integration
+│   │   │   │   └── route.ts
+│   │   │   └── revalidate/                    # ISR revalidation
+│   │   │       └── route.ts
+│   │   ├── utils/
+│   │   │   └── config.ts
+│   │   ├── Providers.tsx                      # Redux + NextAuth + PrimeReact providers
+│   │   ├── layout.tsx                         # Root layout
+│   │   ├── not-found.tsx                      # 404 page
+│   │   ├── forbidden/                         # 403 page
+│   │   │   └── page.tsx
+│   │   ├── google-signin/                     # Google OAuth callback
+│   │   │   └── page.tsx
+│   │   ├── robots.tsx                         # Robots.txt generator
+│   │   └── sitemap.tsx                        # Sitemap generator
+│   ├── core/                                  # Business logic layer
+│   │   ├── services/                          # API communication
+│   │   │   ├── auth/                          # Authentication API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── club/                          # Club-related API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── cms/                           # CMS content API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── don/                           # Donation API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── don-pdf/                       # PDF generation
+│   │   │   │   └── index.ts
+│   │   │   ├── donateur/                      # Donor API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── projet/                        # Project API calls
+│   │   │   │   └── index.ts
+│   │   │   ├── index.ts                       # HttpService wrapper
+│   │   │   ├── endpoints.ts                   # All API endpoint definitions
+│   │   │   └── entities.ts                    # Entity type definitions
+│   │   ├── store/                             # Redux store
+│   │   │   ├── modules/                       # Redux slices
 │   │   │   │   ├── authSlice.ts
 │   │   │   │   ├── projectSlice.ts
 │   │   │   │   ├── sponsorsSlice.ts
 │   │   │   │   └── rootSlice.ts
-│   │   │   └── index.ts         # Store configuration
-│   │   ├── models/              # TypeScript interfaces/types
+│   │   │   ├── hooks.ts                       # Typed Redux hooks
+│   │   │   └── index.ts                       # Store configuration
+│   │   ├── models/                            # TypeScript interfaces/types
 │   │   │   ├── club/
+│   │   │   │   └── index.ts
+│   │   │   ├── cms/
+│   │   │   │   └── index.ts
+│   │   │   ├── hp/
+│   │   │   │   └── index.ts
 │   │   │   ├── klub-don/
+│   │   │   │   └── index.ts
 │   │   │   ├── klub-project/
+│   │   │   │   └── index.ts
 │   │   │   ├── klubr-donateur/
-│   │   │   ├── user/
-│   │   │   └── cms/
-│   │   ├── hooks/               # Custom React hooks
-│   │   ├── helpers/             # Utility functions
-│   │   ├── constants/           # Application constants
-│   │   └── enum/                # Enumerations
-│   ├── layouts/                 # UI components
-│   │   ├── partials/            # Page sections
-│   │   │   ├── clubPage/
-│   │   │   ├── projectPage/
-│   │   │   ├── mecenatPage/
-│   │   │   ├── profilePage/
-│   │   │   ├── sponsorshipForm/
-│   │   │   ├── authentication/
-│   │   │   └── common/
-│   │   └── components/          # Reusable UI components
+│   │   │   │   └── index.ts
+│   │   │   ├── klubr-membre/
+│   │   │   │   └── index.ts
+│   │   │   ├── misc/
+│   │   │   │   └── index.ts
+│   │   │   ├── strapi-component/
+│   │   │   │   └── index.ts
+│   │   │   └── user/
+│   │   │       └── index.ts
+│   │   ├── hooks/                             # Custom React hooks
+│   │   │   └── useWindow.ts
+│   │   ├── helpers/                           # Utility functions
+│   │   │   ├── currency/
+│   │   │   │   └── CurrencyHelpers.ts
+│   │   │   ├── color.ts
+│   │   │   ├── getClientCookie.ts
+│   │   │   ├── getCookie.ts
+│   │   │   ├── getServerCookie.ts
+│   │   │   ├── getFileNameFromContentDisposition.ts
+│   │   │   ├── getURL.ts
+│   │   │   ├── objEqObj.ts
+│   │   │   ├── scrollIntoForm.ts
+│   │   │   ├── sendGaEvent.ts
+│   │   │   └── srcLoader.ts
+│   │   ├── constants/                         # Application constants
+│   │   │   ├── dons.ts
+│   │   │   └── toBeDeleted.ts
+│   │   ├── enum/                              # Enumerations
+│   │   │   └── tagsEnum.ts
+│   │   ├── types/
+│   │   │   └── index.d.ts
+│   │   └── README.md
+│   ├── layouts/                               # UI components
+│   │   ├── partials/                          # Page sections
+│   │   │   ├── authentication/                # Auth components
+│   │   │   │   ├── connexionForm/
+│   │   │   │   ├── contactUsForm/
+│   │   │   │   ├── googleForm/
+│   │   │   │   ├── loginForm/
+│   │   │   │   ├── magicLink/
+│   │   │   │   ├── newClubForm/
+│   │   │   │   ├── popAuth/
+│   │   │   │   ├── registerForm/
+│   │   │   │   └── resetPasswordForm/
+│   │   │   ├── clubPage/                      # Club page sections
+│   │   │   │   ├── clubCard/
+│   │   │   │   ├── clubDescription/
+│   │   │   │   ├── clubIntroduction/
+│   │   │   │   ├── gMaps/
+│   │   │   │   ├── ourSponsors/
+│   │   │   │   ├── projectCard/
+│   │   │   │   └── quote/
+│   │   │   ├── common/                        # Shared sections
+│   │   │   │   ├── accordion/
+│   │   │   │   ├── breadcrumb/
+│   │   │   │   ├── cookiesConsent/
+│   │   │   │   ├── donateButton/
+│   │   │   │   ├── downloadPdf/
+│   │   │   │   ├── faqItems/
+│   │   │   │   ├── footer/
+│   │   │   │   ├── header/
+│   │   │   │   ├── invoice/
+│   │   │   │   ├── newslettersForm/
+│   │   │   │   ├── paginatedKlubsList/
+│   │   │   │   ├── paginatedProjectsList/
+│   │   │   │   ├── pagination/
+│   │   │   │   ├── plusProjects/
+│   │   │   │   ├── previewMode/
+│   │   │   │   ├── sections/
+│   │   │   │   ├── statusIndicator/
+│   │   │   │   └── templateReference/
+│   │   │   ├── mecenatPage/                   # Sponsorship page sections
+│   │   │   │   ├── avantageMecenat/
+│   │   │   │   ├── conclusion/
+│   │   │   │   ├── descriptionMecenat/
+│   │   │   │   ├── manifestMecenat/
+│   │   │   │   ├── needHelp/
+│   │   │   │   ├── slideMecenat/
+│   │   │   │   └── statsMecenat/
+│   │   │   ├── myDonations/                   # User donations view
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── index.scss
+│   │   │   ├── profilePage/                   # User profile
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── useProfileForm.ts
+│   │   │   ├── projectPage/                   # Project page sections
+│   │   │   │   ├── authorCard/
+│   │   │   │   ├── milestone/
+│   │   │   │   ├── projectDecription/
+│   │   │   │   └── slides/
+│   │   │   ├── sponsorshipForm/               # Donation form
+│   │   │   │   ├── steps/
+│   │   │   │   ├── logic/
+│   │   │   │   ├── badgeRescritFiscale.tsx
+│   │   │   │   ├── formBanners.tsx
+│   │   │   │   ├── formBody.tsx
+│   │   │   │   ├── formNavigation.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── index.scss
+│   │   │   └── _sponsorshipForm/              # Legacy sponsorship form
+│   │   │       ├── index.tsx
+│   │   │       ├── requests.ts
+│   │   │       └── useSponsorshipForm.ts
+│   │   └── components/                        # Reusable UI components
 │   │       ├── dropdownList/
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── media/                         # Media components
+│   │       │   ├── ImageHtml.tsx
+│   │       │   ├── ImageKit.tsx
+│   │       │   ├── MediaExtraProps.ts
+│   │       │   └── VideoKit.tsx
 │   │       ├── popUp/
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── spinnerButton/
+│   │       │   └── index.tsx
 │   │       ├── toaster/
-│   │       └── media/
-│   ├── config/                  # Configuration files
-│   │   ├── config.json          # Site configuration
-│   │   └── theme.json           # Theme configuration
-│   ├── styles/                  # Global styles
-│   │   ├── main.scss            # Main stylesheet entry
+│   │       │   ├── index.tsx
+│   │       │   └── index.scss
+│   │       ├── Counter.tsx
+│   │       ├── KillCookie.tsx
+│   │       ├── KlubrLogo.tsx
+│   │       ├── LottieAnimation.tsx
+│   │       ├── ProgresBar.tsx
+│   │       ├── RichTextBlock.tsx
+│   │       └── Share.tsx
+│   ├── config/                                # Configuration files
+│   │   ├── config.json                        # Site configuration
+│   │   └── theme.json                         # Theme configuration
+│   ├── styles/                                # Global styles
+│   │   ├── main.scss                          # Main stylesheet entry
 │   │   ├── base.scss
 │   │   ├── buttons.scss
 │   │   └── utilities.scss
-│   └── types/                   # Global TypeScript types
-├── next.config.js               # Next.js configuration
-├── tailwind.config.js           # TailwindCSS configuration
-└── tsconfig.json                # TypeScript configuration
+│   ├── types/                                 # Global TypeScript types
+│   │   ├── global.d.ts
+│   │   └── next-auth.d.ts
+│   └── middleware.ts                          # Next.js middleware
+├── next.config.js                             # Next.js configuration
+├── tailwind.config.js                         # TailwindCSS configuration
+├── postcss.config.js                          # PostCSS configuration
+├── tsconfig.json                              # TypeScript configuration
+└── package.json                               # Dependencies
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case for pages, camelCase for components
-- **Components**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
@@ -188,8 +352,8 @@ graph TD
 
 ##### Base Configuration
 
-@klubr-frontend/src/core/services/endpoints.ts
-@klubr-frontend/src/core/services/index.ts
+@donaction-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/index.ts
 
 - Environment URLs via `process.env`
 - `NEXT_PUBLIC_API_URL` for Strapi backend
@@ -229,7 +393,7 @@ ExecutorInterface {
 
 ##### NextAuth Integration
 
-@klubr-frontend/src/app/api/auth/[...nextauth]/route.ts
+@donaction-frontend/src/app/api/auth/[...nextauth]/route.ts
 
 **Providers**:
 - Google OAuth via `GoogleProvider`
@@ -249,7 +413,7 @@ ExecutorInterface {
 
 ##### Auth Service Layer
 
-@klubr-frontend/src/core/services/auth/index.ts
+@donaction-frontend/src/core/services/auth/index.ts
 
 **Endpoints**:
 - `me()` - GET `/api/users/me` with role, klubr_membres, avatar
@@ -266,7 +430,7 @@ ExecutorInterface {
 
 ##### State Management
 
-@klubr-frontend/src/core/store/modules/authSlice.ts
+@donaction-frontend/src/core/store/modules/authSlice.ts
 
 - Redux Toolkit slice for session state
 - Stores NextAuth session data
@@ -276,7 +440,7 @@ ExecutorInterface {
 
 ##### Endpoint Organization
 
-@klubr-frontend/src/core/services/endpoints.ts
+@donaction-frontend/src/core/services/endpoints.ts
 
 **Strapi Entities**:
 - Clubs: `/api/klubrs`
@@ -330,7 +494,7 @@ ExecutorInterface {
 
 ##### Hybrid: Next.js API Routes as Proxy
 
-@klubr-frontend/src/app/api/[...fetch]/route.ts
+@donaction-frontend/src/app/api/[...fetch]/route.ts
 
 **Purpose**: Unified proxy for all Strapi requests
 
@@ -355,7 +519,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 ##### Stripe Payment
 
-@klubr-frontend/src/app/api/create-payment-intent/route.ts
+@donaction-frontend/src/app/api/create-payment-intent/route.ts
 
 - Endpoint: `/api/create-payment-intent`
 - Creates Stripe PaymentIntent via server-side Stripe SDK
@@ -384,7 +548,7 @@ if (USER_TOKEN_ENDPOINTS.includes(endpoint)) {
 
 #### Key Dependencies
 
-@klubr-frontend/package.json
+@donaction-frontend/package.json
 
 - `next` ^14
 - `next-auth` ^4
@@ -425,7 +589,7 @@ argument-hint: N/A
 
 #### TypeScript Configuration
 
-Config: @klubr-frontend/tsconfig.json
+Config: @donaction-frontend/tsconfig.json
 
 - Strict mode enabled (`"strict": true`)
 - Target ES6
@@ -502,7 +666,7 @@ Config: @klubr-frontend/tsconfig.json
 
 #### Next.js Specifics
 
-Config: @klubr-frontend/next.config.js
+Config: @donaction-frontend/next.config.js
 
 - App Router (Next.js 14)
 - `reactStrictMode: false`
@@ -512,7 +676,7 @@ Config: @klubr-frontend/next.config.js
 
 #### Styling
 
-Config: @klubr-frontend/.prettierrc
+Config: @donaction-frontend/.prettierrc
 
 - Prettier for formatting
 - Tabs for indentation (`"useTabs": true`)
@@ -581,9 +745,9 @@ argument-hint: N/A
 
 #### Design System Files
 
-- **Theme Config**: @klubr-frontend/src/config/theme.json (colors, fonts) + @klubr-frontend/tailwind.config.js (Tailwind configuration)
-- **Design Components**: @klubr-frontend/src/layouts/components (reusable UI components)
-- **Style Guidelines**: @klubr-frontend/src/styles/main.scss (base, buttons, utilities layers)
+- **Theme Config**: @donaction-frontend/src/config/theme.json (colors, fonts) + @donaction-frontend/tailwind.config.js (Tailwind configuration)
+- **Design Components**: @donaction-frontend/src/layouts/components (reusable UI components)
+- **Style Guidelines**: @donaction-frontend/src/styles/main.scss (base, buttons, utilities layers)
 
 #### Design System
 
@@ -592,7 +756,7 @@ argument-hint: N/A
 - **Shadows**: Custom utilities - `shadow-default`, `shadow-xs`, `shadow-sm`, `shadow-md`, `boxBoxShadow` class, `shadow-button` for buttons
 - **Breakpoints**: Custom - `xs: 480px`, `sm: 575px`, `md: 768px`, `lg: 1024px`, `xl: 1320px`
 
-- **Color Palette**: See @klubr-frontend/src/config/theme.json
+- **Color Palette**: See @donaction-frontend/src/config/theme.json
 
   - Primary: `#000` (black) - Main brand, buttons, text headings
   - Secondary: `#73cfa8` (green) - Accent actions
@@ -606,7 +770,7 @@ argument-hint: N/A
   - Text Dark: `#222222` - Dark text
   - Text Light: `#fffefe` - Light text
 
-- **Typography**: See @klubr-frontend/src/config/theme.json
+- **Typography**: See @donaction-frontend/src/config/theme.json
   - Primary Font: Maven Pro (400, 500, 600, 700) - All text
   - Fallback: sans-serif
   - Base size: `16px`, Scale: `1.23` (exponential heading scale)
@@ -703,7 +867,7 @@ graph TD
 
 ### Testing Guidelines
 
-This document outlines the testing strategies and guidelines for klubr-frontend.
+This document outlines the testing strategies and guidelines for donaction-frontend.
 
 #### Test Coverage
 

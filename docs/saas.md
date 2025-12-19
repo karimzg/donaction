@@ -3,7 +3,6 @@
 - [Language/Framework](#languageframework)
   - [Frontend](#frontend)
 - [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
 - [Services communication](#services-communication)
   - [Form Workflow](#form-workflow)
   - [External Services](#external-services)
@@ -15,7 +14,7 @@
 
 ##### Frontend
 
-- **Framework**: Svelte 5 → @klubr-saas/package.json
+- **Framework**: Svelte 5 → @donaction-saas/package.json
 - **Component Type**: Web Components (Custom Elements)
 - **Routing**: N/A - Single component module
 - **Data Fetching**: Custom fetch util with event bus pattern
@@ -28,7 +27,7 @@
 #### Full project structure
 
 ```text
-klubr-saas/
+donaction-saas/
 ├── src/
 │   ├── assets/           # Static assets
 │   │   ├── animations/   # Lottie JSON files
@@ -44,20 +43,11 @@ klubr-saas/
 │   ├── utils/            # Shared utilities (eventBus, fetch, analytics)
 │   └── main.ts           # Entry point
 ├── build/                # Build output
-│   └── klubr-web-components/
+│   └── donaction-web-components/
 │       └── components/   # Individual component builds
 ├── vite.config.ts              # Production build config
 └── vite.config.development.ts  # Development build config
 ```
-
-##### Naming Conventions
-
-- **Files**: kebab-case for directories, PascalCase for components
-- **Components**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE
-- **Types/Interfaces**: PascalCase
 
 #### Services communication
 
@@ -137,7 +127,7 @@ argument-hint: N/A
 
 #### TypeScript Configuration
 
-Config: @klubr-saas/tsconfig.json
+Config: @donaction-saas/tsconfig.json
 
 - Extends `@tsconfig/svelte`
 - Target: ESNext
@@ -215,17 +205,17 @@ Config: @klubr-saas/tsconfig.json
 
 #### Vite Specifics
 
-Config: @klubr-saas/vite.config.ts
+Config: @donaction-saas/vite.config.ts
 
 - Plugin: `@sveltejs/vite-plugin-svelte`
 - Preprocess: `svelte-preprocess` with TypeScript
 - Custom elements: `customElement: true`
 - Build mode: `BUILD_MODE=INDIVIDUAL` for separate component builds
-- Output: ES modules to `build/klubr-web-components/components/`
+- Output: ES modules to `build/donaction-web-components/components/`
 
 #### Styling
 
-Config: @klubr-saas/.prettierrc
+Config: @donaction-saas/.prettierrc
 
 - Prettier for formatting
 - Tabs: 2 spaces (`"tabWidth": 2`)
@@ -280,7 +270,7 @@ src/
 
 ### Testing Guidelines
 
-Testing strategy and configuration for klubr-saas module.
+Testing strategy and configuration for donaction-saas module.
 
 #### Tools and Frameworks
 
@@ -306,7 +296,7 @@ Testing strategy and configuration for klubr-saas module.
 
 ##### File Structure
 - Tests in `__tests__` subdirectories
-- Example: @klubr-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
+- Example: @donaction-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
 
 ##### Common Patterns
 - Mock external dependencies (`Fetch`, `document.querySelectorAll`)

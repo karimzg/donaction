@@ -39,7 +39,7 @@ Here are the changes that defer from initial rules / documentation:
 
 ## Suggestions
 
-### DESIGN.md
+### docs/memory-bank/frontend/AGENTS.md
 + "Incorporate user feedback into the design process."
 - "Design should be based solely on initial requirements."
 

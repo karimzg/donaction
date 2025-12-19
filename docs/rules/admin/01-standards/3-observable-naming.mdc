@@ -1,0 +1,46 @@
+---
+description: Suffix all Observable variable names with $ for clear identification of async streams throughout the codebase
+globs:
+  - "donaction-admin/**/*.ts"
+  - "!donaction-admin/node_modules/**"
+---
+
+# Observable Naming
+
+## Naming Convention
+
+- Observable variables: suffix with `$`
+- Applies to properties, parameters, return types
+- Makes async streams immediately identifiable
+
+```typescript
+export class UserService {
+  me$: Observable<User>;
+  isAuthenticated$: Observable<boolean>;
+
+  getUser(userId: string): Observable<User> {
+    return this.http.get<User>(`/users/${userId}`);
+  }
+
+  loadUsers() {
+    this.users$ = this.http.get<User[]>('/users');
+  }
+}
+```
+
+## Usage in Components
+
+- Observable properties: `user$`, `loading$`
+- Subscriptions: use `async` pipe or `takeUntilDestroyed()`
+
+```typescript
+export class ProfileComponent {
+  user$ = inject(UserService).me$;
+}
+```
+
+```html
+<div *ngIf="user$ | async as user">
+  {{ user.name }}
+</div>
+```

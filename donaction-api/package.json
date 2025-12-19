@@ -1,0 +1,63 @@
+{
+  "name": "donaction-api",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Donaction Strapi API application",
+  "author": {
+    "name": "Khalfaoui/Chouiref/Zgoulli"
+  },
+  "scripts": {
+    "develop": "strapi develop --debug",
+    "start": "strapi start",
+    "build": "strapi build",
+    "start-node": "node dist/index.js",
+    "strapi": "strapi",
+    "gen:types": "strapi ts:generate-types --debug",
+    "export-db-archive": "timestamp=$(date \"+%Y%m%d-%H%M%S\") && strapi export --exclude files --file data/$timestamp-strapi-export --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
+    "export-db": "strapi export --exclude files --file data/strapi-export --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
+    "import-db": "strapi import  --exclude files --file data/strapi-export.tar.gz.enc --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@strapi/plugin-color-picker": "^5.13.0",
+    "@strapi/plugin-users-permissions": "^5.13.0",
+    "@strapi/provider-email-nodemailer": "^5.13.0",
+    "@strapi/strapi": "^5.13.0",
+    "csv-parser": "^3.2.0",
+    "google-auth-library": "^9.15.1",
+    "imagekit": "^6.0.0",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.3.2",
+    "pdf-lib": "^1.17.1",
+    "pdf2pic": "^3.1.3",
+    "pg": "8.8.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "sharp": "^0.33.5",
+    "sib-api-v3-sdk": "^8.5.0",
+    "strapi-advanced-uuid": "^2.0.2",
+    "strapi-provider-upload-imagekit": "https://github.com/karimzg/strapi-provider-upload-imagekit.git#1191a39c71de7286c2a95e6bf2dab7d84b428c70",
+    "stripe": "^17.6.0",
+    "styled-components": "^6.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "prettier": "^3.5.2",
+    "source-map-support": "^0.5.21",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "b95b005e-2ed5-415a-bdc7-25e98afc8b9b"
+  }
+}

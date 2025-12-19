@@ -1,0 +1,151 @@
+@if (user(); as user) {
+  @let lastProfileUsed = user | lastProfileUsed;
+  <div class="flex flex-col p-2.5 gap-2.5 border-1 rounded border-[#E2E8F0] max-w-[349px] text-black">
+    <div class="flex flex-col p-2 gap-1 bg-[#F8FAFC] rounded">
+      <span class="text-[#64748B] truncate text-base">{{ user.email }}</span>
+      <span class="text-base"> {{ user.createdAt | date: "dd/MM/yyyy" }}
+        | Last login: {{ user.lastLogin | date: "dd/MM/yyyy" }}</span>
+      <div class="flex gap-2">
+        <app-user-role-tag [role]="user.role.name"></app-user-role-tag>
+        <p-tag severity="secondary">{{ user.origine }}</p-tag>
+      </div>
+    </div>
+    <p class="m-0 font-semibold"> Profils rattachés </p>
+    <div class="flex flex-col p-2 gap-2 bg-[#F8FAFC] rounded min-h-[45px] justify-center">
+      <div class="flex gap-2 text-black items-center justify-between">
+        @if (lastProfileUsed) {
+          <div class="flex gap-1 items-center gap-1">
+            <app-klub-infos [klub]="lastProfileUsed?.klubr" [displaySport]="false"></app-klub-infos>
+            @if (lastProfileUsed?.role) {
+              <app-role-tag [role]="lastProfileUsed!.role"></app-role-tag>
+            }
+          </div>
+          @if (user.klubr_membres.length > 1) {
+            <i class="pi pi-users cursor-pointer text-[1.5rem]" (click)="toggleUserOp($event)"></i>
+          }
+        } @else {
+          <p class="m-0 text-[#64748B] text-base"> Aucun profil rattaché </p>
+        }
+      </div>
+    </div>
+    <hr class="border-t border-gray-300 my-1">
+    <div class="flex flex-1 justify-between items-center">
+      <div class="flex gap-2 items-center">
+        <p class="m-0 font-semibold"> Dons </p>
+        @if (user.stats) {
+          <p-tag severity="success"> {{ user.stats!.montantTotal + user.stats!.montantContributionsTotal }}€
+          </p-tag>
+        } @else {
+          <p-tag severity="success"> 0€</p-tag>
+        }
+      </div>
+      @if (user.stats!.montantTotal + user.stats!.montantContributionsTotal !== 0) {
+        <i class="pi pi-info-circle cursor-pointer text-[1.5rem]" (click)="toggleDonationOp($event)"></i>
+      }
+    </div>
+
+  </div>
+  <!-- PROFILES POPOVER-->
+  <p-popover #profilesOp>
+    <div class="flex flex-col gap-2">
+      @for (attachedProfile of user.klubr_membres; track attachedProfile.uuid) {
+        @if (attachedProfile.uuid !== lastProfileUsed?.uuid) {
+          <div class="flex flex-col p-2 gap-2 bg-[#F8FAFC] rounded">
+            <div class="flex gap-2 text-black items-center justify-between">
+              <app-klub-infos [klub]="attachedProfile.klubr" [displaySport]="false"></app-klub-infos>
+              <app-role-tag [role]="attachedProfile.role"></app-role-tag>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </p-popover>
+  <!-- PROFILES DRAWER-->
+  <p-drawer #profilesDrawerRef
+            [(visible)]="showProfilesDrawer"
+            position="bottom"
+            blockScroll="true"
+            transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)">
+    <ng-template #headless>
+      <div class="flex flex-col px-3 py-4 gap-2 bg-[#F8FAFC] border-solid border border-[#E2E8F0] rounded-lg">
+        @for (attachedProfile of user.klubr_membres; track attachedProfile.uuid) {
+          @if (attachedProfile.uuid !== lastProfileUsed?.uuid) {
+            <div class="flex gap-2 text-black items-center justify-between">
+              <app-klub-infos [klub]="attachedProfile.klubr" [displaySport]="false"></app-klub-infos>
+              <app-role-tag [role]="attachedProfile.role"></app-role-tag>
+            </div>
+          }
+        }
+      </div>
+    </ng-template>
+  </p-drawer>
+  <!-- DONATIONS POPOVER-->
+  <p-popover #donationsOp>
+    <div class="flex flex-col gap-2">
+      <!--      <div class="flex flex-col p-2 gap-2 bg-[#F8FAFC] rounded">-->
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Nb dons particulier </span>
+        <p-tag severity="secondary"> {{ user.stats?.nbDonsParticuliers }}</p-tag>
+      </div>
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Nb dons pro </span>
+        <p-tag severity="secondary"> {{ user.stats?.nbDonsOrganismes }}</p-tag>
+      </div>
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Montant total de dons </span>
+        <p-tag severity="success"> {{ user.stats?.montantTotal }}€</p-tag>
+      </div>
+      <hr class="border-t border-gray-300 my-1">
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Nb dons de contribution Part </span>
+        <p-tag severity="secondary"> {{ user.stats?.nbDonsContributionParticuliers }}</p-tag>
+      </div>
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Nb Dons de contribution Pro </span>
+        <p-tag severity="secondary"> {{ user.stats?.nbDonsContributionOrganismes }}</p-tag>
+      </div>
+      <div class="flex gap-2 justify-between text-black">
+        <span class="text-[#777777]"> Montant total des dons de contribution </span>
+        <span><p-tag severity="success"> {{ user.stats?.montantContributionsTotal }}€ </p-tag></span>
+      </div>
+      <!--      </div>-->
+    </div>
+  </p-popover>
+  <!-- DONATIONS DRAWER-->
+  <p-drawer #drawerRef
+            [(visible)]="showDonationsDrawer"
+            position="bottom"
+            blockScroll="true"
+            transitionOptions="250ms cubic-bezier(0, 0, 0.2, 1)">
+    <ng-template #headless>
+      <div class="flex flex-col px-3 py-4 gap-2 bg-white border-solid border border-[#E2E8F0] rounded-lg">
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Nb dons particulier </span>
+          <p-tag severity="secondary"> {{ user.stats?.nbDonsParticuliers }}</p-tag>
+        </div>
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Nb dons pro </span>
+          <p-tag severity="secondary"> {{ user.stats?.nbDonsOrganismes }}</p-tag>
+        </div>
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Montant total de dons </span>
+          <p-tag severity="success"> {{ user.stats?.montantTotal }}€</p-tag>
+        </div>
+        <hr class="border-t border-gray-300 my-1">
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Nb dons de contribution Part </span>
+          <p-tag severity="secondary"> {{ user.stats?.nbDonsContributionParticuliers }}</p-tag>
+        </div>
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Nb Dons de contribution Pro </span>
+          <p-tag severity="secondary"> {{ user.stats?.nbDonsContributionOrganismes }}</p-tag>
+        </div>
+        <div class="flex gap-2 justify-between text-black">
+          <span class="text-[#777777]"> Montant total des dons de contribution </span>
+          <span><p-tag severity="success"> {{ user.stats?.montantContributionsTotal }}€ </p-tag></span>
+        </div>
+      </div>
+    </ng-template>
+  </p-drawer>
+
+}

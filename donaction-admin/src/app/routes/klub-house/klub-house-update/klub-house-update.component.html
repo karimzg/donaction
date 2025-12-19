@@ -1,0 +1,746 @@
+<div class="flex flex-col sm:flex-row sm:gap-4 sm:sticky top-[70px] bg-white px-3 mx-[-1rem] z-10 pt-3">
+  <h1 #title class="admin-h1 flex flex-1 items-center gap-4">
+    <i (click)="goBack()" class="pi pi-arrow-circle-left text-[1.5rem] cursor-pointer"></i>
+    @if (entitySignal()?.uuid) {
+      Modifier ma page Klub
+    } @else {
+      Créer une nouvelle page Klub
+    }
+  </h1>
+  <div class="flex flex-row sm:flex-row justify-between gap-4 mb-4">
+    <p-button class="" label="Voir la page Klub" (click)="openPreview()" icon="pi pi-eye" severity="primary"
+              [disabled]="!editMode || sharedFacade.loading()"/>
+  </div>
+</div>
+@if (isReady() && entityForm) {
+  <form [formGroup]="entityForm" (ngSubmit)="onSubmit()" appInvalidControlScroll class="flex flex-col gap-4" @fade>
+    <!-- MEDIAS -->
+    <div class="flex gap-4 flex-wrap md:flex-nowrap">
+      <ng-container formGroupName="klub">
+        <div class="flex flex-auto flex-col gap-2 max-w-[300px]">
+          <label for="logo" class="flex gap-1"><b> Logo </b><span
+            class="text-red-700">*</span></label>
+          <input id="logo" type="text" class="hidden" formControlName="logo">
+          <app-form-media-update
+            [endpointPrefix]="'medias/klubr/'"
+            [itemUUID]="entitySignal()!.klubr.uuid"
+            [itemMediaLabel]="'Logo'"
+            [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"
+            [mediaField]="'logo'"
+            [disabled]="formDisabled()"
+            #logo
+          >
+            <p> Glissez votre fichier ici. </p>
+          </app-form-media-update>
+          <app-error-display [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+
+      </ng-container>
+      <ng-container formGroupName="klubrHouse">
+        <div class="flex flex-auto flex-col gap-2">
+          <label for="couverture" class="flex gap-1"><b> Image de couverture </b><span
+            class="text-red-700">*</span></label>
+          <input id="couverture" type="text" class="hidden" formControlName="couvertureMedia">
+          <app-form-media-update
+            [endpointPrefix]="'medias/klubr-house/'"
+            [itemUUID]="entitySignal()!.uuid"
+            [itemMediaLabel]="'Image de couverture'"
+            [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'couvertureMedia'"
+            [mediaField]="'couvertureMedia'"
+            [disabled]="formDisabled()"
+            [fileTypesAllowed]="fileTypesAllowed()"
+            [mediaType]="!!entity()?.couvertureMedia?.mime?.startsWith('video') ? 'video' : 'img'"
+            activateCropperForImg="true"
+            [aspectRatio]="2.8"
+            #couverture
+          >
+            <p> Glissez votre fichier ici. </p>
+          </app-form-media-update>
+          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'couvertureMedia'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </ng-container>
+    </div>
+
+    <ng-container formGroupName="klubrHouse">
+      <!-- COLORS -->
+      <div class="flex gap-4 flex-wrap">
+        <div class="flex flex-col gap-2 min-w-[250px] basis-[250px] grow shrink">
+          <label for="primaryColor" class="flex gap-1"><b>Couleur Primaire </b><span
+            class="text-red-700">*</span></label>
+          <div class="flex gap-2 items-center">
+            <p-colorPicker formControlName="primary_color"/>
+            <input id="primaryColor" pInputText type="text" placeholder="Couleur Primaire"
+                   [value]="((entityForm | formGroup : 'klubrHouse')  | formControl : 'primary_color').value"
+                   (change)="setValue($event)"
+                   class="w-full">
+          </div>
+          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'primary_color'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 min-w-[250px] basis-[250px] grow shrink">
+          <label for="secondaryColor" class="flex gap-1"><b>Couleur Secondaire </b><span
+            class="text-red-700">*</span></label>
+          <div class="flex gap-2 items-center">
+            <p-colorPicker formControlName="secondary_color"/>
+            <input id="secondaryColor" pInputText type="text" placeholder="Couleur Secondaire"
+                   [value]="((entityForm | formGroup : 'klubrHouse')  | formControl : 'secondary_color').value"
+                   (change)="setValue($event, 'secondary_color')"
+                   class="w-full">
+          </div>
+          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'secondary_color'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 min-w-[250px] basis-[250px] grow shrink">
+          <label for="headerTextColor" class="flex gap-1"><b>Couleur de texte du header </b></label>
+          <div class="flex gap-2 items-center">
+            <p-colorPicker formControlName="header_text_color"/>
+            <input id="headerTextColor" pInputText type="text" placeholder="Couleur de texte du header"
+                   [value]="((entityForm | formGroup : 'klubrHouse')  | formControl : 'header_text_color').value"
+                   (change)="setValue($event, 'header_text_color')"
+                   class="w-full">
+          </div>
+          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'header_text_color'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+        <div class="flex flex-col gap-2 min-w-[250px] basis-[250px] grow shrink">
+          <label for="footerTextColor" class="flex gap-1"><b>Couleur de texte du footer </b></label>
+          <div class="flex gap-2 items-center">
+            <p-colorPicker formControlName="footer_text_color"/>
+            <input id="footerTextColor" pInputText type="text" placeholder="Couleur de texte du footer"
+                   [value]="((entityForm | formGroup : 'klubrHouse')  | formControl : 'footer_text_color').value"
+                   (change)="setValue($event, 'footer_text_color')"
+                   class="w-full">
+          </div>
+          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'footer_text_color'"
+                             [isSubmitted]="isSubmitted()"></app-error-display>
+        </div>
+      </div>
+      <hr class="flex flex-1">
+
+      @if (false) {
+        <!-- TODO: CHIFFRES -->
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center gap-3">
+            <div class="flex flex-auto flex-col gap-3">
+              <label class="flex gap-1"><b> Chiffres </b><span class="text-red-700">*</span></label>
+              <input pInputText type="number" placeholder="Chiffre">
+              <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'adresse'"-->
+              <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+            </div>
+            <div class="flex flex-auto flex-col gap-3">
+              <label class="flex gap-1"><b> Texte </b><span class="text-red-700">*</span></label>
+              <div class="flex gap-3 items-center">
+                <input pInputText type="text" placeholder="Texte" class="w-full">
+                <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'adresse'"-->
+                <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                <i
+                  class="pi pi-trash ml-auto rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-auto flex-col gap-3">
+              <input pInputText type="number" placeholder="Chiffre">
+              <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'adresse'"-->
+              <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+            </div>
+            <div class="flex flex-auto flex-col gap-3">
+              <div class="flex gap-3 items-center">
+                <input pInputText type="text" placeholder="Texte" class="w-full">
+                <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'adresse'"-->
+                <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                <i
+                  class="pi pi-trash ml-auto rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- NUMBERS -->
+        <div class="flex items-center gap-1 border-solid border rounded border-[#E2E8F0] p-2">
+          <div class="flex flex-col gap-2">
+            <b> Des chiffres clés </b>
+            <p class="m-0 text-[0.9rem] text-[#64748B]"> (Incluez une section pour présenter les chiffres clés : soit
+              aucun chiffre clé, soit exactement trois, mais pas un ni deux.) </p>
+          </div>
+          <button class="flex items-center rounded-full p-2 ml-auto border-none">
+            <i class="pi pi-plus p-1 bg-[#EFEFEF] rounded-full"></i>
+          </button>
+        </div>
+
+        <hr class="flex flex-1">
+      }
+
+
+      <!-- PRESENTATIION -->
+      <div class="flex flex-col gap-2">
+        <label for="titre" class="flex gap-1"><b> Titre </b><span class="text-red-700">*</span></label>
+        <input id="titre" pInputText type="text" placeholder="Titre" formControlName="title">
+        <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="flex flex-col lg:flex-row gap-1">
+          <div><b>Description</b><span class="text-red-700">*</span></div>
+          <span class="text-gray-500 text-sm self-center leading-none">(Cette description ne doit pas excéder 1200 caractères)</span>
+        </label>
+        <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                    [placeholder]="'Décrivez votre Klub'" [minChars]="50"
+                    [maxChars]="1200"></app-editor>
+        <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                           [handleWarnings]="true"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+      @if (false) {
+
+        <hr class="flex flex-1">
+
+        <p-accordion class="w-full flex gap-5 customAccordeon"
+                     (valueChange)="mainAccordionActiveValueChange($event)"
+                     [value]="mainAccordionActiveValue">
+          <!-- DIRECTOR'S WORD -->
+          <p-accordion-panel value="0">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <i class="pi pi-align-center rounded-full text-[#FFFFFF] p-2 text-[1.5rem]"></i>
+                  <h3 class="text-white m-0 text-[1.14rem]"> Mot du dirigeant </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="getMainAccordionTabIcon('0')"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="mainAccordionActiveValue = '0'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="flex flex-col gap-5 mt-5">
+                <div class="flex flex-col gap-2">
+                  <label for="nomDuDirigeant" class="flex gap-1"><b> Nom du dirigeant </b><span
+                    class="text-red-700">*</span></label>
+                  <input id="nomDuDirigeant" pInputText type="text" placeholder="Nom du dirigeant">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="flex flex-col lg:flex-row gap-1">
+                    <div><b>Mot du dirigeant</b><span class="text-red-700">*</span></div>
+                    <span
+                      class="text-gray-500 text-sm self-center leading-none">(Cette description ne doit pas excéder 1000 caractères)</span>
+                  </label>
+                  <!-- formControlName to change -->
+                  <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                              [placeholder]="'Ajoutez une citation'" [minChars]="50"
+                              [maxChars]="1000"></app-editor>
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                  <!--                             [handleWarnings]="true"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label for="signature" class="flex gap-1"><b> Signature </b><span class="text-red-700">*</span></label>
+                  <input id="signature" pInputText type="text" placeholder="Nom Prénom, Fonction">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+
+          <!-- CITATION -->
+          <p-accordion-panel value="1">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <i class="pi pi-comment rounded-full text-[#FFFFFF] p-2 text-[1.5rem]"></i>
+                  <h3 class="text-white m-0 text-[1.14rem]"> Citation </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="getMainAccordionTabIcon('1')"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="mainAccordionActiveValue = '1'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="flex flex-col gap-5">
+                <p-accordion class="w-full flex gap-5 mt-5 customSubAccordeon"
+                             (valueChange)="citationAccordionActiveValueChange($event)"
+                             [value]="citationAccordionActiveValue">
+                  <p-accordion-panel value="0">
+                    <p-accordion-header>
+                      <div class="flex flex-1 mr-2 text-white">
+                        <div class="flex flex-1 items-center">
+                          <div class="flex gap-2 items-center">
+                            <i [ngClass]="getCitationAccordionTabIcon('0')"
+                               class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                               (click)="citationAccordionActiveValue = '0'"
+                            ></i>
+                            <b class="text-black"> Alexandre, Joueur </b>
+                          </div>
+                          <div class="ml-auto">
+                            <i
+                              class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </p-accordion-header>
+                    <p-accordion-content>
+                      <div class="flex flex-col gap-5 py-4 px-5 border-solid border rounded border-[#D7D9DE] bg-[#F9FAFB]">
+                        <div class="flex flex-col gap-2">
+                          <label class="flex flex-col lg:flex-row gap-1">
+                            <div><b> Citation </b><span class="text-red-700">*</span></div>
+                            <span
+                              class="text-gray-500 text-sm self-center leading-none">(Cette citation ne doit pas excéder 100 caractères)</span>
+                          </label>
+                          <!-- formControlName to change -->
+                          <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                                      [placeholder]="'Ajoutez une citation'" [minChars]="10"
+                                      [maxChars]="100"></app-editor>
+                          <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                          <!--                             [handleWarnings]="true"-->
+                          <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                        </div>
+                        <div class="flex flex-col gap-2">
+                          <label for="signatureCitation" class="flex gap-1"><b> Signature </b><span
+                            class="text-red-700">*</span></label>
+                          <input id="signatureCitation" pInputText type="text" placeholder="Prénom, Fonction">
+                          <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                          <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                        </div>
+                      </div>
+                    </p-accordion-content>
+                  </p-accordion-panel>
+                </p-accordion>
+                <div class="flex items-center gap-1 border-solid border rounded border-[#E2E8F0] p-2">
+                  <div class="flex flex-col gap-2">
+                    <b> Liste des citations </b>
+                    <p class="m-0 text-[0.9rem] text-[#64748B]"> (Ajoutez ici une nouvelle citation) </p>
+                  </div>
+                  <button class="flex items-center rounded-full p-2 ml-auto border-none">
+                    <i class="pi pi-plus p-1 bg-[#EFEFEF] rounded-full"></i>
+                  </button>
+                </div>
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+
+          <!-- WHY KLUBR -->
+          <p-accordion-panel value="2">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <i class="pi pi-link rounded-full text-[#FFFFFF] p-2 text-[1.5rem]"></i>
+                  <h3 class="text-white m-0 text-[1.14rem]"> Pourquoi Klubr vous accompagne </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="getMainAccordionTabIcon('2')"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="mainAccordionActiveValue = '2'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="flex flex-col gap-5 mt-5">
+                <div class="flex flex-col gap-2">
+                  <label for="pourquoiKlubrTitre" class="flex gap-1"><b> Titre </b><span
+                    class="text-red-700">*</span></label>
+                  <input id="pourquoiKlubrTitre" pInputText type="text" placeholder="Titre">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="flex flex-col lg:flex-row gap-1">
+                    <div><b> Description </b><span class="text-red-700">*</span></div>
+                    <span
+                      class="text-gray-500 text-sm self-center leading-none">(Cette description ne doit pas excéder 700 caractères)</span>
+                  </label>
+                  <!-- formControlName to change -->
+                  <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                              [placeholder]="'Ajoutez une citation'" [minChars]="50"
+                              [maxChars]="700"></app-editor>
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                  <!--                             [handleWarnings]="true"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+
+          <!-- LOCATION -->
+          <p-accordion-panel value="3">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <i class="pi pi-map-marker rounded-full text-[#FFFFFF] p-2 text-[1.5rem]"></i>
+                  <h3 class="text-white m-0 text-[1.14rem]"> Localisation </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="getMainAccordionTabIcon('3')"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="mainAccordionActiveValue = '3'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="flex flex-col gap-5 mt-5">
+                <div class="flex flex-col gap-2">
+                  <label for="localisationTitre" class="flex gap-1"><b> Titre </b><span
+                    class="text-red-700">*</span></label>
+                  <input id="localisationTitre" pInputText type="text" placeholder="Où sommes-nous ?">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex gap-6">
+                  <div class="flex flex-col gap-2">
+                    <label class="flex flex-col lg:flex-row gap-1">
+                      <div><b> Adresse </b><span class="text-red-700">*</span></div>
+                    </label>
+                    <!-- formControlName to change -->
+                    <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                                [placeholder]="'John Doe, 456 Elm Street, Suite 3, Los Angeles, CA 90001,France'"
+                                [minChars]="50"
+                                [maxChars]="1000"></app-editor>
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                    <!--                             [handleWarnings]="true"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label class="flex flex-col lg:flex-row gap-1">
+                      <div><b> Accès </b></div>
+                    </label>
+                    <!-- formControlName to change -->
+                    <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                                [placeholder]="''" [minChars]="50"
+                                [maxChars]="1000"></app-editor>
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                    <!--                             [handleWarnings]="true"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="flex flex-1 flex-col gap-2">
+                    <label for="localisationEmail" class="flex gap-1"><b> Email de contact </b><span
+                      class="text-red-700">*</span></label>
+                    <input id="localisationEmail" pInputText type="text" placeholder="Adresse email">
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                  <div class="flex flex-1 flex-col gap-2">
+                    <label for="localisationTelephone" class="flex gap-1"><b> Téléphone de contact </b></label>
+                    <input id="localisationTelephone" pInputText type="text" placeholder="+33 XX XX XX XX XX">
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label for="localisation" class="flex gap-1"><b> Localisation </b><span
+                    class="text-red-700">*</span></label>
+                  <input id="localisation" pInputText type="text"
+                         placeholder="John Doe, 456 Elm Street, Suite 3, Los Angeles, CA 90001,France">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex gap-4">
+                  <div class="flex flex-1 flex-col gap-2">
+                    <label for="latitude" class="flex items-center gap-1">
+                      <b> Latitude </b>
+                      <i class="pi pi-info-circle rounded-full text-[#A0A0A0] p-2"
+                         pTooltip="Position nord-sud d'un point. Vous pouvez la trouver sur Google Maps."
+                         tooltipPosition="top"
+                      ></i>
+                    </label>
+                    <input id="latitude" pInputText type="text" placeholder="Latitude">
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                  <div class="flex flex-1 flex-col gap-2">
+                    <label for="longitude" class="flex items-center gap-1">
+                      <b> Longitude </b>
+                      <i class="pi pi-info-circle rounded-full text-[#A0A0A0] p-2"
+                         pTooltip="Position est-ouest d'un point. Vous pouvez la trouver sur Google Maps."
+                         tooltipPosition="top"
+                      ></i>
+                    </label>
+                    <input id="longitude" pInputText type="text" placeholder="Longitude">
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                </div>
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+
+          <!-- IMAGE/TEXT -->
+          <p-accordion-panel value="4">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <i class="pi pi-images rounded-full text-[#FFFFFF] p-2 text-[1.5rem]"></i>
+                  <h3 class="text-white m-0 text-[1.14rem]"> Section Image/Text </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="getMainAccordionTabIcon('4')"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="mainAccordionActiveValue = '4'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="flex flex-col gap-5 mt-5">
+                <div class="flex flex-col gap-2">
+                  <label for="imageTexteTitre" class="flex gap-1"><b> Titre </b><span
+                    class="text-red-700">*</span></label>
+                  <input id="imageTexteTitre" pInputText type="text" placeholder="Titre">
+                  <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                  <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                </div>
+                <div class="flex flex-row gap-2">
+                  <div class="flex flex-1  flex-col gap-2">
+                    <label class="flex flex-col lg:flex-row gap-1">
+                      <div><b>Texte</b><span class="text-red-700">*</span></div>
+                      <span class="text-gray-500 text-sm self-center leading-none">(Cet texte ne doit pas excéder 1000 caractères)</span>
+                    </label>
+                    <!-- formControlName to change -->
+                    <app-editor [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"
+                                [placeholder]="'Ajoutez une citation'" [minChars]="50"
+                                [maxChars]="1000"></app-editor>
+                    <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'description'"-->
+                    <!--                             [handleWarnings]="true"-->
+                    <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                  </div>
+                  <div class="flex flex-1  flex-col gap-2">
+                    <label for="image" class="flex gap-1"><b> Image </b><span
+                      class="text-red-700">*</span></label>
+                    <input id="image" type="text" class="hidden">
+                    <!-- TODO: set correct data -->
+                    <div class="flex flex-col gap-4">
+                      <app-form-media-update
+                        [endpointPrefix]="'medias/klubr/'"
+                        [itemUUID]="entitySignal()!.klubr.uuid"
+                        [itemMediaLabel]="'Logo'"
+                        [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"
+                        [mediaField]="'logo'"
+                        [disabled]="formDisabled()"
+                        #image
+                      >
+                      </app-form-media-update>
+                      <!--                  <app-error-display [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"-->
+                      <!--                                     [isSubmitted]="isSubmitted()"></app-error-display>-->
+
+                      <div class="flex gap-4 align-items-center">
+                        <div>
+                          <p-radiobutton
+                            name="isLeft"
+                            [(ngModel)]="isLeft"
+                            [value]="true"
+                            inputId="gauche"
+                            id="gauche"
+                            class="customCheckbox"></p-radiobutton>
+                          <label for="gauche">
+                            Texte à gauche
+                          </label>
+                        </div>
+                        <div>
+                          <p-radiobutton
+                            name="isLeft"
+                            [(ngModel)]="isLeft"
+                            [value]="false"
+                            id="droite"
+                            class="customCheckbox"/>
+                          <label for="droite">
+                            Texte à droite
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!--            <div class="flex flex-col gap-3">-->
+                <!--              <div class="flex flex-col md:flex-row gap-1 md:items-center">-->
+                <!--                <label for="emplacementTexte" class="flex gap-1"><b> Emplacement du texte </b><span class="text-red-700">*</span></label>-->
+                <!--                <input id="emplacementTexte" type="text" class="hidden">-->
+                <!--                &lt;!&ndash;          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"&ndash;&gt;-->
+                <!--                &lt;!&ndash;                             [isSubmitted]="isSubmitted()"></app-error-display>&ndash;&gt;-->
+                <!--                <span class="text-[0.9rem] text-[#64748B]">Choisissez où doit se placer le texte par rapport à l'image.</span>-->
+                <!--              </div>-->
+                <!--                <p-selectButton-->
+                <!--                [options]="[{label: 'Gauche', value: 'true'}, {label: 'Droite', value: 'false'}]"-->
+                <!--                formControlName="value"-->
+                <!--                optionLabel="label"-->
+                <!--                optionValue="value" />-->
+                <!--            </div>-->
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+        </p-accordion>
+
+        <!-- ADD SECTION -->
+        <div class="flex flex-col bg-[#F8FAFC] gap-4 items-center border-solid border rounded border-[#E2E8F0] p-5">
+          <b> Choisir et ajouter une section </b>
+          <div class="flex flex-wrap justify-center gap-4">
+            <div
+              class="flex flex-col justify-center text-center gap-2 w-[155px] border-solid border rounded border-[#E2E8F0] p-3 cursor-pointer">
+              <i class="pi pi-align-center self-center rounded-full text-[#64748B] bg-[#E2E8F0] p-2 text-[1.5rem]"></i>
+              <p class="m-0 text-[#64748B]"> Mot du dirigeant </p>
+            </div>
+            <div
+              class="flex flex-col justify-center text-center gap-2 w-[155px] border-solid border rounded border-[#E2E8F0] p-3 cursor-pointer">
+              <i class="pi pi-comments self-center rounded-full text-[#64748B] bg-[#E2E8F0] p-2 text-[1.5rem]"></i>
+              <p class="m-0 text-[#64748B]"> Citation </p>
+            </div>
+            <div
+              class="flex flex-col justify-center text-center gap-2 w-[155px] border-solid border rounded border-[#E2E8F0] p-3 cursor-pointer">
+              <i class="pi pi-link self-center rounded-full text-[#64748B] bg-[#E2E8F0] p-2 text-[1.5rem]"></i>
+              <p class="m-0 text-[#64748B]"> Pourquoi Klubr accompagne </p>
+            </div>
+            <div
+              class="flex flex-col justify-center text-center gap-2 w-[155px] border-solid border rounded border-[#E2E8F0] p-3 cursor-pointer">
+              <i class="pi pi-map-marker self-center rounded-full text-[#64748B] bg-[#E2E8F0] p-2 text-[1.5rem]"></i>
+              <p class="m-0 text-[#64748B]"> Localisation </p>
+            </div>
+            <div
+              class="flex flex-col justify-center text-center gap-2 w-[155px] border-solid border rounded border-[#E2E8F0] p-3 cursor-pointer">
+              <i class="pi pi-images self-center rounded-full text-[#64748B] bg-[#E2E8F0] p-2 text-[1.5rem]"></i>
+              <p class="m-0 text-[#64748B]"> Section Image/Text </p>
+            </div>
+          </div>
+        </div>
+
+        <hr class="flex flex-1">
+
+        <!-- PARTNERS -->
+        <p-accordion class="w-full flex gap-5 customAccordeon"
+                     (valueChange)="partnersAccordionActiveValueChange($event)"
+                     [value]="partnersAccordionActiveValue">
+          <p-accordion-panel value="0">
+            <p-accordion-header>
+              <div class="flex flex-1 mr-2">
+                <div class="flex gap-2 items-center">
+                  <h3 class="text-white m-0 text-[1.14rem]"> Liste des partenaires </h3>
+                </div>
+                <div class="ml-auto flex gap-2">
+                  <i [ngClass]="partnersAccordionActiveValue === '0' ? 'pi pi-angle-up' : 'pi pi-angle-down'"
+                     class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                     (click)="partnersAccordionActiveValue = '0'"
+                  ></i>
+                  <i class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <p-accordion class="w-full flex gap-5 mt-5 customSubAccordeon"
+                           (valueChange)="partnersSubAccordionActiveValueChange($event)"
+                           [value]="partnersSubAccordionActiveValue">
+                <p-accordion-panel value="0">
+                  <p-accordion-header>
+                    <div class="flex flex-1 mr-2 text-white">
+                      <div class="flex flex-1 gap-2 items-center">
+                        <i [ngClass]="partnersSubAccordionActiveValue === '0' ? 'pi pi-angle-up' : 'pi pi-angle-down'"
+                           class="rounded-full bg-[#E2E8F0] text-black p-2 text-[1.5rem]"
+                           (click)="partnersSubAccordionActiveValue = '0'"
+                        ></i>
+                        <b class="text-black"> Partenaire 1 </b>
+                        <div class="ml-auto">
+                          <i
+                            class="pi pi-trash rounded-full text-[#E3271B] bg-[#FCE7E7] p-2 text-[1.5rem] cursor-pointer"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </p-accordion-header>
+                  <p-accordion-content>
+                    <div class="flex flex-col gap-5 py-4 px-5 border-solid border rounded border-[#D7D9DE] bg-[#F9FAFB]">
+                      <div class="flex flex-col md:flex-row gap-2">
+                        <div class="flex flex-auto flex-col gap-2 max-w-[300px]">
+                          <label for="logoPartenaire" class="flex gap-1"><b> Logo </b><span
+                            class="text-red-700">*</span></label>
+                          <input id="logoPartenaire" type="text" class="hidden" formControlName="logo">
+                          <app-form-media-update
+                            [endpointPrefix]="'medias/klubr/'"
+                            [itemUUID]="entitySignal()!.klubr.uuid"
+                            [itemMediaLabel]="'Logo'"
+                            [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"
+                            [mediaField]="'logo'"
+                            [disabled]="formDisabled()"
+                            #logo
+                          >
+                          </app-form-media-update>
+                          <app-error-display [control]="(entityForm | formGroup : 'klub')  | formControl : 'logo'"
+                                             [isSubmitted]="isSubmitted()"></app-error-display>
+                        </div>
+
+                        <div class="flex flex-1 flex-col gap-2">
+                          <label for="nomDuPartenaire" class="flex gap-1"><b> Nom du partenaire </b><span
+                            class="text-red-700">*</span></label>
+                          <input id="nomDuPartenaire" pInputText type="text" placeholder="Nom du partenaire">
+                          <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                          <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                        </div>
+                        <div class="flex flex-1 flex-col gap-2">
+                          <label for="lien" class="flex gap-1"><b> Lien </b><span class="text-red-700">*</span></label>
+                          <input id="lien" pInputText type="text" placeholder="https://www.votre-partenaire.fr/">
+                          <!--          <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'title'"-->
+                          <!--                             [isSubmitted]="isSubmitted()"></app-error-display>-->
+                        </div>
+                      </div>
+                    </div>
+                  </p-accordion-content>
+                </p-accordion-panel>
+              </p-accordion>
+            </p-accordion-content>
+          </p-accordion-panel>
+        </p-accordion>
+
+
+        <div class="flex items-center gap-1 border-solid border rounded border-[#E2E8F0] p-2">
+          <div class="flex flex-col gap-2">
+            <b> Liste de partenaires </b>
+            <p class="m-0 text-[0.9rem] text-[#64748B]"> (Ajoutez ici les partenaires de votre club) </p>
+          </div>
+          <button class="flex items-center rounded-full p-2 ml-auto border-none">
+            <i class="pi pi-plus p-1 bg-[#EFEFEF] rounded-full"></i>
+          </button>
+        </div>
+      }
+
+      <!-- META DESCRIPTION -->
+      <div class="flex flex-col gap-2">
+        <label for="meta-desc" class="flex flex-col lg:flex-row gap-1">
+          <span><b>Meta Description</b><span class="text-red-700">*</span></span>
+          <span
+            class="text-gray-500 text-sm self-center leading-none">(Un court résumé qui apparaît dans les résultats de recherche.)</span>
+        </label>
+        <textarea
+          placeholder="Décrivez votre klub en quelques mots... Cette description ne doit pas excéder 160 caractères"
+          pTextarea
+          formControlName="metaDescription" id="meta-desc" cols="30" rows="4"></textarea>
+        <app-error-display [control]="(entityForm | formGroup : 'klubrHouse')  | formControl : 'metaDescription'"
+                           [handleWarnings]="true"
+                           [isSubmitted]="isSubmitted()"></app-error-display>
+      </div>
+    </ng-container>
+    <hr class="flex flex-1">
+
+    <div class="flex justify-between sticky bottom-0 py-3 px-3 mx-[-1rem] bg-white">
+      <p-button label="Annuler" icon="pi pi-times" severity="secondary" (onClick)="resetForm()"
+                [disabled]="entityForm.pristine || sharedFacade.loading() || couverture.loading()">
+
+      </p-button>
+      <p-button type="submit" class="ml-auto" label="Enregistrer" icon="pi pi-save" severity="contrast"
+                [disabled]="entityForm.pristine"
+                [loading]="sharedFacade.loading() || couverture.loading()">
+      </p-button>
+    </div>
+  </form>
+}

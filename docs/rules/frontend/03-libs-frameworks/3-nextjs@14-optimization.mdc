@@ -1,0 +1,327 @@
+---
+description: Next.js 14 performance optimization covering next/image best practices, next/font configuration, bundle analysis, code splitting, lazy loading, script optimization, and build output configuration for production deployments.
+globs:
+  - "donaction-frontend/src/**/*.{ts,tsx}"
+  - "donaction-frontend/next.config.js"
+  - "!donaction-frontend/node_modules/**"
+---
+
+# Next.js 14 Optimization
+
+## next/image Configuration
+
+- Use Image component for all images
+- Configure remotePatterns for external domains
+- Set device sizes for responsive breakpoints
+- Define image sizes for optimization
+- Enable dangerouslyAllowSVG if needed
+
+```javascript
+// @donaction-frontend/next.config.js
+images: {
+  dangerouslyAllowSVG: true,
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'lh3.googleusercontent.com',
+      pathname: '/**',
+    },
+    {
+      protocol: 'https',
+      hostname: 'ik.imagekit.io',
+      pathname: '/**',
+    },
+  ],
+  deviceSizes: [480, 768],
+  imageSizes: [480, 1220],
+}
+```
+
+## Image Component Usage
+
+- Always specify width and height
+- Use priority for above-the-fold images
+- Set appropriate loading strategy (lazy default)
+- Use fill for responsive containers
+- Specify sizes for responsive images
+
+```tsx
+import Image from 'next/image';
+
+<Image
+  src={klub.logo.url}
+  alt={klub.logo.alt}
+  width={klub.logo.width}
+  height={klub.logo.height}
+  priority={isAboveFold}
+  sizes="(max-width: 768px) 100vw, 50vw"
+/>
+```
+
+## Custom Image Loader
+
+- Implement loader for ImageKit transformations
+- Apply transformations via query params
+- Optimize format and quality
+- Use srcLoader helper for consistent transforms
+- Cache transformed images on CDN
+
+```typescript
+// @donaction-frontend/src/core/helpers/srcLoader.ts
+export default function srcLoader(src: string, transform?: string) {
+  if (!src) return '';
+
+  if (src.includes('ik.imagekit.io') && transform) {
+    return `${src}?${transform}`;
+  }
+
+  return src;
+}
+
+// Usage
+const optimizedUrl = srcLoader(image.url, 'tr:w-1200,ar-1.91-1');
+```
+
+## next/font Optimization
+
+- Use next/font/google for Google Fonts
+- Load fonts in root layout
+- Use font-display: swap for performance
+- Preconnect to fonts.gstatic.com
+- Define fallback fonts
+
+```tsx
+// @donaction-frontend/src/app/layout.tsx
+<head>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
+  <link
+    href={`https://fonts.googleapis.com/css2?family=${pf}&display=swap`}
+    rel='stylesheet'
+  />
+</head>
+```
+
+## Bundle Analysis
+
+- Enable bundle analyzer in development
+- Run `ANALYZE=true npm run build`
+- Identify large dependencies
+- Remove unused code and dependencies
+- Code split large modules
+
+```javascript
+// @donaction-frontend/next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer({
+  // ...config
+});
+```
+
+## Code Splitting
+
+- Automatic route-based code splitting
+- Use dynamic imports for heavy components
+- Lazy load third-party libraries
+- Split vendor chunks automatically
+- Use React.lazy for Client Components
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
+  loading: () => <LoadingSkeleton />,
+  ssr: false, // Disable SSR if not needed
+});
+```
+
+## Script Optimization
+
+- Use next/script for third-party scripts
+- Set strategy: afterInteractive, lazyOnload, beforeInteractive
+- Defer non-critical scripts
+- Use async for parallel loading
+- Inline critical scripts in head
+
+```tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
+import Script from 'next/script';
+
+<Script
+  id='mapScript'
+  async={true}
+  defer={true}
+  src={`https://maps.googleapis.com/maps/api/js?key=${key}&loading=async`}
+/>
+```
+
+## Analytics Integration
+
+- Load analytics with defer attribute
+- Use conditional loading based on environment
+- Implement plausible for privacy-friendly tracking
+- Avoid blocking rendering with analytics
+- Use lazyOnload strategy when possible
+
+```tsx
+// @donaction-frontend/src/app/layout.tsx
+{process.env.NEXT_PUBLIC_ACTIVATE_ANALYTICS === 'true' && (
+  <script
+    defer
+    data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN}
+    src='https://plausible.io/js/script.js'
+  />
+)}
+```
+
+## Build Output Optimization
+
+- Use standalone output for Docker
+- Enable source maps only in production for debugging
+- Configure basePath and trailingSlash
+- Set body size limit for uploads
+- Disable features not in use
+
+```javascript
+// @donaction-frontend/next.config.js
+module.exports = {
+  output: 'standalone',
+  productionBrowserSourceMaps: true,
+  basePath: config.base_path !== '/' ? config.base_path : '',
+  trailingSlash: config.site.trailing_slash,
+  experimental: {
+    bodySizeLimit: '20mb',
+  },
+};
+```
+
+## React Strict Mode
+
+- Disable for third-party library compatibility
+- Enable in development for debugging
+- Set `reactStrictMode: false` if needed
+- Document why disabled
+- Re-enable when library issues resolved
+
+```javascript
+// @donaction-frontend/next.config.js
+module.exports = {
+  reactStrictMode: false, // Disabled due to PrimeReact compatibility
+};
+```
+
+## Metadata Optimization
+
+- Define metadataBase for absolute URLs
+- Use template for consistent titles
+- Set Open Graph images with dimensions
+- Include structured data with JSON-LD
+- Configure robots and sitemap
+
+```tsx
+// @donaction-frontend/src/app/layout.tsx
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    template: '%s | Klubr',
+    default: 'Klubr',
+  },
+  icons: {
+    icon: {
+      url: config.site.favicon_png,
+      type: 'image/png',
+      sizes: '128x128',
+    },
+  },
+};
+```
+
+## JSON-LD Structured Data
+
+- Include structured data for SEO
+- Use schema-dts for type safety
+- Add WebSite schema in root layout
+- Add entity-specific schemas in pages
+- Include potentialAction for donations
+
+```tsx
+// @donaction-frontend/src/app/[slug]/page.tsx
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsClub',
+  name: klub.denomination,
+  url: `${SITE_URL}/${params.slug}`,
+  logo: {
+    '@type': 'ImageObject',
+    url: klub.logo.url,
+    width: `${klub.logo.width}`,
+    height: `${klub.logo.height}`,
+  },
+};
+
+<script
+  type='application/ld+json'
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+/>;
+```
+
+## Request Deduplication
+
+- Next.js deduplicates identical fetch requests
+- Cache requests during single render pass
+- Share data across Server Components
+- No need for global state for fetching
+- Use React Cache API for custom deduplication
+
+## Tree Shaking
+
+- Import only needed functions from libraries
+- Use named imports instead of default
+- Check bundle for unused code
+- Configure package.json sideEffects field
+- Remove dead code with linters
+
+```typescript
+// ✅ Good - tree-shakeable
+import { redirect, notFound } from 'next/navigation';
+
+// ❌ Bad - imports entire module
+import * as navigation from 'next/navigation';
+```
+
+## CSS Optimization
+
+- Use Tailwind CSS for utility-first styling
+- Configure Tailwind to purge unused CSS
+- Use CSS modules for component-specific styles
+- Minimize global styles
+- Extract critical CSS inline
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/layouts/**/*.{js,ts,jsx,tsx}',
+  ],
+  // ...
+};
+```
+
+## Environment Variables
+
+- Prefix client vars with NEXT_PUBLIC_
+- Keep server-only vars without prefix
+- Access via process.env at build time
+- Never expose secrets to client
+- Validate required env vars at build
+
+```typescript
+// Server-only (safe)
+const API_SECRET = process.env.API_SECRET;
+
+// Client-side (exposed)
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_KEY;
+```

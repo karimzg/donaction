@@ -14,33 +14,35 @@ If $ARGUMENTS is provided, it will be the module/folder to analyze, otherwise us
 
 ## Resources
 
-Every file has its own template to follow.
+### Templates
 
-### Common
+- aidd/prompts/templates/memory-bank/AGENTS.md (for each app)
+- aidd/prompts/templates/memory-bank/PROJECT_BRIEF.md (root only)
 
-Used for each module! (Backend, Frontend, etc...)
+### Current Structure
 
-- aidd/prompts/templates/memory-bank/common/ARCHITECTURE.md
-- aidd/prompts/templates/memory-bank/common/CODING_ASSERTIONS.md
-- aidd/prompts/templates/memory-bank/common/TESTING.md
+```
+docs/memory-bank/
+├── AGENTS.md              # Global rules (symlinked to CLAUDE.md)
+├── admin/
+│   ├── AGENTS.md          # Angular-specific rules
+│   ├── BACKEND_COMMUNICATION.md
+│   └── FORMS.md
+├── backend/
+│   ├── AGENTS.md          # Strapi-specific rules
+│   ├── API_DOCS.md
+│   └── DATABASE.md
+├── frontend/
+│   ├── AGENTS.md          # Next.js-specific rules
+│   ├── BACKEND_COMMUNICATION.md
+│   └── FORMS.md
+└── saas/
+    └── AGENTS.md          # Svelte-specific rules
+```
 
-### Backend Specific
+### Rules Location
 
-- aidd/prompts/templates/memory-bank/backend/API_DOCS.md
-- aidd/prompts/templates/memory-bank/backend/DATABASE.md
-
-### Frontend Specific
-
-- aidd/prompts/templates/memory-bank/frontend/BACKEND_COMMUNICATION.md
-- aidd/prompts/templates/memory-bank/frontend/DESIGN.md
-- aidd/prompts/templates/memory-bank/frontend/FORMS.md
-
-### Documentation Root
-
-- aidd/prompts/templates/memory-bank/PROJECT_BRIEF.md
-- aidd/prompts/templates/memory-bank/DEPLOYMENT.md
-- aidd/prompts/templates/memory-bank/STACK.md
-- aidd/prompts/templates/memory-bank/CODEBASE_STRUCTURE.md
+- docs/rules/{app}/ → Naming conventions, framework-specific rules
 
 ## Steps
 

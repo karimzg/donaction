@@ -93,17 +93,34 @@
 
 #### 1.1 Registration Flow (Next.js → Email → Angular)
 
-**Next.js Registration Page:**
-- Collect: Association name, address, email, password, sport type
-- Create: User account + Klubr profile + **Stripe Express Account**
-- Send: Email with activation link (contains token to auto-login + link to Angular)
+**Next.js Registration Page (Already Exists):**
+
+- **Step 1 - Association Leader Info:**
+  - nom, prenom, birthDate, tel, email
+
+- **Step 2 - Association Info:**
+  - clubName, acronyme, adresse, legalStatus, sportType
+  - acceptConditions1, acceptConditions2
+
+- **On Submit:**
+  - Create: User account + Klubr profile + **Stripe Express Account**
+  - Send: Email with activation link to Angular (contains token to auto-link user account to profile)
 
 **Email Link Behavior:**
-- Auto-authenticate user in Angular Dashboard
-- Connect user account to klubr profile
-- Redirect to "Complete Your Profile" page
+- Auto-authenticate user in Angular Dashboard **(TO IMPLEMENT)**
+- Connect user account to klubr profile **(ALREADY IMPLEMENTED)**
+- Redirect to "Complete Your Profile" page **(PARTIAL - TO COMPLETE)**
 
 **Angular Dashboard Completion:**
+
+- **Dashboard Homepage Enhancement (NEW):**
+  - Add completion status summary widget with 3 sections:
+    1. **Klub Info** - Progress bar showing `requiredFieldsCompletion` %
+    2. **Document Upload** - Progress bar showing `requiredDocsValidatedCompletion` %
+    3. **Stripe Account** - Status badge (pending/verified/restricted)
+  - Visual indicators (✅/⚠️/❌) for each section
+  - Quick action buttons: "Complete Info", "Upload Docs", "Setup Stripe"
+
 - **Klub Info Page:** Complete all required fields (`requiredFieldsCompletion` → 100%)
 - **Document Upload:** Upload required legal docs (`requiredDocsValidatedCompletion` → 100%)
   - Add new field: **`managerSignature`** (image upload) in `klubr` table for tax receipt signing
@@ -138,13 +155,52 @@
 #### 1.3 Angular Dashboard Features
 
 **New Screens:**
-1. Payment Account Activation (`/payment-setup`)
-2. Payment Account Status (`/payment-status`)
-3. Trade Policy Configuration (`/trade-policy`) - 3 fee models + donor pays toggle
-4. Enhanced Donation Dashboard (`/dons`)
-5. Superadmin Monitoring (`/admin/connected-accounts`)
-6. Fee Statement Generation (`/fee-statements`)
-7. Exceptional Refund Management (`/refunds`)
+
+1. **Dashboard Homepage Enhancement**
+   - Klub completion status widget (3 sections: info/docs/stripe)
+   - Trade policy display (read-only for association leaders)
+   - Quick stats: total donations, pending refunds
+
+2. **Payment Account Activation** (`/payment-setup`)
+   - Display Stripe onboarding status
+   - Button: "Complete Stripe Setup" → Opens Stripe-hosted onboarding
+   - Show requirements still due
+
+3. **Payment Account Status** (`/payment-status`)
+   - Visual indicator: KYC status (pending/verified/restricted)
+   - Charges enabled: ✅/❌
+   - Payouts enabled: ✅/❌
+
+4. **Trade Policy Configuration** (`/trade-policy`)
+   - **Access:** Superadmin ONLY
+   - Fee models: percentage / fixed+percentage / fixed only
+   - Toggle: "Donor pays fee"
+   - Preview calculation example
+
+5. **Enhanced Donation Dashboard** (`/dons`)
+   - Filter by association (superadmin: global view)
+   - Columns: Date, Donor, Amount, Fee, Net, Status, Receipt, Refund Status
+   - Export to CSV (accounting format)
+
+6. **Superadmin Monitoring**
+   - `/admin/connected-accounts` (NEW dedicated screen)
+   - `/admin/klub/listing` (ENHANCED with Stripe Connect filters)
+     - Filters: KYC complete/incomplete, charges enabled/disabled
+     - Column: Stripe Account Status
+     - Bulk actions: Send KYC reminder emails
+
+7. **Fee Statement Generation** (`/fee-statements`)
+   - **Note:** Requires facturation module refactoring
+   - Select month/year
+   - Generate PDF "Relevé de frais"
+   - Download button
+
+8. **Exceptional Refund Management** (`/refunds`)
+   - **Access:** Superadmin + Association Leader (own donations only)
+   - Accessible from `/admin/klub/listing` (via action button per klub)
+   - List refund requests with status filters
+   - Refund request form with file upload
+   - Approval workflow (see section 8 for detailed process)
 
 ---
 
@@ -162,8 +218,16 @@
 7. Return clientSecret to Svelte
 
 #### 2.2 Error Handling
+
+**Critical Validation (Backend):**
+- Check `charges_enabled: true` BEFORE allowing donation form display
+- This prevents donations when account is inactive or KYC incomplete
+
+**Defensive Error Handling (Svelte):**
 - `account_inactive` → "Association temporarily unable to accept donations"
+  - **Note:** Should rarely happen due to backend validation, but handle as safety net
 - `account_kyc_incomplete` → Gray out form with status message
+  - **Note:** Should rarely happen due to backend validation, but handle as safety net
 - `payment_failed` → Retry button + cron backup
 
 #### 2.3 Improved Retry
@@ -230,23 +294,182 @@
 
 ### 8. Exceptional Refund Workflow
 
-**Requirements if tax receipt exists:**
-1. Signed donor declaration (won't use receipt)
-2. OR original receipt returned
-3. Justification (fraud, error, dispute, request)
+**Important Note:**
+- Manual process for now (mentioned in FAQ)
+- Future automation planned
+- Users request refunds via email to support team
+- This feature adds admin interface to manage the manual workflow
 
-**Approval workflow:**
-- Association admin OR superadmin approval
-- Generate cancellation attestation PDF
-- Process Stripe refund
-- Log in audit trail
-- Notify tax authorities if needed (> threshold or fraud)
+#### 8.1 Refund Request Process
 
-**Special cases:**
-- Fraud → TRACFIN notification (> 10k€), block donor
-- Legal dispute → Freeze until court decision
-- Payment error → Fast-track if no receipt generated
-- Retraction (14 days) → Simple cancellation
+**Step 1: Donor Initiates Request**
+- Donor sends email to support team (association leader)
+- Includes: donation reference, reason for refund
+
+**Step 2: Association Leader Creates Refund Request**
+- From `/admin/klub/listing` → click "Manage Refunds" for their klub
+- Or from `/dons` → select donation → "Request Refund"
+- Navigate to `/refunds` screen
+- Fill refund request form:
+  - Refund type: fraud / legal dispute / donor request / payment error
+  - Reason (text area, min 50 chars)
+  - Tax authority notification needed: checkbox (auto-checked > threshold)
+- Submit request → Status: "Pending - Awaiting Donor Declaration"
+
+**Step 3: Email to Donor**
+- System sends email to donor requesting signed declaration
+- Email template: "Please sign and return this declaration stating you will not use the tax receipt for tax purposes"
+- Attachment: PDF declaration template
+
+**Step 4: Donor Returns Signed Declaration**
+- Donor sends signed PDF to support email
+
+**Step 5: Association Leader Uploads Declaration**
+- From `/refunds` → find request → "Upload Declaration"
+- Upload signed donor declaration PDF
+- Status changes to: "Pending Approval"
+
+**Step 6: Admin Approval**
+- Authorized admins (Superadmin OR Association Leader) review request
+- Approval screen shows:
+  - Donation details
+  - Tax receipt status
+  - Refund reason
+  - Preview of uploaded donor declaration
+- Actions: Approve / Deny (with comment field)
+
+**Step 7: System Processing (On Approval)**
+1. Create `ReceiptCancellation` record
+2. Generate cancellation attestation PDF
+3. Process Stripe refund via API
+4. Update donation: `refund_status = 'completed'`
+5. Log in `FinancialAuditLog`
+6. Send email notifications:
+   - Donor: refund confirmation + cancellation attestation
+   - Association leader: refund processed
+   - Superadmin: refund audit notification
+
+#### 8.2 Refund Management Features
+
+**Dashboard: `/refunds`**
+- **Access Control:**
+  - Superadmin: see ALL refund requests
+  - Association Leader: see ONLY their klub's refunds
+- **List View:**
+  - Columns: Donation ID, Donor, Amount, Refund Type, Status, Date Requested, Actions
+  - Filters: Status (pending/awaiting_declaration/pending_approval/approved/denied/processed)
+  - Search: by donation ID, donor email
+- **Actions:**
+  - View details
+  - Upload declaration (if status = awaiting_declaration)
+  - Approve/Deny (if status = pending_approval AND user authorized)
+  - View audit trail
+
+**Security Measures:**
+- Role-based access control (RBAC)
+  - Superadmin: full access to all refunds
+  - Association Leader: access only to their klub's refunds
+- Audit logging of all actions (who, what, when, IP address)
+- File upload validation (PDF only, max size)
+- Email verification before processing
+
+**Reporting:**
+- Export refund requests to CSV
+- Monthly refund summary report
+- Financial review dashboard with refund metrics
+
+**Special Cases Handling:**
+
+| Situation | Workflow |
+|-----------|----------|
+| **Fraude avérée** | - Signalement TRACFIN if > 10,000€<br>- Block donor from future donations (add to blacklist)<br>- Notify tax authorities<br>- Full audit log with fraud flag |
+| **Litige juridique** | - Freeze refund until legal decision<br>- Require court document upload<br>- Preserve all evidence in system |
+| **Erreur de paiement** | - Fast-track approval if receipt not yet generated<br>- Simple refund without cancellation doc |
+| **Rétractation (14j)** | - Simple cancellation if receipt not generated<br>- No donor declaration needed |
+
+#### 8.3 Exceptional Refund Workflow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Donor
+    participant SupportEmail as Support Email
+    participant AssocLeader as Association Leader
+    participant AdminDashboard as Admin Dashboard (/refunds)
+    participant System as DONACTION System
+    participant Stripe
+    participant SuperAdmin
+
+    Note over Donor,SuperAdmin: Phase 1: Request Initiation
+    Donor->>SupportEmail: Email requesting refund
+    SupportEmail->>AssocLeader: Forward refund request
+    AssocLeader->>AdminDashboard: Login & navigate to /refunds
+    AssocLeader->>AdminDashboard: Click "New Refund Request"
+
+    Note over AssocLeader,AdminDashboard: Fill form (type, reason, amount)
+    AdminDashboard->>System: Submit refund request
+    System->>System: Create refund record (status: awaiting_declaration)
+    System->>System: Log in FinancialAuditLog
+    System->>Donor: Email: "Please sign declaration" (PDF attached)
+    System->>AssocLeader: Email: "Refund request created, awaiting donor"
+
+    Note over Donor,System: Phase 2: Donor Declaration
+    Donor->>Donor: Download, sign PDF declaration
+    Donor->>SupportEmail: Email signed declaration PDF
+    SupportEmail->>AssocLeader: Forward signed declaration
+    AssocLeader->>AdminDashboard: Upload declaration to refund request
+    AdminDashboard->>System: Store declaration file
+    System->>System: Update status: pending_approval
+    System->>SuperAdmin: Email: "Refund request ready for approval"
+
+    Note over AssocLeader,SuperAdmin: Phase 3: Approval
+    alt Approved by Association Leader
+        AssocLeader->>AdminDashboard: Review request & approve
+    else Approved by SuperAdmin
+        SuperAdmin->>AdminDashboard: Review request & approve
+    end
+
+    AdminDashboard->>System: Submit approval
+    System->>System: Create ReceiptCancellation record
+    System->>System: Generate cancellation attestation PDF
+    System->>System: Update status: processing
+
+    Note over System,Stripe: Phase 4: Stripe Refund
+    System->>Stripe: API: Create refund
+    Stripe-->>System: Refund ID + status
+    System->>System: Update refund_status: completed
+    System->>System: Link Stripe refund ID to donation
+    System->>System: Log all actions in FinancialAuditLog
+
+    Note over System,SuperAdmin: Phase 5: Notifications
+    System->>Donor: Email: "Refund processed" (cancellation PDF attached)
+    System->>AssocLeader: Email: "Refund completed for donation #123"
+    System->>SuperAdmin: Email: "Refund audit notification"
+
+    Note over System: Optional: Tax Authority Notification
+    alt Fraud or Amount > Threshold
+        System->>System: Flag for tax authority notification
+        SuperAdmin->>System: Manual tax authority reporting
+    end
+```
+
+#### 8.4 Database Updates for Refunds
+
+**Modified Table: `receipt_cancellations`**
+```sql
+ALTER TABLE receipt_cancellations
+  ADD COLUMN status VARCHAR(50) DEFAULT 'awaiting_declaration',
+  -- Status: awaiting_declaration, pending_approval, approved, denied, processing, completed
+  ADD COLUMN denial_reason TEXT,
+  ADD COLUMN denied_by INT REFERENCES users(id),
+  ADD COLUMN denied_at TIMESTAMP;
+```
+
+**Modified Table: `financial_audit_logs`**
+```sql
+-- Add new event types:
+-- 'refund_requested', 'declaration_uploaded', 'refund_approved',
+-- 'refund_denied', 'refund_processing', 'refund_completed'
+```
 
 ---
 

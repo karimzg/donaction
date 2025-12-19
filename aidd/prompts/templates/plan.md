@@ -36,7 +36,10 @@ argument-hint: N/A
 > {straight to point goal}
 
 1. {ultra concise task1, with logical
+   [] 1.1. {ultra concise sub task1}
+   [] 1.2. {...}
 2. {...}
+   [] 2.1. {...}
 3. {...}
 
 ## Reviewed implementation
