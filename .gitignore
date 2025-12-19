@@ -67,3 +67,4 @@ Thumbs.db
 
 # leagacy
 /logs
+/docker-compose
