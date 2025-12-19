@@ -122,7 +122,7 @@ export class MemberCardComponent implements OnInit {
       }
     });
 
-    ref.onClose.pipe(
+    ref?.onClose.pipe(
       take(1),
     ).subscribe((reponse) => {
       if (reponse) {

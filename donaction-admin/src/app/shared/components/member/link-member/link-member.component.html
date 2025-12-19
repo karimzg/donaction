@@ -3,7 +3,7 @@
   @if (meDetails()?.klubr_membres?.length) {
     <div class="absolute top-0 right-0 m-4">
       <a [routerLink]="['/']" class="pi pi-times bg-[#E4E4E5] p-2 rounded-full text-black text-lg leading-4"
-         aria-label="Exit"></a>
+      aria-label="Exit"></a>
     </div>
   }
 
@@ -24,33 +24,35 @@
     <hr class="w-full">
 
     @if (members().length) {
-      <div *ngFor="let item of members()" class="my-2 px-4" @fade>
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <p-avatar
-              [image]="item?.klubr?.logo | media : 'logo' : '2x'"
-              size="large"
-              shape="circle"
-              class="avatar-logo"
-            >
-            </p-avatar>
-            <div class="flex flex-col gap-0.5 items-start">
-              <div
-                class="font-bold text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.klubr?.denomination }}
-              </div>
-              <div
-                class="text-xs text-[#757575] text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.nom + ' ' + item?.prenom }}
-                - {{ item?.fonction }}
+      @for (item of members(); track item) {
+        <div class="my-2 px-4" @fade>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <p-avatar
+                [image]="item?.klubr?.logo | media : 'logo' : '2x'"
+                size="large"
+                shape="circle"
+                class="avatar-logo"
+                >
+              </p-avatar>
+              <div class="flex flex-col gap-0.5 items-start">
+                <div
+                  class="font-bold text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.klubr?.denomination }}
+                </div>
+                <div
+                  class="text-xs text-[#757575] text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.nom + ' ' + item?.prenom }}
+                  - {{ item?.fonction }}
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex gap-2">
-            @if (item.role) {
-              <app-role-tag [role]="item.role"></app-role-tag>
-            }
+            <div class="flex gap-2">
+              @if (item.role) {
+                <app-role-tag [role]="item.role"></app-role-tag>
+              }
+            </div>
           </div>
         </div>
-      </div>
+      }
 
       <div class="w-full flex justify-content-between align-items-center mt-4 px-4 pb-4">
         <span (click)="goBack()" class="cursor-pointer">Saisir un autre code</span>
@@ -58,95 +60,97 @@
       </div>
 
     } @else if (klubs().length) {
-      <div *ngFor="let item of klubs()" class="my-2 px-4" @fade>
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <p-avatar
-              [image]="item?.logo | media : 'logo' : '2x'"
-              size="large"
-              shape="circle"
-              class="avatar-logo"
-            >
-            </p-avatar>
-            <div class="flex flex-col gap-0.5 items-start">
-              <div
-                class="font-bold text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.denomination }}
-              </div>
-              <div
-                class="text-xs text-[#757575] text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">
-                Membre du Klub
+      @for (item of klubs(); track item) {
+        <div class="my-2 px-4" @fade>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <p-avatar
+                [image]="item?.logo | media : 'logo' : '2x'"
+                size="large"
+                shape="circle"
+                class="avatar-logo"
+                >
+              </p-avatar>
+              <div class="flex flex-col gap-0.5 items-start">
+                <div
+                  class="font-bold text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">{{ item?.denomination }}
+                </div>
+                <div
+                  class="text-xs text-[#757575] text-left text-ellipsis whitespace-nowrap overflow-hidden max-w-40 md:max-w-80">
+                  Membre du Klub
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex gap-2">
-            <app-role-tag [role]="memberRole()"></app-role-tag>
+            <div class="flex gap-2">
+              <app-role-tag [role]="memberRole()"></app-role-tag>
+            </div>
           </div>
         </div>
-      </div>
+      }
       @if (isKlubCode()) {
         <form [formGroup]="profileForm" class="px-4 w-full">
           <div class="flex flex-col md:flex-row gap-2 md:gap-5 ">
             <div class="flex flex-col gap-2 items-start flex-1">
               <label class="font-semibold" for="prenom">Prénom<span class="text-red-700">*</span></label>
               <input pInputText id="prenom" type="text" placeholder="Prénom" formControlName="prenom" class="w-full"
-                     tabindex="1"
+                tabindex="1"
                      [ngClass]="{'ng-dirty': profileForm.controls['prenom'].dirty,
                                            'ng-invalid': profileForm.controls['prenom'].invalid && (profileForm.controls['prenom'].dirty || isSubmitted)}"/>
-              <app-error-display [control]="profileForm.controls['prenom']"
-                                 [isSubmitted]="isSubmitted()"></app-error-display>
-            </div>
-            <div class="flex flex-col gap-2 items-start flex-1">
-              <label class="font-semibold" for="nom">Nom<span class="text-red-700">*</span></label>
-              <input pInputText id="nom" type="text" placeholder="Nom" formControlName="nom" class="w-full"
-                     tabindex="2"
+                <app-error-display [control]="profileForm.controls['prenom']"
+                [isSubmitted]="isSubmitted()"></app-error-display>
+              </div>
+              <div class="flex flex-col gap-2 items-start flex-1">
+                <label class="font-semibold" for="nom">Nom<span class="text-red-700">*</span></label>
+                <input pInputText id="nom" type="text" placeholder="Nom" formControlName="nom" class="w-full"
+                  tabindex="2"
                      [ngClass]="{'ng-dirty': profileForm.controls['nom'].dirty,
                                            'ng-invalid': profileForm.controls['nom'].invalid && (profileForm.controls['nom'].dirty || isSubmitted)}"/>
-              <app-error-display [control]="profileForm.controls['nom']"
-                                 [isSubmitted]="isSubmitted()"></app-error-display>
-            </div>
-          </div>
-          <div class="flex flex-col gap-2 items-start flex-1 w-full">
-            <label class="font-semibold" for="fonction">Fonction<span class="text-red-700">*</span></label>
-            <p-select
-              class="w-full"
-              styleClass="customDropdown text-left"
-              id="fonction"
-              formControlName="fonction"
-              [options]="defaultKlubMemberFunctions"
-              [editable]="true"
-              placeholder="Fonction"
-            />
-            <app-error-display [control]="profileForm.controls['fonction']"
-                               [isSubmitted]="isSubmitted()"></app-error-display>
-          </div>
-        </form>
-      }
+                  <app-error-display [control]="profileForm.controls['nom']"
+                  [isSubmitted]="isSubmitted()"></app-error-display>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 items-start flex-1 w-full">
+                <label class="font-semibold" for="fonction">Fonction<span class="text-red-700">*</span></label>
+                <p-select
+                  class="w-full"
+                  styleClass="customDropdown text-left"
+                  id="fonction"
+                  formControlName="fonction"
+                  [options]="defaultKlubMemberFunctions"
+                  [editable]="true"
+                  placeholder="Fonction"
+                  />
+                  <app-error-display [control]="profileForm.controls['fonction']"
+                  [isSubmitted]="isSubmitted()"></app-error-display>
+                </div>
+              </form>
+            }
 
-      <div class="w-full flex justify-content-between align-items-center mt-4 px-4 pb-4">
-        <span (click)="goBack()" class="cursor-pointer">Saisir un autre code</span>
-        <p-button (click)="linkUser(klubs()![0])" label="Valider" severity="contrast" tabindex="3"
-                  [disabled]="profileForm.pristine || !profileForm.valid"/>
-      </div>
+            <div class="w-full flex justify-content-between align-items-center mt-4 px-4 pb-4">
+              <span (click)="goBack()" class="cursor-pointer">Saisir un autre code</span>
+              <p-button (click)="linkUser(klubs()![0])" label="Valider" severity="contrast" tabindex="3"
+                [disabled]="profileForm.pristine || !profileForm.valid"/>
+              </div>
 
-    } @else {
-      <div class="flex justify-content-center align-items-center flex-col px-4 pb-5">
-        <p-input-otp (onChange)="handlelinkCodeChange($event)" [length]="8"></p-input-otp>
-        @if (hasError()) {
-          <div class="text-[#EF4444] mt-3">
-            <span class="pi pi-times p-2 rounded-full leading-4 border-1 border-[#EF4444] " aria-label="Exit"></span>
-            Ce code est inexistant !
+            } @else {
+              <div class="flex justify-content-center align-items-center flex-col px-4 pb-5">
+                <p-input-otp (onChange)="handlelinkCodeChange($event)" [length]="8"></p-input-otp>
+                @if (hasError()) {
+                  <div class="text-[#EF4444] mt-3">
+                    <span class="pi pi-times p-2 rounded-full leading-4 border-1 border-[#EF4444] " aria-label="Exit"></span>
+                    Ce code est inexistant !
+                  </div>
+
+                  <div class="w-full flex justify-content-center align-items-center mt-4">
+                    <p-button (click)="clearOptInput()" label="Saisir un autre code" severity="contrast"/>
+                  </div>
+                }
+              </div>
+            }
+
           </div>
-
-          <div class="w-full flex justify-content-center align-items-center mt-4">
-            <p-button (click)="clearOptInput()" label="Saisir un autre code" severity="contrast"/>
-          </div>
-        }
-      </div>
-    }
-
-  </div>
-</div>
-<ng-lottie
-  class="fixed bottom-0 w-56 z-[-1] md:w-80"
-  [options]="{path: 'assets/animations/basketball.json'}">
-</ng-lottie>
+        </div>
+        <ng-lottie
+          class="fixed bottom-0 w-56 z-[-1] md:w-80"
+          [options]="{path: 'assets/animations/basketball.json'}">
+        </ng-lottie>

@@ -1,12 +1,11 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { Button } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { EditorComponent } from "@shared/components/form/editor/editor.component";
-import { takeUntil } from "rxjs/operators";
 import { SharedService } from "@shared/data-access/repositories/shared.service";
 import { TransformationService } from "@shared/services/data-transformation.service";
-import { Subject } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-editor-sandbox',
@@ -19,11 +18,10 @@ import { Subject } from "rxjs";
   templateUrl: './editor-sandbox.component.html',
   styleUrl: './editor-sandbox.component.scss'
 })
-export class EditorSandboxComponent implements OnInit, OnDestroy {
+export class EditorSandboxComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly sharedService = inject(SharedService);
   private readonly transformationService = inject(TransformationService);
-
-  private destroy$ = new Subject<void>();
 
   editorControl = new FormControl({value: '', disabled: false});
   form = new FormGroup({
@@ -34,14 +32,9 @@ export class EditorSandboxComponent implements OnInit, OnDestroy {
     this.getKlubrDetails();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   getKlubrDetails() {
     this.sharedService.getKlubrHouseDetails()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: any) => {
           console.log('API Description:', data?.description);
@@ -65,7 +58,7 @@ export class EditorSandboxComponent implements OnInit, OnDestroy {
     const klubrHouseDetails = this.transformationService.transformEditorToApiFormat(this.form.value.editorContent);
     console.log('formatted', klubrHouseDetails);
     this.sharedService.updateKlubrHouseDetails({data: {description: klubrHouseDetails}})
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response: any) => {
           console.log('Successfully updated:', response);

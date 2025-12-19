@@ -7,7 +7,6 @@ import {
   input,
   OnDestroy,
   output,
-  ViewChild,
   viewChild
 } from '@angular/core';
 import {
@@ -110,11 +109,11 @@ export class SectionTxtImgComponent implements ControlValueAccessor, Validator, 
   removeItem = output<void>();
   sendAction = output<void>();
 
-  @ViewChild('firstInput') firstInput!: ElementRef;
+  firstInput = viewChild.required<ElementRef>('firstInput');
 
   ngAfterViewInit(): void {
-    if (this.firstInput?.nativeElement && this.deviceService.isDesktop()) {
-      this.firstInput.nativeElement.focus();
+    if (this.firstInput()?.nativeElement && this.deviceService.isDesktop()) {
+      this.firstInput().nativeElement.focus();
     }
   }
 

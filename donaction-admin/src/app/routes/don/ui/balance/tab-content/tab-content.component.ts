@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { ITab, ITabActions, ITabContent, TabContentContext } from "@shared/utils/models/tabContent";
 import { ImageModule } from "primeng/image";
-import { DatePipe, NgIf } from "@angular/common";
+import { DatePipe } from "@angular/common";
 import { TabContentSidebarComponent } from "./tab-content-sidebar/tab-content-sidebar.component";
 import { ActivatedRoute, Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -47,14 +47,13 @@ import { fadeAnimation } from "@shared/utils/animations/animations";
   selector: 'app-tab-content',
   imports: [
     ImageModule,
-    NgIf,
     TabContentSidebarComponent,
     BalanceDonLineComponent,
     LottieComponent,
     Button,
     Select,
-    FormsModule,
-  ],
+    FormsModule
+],
   providers: [
     TabContentServiceService,
     DialogService,
@@ -351,7 +350,7 @@ export class TabContentComponent implements OnInit {
         message: `Veuillez choisir une nouvelle date limite de financement pour votre projet.`
       }
     });
-    ref.onClose.pipe(
+    ref?.onClose.pipe(
       take(1),
     ).subscribe((dateLimiteFinancementProjet: Date | undefined) => {
       if (dateLimiteFinancementProjet) {

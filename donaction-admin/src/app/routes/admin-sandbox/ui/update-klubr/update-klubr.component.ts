@@ -1,6 +1,6 @@
 import { Component, } from '@angular/core';
 import { environment } from "@environments/environment";
-import { CommonModule } from "@angular/common";
+
 import { ButtonModule } from "primeng/button";
 import { RippleModule } from "primeng/ripple";
 import { FileUploadModule } from "primeng/fileupload";
@@ -15,7 +15,6 @@ import {
 @Component({
   selector: 'app-update-klubr',
   imports: [
-    CommonModule,
     ButtonModule,
     RippleModule,
     FileUploadModule,
@@ -23,7 +22,7 @@ import {
     FormsModule,
     MediaUpdateComponent,
     DropdownKlubFilterComponent
-  ],
+],
   templateUrl: './update-klubr.component.html',
   styleUrl: './update-klubr.component.scss'
 })

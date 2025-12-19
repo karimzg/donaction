@@ -7,7 +7,7 @@ import {
   Signal,
   signal,
   untracked,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
   WritableSignal
 } from '@angular/core';
@@ -140,8 +140,8 @@ export class KlubHouseUpdateComponent extends GenericUpdateComponent<KlubrHouse>
   protected override routePrefix = '/';
 
   // Couverture
-  @ViewChild('couverture') couverture!: FormMediaUpdateComponent;
-  @ViewChild('logo') logo!: FormMediaUpdateComponent;
+  couverture = viewChild.required<FormMediaUpdateComponent>('couverture');
+  logo = viewChild.required<FormMediaUpdateComponent>('logo');
 
   // Misc
   public formDisabled: WritableSignal<boolean> = signal<boolean>(false);
@@ -246,8 +246,8 @@ export class KlubHouseUpdateComponent extends GenericUpdateComponent<KlubrHouse>
         metaDescription: this.entitySignal()?.metaDescription || (this.entitySignal()?.klubr.denomination + ' | Soutenez nous grâce au mécénat!'),
       }
     });
-    this.couverture.reset();
-    this.logo.reset()
+    this.couverture().reset();
+    this.logo().reset()
     this.entityForm.markAsPristine();
   }
 
@@ -269,12 +269,12 @@ export class KlubHouseUpdateComponent extends GenericUpdateComponent<KlubrHouse>
   protected override updateFile(entity: KlubrHouse): Observable<KlubrHouse> {
     let observable$: Array<Observable<boolean>> = [];
     if (this.entityForm.get('klubrHouse.couvertureMedia')?.dirty) {
-      this.couverture.uploadFile();
-      observable$.push(merge(this.couverture.onItemLoaded$, this.couverture.onItemErrorLoaded$).pipe(take(1)));
+      this.couverture().uploadFile();
+      observable$.push(merge(this.couverture().onItemLoaded$, this.couverture().onItemErrorLoaded$).pipe(take(1)));
     }
     if (this.entityForm.get('klub.logo')?.dirty) {
-      this.logo.uploadFile();
-      observable$.push(merge(this.logo.onItemLoaded$, this.logo.onItemErrorLoaded$).pipe(
+      this.logo().uploadFile();
+      observable$.push(merge(this.logo().onItemLoaded$, this.logo().onItemErrorLoaded$).pipe(
         take(1),
         delay(200),
         switchMap(() => untracked(this.entity)?.klubr.uuid ? this.klubrService.getKlubrByUuid(untracked(this.entity)!.klubr.uuid) : of(null)),

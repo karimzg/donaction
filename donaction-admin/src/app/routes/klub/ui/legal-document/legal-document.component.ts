@@ -257,7 +257,7 @@ export class LegalDocumentComponent extends GenericUpdateComponent<KlubrDocument
           message: `Veuillez choisir une nouvelle date limite de financement pour votre projet.`
         }
       });
-      ref.onClose.pipe(
+      ref?.onClose.pipe(
         take(1),
         filter((response) => response !== undefined),
       ).subscribe({

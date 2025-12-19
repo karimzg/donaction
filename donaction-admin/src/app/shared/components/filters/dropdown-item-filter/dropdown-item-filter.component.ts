@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { debounceTime, filter, switchMap, take, tap } from "rxjs/operators";
-import { CommonModule } from "@angular/common";
+
 import { ButtonModule } from "primeng/button";
 import { Observable } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -40,7 +40,6 @@ export type CustomDropdownItem = {
 @Component({
   selector: 'app-dropdown-item-filter',
   imports: [
-    CommonModule,
     ButtonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -50,8 +49,8 @@ export type CustomDropdownItem = {
     InputGroupAddonModule,
     IconField,
     InputIcon,
-    NestedPropertyPipe,
-  ],
+    NestedPropertyPipe
+],
   templateUrl: './dropdown-item-filter.component.html',
   styleUrl: './dropdown-item-filter.component.scss',
   encapsulation: ViewEncapsulation.None

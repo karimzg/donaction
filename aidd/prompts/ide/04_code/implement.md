@@ -12,7 +12,7 @@ Implement following development plan following project rules with complete valid
 
 ## Rules
 
-- Follow all project rules @docs/rules.md
+- Follow all project rules from loaded context (CLAUDE.md + app-specific AGENTS.md + naming conventions + Strapi v5 rules if backend)
 - Never format code
 - Never run dev mode
 
@@ -25,6 +25,20 @@ $ARGUMENTS
 ```
 
 ## Process steps
+
+### Step 0: Verify Context
+
+1. **Check loaded context** matches plan requirements
+2. **Verify app detection** is correct based on plan
+3. **List loaded context files**:
+   - CLAUDE.md
+   - Relevant AGENTS.md files
+   - Naming conventions
+   - Strapi v5 rules (if backend)
+4. **Re-load if needed**: If context is missing or incorrect, reload using @aidd/prompts/ide/helpers/detect-app-context.md
+5. **Confirm context** is sufficient for implementation
+
+### Step 1: Implementation
 
 IMPORTANT: Iterate on those steps until nothing more can be done.
 

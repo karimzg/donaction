@@ -125,7 +125,7 @@ export class MemberListingComponent extends GenericListingComponent<KlubrMembre,
         profile: null,
       }
     });
-    ref.onClose.pipe(
+    ref?.onClose.pipe(
       take(1),
     ).subscribe((profileUpdated: KlubrMembre | undefined) => {
       if (profileUpdated) {

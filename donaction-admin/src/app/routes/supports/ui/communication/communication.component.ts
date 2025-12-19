@@ -7,7 +7,7 @@ import { KlubrMembre } from "@shared/utils/models/user-details";
 import { SharedFacade } from "@shared/data-access/+state/shared.facade";
 import { HttpClient } from "@angular/common/http";
 import { KlubProject, KlubrHouse } from "@shared/utils/models/klubr";
-import { CommonModule } from "@angular/common";
+
 import { KlubrService } from "@shared/services/klubr.service";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fadeAnimation } from "@shared/utils/animations/animations";
@@ -15,9 +15,8 @@ import { fadeAnimation } from "@shared/utils/animations/animations";
 @Component({
   selector: 'app-communication',
   imports: [
-    CommonModule,
     InformationsImageCardComponent
-  ],
+],
   templateUrl: './communication.component.html',
   styleUrl: './communication.component.scss',
   animations: [fadeAnimation]

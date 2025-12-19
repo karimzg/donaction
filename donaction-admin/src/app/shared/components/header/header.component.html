@@ -2,7 +2,7 @@
 
   <!--Mobile Left Sidebar Button -->
   <button #menubutton class="p-link layout-menu-button layout-topbar-button ml-0 mr-2"
-          (click)="layoutService.onMenuToggle()">
+    (click)="layoutService.onMenuToggle()">
     <i class="pi pi-bars"></i>
   </button>
 
@@ -12,7 +12,7 @@
 
   <!--Mobile Right Sidebar Button -->
   <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
-          (click)="toggleRightSidebar()">
+    (click)="toggleRightSidebar()">
     <p-avatar [image]="profile()?.avatar | media" size="large" shape="circle"></p-avatar>
   </button>
 
@@ -40,7 +40,7 @@
 <ng-template #user let-isMobile="isMobile">
   <!--  TODO: Implement when Notifs ready <i (click)="notifOp.toggle($event)" class="pi pi-bell text-black bg-[#F3F4F6] p-3 text-[1.25rem] rounded-full cursor-pointer"></i>-->
   <div class="flex items-center gap-2" (mouseenter)="!isMobile && onHover($event, op)"
-       (mouseleave)="!isMobile && onLeave(op)">
+    (mouseleave)="!isMobile && onLeave(op)">
     <button class="p-link layout-topbar-button">
       <p-avatar [image]="profile()?.avatar | media : 'avatar' : '2x'" size="large" shape="circle"></p-avatar>
     </button>
@@ -58,187 +58,193 @@
 
 <!--ng-template layer -->
 <ng-template #content let-isMobile="isMobile">
-  <div *ngFor="let item of items; let i = index;"
-       [ngClass]="{'p-overlaypanel-content--section': true, 'mt-4': i > 0, 'w-80': !isMobile}"
-       (mouseenter)="onOverlayEnter()"
-       (mouseleave)="onOverlayLeave(op)"
-  >
-    @if (item?.label) {
-      <h6 class="mb-2 title-link primary-color">{{ item?.label }} :</h6>
-    }
-    @if (item?.id === 'teams' && profileTotal() > pageSize()) {
-      <div class="mb-4">
-        <p-iconfield iconPosition="left" class="w-full w-full-component">
-          <p-inputicon styleClass="pi pi-search"/>
-          <input type="text" pInputText placeholder="Chercher mon profile" [(ngModel)]="searchProfileTerm"
-                 (input)="onSearchProfiles()"/>
-        </p-iconfield>
-      </div>
-    }
-    @if (item?.items) {
-      <div class="flex flex-col gap-3">
-        <div *ngFor="let subItem of item.items">
-          @if (subItem.noResult) {
-            <div class="flex items-center justify-between gap-1" @flip>
-              <div class="flex flex-col gap-0.5">
-                <b>{{ subItem.label }}</b>
-                <div class="text-xs text-[#757575]">{{ subItem.fonction }}</div>
-              </div>
-            </div>
-          } @else if (subItem.label) {
-            <button (click)="subItem.command()" class="p-link w-full">
-              <div class="flex items-center justify-between gap-1" @flip>
-                <div class="flex items-center gap-2">
-                  <p-avatar
-                    image="{{subItem.img | media : 'logo'}}"
-                    size="large"
-                    shape="circle"
-                    class="avatar-logo"
-                  >
-                  </p-avatar>
-                  <div class="flex flex-col gap-0.5">
-                    <b>{{ subItem.label }}</b>
-                    <div class="text-xs text-[#757575]">{{ subItem.fonction }}</div>
+  @for (item of items; track item; let i = $index) {
+    <div
+      [ngClass]="{'p-overlaypanel-content--section': true, 'mt-4': i > 0, 'w-80': !isMobile}"
+      (mouseenter)="onOverlayEnter()"
+      (mouseleave)="onOverlayLeave(op)"
+      >
+      @if (item?.label) {
+        <h6 class="mb-2 title-link primary-color">{{ item?.label }} :</h6>
+      }
+      @if (item?.id === 'teams' && profileTotal() > pageSize()) {
+        <div class="mb-4">
+          <p-iconfield iconPosition="left" class="w-full w-full-component">
+            <p-inputicon styleClass="pi pi-search"/>
+            <input type="text" pInputText placeholder="Chercher mon profile" [(ngModel)]="searchProfileTerm"
+              (input)="onSearchProfiles()"/>
+            </p-iconfield>
+          </div>
+        }
+        @if (item?.items) {
+          <div class="flex flex-col gap-3">
+            @for (subItem of item.items; track subItem) {
+              <div>
+                @if (subItem.noResult) {
+                  <div class="flex items-center justify-between gap-1" @flip>
+                    <div class="flex flex-col gap-0.5">
+                      <b>{{ subItem.label }}</b>
+                      <div class="text-xs text-[#757575]">{{ subItem.fonction }}</div>
+                    </div>
                   </div>
-                </div>
-                <div class="flex gap-2">
-                  @if (subItem.role) {
-                    <app-role-tag [role]="subItem.role"></app-role-tag>
-                  }
-                  @if (profileTotal() > 1) {
-                    <p-radiobutton name="isChecked" [value]="1" [ngModel]="profilesSelected() === subItem.uuid"
-                                   [disabled]="profilesSelected() === subItem.uuid"></p-radiobutton>
-                  }
-                </div>
+                } @else if (subItem.label) {
+                  <button (click)="subItem.command()" class="p-link w-full">
+                    <div class="flex items-center justify-between gap-1" @flip>
+                      <div class="flex items-center gap-2">
+                        <p-avatar
+                          image="{{subItem.img | media : 'logo'}}"
+                          size="large"
+                          shape="circle"
+                          class="avatar-logo"
+                          >
+                        </p-avatar>
+                        <div class="flex flex-col gap-0.5">
+                          <b>{{ subItem.label }}</b>
+                          <div class="text-xs text-[#757575]">{{ subItem.fonction }}</div>
+                        </div>
+                      </div>
+                      <div class="flex gap-2">
+                        @if (subItem.role) {
+                          <app-role-tag [role]="subItem.role"></app-role-tag>
+                        }
+                        @if (profileTotal() > 1) {
+                          <p-radiobutton name="isChecked" [value]="1" [ngModel]="profilesSelected() === subItem.uuid"
+                          [disabled]="profilesSelected() === subItem.uuid"></p-radiobutton>
+                        }
+                      </div>
+                    </div>
+                  </button>
+                }
               </div>
-            </button>
-          }
-        </div>
-      </div>
-      <div class="flex justify-center">
-        @if (item.hasPreviousPage) {
-          <i class="pi pi-angle-up p-2 mx-2 mt-1 bg-[#E4E4E5] rounded-full cursor-pointer" (click)="previousPage()"></i>
+            }
+          </div>
+          <div class="flex justify-center">
+            @if (item.hasPreviousPage) {
+              <i class="pi pi-angle-up p-2 mx-2 mt-1 bg-[#E4E4E5] rounded-full cursor-pointer" (click)="previousPage()"></i>
+            }
+            @if (item.hasNextPage) {
+              <i class="pi pi-angle-down p-2 mx-2 mt-1 bg-[#E4E4E5] rounded-full cursor-pointer" (click)="nextPage()"></i>
+            }
+          </div>
         }
-        @if (item.hasNextPage) {
-          <i class="pi pi-angle-down p-2 mx-2 mt-1 bg-[#E4E4E5] rounded-full cursor-pointer" (click)="nextPage()"></i>
-        }
-      </div>
-    }
-    <hr class="mb-4 mt-3"/>
-    <button class="w-full p-3 border border-transparent rounded bg-[#E4E4E5] cursor-pointer">
-      <div class="flex items-center justify-center gap-2" [routerLink]="['link-member']">
-        <i class="pi pi-plus text-white p-1 bg-black rounded-full"></i>
-        Ajouter un Klub
-      </div>
-    </button>
-    <hr class="my-4"/>
-    <div class="flex flex-col gap-3">
-      <div *ngFor="let subItem of profileItems">
-        <button (click)="subItem.command()" class="p-link w-full ">
-          <div class="flex items-center gap-2">
-            <i class="{{subItem.icon}} p-2 bg-[#E4E4E5] rounded-full"></i>
-            {{ subItem.label }}
+        <hr class="mb-4 mt-3"/>
+        <button class="w-full p-3 border border-transparent rounded bg-[#E4E4E5] cursor-pointer">
+          <div class="flex items-center justify-center gap-2" [routerLink]="['link-member']">
+            <i class="pi pi-plus text-white p-1 bg-black rounded-full"></i>
+            Ajouter un Klub
           </div>
         </button>
-      </div>
-    </div>
-    <footer class="text-sm flex flex-col gap-1">
-      <hr class="mb-2">
-      <div>
-        Version: {{ version }}
-        <div class="flex gap-1">Powered by<img [ngSrc]="'assets/images/logos/begoodee.svg'"
-                                               width="70" height="20"
-                                               alt="Begoodee"/>
+        <hr class="my-4"/>
+        <div class="flex flex-col gap-3">
+          @for (subItem of profileItems; track subItem) {
+            <div>
+              <button (click)="subItem.command()" class="p-link w-full ">
+                <div class="flex items-center gap-2">
+                  <i class="{{subItem.icon}} p-2 bg-[#E4E4E5] rounded-full"></i>
+                  {{ subItem.label }}
+                </div>
+              </button>
+            </div>
+          }
         </div>
+        <footer class="text-sm flex flex-col gap-1">
+          <hr class="mb-2">
+          <div>
+            Version: {{ version }}
+            <div class="flex gap-1">Powered by<img [ngSrc]="'assets/images/logos/begoodee.svg'"
+              width="70" height="20"
+              alt="Begoodee"/>
+            </div>
+          </div>
+        </footer>
       </div>
-    </footer>
-  </div>
-</ng-template>
+    }
+  </ng-template>
 
-<!--TODO: Implement when Notifs ready-->
-<!--template notifications -->
-<!--
-<p-popover #notifOp>
-  <div class="flex flex-col gap-2 w-[400px]">
-    <div class="flex w-full justify-between text-black">
-      Notifications
-      <div class="flex gap-3">
-        <div [ngClass]="{'notif-button-active': allNotifications(), 'notif-button-inactive': !allNotifications()}"
-             (click)="toggleAllNotifications(true)">
-          <span class="text-base"> Tout </span>
+  <!--TODO: Implement when Notifs ready-->
+  <!--template notifications -->
+  <!--
+  <p-popover #notifOp>
+    <div class="flex flex-col gap-2 w-[400px]">
+      <div class="flex w-full justify-between text-black">
+        Notifications
+        <div class="flex gap-3">
+          <div [ngClass]="{'notif-button-active': allNotifications(), 'notif-button-inactive': !allNotifications()}"
+            (click)="toggleAllNotifications(true)">
+            <span class="text-base"> Tout </span>
+          </div>
+          <div [ngClass]="{'notif-button-active': !allNotifications(), 'notif-button-inactive': allNotifications()}"
+            (click)="toggleAllNotifications(false)">
+            <span class="text-base"> Non lu </span>
+          </div>
         </div>
-        <div [ngClass]="{'notif-button-active': !allNotifications(), 'notif-button-inactive': allNotifications()}"
-             (click)="toggleAllNotifications(false)">
-          <span class="text-base"> Non lu </span>
+      </div>
+      @if (!allNotifications()) {
+        <div class="flex items-center justify-center w-full">
+          <ng-lottie
+            width="200px"
+            [options]="{path: 'assets/animations/notification.json'}"
+          ></ng-lottie>
         </div>
-      </div>
-    </div>
-    @if (!allNotifications()) {
-      <div class="flex items-center justify-center w-full">
-        <ng-lottie
-          width="200px"
-          [options]="{path: 'assets/animations/notification.json'}"
-        ></ng-lottie>
-      </div>
-      <div class="flex flex-col gap-1 self-center items-center">
-        <p class="m-0 text-gray-600 text-sm"> Vous serez notifié ici de vos dons reçus et informations importantes </p>
-        <p class="m-0 font-semibold text-black"> Suivez vos actualités ! </p>
-      </div>
-    }@else{
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
-          <div class="flex gap-2">
-            <p-avatar
-              icon="pi pi-user"
-              size="normal"
-              [shape]="'circle'"
-              class="flex-[1_0_auto]"
-            ></p-avatar>
-            <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 self-center items-center">
+          <p class="m-0 text-gray-600 text-sm"> Vous serez notifié ici de vos dons reçus et informations importantes </p>
+          <p class="m-0 font-semibold text-black"> Suivez vos actualités ! </p>
+        </div>
+        }@else{
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+            <div class="flex gap-2">
+              <p-avatar
+                icon="pi pi-user"
+                size="normal"
+                [shape]="'circle'"
+                class="flex-[1_0_auto]"
+              ></p-avatar>
+              <div class="flex flex-col gap-1">
                 <span>
                   <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
                 </span>
-              <p class="m-0 text-gray-600 text-sm"> il y a 14 heures </p>
+                <p class="m-0 text-gray-600 text-sm"> il y a 14 heures </p>
+              </div>
             </div>
+            <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="bottom"></i>
           </div>
-          <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="bottom"></i>
-        </div>
-        <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
-          <div class="flex gap-2">
-            <p-avatar
-              icon="pi pi-user"
-              size="normal"
-              [shape]="'circle'"
-              class="flex-[1_0_auto]"
-            ></p-avatar>
-            <div class="flex flex-col gap-1">
+          <div class="flex justify-between bg-[#F3F4F6] rounded-lg p-2">
+            <div class="flex gap-2">
+              <p-avatar
+                icon="pi pi-user"
+                size="normal"
+                [shape]="'circle'"
+                class="flex-[1_0_auto]"
+              ></p-avatar>
+              <div class="flex flex-col gap-1">
                 <span>
                   <span class="font-semibold"> Theodore T.C. Calvin </span> ajouter un nouveau projet <span class="font-semibold"> Vidéo surveillance pour les infrastructures sportives. </span>
                 </span>
-              <p class="m-0 text-gray-600 text-sm"> il y a 23 heures </p>
+                <p class="m-0 text-gray-600 text-sm"> il y a 23 heures </p>
+              </div>
             </div>
+            <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="bottom"></i>
           </div>
-          <i class="pi pi-eye p-2 bg-[#E2E8F0] self-center rounded-full text-[1.25rem]" pTooltip="Marquer comme lu" tooltipPosition="bottom"></i>
-        </div>
-        <div class="flex justify-between rounded-lg p-2">
-          <div class="flex gap-2">
-            <p-avatar
-              icon="pi pi-user"
-              size="normal"
-              [shape]="'circle'"
-              class="flex-[1_0_auto]"
-            ></p-avatar>
-            <div class="flex flex-col gap-1">
+          <div class="flex justify-between rounded-lg p-2">
+            <div class="flex gap-2">
+              <p-avatar
+                icon="pi pi-user"
+                size="normal"
+                [shape]="'circle'"
+                class="flex-[1_0_auto]"
+              ></p-avatar>
+              <div class="flex flex-col gap-1">
                 <span>
                   <span class="font-semibold"> Jacques Moulin </span> à modifier la date de clôture du projet <span class="font-semibold"> Financement matériels de Golf. </span>
                 </span>
-              <p class="m-0 text-gray-600 text-sm"> 24/01/2025 </p>
+                <p class="m-0 text-gray-600 text-sm"> 24/01/2025 </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <p-button (click)="notifOp.toggle($event)" [routerLink]="['/notifications']" class="mt-4" severity="secondary">Voir toutes les notifications</p-button>
-    }
-  </div>
-</p-popover>
--->
+        <p-button (click)="notifOp.toggle($event)" [routerLink]="['/notifications']" class="mt-4" severity="secondary">Voir toutes les notifications</p-button>
+      }
+    </div>
+  </p-popover>
+  -->

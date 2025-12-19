@@ -29,9 +29,10 @@ output: code
 
 ```typescript
 // login-form.component.ts
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { FormControlPipe } from '@shared/pipes/form-control.pipe';
@@ -76,16 +77,18 @@ export class LoginFormComponent {
     this.loading.set(true);
     const { email, password } = this.loginForm.value;
 
-    this.authService.login(email!, password!).subscribe({
-      next: () => {
-        this.toastService.showSuccess('Login successful');
-        this.loading.set(false);
-      },
-      error: (error) => {
-        this.toastService.showErrorToast('Login failed');
-        this.loading.set(false);
-      }
-    });
+    this.authService.login(email!, password!)
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: () => {
+          this.toastService.showSuccess('Login successful');
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.toastService.showErrorToast('Login failed');
+          this.loading.set(false);
+        }
+      });
   }
 
   resetForm() {

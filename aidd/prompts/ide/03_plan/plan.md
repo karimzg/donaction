@@ -35,6 +35,37 @@ $ARGUMENTS
 
 ## Steps
 
+### Step 0: Context Detection & Approval
+
+1. **Analyze requirements** to detect affected apps using @aidd/prompts/ide/helpers/detect-app-context.md
+2. **Extract keywords** from requirements (case-insensitive matching)
+3. **Identify apps**:
+   - admin: admin, dashboard, Angular, backoffice
+   - backend: API, Strapi, database, schema, endpoint
+   - frontend: frontend, Next.js, public site, SSR
+   - saas: widget, embeddable, Svelte, embed
+4. **Build context file list** based on detected apps:
+   - Always: `CLAUDE.md`
+   - Per app: `docs/memory-bank/{app}/AGENTS.md`, `docs/rules/{app}/naming-conventions.md`
+   - Backend: Also load `docs/rules/backend/strapi-v5/strapi-v5-coding-rules.md` and `quick-reference.md`
+5. **Present detection results** to user:
+   ```
+   📋 Context Detection Results
+
+   Detected Apps: [list]
+
+   Context to Load:
+   - ✅ CLAUDE.md
+   - ✅ [list all files]
+
+   Ambiguous? [Yes/No - if yes, explain]
+
+   Proceed with this context? [Y/n]
+   ```
+6. **Handle ambiguity**: If multiple interpretations possible, ask user to clarify which apps to include
+7. **Wait for approval** before proceeding
+8. **Load approved context** files into agent memory for use in all subsequent steps
+
 ### Step 1: Parse Input
 
 1. Detect input type (GitHub URL vs raw text)

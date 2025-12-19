@@ -7,7 +7,7 @@ import {
   inject,
   OnInit,
   signal,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
   WritableSignal,
 } from '@angular/core';
@@ -85,11 +85,11 @@ export class HeaderComponent implements OnInit {
   public version = version;
   public allNotifications = signal<boolean>(true);
 
-  @ViewChild('menubutton') menuButton!: ElementRef;
+  menuButton = viewChild.required<ElementRef>('menubutton');
 
-  @ViewChild('topbarmenubutton') topbarMenuButton!: ElementRef;
+  topbarMenuButton = viewChild.required<ElementRef>('topbarmenubutton');
 
-  @ViewChild('topbarmenu') menu!: ElementRef;
+  menu = viewChild.required<ElementRef>('topbarmenu');
 
   constructor() {
     this.setupEffects();
