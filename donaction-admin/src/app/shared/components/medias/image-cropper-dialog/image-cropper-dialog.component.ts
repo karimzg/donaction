@@ -16,6 +16,7 @@ import { TooltipModule } from "primeng/tooltip";
 import { SliderModule } from "primeng/slider";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Message } from 'primeng/message';
+import { Severity2 } from "@shared/utils/models/misc";
 
 @Component({
     selector: 'app-image-cropper-dialog',
@@ -90,7 +91,7 @@ export class ImageCropperDialogComponent implements AfterViewInit {
   isReady = signal(false);
 
   /* MISC VARIABLES */
-  alertMsg = signal<Array<{ severity: string, text: string }> | undefined>(undefined);
+  alertMsg = signal<Array<{ severity: Severity2, text: string }> | undefined>(undefined);
 
   constructor() {
     /* UPDATE FOOTER COMPONENT STATES */

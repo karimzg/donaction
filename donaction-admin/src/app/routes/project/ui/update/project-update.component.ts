@@ -73,7 +73,7 @@ import { Message } from 'primeng/message';
 import { SpeedDial, SpeedDialModule } from "primeng/speeddial";
 import { Select } from "primeng/select";
 import { ProfileFilters } from "@app/routes/members/model/profile-filters";
-import { ApiListResult } from "@shared/utils/models/misc";
+import { ApiListResult, Severity2 } from "@shared/utils/models/misc";
 import { fadeAnimation } from "@shared/utils/animations/animations";
 import { ActivatedRoute } from "@angular/router";
 
@@ -154,8 +154,8 @@ export class ProjectUpdateComponent extends GenericUpdateComponent<KlubProject> 
 
   // Misc
   public formDisabled: WritableSignal<boolean> = signal<boolean>(false);
-  public disabledMsg: WritableSignal<Array<{ severity: string, text: string }> | undefined> = signal<Array<{
-    severity: string,
+  public disabledMsg: WritableSignal<Array<{ severity: Severity2, text: string }> | undefined> = signal<Array<{
+    severity: Severity2,
     text: string
   }> | undefined>(undefined);
   public pathsToUnvalidate: WritableSignal<Array<string>> = signal<Array<string>>([]);

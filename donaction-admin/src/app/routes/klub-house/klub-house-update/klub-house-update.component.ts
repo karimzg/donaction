@@ -104,7 +104,6 @@ export class KlubHouseUpdateComponent extends GenericUpdateComponent<KlubrHouse>
   }
 
   getMainAccordionTabIcon(index: string): string {
-    console.log(this.mainAccordionActiveValue, index)
     return this.mainAccordionActiveValue === index ? 'pi pi-angle-up' : 'pi pi-angle-down';
   }
 
