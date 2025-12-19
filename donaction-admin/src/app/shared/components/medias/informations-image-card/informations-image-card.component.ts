@@ -8,7 +8,7 @@ import {
   OnInit,
   signal,
   untracked,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
   WritableSignal
 } from '@angular/core';
@@ -78,7 +78,7 @@ export class InformationsImageCardComponent implements OnInit {
   public showUploadPoster: WritableSignal<boolean> = signal<boolean>(false);
 
   // posterMedia
-  @ViewChild('mediaUpload') mediaUpload!: FormMediaUpdateComponent;
+  mediaUpload = viewChild.required<FormMediaUpdateComponent>('mediaUpload');
   public control = new FormControl(undefined, Validators.required)
   public isLoading: WritableSignal<boolean> = signal<boolean>(false);
 
@@ -210,9 +210,9 @@ export class InformationsImageCardComponent implements OnInit {
   public updateFile(): void {
     if (this.control?.dirty) {
       this.isLoading.set(true);
-      this.mediaUpload.uploadFile();
+      this.mediaUpload().uploadFile();
       merge(
-        this.mediaUpload.onItemLoaded$.pipe(
+        this.mediaUpload().onItemLoaded$.pipe(
           take(1),
           tap(() => {
             this.unvalidateCache();
@@ -223,7 +223,7 @@ export class InformationsImageCardComponent implements OnInit {
           switchMap(() => this.setImage()),
           tap(() => this.analyticsService.trackEvent('FileEvent', {customProps: {Action: `UpdatePoster: ${untracked(this.description)}`}})),
         ),
-        this.mediaUpload.onItemErrorLoaded$.pipe(),
+        this.mediaUpload().onItemErrorLoaded$.pipe(),
       ).pipe(
       ).subscribe({
         complete: () => {

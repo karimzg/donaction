@@ -10,7 +10,7 @@
 
   <ul class="layout-menu">
     @for (item of model(); let i = $index; track item.label) {
-      <li app-menuitem [item]="item" [index]="i" [root]="true" [isDisabled]="sharedFacade.loading()"></li>
+      <li app-menuitem [item]="item" [index]="i" [root]="true" [parentKey]="''" [isDisabled]="sharedFacade.loading()"></li>
     }
   </ul>
 

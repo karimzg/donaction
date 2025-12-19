@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, HostListener, input, OnInit, Output } from '@angular/core';
 
 @Directive({
   selector: '[appScrollNearEnd]',
@@ -10,7 +10,7 @@ export class ScrollNearEndDirective implements OnInit {
   /**
    * threshold in PX when to emit before page end scroll
    */
-  @Input() threshold = 120;
+  threshold = input<number>(120);
 
   private window!: Window;
 
@@ -46,7 +46,7 @@ export class ScrollNearEndDirective implements OnInit {
       heightOfElement - innerHeight - currentScrolledY + spaceOfElementAndPage;
 
     // if the user is near end
-    if (scrollToBottom < this.threshold) {
+    if (scrollToBottom < this.threshold()) {
       this.nearEnd.emit();
     }
   }

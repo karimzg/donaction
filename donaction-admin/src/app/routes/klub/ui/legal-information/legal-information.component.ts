@@ -171,7 +171,7 @@ export class LegalInformationComponent extends GenericUpdateComponent<Klubr> imp
       associationType: entity?.associationType || 'Sport',
       sportType: entity?.sportType || '',
       federationLink: entity?.federationLink?.id || null,
-      klubYearCreation: entity?.klubYearCreation ? new Date(entity?.klubYearCreation, 0) : null,
+      klubYearCreation: entity?.klubYearCreation ? new Date(entity!.klubYearCreation, 0) : null,
       webSite: entity?.webSite || '',
       googlePlace: entity?.googlePlace.formatted_address || '',
       siegeSocialAdresse: this.gMapsUtilsService.getAddress(entity?.googlePlace) || '',
@@ -215,8 +215,8 @@ export class LegalInformationComponent extends GenericUpdateComponent<Klubr> imp
 
   /* SPECIFIC METHODES */
   override ngAfterViewInit(): void {
-    if (this.firstInput?.nativeElement) {
-      this.firstInput.nativeElement.focus();
+    if (this.firstInput()?.nativeElement) {
+      this.firstInput()!.nativeElement.focus();
     }
   }
 

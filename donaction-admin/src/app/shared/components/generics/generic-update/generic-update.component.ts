@@ -7,7 +7,6 @@ import {
   model,
   signal,
   viewChild,
-  ViewChild,
   WritableSignal
 } from '@angular/core';
 import { SharedFacade } from "@shared/data-access/+state/shared.facade";
@@ -59,7 +58,7 @@ export class GenericUpdateComponent<T extends EntityModel> implements AfterViewI
   // INPUT ENTITY (from component input or route data)
   public entity = model<T | null>(null, {alias: 'entity'});
 
-  @ViewChild('firstInput') firstInput!: ElementRef;
+  firstInput = viewChild<ElementRef>('firstInput');
 
   // ANALYTICS PROPERTIES
   firstHeading = viewChild<ElementRef>('title');
@@ -86,8 +85,8 @@ export class GenericUpdateComponent<T extends EntityModel> implements AfterViewI
   }
 
   ngAfterViewInit(): void {
-    if (this.firstInput?.nativeElement) {
-      this.firstInput.nativeElement.focus();
+    if (this.firstInput()?.nativeElement) {
+      this.firstInput()!.nativeElement.focus();
     }
   }
 

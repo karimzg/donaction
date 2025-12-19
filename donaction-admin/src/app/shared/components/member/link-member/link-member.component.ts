@@ -1,4 +1,4 @@
-import { Component, effect, inject, Input, OnDestroy, signal, Signal, ViewChild, WritableSignal, } from '@angular/core';
+import { Component, effect, inject, input, OnDestroy, signal, Signal, ViewChild, WritableSignal, } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { NgOtpInputComponent, NgOtpInputModule } from 'ng-otp-input';
 import { InputOtpChangeEvent, InputOtpModule } from 'primeng/inputotp';
@@ -76,10 +76,7 @@ export class LinkMemberComponent implements OnDestroy {
   members: WritableSignal<Array<any>> = signal([]);
   klubs: WritableSignal<Array<any>> = signal([]);
 
-  private _code: WritableSignal<string | undefined> = signal(undefined);
-  @Input() set code(value: string | undefined) {
-    this._code.set(value);
-  }
+  code = input<string | undefined>(undefined);
 
   @ViewChild(NgOtpInputComponent, {static: false}) ngOtpInput!: NgOtpInputComponent;
 
@@ -92,8 +89,8 @@ export class LinkMemberComponent implements OnDestroy {
 
   constructor() {
     effect(() => {
-      if (this._code()) {
-        const code: string | undefined = this._code();
+      if (this.code()) {
+        const code: string | undefined = this.code();
         if (code && (this.isMemberCodeValid(code) || this.isKlubCodeValid(code))) {
           this.handlelinkCodeChange(code);
         } else {
@@ -237,7 +234,6 @@ export class LinkMemberComponent implements OnDestroy {
     this.members.set([]);
     this.klubs.set([]);
     this.isKlubCode.set(false);
-    this.code = undefined;
     this.sharedFacade.emptyFilterMembers();
     this.sharedFacade.emptyFilterKlubs();
   }

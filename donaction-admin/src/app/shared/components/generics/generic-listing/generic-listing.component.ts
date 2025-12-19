@@ -9,7 +9,6 @@ import {
   signal,
   untracked,
   viewChild,
-  ViewChild,
   WritableSignal
 } from '@angular/core';
 import { ApiListResult, EntityModel, ListingFilters, MetaPagination } from "@shared/utils/models/misc";
@@ -57,7 +56,7 @@ export class GenericListingComponent<T extends EntityModel, F extends ListingFil
 
   protected incrementalPagination = false;
 
-  @ViewChild('firstInput') firstInput!: ElementRef;
+  firstInput = viewChild<ElementRef>('firstInput');
   filtersComponent = viewChild<GenericFiltersComponent<F>>('filtersComponent');
 
   constructor() {
@@ -77,8 +76,8 @@ export class GenericListingComponent<T extends EntityModel, F extends ListingFil
   }
 
   ngAfterViewInit(): void {
-    if (this.firstInput?.nativeElement) {
-      this.firstInput.nativeElement.focus();
+    if (this.firstInput()?.nativeElement) {
+      this.firstInput()!.nativeElement.focus();
     }
   }
 
@@ -87,7 +86,7 @@ export class GenericListingComponent<T extends EntityModel, F extends ListingFil
   }
 
   public onNearEndScroll() {
-    if (this.pagination()!.page < (this.pagination()?.pageCount || 0) && !this.sharedFacade.loading()) {
+    if (this.pagination() && this.pagination()!.page < (this.pagination()?.pageCount || 0) && !this.sharedFacade.loading()) {
       this.onFiltersChanged(this.pagination()!.page + 1);
     }
   }

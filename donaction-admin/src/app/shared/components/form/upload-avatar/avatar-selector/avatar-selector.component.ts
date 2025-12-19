@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, input, linkedSignal, output, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, linkedSignal, output, viewChild } from '@angular/core';
 import { take } from "rxjs/operators";
 import { AvatarPopUpComponent } from "../avatar-pop-up/avatar-pop-up.component";
 import { filter } from "rxjs";
@@ -35,12 +35,12 @@ export class AvatarSelectorComponent {
   fileSelected = output<File>();
   avatarSelected = output<Media>();
 
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
   /* FILE UPLOAD METHODS */
   openFileDialog(op: Popover) {
     op.hide();
-    this.fileInput.nativeElement.click();
+    this.fileInput().nativeElement.click();
   }
 
   public onFileSelected(event: Event): void {

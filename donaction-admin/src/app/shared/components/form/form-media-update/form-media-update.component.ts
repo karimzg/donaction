@@ -12,7 +12,7 @@ import {
   Signal,
   signal,
   untracked,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
   WritableSignal,
 } from '@angular/core';
@@ -118,7 +118,7 @@ export class FormMediaUpdateComponent implements OnInit {
   public safeUrl: WritableSignal<SafeUrl | undefined> = signal<SafeUrl | undefined>(undefined);
   public loading: WritableSignal<boolean> = signal<boolean>(false);
 
-  @ViewChild(FileUpload) fileUploadComponent!: FileUpload;
+  fileUploadComponent = viewChild.required<FileUpload>(FileUpload);
 
   constructor() {
     // effect(() => {
@@ -134,7 +134,7 @@ export class FormMediaUpdateComponent implements OnInit {
 
   public setInitFile(file: any) {
     this.initFile.set(file);
-    this.fileUploadComponent.files = [file];
+    this.fileUploadComponent().files = [file];
     this.setSelection(file);
   }
 
@@ -318,7 +318,7 @@ export class FormMediaUpdateComponent implements OnInit {
       delay(100),
       take(1),
     ).subscribe(() => {
-      this.fileUploadComponent.upload();
+      this.fileUploadComponent().upload();
     });
   }
 }

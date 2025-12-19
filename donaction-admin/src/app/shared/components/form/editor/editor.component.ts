@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   signal,
@@ -32,9 +32,9 @@ import { CommonModule } from "@angular/common";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.ng-invalid]': 'control.invalid',
-    '[class.ng-touched]': '!control.untouched',
-    '[class.ng-dirty]': 'control.dirty',
+    '[class.ng-invalid]': 'control().invalid',
+    '[class.ng-touched]': '!control().untouched',
+    '[class.ng-dirty]': 'control().dirty',
   }
 })
 export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -49,18 +49,18 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     // ['text_color', 'background_color'],
   ];
 
-  @Input() control!: FormControl;
-  @Input() placeholder: string = 'Écrivez quelque chose...';
-  @Input() minChars = 0;
-  @Input() maxChars = 600;
-  @Input() name = 'editor';
+  control = input.required<FormControl>();
+  placeholder = input<string>('Écrivez quelque chose...');
+  minChars = input<number>(0);
+  maxChars = input<number>(600);
+  name = input<string>('editor');
   public nbCars: WritableSignal<number | undefined> = signal(undefined);
   public exceedLimit: WritableSignal<boolean> = signal(false);
 
   ngOnInit(): void {
-    this.control.valueChanges.subscribe((value: string) => {
+    this.control().valueChanges.subscribe((value: string) => {
       this.nbCars.set(htmlNbCars(value));
-      this.exceedLimit.set((this.nbCars()! >= this.maxChars) || (this.nbCars()! < this.minChars));
+      this.exceedLimit.set((this.nbCars()! >= this.maxChars()) || (this.nbCars()! < this.minChars()));
     });
     this.editor = new Editor();
   }

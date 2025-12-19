@@ -7,7 +7,7 @@ import {
   InputSignal,
   output,
   signal,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
   WritableSignal
 } from '@angular/core';
@@ -78,7 +78,7 @@ export class ProjectStateDropdownComponent {
   private datePipe = new DatePipe('en-US');
 
 
-  @ViewChild('select') select!: Select;
+  select = viewChild.required<Select>('select');
 
   constructor() {
     effect(() => {
@@ -267,7 +267,7 @@ export class ProjectStateDropdownComponent {
 
   reInitDropdown() {
     const tmp = this.currentStatus();
-    this.select.clear();
+    this.select().clear();
     this.currentStatus.set(tmp);
   }
 }

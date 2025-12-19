@@ -3,8 +3,8 @@
   <div class="flex flex-col p-2.5 gap-2.5 border-1 rounded border-[#E2E8F0] max-w-[349px] text-black">
     <div class="flex flex-col p-2 gap-1 bg-[#F8FAFC] rounded">
       <span class="text-[#64748B] truncate text-base">{{ user.email }}</span>
-      <span class="text-base"> {{ user.createdAt | date: "dd/MM/YYYY" }}
-        | Last login: {{ user.lastLogin | date: "dd/MM/YYYY" }}</span>
+      <span class="text-base"> {{ user.createdAt | date: "dd/MM/yyyy" }}
+        | Last login: {{ user.lastLogin | date: "dd/MM/yyyy" }}</span>
       <div class="flex gap-2">
         <app-user-role-tag [role]="user.role.name"></app-user-role-tag>
         <p-tag severity="secondary">{{ user.origine }}</p-tag>

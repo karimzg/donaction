@@ -1,6 +1,6 @@
 <div class="app-editor">
   <ngx-editor-menu tabindex="-1" [editor]="editor" [toolbar]="toolbar" [customMenuRef]="customMenu"></ngx-editor-menu>
-  <ngx-editor [editor]="editor" [formControl]="control" [placeholder]="placeholder"
+  <ngx-editor [editor]="editor" [formControl]="control()" [placeholder]="placeholder()"
               [outputFormat]="'html'"></ngx-editor>
 </div>
 <ng-template #customMenu>
@@ -8,7 +8,7 @@
     <div class="NgxEditor__Seperator"></div>
     <div class="NgxEditor__MenuItem NgxEditor__MenuItem--Text NgxEditor__MenuItem--NbChars"
          [ngClass]="{'NgxEditor__MenuItem--NbChars__Limit': exceedLimit()}">
-      {{ nbCars() }} / {{ maxChars }}
+      {{ nbCars() }} / {{ maxChars() }}
     </div>
   }
 </ng-template>

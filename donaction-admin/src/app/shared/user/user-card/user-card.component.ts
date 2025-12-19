@@ -1,4 +1,4 @@
-import { Component, inject, model, signal, ViewChild } from '@angular/core';
+import { Component, inject, model, signal, viewChild } from '@angular/core';
 import { UserDetail } from "@shared/utils/models/user-details";
 import { Tag } from "primeng/tag";
 import { KlubInfosComponent } from "@shared/components/klub/klub-infos/klub-infos.component";
@@ -32,14 +32,14 @@ export class UserCardComponent {
 
   public showProfilesDrawer = signal(false);
   public showDonationsDrawer = signal(false);
-  @ViewChild('profilesOp') profilesOp!: Popover;
-  @ViewChild('donationsOp') donationsOp!: Popover;
+  profilesOp = viewChild.required<Popover>('profilesOp');
+  donationsOp = viewChild.required<Popover>('donationsOp');
 
   public toggleUserOp(event: MouseEvent) {
-    this.deviceService.isMobile() ? this.showProfilesDrawer.set(!this.showProfilesDrawer()) : this.profilesOp.toggle(event);
+    this.deviceService.isMobile() ? this.showProfilesDrawer.set(!this.showProfilesDrawer()) : this.profilesOp().toggle(event);
   }
 
   public toggleDonationOp(event: MouseEvent) {
-    this.deviceService.isMobile() ? this.showDonationsDrawer.set(!this.showDonationsDrawer()) : this.donationsOp.toggle(event);
+    this.deviceService.isMobile() ? this.showDonationsDrawer.set(!this.showDonationsDrawer()) : this.donationsOp().toggle(event);
   }
 }
