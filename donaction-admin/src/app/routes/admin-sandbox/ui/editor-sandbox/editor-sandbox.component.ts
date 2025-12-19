@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { Button } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
@@ -19,6 +19,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   styleUrl: './editor-sandbox.component.scss'
 })
 export class EditorSandboxComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly sharedService = inject(SharedService);
   private readonly transformationService = inject(TransformationService);
 
@@ -33,7 +34,7 @@ export class EditorSandboxComponent implements OnInit {
 
   getKlubrDetails() {
     this.sharedService.getKlubrHouseDetails()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: any) => {
           console.log('API Description:', data?.description);
@@ -57,7 +58,7 @@ export class EditorSandboxComponent implements OnInit {
     const klubrHouseDetails = this.transformationService.transformEditorToApiFormat(this.form.value.editorContent);
     console.log('formatted', klubrHouseDetails);
     this.sharedService.updateKlubrHouseDetails({data: {description: klubrHouseDetails}})
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response: any) => {
           console.log('Successfully updated:', response);

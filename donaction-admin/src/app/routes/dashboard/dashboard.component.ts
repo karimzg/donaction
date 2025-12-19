@@ -64,12 +64,12 @@ export class DashboardComponent implements OnDestroy {
           'click',
           (event) => {
             const isOutsideClicked = !(
-              this.appSidebar().el.nativeElement.isSameNode(event.target) ||
-              this.appSidebar().el.nativeElement.contains(event.target) ||
-              this.appTopbar().menuButton().nativeElement.isSameNode(
+              this.appSidebar()?.el.nativeElement.isSameNode(event.target) ||
+              this.appSidebar()?.el.nativeElement.contains(event.target) ||
+              this.appTopbar()?.menuButton()?.nativeElement.isSameNode(
                 event.target
               ) ||
-              this.appTopbar().menuButton().nativeElement.contains(event.target)
+              this.appTopbar()?.menuButton()?.nativeElement.contains(event.target)
             );
 
             if (isOutsideClicked) {
@@ -85,12 +85,12 @@ export class DashboardComponent implements OnDestroy {
           'click',
           (event) => {
             const isOutsideClicked = !(
-              this.appTopbar().menu().nativeElement.isSameNode(event.target) ||
-              this.appTopbar().menu().nativeElement.contains(event.target) ||
-              this.appTopbar().topbarMenuButton().nativeElement.isSameNode(
+              this.appTopbar()?.menu()?.nativeElement.isSameNode(event.target) ||
+              this.appTopbar()?.menu()?.nativeElement.contains(event.target) ||
+              this.appTopbar()?.topbarMenuButton()?.nativeElement.isSameNode(
                 event.target
               ) ||
-              this.appTopbar().topbarMenuButton().nativeElement.contains(
+              this.appTopbar()?.topbarMenuButton()?.nativeElement.contains(
                 event.target
               )
             );

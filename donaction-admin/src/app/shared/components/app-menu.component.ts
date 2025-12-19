@@ -3,13 +3,11 @@ import {
   Component,
   inject,
   input,
-  OnDestroy,
   OnInit,
   Signal,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { MenuService } from '../services/menu.service';
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
@@ -94,7 +92,7 @@ import { NgClass } from "@angular/common";
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppMenuitemComponent implements OnInit, OnDestroy {
+export class AppMenuitemComponent implements OnInit {
   router = inject(Router);
   menuService = inject(MenuService);
   permissionsService = inject(PermissionsService);
@@ -107,31 +105,30 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
   isDisabled = input(false);
 
   active = false;
-
-  menuSourceSubscription: Subscription;
-
-  menuResetSubscription: Subscription;
-
   key: string = "";
 
   public isAdmin: Signal<boolean | undefined> = toSignal(this.permissionsService.isAdmin$);
 
   constructor() {
-    this.menuSourceSubscription = this.menuService.menuSource$.subscribe((value: any) => {
-      Promise.resolve(null).then(() => {
-        if (value.routeEvent) {
-          this.active = (value.key === this.key || value.key.startsWith(this.key + '-')) ? true : false;
-        } else {
-          if (value.key !== this.key && !value.key.startsWith(this.key + '-')) {
-            this.active = false;
+    this.menuService.menuSource$
+      .pipe(takeUntilDestroyed())
+      .subscribe((value: any) => {
+        Promise.resolve(null).then(() => {
+          if (value.routeEvent) {
+            this.active = (value.key === this.key || value.key.startsWith(this.key + '-')) ? true : false;
+          } else {
+            if (value.key !== this.key && !value.key.startsWith(this.key + '-')) {
+              this.active = false;
+            }
           }
-        }
+        });
       });
-    });
 
-    this.menuResetSubscription = this.menuService.resetSource$.subscribe(() => {
-      this.active = false;
-    });
+    this.menuService.resetSource$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.active = false;
+      });
 
     this.router.events.pipe(
       takeUntilDestroyed(),
@@ -186,15 +183,5 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
 
   get submenuAnimation() {
     return this.root() ? 'expanded' : (this.active ? 'expanded' : 'collapsed');
-  }
-
-  ngOnDestroy() {
-    if (this.menuSourceSubscription) {
-      this.menuSourceSubscription.unsubscribe();
-    }
-
-    if (this.menuResetSubscription) {
-      this.menuResetSubscription.unsubscribe();
-    }
   }
 }
