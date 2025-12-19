@@ -10,13 +10,13 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CalendarModule } from "primeng/calendar";
+import { DatePickerModule } from "primeng/datepicker";
 import { MultiSelectModule } from "primeng/multiselect";
 import {
   DropdownKlubFilterComponent
 } from "@shared/components/filters/dropdown-item-filter/children/dropdown-klub-filter.component";
 import { MEMBER_ROLES } from "@shared/utils/models/user-details";
-import { OverlayPanelModule } from "primeng/overlaypanel";
+import { PopoverModule } from "primeng/popover";
 import { InputTextModule } from "primeng/inputtext";
 import { ProfileFilters } from "../../model/profile-filters";
 import { Select } from "primeng/select";
@@ -28,10 +28,10 @@ import { Klubr } from "@shared/utils/models/klubr";
   selector: 'app-member-filters',
   imports: [
     FormsModule,
-    CalendarModule,
+    DatePickerModule,
     MultiSelectModule,
     DropdownKlubFilterComponent,
-    OverlayPanelModule,
+    PopoverModule,
     InputTextModule,
     Select,
     ButtonModule,

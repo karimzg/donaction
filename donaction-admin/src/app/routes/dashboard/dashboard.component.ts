@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, Renderer2, viewChild } from '@angular/core';
-import { SidebarModule } from 'primeng/sidebar';
+import { DrawerModule } from 'primeng/drawer';
 import { MenuModule } from 'primeng/menu';
 import { MenubarModule } from 'primeng/menubar';
 import { LayoutService } from '@shared/services/layout.services';
@@ -22,7 +22,7 @@ import { ServiceWorkerService } from "@shared/services/sw/service-worker.service
 @Component({
   selector: 'app-dashboard',
   imports: [
-    SidebarModule,
+    DrawerModule,
     MenuModule,
     MenubarModule,
     CommonModule,

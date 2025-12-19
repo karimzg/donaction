@@ -60,7 +60,7 @@
 <ng-template #content let-isMobile="isMobile">
   @for (item of items; track item; let i = $index) {
     <div
-      [ngClass]="{'p-overlaypanel-content--section': true, 'mt-4': i > 0, 'w-80': !isMobile}"
+      [ngClass]="{'p-popover-content--section': true, 'mt-4': i > 0, 'w-80': !isMobile}"
       (mouseenter)="onOverlayEnter()"
       (mouseleave)="onOverlayLeave(op)"
       >

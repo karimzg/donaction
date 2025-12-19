@@ -3,7 +3,7 @@
 @if (alertMsg()) {
   <div class="mb-2">
     @for (msg of alertMsg(); track msg.text) {
-      <p-message [severity]="msg.severity" class="mb-2">{{ msg.text }}</p-message>
+      <p-message [severity]="$any(msg.severity)" class="mb-2">{{ msg.text }}</p-message>
     }
   </div>
 }

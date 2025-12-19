@@ -1,7 +1,7 @@
 import { Component, inject, signal, viewChild, WritableSignal } from '@angular/core';
 import { KlubFilters } from "../../model/klub-filters";
-import { CalendarModule } from "primeng/calendar";
-import { OverlayPanelModule } from "primeng/overlaypanel";
+import { DatePickerModule } from "primeng/datepicker";
+import { PopoverModule } from "primeng/popover";
 import { MultiSelectModule } from "primeng/multiselect";
 import { PaginatorModule } from "primeng/paginator";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -22,9 +22,9 @@ import { SelectButton } from "primeng/selectbutton";
   selector: 'app-klub-filters',
   standalone: true,
   imports: [
-    CalendarModule,
+    DatePickerModule,
     Select,
-    OverlayPanelModule,
+    PopoverModule,
     DropdownMultiKlubFilterComponent,
     MultiSelectModule,
     PaginatorModule,

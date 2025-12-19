@@ -97,40 +97,40 @@ export class KlubHouseUpdateComponent extends GenericUpdateComponent<KlubrHouse>
   //   { label: 'Texte à droite', value: false, id: 2 },
   // ];
   // Main Accordion
-  mainAccordionActiveIndex: number | undefined = undefined;
+  mainAccordionActiveValue: string | undefined = undefined;
 
-  mainAccordionActiveIndexChange(index: any) {
-    this.mainAccordionActiveIndex = index;
+  mainAccordionActiveValueChange(value: any) {
+    this.mainAccordionActiveValue = value;
   }
 
-  getMainAccordionTabIcon(index: number): string {
-    console.log(this.mainAccordionActiveIndex, index)
-    return this.mainAccordionActiveIndex === index ? 'pi pi-angle-up' : 'pi pi-angle-down';
+  getMainAccordionTabIcon(index: string): string {
+    console.log(this.mainAccordionActiveValue, index)
+    return this.mainAccordionActiveValue === index ? 'pi pi-angle-up' : 'pi pi-angle-down';
   }
 
   // Citation Sub Accordion
-  citationAccordionActiveIndex: number | undefined = undefined;
+  citationAccordionActiveValue: string | undefined = undefined;
 
-  citationAccordionActiveIndexChange(index: any) {
-    this.citationAccordionActiveIndex = index;
+  citationAccordionActiveValueChange(value: any) {
+    this.citationAccordionActiveValue = value;
   }
 
-  getCitationAccordionTabIcon(index: number): string {
-    return this.citationAccordionActiveIndex === index ? 'pi pi-angle-up' : 'pi pi-angle-down';
+  getCitationAccordionTabIcon(index: string): string {
+    return this.citationAccordionActiveValue === index ? 'pi pi-angle-up' : 'pi pi-angle-down';
   }
 
   // Partners Accordion
-  partnersAccordionActiveIndex: number | undefined = undefined;
+  partnersAccordionActiveValue: string | undefined = undefined;
 
-  partnersAccordionActiveIndexChange(index: any) {
-    this.partnersAccordionActiveIndex = index;
+  partnersAccordionActiveValueChange(value: any) {
+    this.partnersAccordionActiveValue = value;
   }
 
   // Partners Sub Accordion
-  partnersSubAccordionActiveIndex: number | undefined = undefined;
+  partnersSubAccordionActiveValue: string | undefined = undefined;
 
-  partnersSubAccordionActiveIndexChange(index: any) {
-    this.partnersSubAccordionActiveIndex = index;
+  partnersSubAccordionActiveValueChange(value: any) {
+    this.partnersSubAccordionActiveValue = value;
   }
 
   // MESSAGES

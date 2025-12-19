@@ -5,7 +5,7 @@ import { DialogModule } from "primeng/dialog";
 import { DialogService, DynamicDialogConfig, DynamicDialogRef } from "primeng/dynamicdialog";
 import { InplaceModule } from 'primeng/inplace';
 import { ErrorDisplayComponent } from "../../form/error-display/error-display.component";
-import { CalendarModule } from "primeng/calendar";
+import { DatePickerModule } from "primeng/datepicker";
 import { InputTextModule } from "primeng/inputtext";
 import { dateAtLeastTomorrowValidator } from "@shared/utils/validators/date.validator";
 import { DatePickerComponent } from "../../form/date-picker/date-picker.component";
@@ -21,7 +21,7 @@ import { ToastService } from "@shared/services/misc/toast.service";
     ReactiveFormsModule,
     InplaceModule,
     ErrorDisplayComponent,
-    CalendarModule,
+    DatePickerModule,
     InputTextModule,
     DatePickerComponent,
     FormControlPipe,

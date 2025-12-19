@@ -19,7 +19,7 @@ import {
   DropdownProjectFilterComponent
 } from "@shared/components/filters/dropdown-item-filter/children/dropdown-project-filter.component";
 import { KlubProject, Klubr } from "@shared/utils/models/klubr";
-import { OverlayPanelModule } from "primeng/overlaypanel";
+import { PopoverModule } from "primeng/popover";
 import { InputTextModule } from "primeng/inputtext";
 import { STATUS_PAYMENT } from "@shared/utils/models/donation-details";
 import {
@@ -40,7 +40,7 @@ import { GenericFiltersComponent } from "@shared/components/generics/generic-fil
     DropdownKlubFilterComponent,
     DropdownProjectFilterComponent,
     DropdownInvoiceFilterComponent,
-    OverlayPanelModule,
+    PopoverModule,
     InputTextModule,
     Select,
     ButtonModule,

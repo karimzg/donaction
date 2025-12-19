@@ -2,7 +2,7 @@
   @if (isReady()) {
     @if (formDisabled() && disabledMsg()) {
       @for (msg of disabledMsg(); track msg.text) {
-        <p-message [severity]="msg.severity">{{ msg.text }}</p-message>
+        <p-message [severity]="$any(msg.severity)">{{ msg.text }}</p-message>
       }
     }
     <div class="flex flex-col sm:flex-row sm:gap-4 sm:sticky top-[70px] bg-white px-3 mx-[-1rem] z-10 pt-3">

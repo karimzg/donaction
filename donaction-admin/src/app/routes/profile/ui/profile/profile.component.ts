@@ -7,7 +7,7 @@ import { AvatarModule } from "primeng/avatar";
 import { Media } from "@shared/utils/models/media";
 import { ToastModule } from "primeng/toast";
 import { FileUploadModule } from "primeng/fileupload";
-import { OverlayPanelModule } from "primeng/overlaypanel";
+import { PopoverModule } from "primeng/popover";
 import { DialogModule } from "primeng/dialog";
 import { DialogService } from "primeng/dynamicdialog";
 import { CardModule } from "primeng/card";
@@ -43,7 +43,7 @@ import { fadeAnimation } from "@shared/utils/animations/animations";
     AvatarModule,
     ToastModule,
     FileUploadModule,
-    OverlayPanelModule,
+    PopoverModule,
     DialogModule,
     ErrorDisplayComponent,
     AvatarSelectorComponent,
