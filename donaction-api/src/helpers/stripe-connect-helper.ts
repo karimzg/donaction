@@ -108,7 +108,7 @@ export async function syncAccountStatus(
 
     if (!connectedAccount) {
         throw new Error(
-            `Connected account not found for Stripe account: ${accountId}`
+            `Compte connecté introuvable pour le compte Stripe: ${accountId}`
         );
     }
 
