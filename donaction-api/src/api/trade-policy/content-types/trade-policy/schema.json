@@ -67,6 +67,25 @@
         "disable-regenerate": true,
         "disable-auto-fill": true
       }
+    },
+    "fee_model": {
+      "type": "enumeration",
+      "enum": [
+        "percentage_only",
+        "fixed_only",
+        "percentage_plus_fixed"
+      ],
+      "default": "percentage_only",
+      "required": true
+    },
+    "fixed_amount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "donor_pays_fee": {
+      "type": "boolean",
+      "default": false,
+      "required": true
     }
   }
 }
