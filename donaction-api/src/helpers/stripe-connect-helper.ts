@@ -46,8 +46,8 @@ export async function createConnectedAccount(
 
     try {
         console.log('\n🔵 ════════════════════════════════════════════════════════');
-        console.log('🔵 CREATE STRIPE CONNECTED ACCOUNT');
-        console.log(`🔵 Klubr ID: ${klubrId} | Type: ${businessType} | Country: ${country}`);
+        console.log('🔵 CRÉATION COMPTE STRIPE CONNECT');
+        console.log(`🔵 Klubr ID: ${klubrId} | Type: ${businessType} | Pays: ${country}`);
         console.log('🔵 ════════════════════════════════════════════════════════\n');
 
         account = await stripe.accounts.create({
@@ -60,7 +60,7 @@ export async function createConnectedAccount(
             business_type: businessType,
         });
 
-        console.log(`✅ Stripe account created: ${account.id}`);
+        console.log(`✅ Compte Stripe créé: ${account.id}`);
 
         // Store connected account in database
         try {
@@ -79,15 +79,15 @@ export async function createConnectedAccount(
                 },
             });
 
-            console.log(`✅ Connected account stored in database for klubr ${klubrId}\n`);
+            console.log(`✅ Compte connecté enregistré en base pour le klubr ${klubrId}\n`);
         } catch (dbError) {
             // Database insert failed after Stripe account creation succeeded
             console.error('⚠️ ════════════════════════════════════════════════════════');
-            console.error('⚠️ ORPHANED STRIPE ACCOUNT DETECTED');
-            console.error(`⚠️ Stripe Account ID: ${account.id}`);
-            console.error(`⚠️ Klubr ID: ${klubrId}`);
-            console.error(`⚠️ Error: ${dbError.message}`);
-            console.error('⚠️ Action Required: Manual cleanup or webhook reconciliation');
+            console.error('⚠️ COMPTE STRIPE ORPHELIN DÉTECTÉ');
+            console.error(`⚠️ ID Compte Stripe: ${account.id}`);
+            console.error(`⚠️ ID Klubr: ${klubrId}`);
+            console.error(`⚠️ Erreur: ${dbError.message}`);
+            console.error('⚠️ Action requise: nettoyage manuel ou réconciliation webhook');
             console.error('⚠️ ════════════════════════════════════════════════════════\n');
 
             // Log orphaned account to webhook-log for manual cleanup
@@ -110,9 +110,9 @@ export async function createConnectedAccount(
                         retry_count: 0,
                     },
                 });
-                console.log(`📝 Orphaned account logged to webhook-log for cleanup\n`);
+                console.log(`📝 Compte orphelin enregistré dans webhook-log pour nettoyage\n`);
             } catch (logError) {
-                console.error(`❌ Failed to log orphaned account: ${logError.message}\n`);
+                console.error(`❌ Échec de l'enregistrement du compte orphelin: ${logError.message}\n`);
             }
 
             throw dbError;
@@ -122,7 +122,7 @@ export async function createConnectedAccount(
     } catch (error) {
         // Only log if not already handled by inner catch
         if (!account) {
-            console.error('❌ Failed to create connected account:', error);
+            console.error('❌ Échec de la création du compte connecté:', error);
         }
         throw error;
     }
@@ -141,8 +141,8 @@ export async function generateAccountLink(
     returnUrl: string
 ): Promise<Stripe.AccountLink> {
     console.log('\n🔗 ════════════════════════════════════════════════════════');
-    console.log('🔗 GENERATE ACCOUNT ONBOARDING LINK');
-    console.log(`🔗 Account: ${accountId}`);
+    console.log('🔗 GÉNÉRATION LIEN ONBOARDING COMPTE');
+    console.log(`🔗 Compte: ${accountId}`);
     console.log('🔗 ════════════════════════════════════════════════════════\n');
 
     const accountLink = await stripe.accountLinks.create({
@@ -152,7 +152,7 @@ export async function generateAccountLink(
         type: 'account_onboarding',
     });
 
-    console.log(`✅ Account link generated: ${accountLink.url}\n`);
+    console.log(`✅ Lien de compte généré: ${accountLink.url}\n`);
 
     return accountLink;
 }
@@ -166,8 +166,8 @@ export async function syncAccountStatus(
     accountId: string
 ): Promise<ConnectedAccountEntity> {
     console.log('\n🔄 ════════════════════════════════════════════════════════');
-    console.log('🔄 SYNC ACCOUNT STATUS FROM STRIPE');
-    console.log(`🔄 Account: ${accountId}`);
+    console.log('🔄 SYNCHRONISATION STATUT COMPTE DEPUIS STRIPE');
+    console.log(`🔄 Compte: ${accountId}`);
     console.log('🔄 ════════════════════════════════════════════════════════\n');
 
     const account = await stripe.accounts.retrieve(accountId);
@@ -211,7 +211,7 @@ export async function syncAccountStatus(
         }
     }
 
-    console.log(`📊 Status: ${accountStatus} | Verification: ${verificationStatus}`);
+    console.log(`📊 Statut: ${accountStatus} | Vérification: ${verificationStatus}`);
 
     // Update database
     const updated = await strapi.db
@@ -228,7 +228,7 @@ export async function syncAccountStatus(
             },
         });
 
-    console.log(`✅ Account status synced successfully\n`);
+    console.log(`✅ Statut du compte synchronisé avec succès\n`);
 
     return updated as ConnectedAccountEntity;
 }
@@ -303,8 +303,8 @@ export async function createTransferToConnectedAccount(
     metadata: Record<string, string> = {}
 ): Promise<Stripe.Transfer> {
     console.log('\n💸 ════════════════════════════════════════════════════════');
-    console.log('💸 CREATE TRANSFER TO CONNECTED ACCOUNT');
-    console.log(`💸 Amount: ${amount / 100}€ (${amount} cents) → Account: ${accountId}`);
+    console.log('💸 CRÉATION TRANSFERT VERS COMPTE CONNECTÉ');
+    console.log(`💸 Montant: ${amount / 100}€ (${amount} centimes) → Compte: ${accountId}`);
     console.log('💸 ════════════════════════════════════════════════════════\n');
 
     const transfer = await stripe.transfers.create({
@@ -314,7 +314,7 @@ export async function createTransferToConnectedAccount(
         metadata: metadata,
     });
 
-    console.log(`✅ Transfer created: ${transfer.id}\n`);
+    console.log(`✅ Transfert créé: ${transfer.id}\n`);
 
     return transfer;
 }
@@ -338,10 +338,10 @@ export async function logFinancialAction(
     metadata: Record<string, any> = {}
 ): Promise<FinancialAuditLogEntity> {
     console.log('\n📝 ════════════════════════════════════════════════════════');
-    console.log('📝 LOG FINANCIAL ACTION (AUDIT TRAIL)');
+    console.log('📝 ENREGISTREMENT ACTION FINANCIÈRE (AUDIT)');
     console.log(`📝 Action: ${actionType.toUpperCase()}`);
-    console.log(`📝 Klubr: ${klubrId} | Donation: ${klubDonId || 'N/A'} | Amount: ${amount / 100}€`);
-    console.log(`📝 Stripe Object: ${stripeObjectId}`);
+    console.log(`📝 Klubr: ${klubrId} | Don: ${klubDonId || 'N/A'} | Montant: ${amount / 100}€`);
+    console.log(`📝 Objet Stripe: ${stripeObjectId}`);
     console.log('📝 ════════════════════════════════════════════════════════\n');
 
     const auditLog = await strapi
@@ -359,7 +359,7 @@ export async function logFinancialAction(
             },
         });
 
-    console.log(`✅ Financial audit log created successfully\n`);
+    console.log(`✅ Journal d'audit financier créé avec succès\n`);
 
     return auditLog as FinancialAuditLogEntity;
 }
