@@ -229,6 +229,7 @@ export async function syncAccountStatus(
  * @param amount - Donation amount in cents
  * @param tradePolicy - Trade policy entity
  * @returns Calculated fee amount in cents
+ * @throws Error if fee parameters are invalid
  */
 export function calculateApplicationFee(
     amount: number,
@@ -237,6 +238,27 @@ export function calculateApplicationFee(
     const feeModel = tradePolicy.fee_model || 'percentage_only';
     const percentage = tradePolicy.commissionPercentage || 0;
     const fixedAmount = tradePolicy.fixed_amount || 0;
+
+    // Validate percentage is within 0-100 range
+    if (percentage < 0 || percentage > 100) {
+        throw new Error(
+            `Pourcentage de commission invalide: ${percentage}. Doit être entre 0 et 100.`
+        );
+    }
+
+    // Validate fixed amount is non-negative
+    if (fixedAmount < 0) {
+        throw new Error(
+            `Montant fixe invalide: ${fixedAmount}. Doit être >= 0.`
+        );
+    }
+
+    // Validate donation amount is positive
+    if (amount <= 0) {
+        throw new Error(
+            `Montant de donation invalide: ${amount}. Doit être > 0.`
+        );
+    }
 
     let fee = 0;
 
