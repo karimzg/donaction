@@ -5,6 +5,13 @@ import {
     TradePolicyEntity,
 } from '../_types';
 
+// Validate STRIPE_SECRET_KEY exists before initializing client
+if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error(
+        'STRIPE_SECRET_KEY manquant dans les variables d\'environnement. Vérifiez votre fichier .env'
+    );
+}
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2024-11-20.acacia',
 });
