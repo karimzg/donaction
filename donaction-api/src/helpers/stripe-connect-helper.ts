@@ -33,33 +33,38 @@ export async function createConnectedAccount(
     businessType: BusinessType,
     country: string = 'FR'
 ): Promise<Stripe.Account> {
-    const account = await stripe.accounts.create({
-        type: 'express',
-        country: country,
-        capabilities: {
-            card_payments: { requested: true },
-            transfers: { requested: true },
-        },
-        business_type: businessType,
-    });
-
-    // Store connected account in database
-    await strapi.documents('api::connected-account.connected-account').create({
-        data: {
-            stripe_account_id: account.id,
-            klubr: klubrId,
-            account_status: 'pending',
-            verification_status: 'unverified',
-            onboarding_completed: false,
-            business_type: businessType,
+    try {
+        const account = await stripe.accounts.create({
+            type: 'express',
             country: country,
-            created_at_stripe: new Date(account.created * 1000),
-            capabilities: account.capabilities as any,
-            requirements: account.requirements as any,
-        },
-    });
+            capabilities: {
+                card_payments: { requested: true },
+                transfers: { requested: true },
+            },
+            business_type: businessType,
+        });
 
-    return account;
+        // Store connected account in database
+        await strapi.documents('api::connected-account.connected-account').create({
+            data: {
+                stripe_account_id: account.id,
+                klubr: klubrId,
+                account_status: 'pending',
+                verification_status: 'unverified',
+                onboarding_completed: false,
+                business_type: businessType,
+                country: country,
+                created_at_stripe: new Date(account.created * 1000),
+                capabilities: account.capabilities as any,
+                requirements: account.requirements as any,
+            },
+        });
+
+        return account;
+    } catch (error) {
+        console.error('Failed to create connected account:', error);
+        throw error;
+    }
 }
 
 /**
