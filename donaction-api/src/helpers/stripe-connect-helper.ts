@@ -33,13 +33,15 @@ export async function createConnectedAccount(
     businessType: BusinessType,
     country: string = 'FR'
 ): Promise<Stripe.Account> {
+    let account: Stripe.Account | null = null;
+
     try {
         console.log('\n🔵 ════════════════════════════════════════════════════════');
         console.log('🔵 CREATE STRIPE CONNECTED ACCOUNT');
         console.log(`🔵 Klubr ID: ${klubrId} | Type: ${businessType} | Country: ${country}`);
         console.log('🔵 ════════════════════════════════════════════════════════\n');
 
-        const account = await stripe.accounts.create({
+        account = await stripe.accounts.create({
             type: 'express',
             country: country,
             capabilities: {
@@ -52,26 +54,67 @@ export async function createConnectedAccount(
         console.log(`✅ Stripe account created: ${account.id}`);
 
         // Store connected account in database
-        await strapi.documents('api::connected-account.connected-account').create({
-            data: {
-                stripe_account_id: account.id,
-                klubr: klubrId,
-                account_status: 'pending',
-                verification_status: 'unverified',
-                onboarding_completed: false,
-                business_type: businessType,
-                country: country,
-                created_at_stripe: new Date(account.created * 1000),
-                capabilities: account.capabilities as any,
-                requirements: account.requirements as any,
-            },
-        });
+        try {
+            await strapi.documents('api::connected-account.connected-account').create({
+                data: {
+                    stripe_account_id: account.id,
+                    klubr: klubrId,
+                    account_status: 'pending',
+                    verification_status: 'unverified',
+                    onboarding_completed: false,
+                    business_type: businessType,
+                    country: country,
+                    created_at_stripe: new Date(account.created * 1000),
+                    capabilities: account.capabilities as any,
+                    requirements: account.requirements as any,
+                },
+            });
 
-        console.log(`✅ Connected account stored in database for klubr ${klubrId}\n`);
+            console.log(`✅ Connected account stored in database for klubr ${klubrId}\n`);
+        } catch (dbError) {
+            // Database insert failed after Stripe account creation succeeded
+            console.error('⚠️ ════════════════════════════════════════════════════════');
+            console.error('⚠️ ORPHANED STRIPE ACCOUNT DETECTED');
+            console.error(`⚠️ Stripe Account ID: ${account.id}`);
+            console.error(`⚠️ Klubr ID: ${klubrId}`);
+            console.error(`⚠️ Error: ${dbError.message}`);
+            console.error('⚠️ Action Required: Manual cleanup or webhook reconciliation');
+            console.error('⚠️ ════════════════════════════════════════════════════════\n');
+
+            // Log orphaned account to webhook-log for manual cleanup
+            try {
+                await strapi.documents('api::webhook-log.webhook-log').create({
+                    data: {
+                        event_id: `orphaned_account_${account.id}_${Date.now()}`,
+                        event_type: 'account.orphaned',
+                        account_id: account.id,
+                        payload: {
+                            klubrId,
+                            businessType,
+                            country,
+                            stripeAccountId: account.id,
+                            error: dbError.message,
+                            timestamp: new Date().toISOString(),
+                        },
+                        processed: false,
+                        error_message: `Database insert failed: ${dbError.message}`,
+                        retry_count: 0,
+                    },
+                });
+                console.log(`📝 Orphaned account logged to webhook-log for cleanup\n`);
+            } catch (logError) {
+                console.error(`❌ Failed to log orphaned account: ${logError.message}\n`);
+            }
+
+            throw dbError;
+        }
 
         return account;
     } catch (error) {
-        console.error('❌ Failed to create connected account:', error);
+        // Only log if not already handled by inner catch
+        if (!account) {
+            console.error('❌ Failed to create connected account:', error);
+        }
         throw error;
     }
 }
