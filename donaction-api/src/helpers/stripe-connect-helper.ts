@@ -34,6 +34,11 @@ export async function createConnectedAccount(
     country: string = 'FR'
 ): Promise<Stripe.Account> {
     try {
+        console.log('\n🔵 ════════════════════════════════════════════════════════');
+        console.log('🔵 CREATE STRIPE CONNECTED ACCOUNT');
+        console.log(`🔵 Klubr ID: ${klubrId} | Type: ${businessType} | Country: ${country}`);
+        console.log('🔵 ════════════════════════════════════════════════════════\n');
+
         const account = await stripe.accounts.create({
             type: 'express',
             country: country,
@@ -43,6 +48,8 @@ export async function createConnectedAccount(
             },
             business_type: businessType,
         });
+
+        console.log(`✅ Stripe account created: ${account.id}`);
 
         // Store connected account in database
         await strapi.documents('api::connected-account.connected-account').create({
@@ -60,9 +67,11 @@ export async function createConnectedAccount(
             },
         });
 
+        console.log(`✅ Connected account stored in database for klubr ${klubrId}\n`);
+
         return account;
     } catch (error) {
-        console.error('Failed to create connected account:', error);
+        console.error('❌ Failed to create connected account:', error);
         throw error;
     }
 }
@@ -79,12 +88,19 @@ export async function generateAccountLink(
     refreshUrl: string,
     returnUrl: string
 ): Promise<Stripe.AccountLink> {
+    console.log('\n🔗 ════════════════════════════════════════════════════════');
+    console.log('🔗 GENERATE ACCOUNT ONBOARDING LINK');
+    console.log(`🔗 Account: ${accountId}`);
+    console.log('🔗 ════════════════════════════════════════════════════════\n');
+
     const accountLink = await stripe.accountLinks.create({
         account: accountId,
         refresh_url: refreshUrl,
         return_url: returnUrl,
         type: 'account_onboarding',
     });
+
+    console.log(`✅ Account link generated: ${accountLink.url}\n`);
 
     return accountLink;
 }
@@ -97,6 +113,11 @@ export async function generateAccountLink(
 export async function syncAccountStatus(
     accountId: string
 ): Promise<ConnectedAccountEntity> {
+    console.log('\n🔄 ════════════════════════════════════════════════════════');
+    console.log('🔄 SYNC ACCOUNT STATUS FROM STRIPE');
+    console.log(`🔄 Account: ${accountId}`);
+    console.log('🔄 ════════════════════════════════════════════════════════\n');
+
     const account = await stripe.accounts.retrieve(accountId);
 
     // Find connected account in database
@@ -138,6 +159,8 @@ export async function syncAccountStatus(
         }
     }
 
+    console.log(`📊 Status: ${accountStatus} | Verification: ${verificationStatus}`);
+
     // Update database
     const updated = await strapi.db
         .query('api::connected-account.connected-account')
@@ -152,6 +175,8 @@ export async function syncAccountStatus(
                 last_sync: new Date(),
             },
         });
+
+    console.log(`✅ Account status synced successfully\n`);
 
     return updated as ConnectedAccountEntity;
 }
@@ -203,12 +228,19 @@ export async function createTransferToConnectedAccount(
     accountId: string,
     metadata: Record<string, string> = {}
 ): Promise<Stripe.Transfer> {
+    console.log('\n💸 ════════════════════════════════════════════════════════');
+    console.log('💸 CREATE TRANSFER TO CONNECTED ACCOUNT');
+    console.log(`💸 Amount: ${amount / 100}€ (${amount} cents) → Account: ${accountId}`);
+    console.log('💸 ════════════════════════════════════════════════════════\n');
+
     const transfer = await stripe.transfers.create({
         amount: amount,
         currency: 'eur',
         destination: accountId,
         metadata: metadata,
     });
+
+    console.log(`✅ Transfer created: ${transfer.id}\n`);
 
     return transfer;
 }
@@ -231,6 +263,13 @@ export async function logFinancialAction(
     stripeObjectId: string,
     metadata: Record<string, any> = {}
 ): Promise<FinancialAuditLogEntity> {
+    console.log('\n📝 ════════════════════════════════════════════════════════');
+    console.log('📝 LOG FINANCIAL ACTION (AUDIT TRAIL)');
+    console.log(`📝 Action: ${actionType.toUpperCase()}`);
+    console.log(`📝 Klubr: ${klubrId} | Donation: ${klubDonId || 'N/A'} | Amount: ${amount / 100}€`);
+    console.log(`📝 Stripe Object: ${stripeObjectId}`);
+    console.log('📝 ════════════════════════════════════════════════════════\n');
+
     const auditLog = await strapi
         .documents('api::financial-audit-log.financial-audit-log')
         .create({
@@ -245,6 +284,8 @@ export async function logFinancialAction(
                 performed_at: new Date(),
             },
         });
+
+    console.log(`✅ Financial audit log created successfully\n`);
 
     return auditLog as FinancialAuditLogEntity;
 }
