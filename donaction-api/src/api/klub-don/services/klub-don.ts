@@ -288,6 +288,7 @@ export default factories.createCoreService(
                             created: payment.created,
                             error_code: payment.error_code,
                             status: payment.status,
+                            refund_status: 'none',
                         },
                     });
             }
