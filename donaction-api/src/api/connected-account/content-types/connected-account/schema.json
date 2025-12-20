@@ -20,7 +20,8 @@
     "klubr": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::klubr.klubr"
+      "target": "api::klubr.klubr",
+      "inversedBy": "connected_account"
     },
     "account_status": {
       "type": "enumeration",
