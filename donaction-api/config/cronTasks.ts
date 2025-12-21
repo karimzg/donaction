@@ -447,6 +447,30 @@ export default {
             rule: '0 * * * *',
         },
     },
+    syncStripeAccounts: {
+        task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString();
+            console.log(
+                '************ CRON: syncStripeAccounts ************',
+                formattedDate,
+            );
+            try {
+                const syncTask = require('../src/cron/sync-stripe-accounts');
+                await syncTask.default({ strapi });
+            } catch (err: any) {
+                console.log(
+                    'CRON: Erreur lors de la synchronisation des comptes Stripe.',
+                    err,
+                );
+            }
+            console.log('************ CRON END: syncStripeAccounts ************');
+        },
+        // options: Every day at 2am
+        options: {
+            rule: '0 0 2 * * *',
+        },
+    },
     relaunchPendingDonations: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             try {
