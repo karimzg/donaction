@@ -396,18 +396,18 @@ export default factories.createCoreController(
                     });
 
                 console.log(
-                    `📝 Webhook enregistré dans le log (ID: ${webhookLog.documentId})`
+                    `📝 Webhook enregistré dans le log (documentId: ${webhookLog.documentId})`
                 );
 
                 // Process webhook event
                 try {
                     await handleWebhookEvent(event);
 
-                    // Mark as processed
-                    await strapi.db
-                        .query('api::webhook-log.webhook-log')
+                    // Mark as processed (use documentId for Strapi v5)
+                    await strapi
+                        .documents('api::webhook-log.webhook-log')
                         .update({
-                            where: { id: webhookLog.id },
+                            documentId: webhookLog.documentId,
                             data: {
                                 processed: true,
                             },
@@ -424,11 +424,11 @@ export default factories.createCoreController(
                         handlerError
                     );
 
-                    // Mark as failed with error message
-                    await strapi.db
-                        .query('api::webhook-log.webhook-log')
+                    // Mark as failed with error message (use documentId for Strapi v5)
+                    await strapi
+                        .documents('api::webhook-log.webhook-log')
                         .update({
-                            where: { id: webhookLog.id },
+                            documentId: webhookLog.documentId,
                             data: {
                                 processed: false,
                                 error_message: handlerError.message,
