@@ -1,5 +1,6 @@
 import { Core, factories } from '@strapi/strapi';
 import { handleWebhookEvent } from '../../../helpers/stripe-webhook-handlers';
+import { StripeWebhookPayload } from '../../../_types';
 import Stripe from 'stripe';
 
 export default factories.createCoreController(
@@ -389,7 +390,7 @@ export default factories.createCoreController(
                             event_id: event.id,
                             event_type: event.type,
                             account_id: event.account || null,
-                            payload: event.data.object as any,
+                            payload: event.data.object as StripeWebhookPayload,
                             processed: false,
                             retry_count: 0,
                         },
