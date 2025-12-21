@@ -45,12 +45,28 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             let event: Stripe.Event;
 
             try {
-                // ctx.request.body is already parsed by Strapi
-                // We need to get the raw body for signature verification
-                // In Strapi, we can access raw body via ctx.request.rawBody
-                const rawBody =
-                    ctx.request.rawBody ||
-                    JSON.stringify(ctx.request.body);
+                // CRITICAL: Stripe signature verification requires the EXACT raw body bytes
+                // Strapi may provide rawBody, but if not available, we cannot verify
+                const rawBody = ctx.request.rawBody;
+
+                if (!rawBody) {
+                    console.error(
+                        '❌ rawBody non disponible - la vérification de signature échouera',
+                        '\n   📋 ctx.request.rawBody:', typeof ctx.request.rawBody,
+                        '\n   ⚠️  IMPORTANT: Configurez Strapi pour préserver le raw body sur cette route'
+                    );
+
+                    // WARNING: Do NOT use JSON.stringify as fallback
+                    // Stripe's signature is calculated on exact bytes, not re-serialized JSON
+                    // Whitespace, key order, etc. will differ and signature will fail
+                    return ctx.badRequest(
+                        'Corps de requête brut non disponible - vérification de signature impossible'
+                    );
+                }
+
+                console.log(
+                    `   📦 Raw body disponible: ${typeof rawBody} (${Buffer.isBuffer(rawBody) ? rawBody.length + ' bytes' : rawBody.length + ' chars'})`
+                );
 
                 event = stripe.webhooks.constructEvent(
                     rawBody,
