@@ -21,6 +21,12 @@ export default factories.createCoreController(
             );
 
             try {
+                // 1. Validate query (Strapi v5 requirement)
+                await this.validateQuery(ctx);
+
+                // 2. Sanitize query (Strapi v5 requirement)
+                await this.sanitizeQuery(ctx);
+
                 const { klubrId, businessType, country } = ctx.request.body;
 
                 // Validate required fields
@@ -75,13 +81,16 @@ export default factories.createCoreController(
 
                 console.log(`✅ Controller: Compte créé avec succès\n`);
 
-                return {
+                const result = {
                     success: true,
                     data: {
                         accountId: account.id,
                         status: 'pending',
                     },
                 };
+
+                // 3. Sanitize output (Strapi v5 requirement)
+                return await this.sanitizeOutput(result, ctx);
             } catch (error) {
                 console.error(
                     '❌ Controller: Erreur lors de la création du compte:',
@@ -109,6 +118,12 @@ export default factories.createCoreController(
             );
 
             try {
+                // 1. Validate query (Strapi v5 requirement)
+                await this.validateQuery(ctx);
+
+                // 2. Sanitize query (Strapi v5 requirement)
+                await this.sanitizeQuery(ctx);
+
                 const { accountId } = ctx.params;
                 const { refreshUrl, returnUrl } = ctx.request.body;
 
@@ -149,13 +164,16 @@ export default factories.createCoreController(
                     `✅ Controller: Lien d'onboarding généré avec succès\n`
                 );
 
-                return {
+                const result = {
                     success: true,
                     data: {
                         url: accountLink.url,
                         expiresAt: accountLink.expires_at,
                     },
                 };
+
+                // 3. Sanitize output (Strapi v5 requirement)
+                return await this.sanitizeOutput(result, ctx);
             } catch (error) {
                 console.error(
                     '❌ Controller: Erreur lors de la génération du lien:',
@@ -183,6 +201,12 @@ export default factories.createCoreController(
             );
 
             try {
+                // 1. Validate query (Strapi v5 requirement)
+                await this.validateQuery(ctx);
+
+                // 2. Sanitize query (Strapi v5 requirement)
+                await this.sanitizeQuery(ctx);
+
                 const { accountId } = ctx.params;
 
                 // Validate required fields
@@ -212,7 +236,7 @@ export default factories.createCoreController(
                     `✅ Controller: Compte synchronisé avec succès\n`
                 );
 
-                return {
+                const result = {
                     success: true,
                     data: {
                         accountId: updated.stripe_account_id,
@@ -222,6 +246,9 @@ export default factories.createCoreController(
                         lastSync: updated.last_sync,
                     },
                 };
+
+                // 3. Sanitize output (Strapi v5 requirement)
+                return await this.sanitizeOutput(result, ctx);
             } catch (error) {
                 console.error(
                     '❌ Controller: Erreur lors de la synchronisation:',
@@ -249,6 +276,12 @@ export default factories.createCoreController(
             );
 
             try {
+                // 1. Validate query (Strapi v5 requirement)
+                await this.validateQuery(ctx);
+
+                // 2. Sanitize query (Strapi v5 requirement)
+                await this.sanitizeQuery(ctx);
+
                 const { accountId } = ctx.params;
 
                 // Validate required fields
@@ -273,7 +306,7 @@ export default factories.createCoreController(
                     `✅ Controller: Compte récupéré avec succès\n`
                 );
 
-                return {
+                const result = {
                     success: true,
                     data: {
                         accountId: account.stripe_account_id,
@@ -288,6 +321,9 @@ export default factories.createCoreController(
                         klubr: account.klubr,
                     },
                 };
+
+                // 3. Sanitize output (Strapi v5 requirement)
+                return await this.sanitizeOutput(result, ctx);
             } catch (error) {
                 console.error(
                     '❌ Controller: Erreur lors de la récupération du compte:',
