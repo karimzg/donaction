@@ -97,8 +97,9 @@ export default factories.createCoreController(
                     '❌ Controller: Erreur lors de la création du compte:',
                     error
                 );
+                // Don't expose internal error details to client (security)
                 return ctx.internalServerError(
-                    `Erreur lors de la création du compte: ${error.message}`
+                    'Une erreur est survenue lors de la création du compte Stripe'
                 );
             }
         },
@@ -180,8 +181,9 @@ export default factories.createCoreController(
                     '❌ Controller: Erreur lors de la génération du lien:',
                     error
                 );
+                // Don't expose internal error details to client (security)
                 return ctx.internalServerError(
-                    `Erreur lors de la génération du lien: ${error.message}`
+                    'Une erreur est survenue lors de la génération du lien d\'onboarding'
                 );
             }
         },
@@ -255,8 +257,9 @@ export default factories.createCoreController(
                     '❌ Controller: Erreur lors de la synchronisation:',
                     error
                 );
+                // Don't expose internal error details to client (security)
                 return ctx.internalServerError(
-                    `Erreur lors de la synchronisation: ${error.message}`
+                    'Une erreur est survenue lors de la synchronisation du compte'
                 );
             }
         },
@@ -330,8 +333,9 @@ export default factories.createCoreController(
                     '❌ Controller: Erreur lors de la récupération du compte:',
                     error
                 );
+                // Don't expose internal error details to client (security)
                 return ctx.internalServerError(
-                    `Erreur lors de la récupération du compte: ${error.message}`
+                    'Une erreur est survenue lors de la récupération du compte'
                 );
             }
         },
@@ -445,8 +449,9 @@ export default factories.createCoreController(
                     '❌ Controller: Erreur lors du traitement du webhook:',
                     error
                 );
+                // Don't expose internal error details to client (security)
                 return ctx.internalServerError(
-                    `Erreur lors du traitement du webhook: ${error.message}`
+                    'Une erreur est survenue lors du traitement du webhook'
                 );
             }
         },
