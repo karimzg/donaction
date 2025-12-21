@@ -65,7 +65,7 @@ export default async ({ strapi }) => {
         );
 
         const { retryFailedWebhooks } = require('../helpers/stripe-webhook-handlers');
-        await retryFailedWebhooks();
+        await retryFailedWebhooks(strapi);
 
         console.log(
             '✅ Cron job de synchronisation terminé avec succès\n'

@@ -220,8 +220,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 /**
  * Retries failed webhook events
  * Queries webhook-log for unprocessed events and re-processes them
+ * @param strapi - Strapi instance
  */
-export async function retryFailedWebhooks(): Promise<void> {
+export async function retryFailedWebhooks(strapi: any): Promise<void> {
     console.log('\n🔁 ════════════════════════════════════════════════════════');
     console.log('🔁 RETRY: Tentative de retraitement des webhooks échoués');
     console.log('🔁 ════════════════════════════════════════════════════════\n');
