@@ -449,22 +449,39 @@ export default {
     },
     syncStripeAccounts: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            const env = process.env.NODE_ENV || 'development';
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString();
+
+            // Production guard: Skip in non-production environments
+            if (env !== 'production') {
+                console.log(
+                    '⏭️  [CRON] syncStripeAccounts - SKIPPED',
+                    `\n   📅 Date: ${formattedDate}`,
+                    `\n   🌍 Environment: ${env} (only runs in production)`,
+                );
+                return;
+            }
+
             console.log(
-                '************ CRON: syncStripeAccounts ************',
-                formattedDate,
+                '🔄 [CRON] syncStripeAccounts - START',
+                `\n   📅 Date: ${formattedDate}`,
+                `\n   🌍 Environment: ${env}`,
             );
+
             try {
                 const syncTask = require('../src/cron/sync-stripe-accounts');
                 await syncTask.default({ strapi });
+                console.log('✅ [CRON] syncStripeAccounts - SUCCESS');
             } catch (err: any) {
-                console.log(
-                    'CRON: Erreur lors de la synchronisation des comptes Stripe.',
-                    err,
+                console.error(
+                    '❌ [CRON] syncStripeAccounts - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la synchronisation des comptes Stripe'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log('************ CRON END: syncStripeAccounts ************');
+
+            console.log(`🏁 [CRON] syncStripeAccounts - END\n`);
         },
         // options: Every day at 2am
         options: {
