@@ -98,8 +98,9 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
                 '❌ Erreur lors de la vérification de la signature:',
                 error
             );
+            // Don't expose internal error details to client (security)
             return ctx.internalServerError(
-                `Erreur lors de la vérification de la signature: ${error.message}`
+                'Une erreur est survenue lors de la vérification du webhook'
             );
         }
     };
