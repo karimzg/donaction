@@ -318,9 +318,28 @@ export default factories.createCoreController(
                 // Event is attached by verify-webhook-signature middleware
                 const event: Stripe.Event = ctx.state.stripeEvent;
 
+                // Type guards: Validate event structure
                 if (!event) {
                     return ctx.badRequest(
                         'Événement Stripe manquant (vérification de signature échouée)'
+                    );
+                }
+
+                if (!event.type || typeof event.type !== 'string') {
+                    return ctx.badRequest(
+                        'Type d\'événement Stripe invalide ou manquant'
+                    );
+                }
+
+                if (!event.id || typeof event.id !== 'string') {
+                    return ctx.badRequest(
+                        'ID d\'événement Stripe invalide ou manquant'
+                    );
+                }
+
+                if (!event.data || typeof event.data !== 'object') {
+                    return ctx.badRequest(
+                        'Données d\'événement Stripe invalides ou manquantes'
                     );
                 }
 
