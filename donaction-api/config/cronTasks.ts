@@ -40,9 +40,9 @@ export default {
 
             console.log('🏁 [CRON] updateProjectStatus - END\n');
         },
-        // options: Every day at 1am
+        // options: Every day at 1am (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 1 0 * * *',
+            rule: '0 0 1 * * *',
         },
     },
     // generateInvoices: {
@@ -504,8 +504,9 @@ export default {
 
             console.log('🏁 [CRON] cleanAllKlubDons - END\n');
         },
+        // options: Every hour at minute 0 (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 * * * *',
+            rule: '0 0 * * * *',
         },
     },
     syncStripeAccounts: {
@@ -568,8 +569,9 @@ export default {
 
             console.log('🏁 [CRON] relaunchPendingDonations - END\n');
         },
+        // options: Every 10 minutes (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '*/10 * * * *', // EVERY 10 minutes
+            rule: '0 */10 * * * *',
         },
     },
     relaunchClubCreation: {
@@ -594,8 +596,9 @@ export default {
 
             console.log('🏁 [CRON] relaunchClubCreation - END\n');
         },
+        // options: Each day at noon/12pm (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 12 * * *', // Each day at noon (12pm)
+            rule: '0 0 12 * * *',
         },
     },
     /* DATA ANONYMIZATION */
