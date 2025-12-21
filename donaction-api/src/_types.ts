@@ -43,7 +43,6 @@ export type TradePolicyEntity =
     Data.ContentType<'api::trade-policy.trade-policy'>;
 export type ConnectedAccountEntity =
     Data.ContentType<'api::connected-account.connected-account'>;
-export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log'>;
 export type FinancialAuditLogEntity =
     Data.ContentType<'api::financial-audit-log.financial-audit-log'>;
 export type ReceiptCancellationEntity =
@@ -88,7 +87,7 @@ export type StripeWebhookPayload =
 /**
  * Webhook log entity for storing Stripe webhook events
  */
-export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log', 'fields'> & {
+export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log'> & {
     id?: number;
     documentId?: string;
     event_id: string;
