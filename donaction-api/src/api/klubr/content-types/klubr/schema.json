@@ -262,6 +262,12 @@
       "relation": "manyToMany",
       "target": "api::klubr.klubr",
       "mappedBy": "klubrsAffiliateds"
+    },
+    "connected_account": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::connected-account.connected-account",
+      "inversedBy": "klubr"
     }
   }
 }

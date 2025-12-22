@@ -22,24 +22,37 @@
   import loader from '../../../../../../assets/animations/loader.json';
   import error from '../../../../../../assets/animations/error.json';
   import { sendGaEvent } from '../../../../../../utils/sendGaEvent';
+
   let clientSecret: string | null = $state(null);
   let stripe: Stripe | null = $state(null);
   let elements: StripeElements | null = $state(null);
   let stripeLoading = $state('loading');
+  let stripeErrorMessage: string | null = $state(null);
+  let idempotencyKey: string | null = $state(null);
+
+  function generateIdempotencyKey(): string {
+    return crypto.randomUUID();
+  }
 
   onMount(async () => {
     try {
-      //TODO: check
-      // if (!FORM_CONFIG.donUuid || !DEFAULT_VALUES.montant) {
-      //   new Error('error');
-      // }
       sendGaEvent({
         category: 'donation',
         label: `Create payment intent for don: ${FORM_CONFIG.donUuid} price: ${DEFAULT_VALUES.montant})`
       });
-      clientSecret = await createPaymentIntent(
-        DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0)
-      ).then((res) => res.intent);
+
+      // Generate idempotency key for this payment session
+      idempotencyKey = generateIdempotencyKey();
+
+      const totalAmount = DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0);
+      const response = await createPaymentIntent(totalAmount, idempotencyKey, false);
+
+      clientSecret = response.intent;
+
+      if (response.reused) {
+        console.log('♻️ Réutilisation du payment intent existant');
+      }
+
       stripe = await getStripe();
 
       const appearance = {
@@ -60,13 +73,24 @@
       setTimeout(() => {
         stripeLoading = 'loaded';
       }, 300);
-    } catch (e) {
+    } catch (e: any) {
       sendGaEvent({
         category: 'donation_error',
         label: `Create payment intent (prices: ${DEFAULT_VALUES.montant})`
       });
-      console.log(e);
+      console.error('Erreur création payment intent:', e);
+
+      // Extract error message from API response
+      const errorMessage =
+        e?.error?.message ||
+        e?.message ||
+        'Une erreur est survenue lors de l\'initialisation du paiement';
+
+      stripeErrorMessage = errorMessage;
       stripeLoading = 'error';
+
+      // Show toast with specific error message
+      dispatchToast(errorMessage, 'DANGER');
     }
   });
 
@@ -150,9 +174,16 @@
   }
 </script>
 
-{#if ['loading', 'error'].includes(stripeLoading)}
+{#if stripeLoading === 'loading'}
   <div class="animation">
-    <LottieAnimation animation={stripeLoading === 'loading' ? loader : error} />
+    <LottieAnimation animation={loader} />
+  </div>
+{:else if stripeLoading === 'error'}
+  <div class="animation">
+    <LottieAnimation animation={error} />
+    {#if stripeErrorMessage}
+      <p class="error-message">{stripeErrorMessage}</p>
+    {/if}
   </div>
 {:else}
   <form
@@ -180,5 +211,16 @@
     max-width: 300px;
     max-height: 300px;
     margin: auto;
+    text-align: center;
+  }
+
+  .error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #fdf2f2;
+    border-radius: 8px;
+    text-align: center;
   }
 </style>

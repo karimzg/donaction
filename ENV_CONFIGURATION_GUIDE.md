@@ -111,6 +111,7 @@ STRAPI_ADMIN_CLIENT_PREVIEW_SECRET=<GENERATE_SECURE_STRING>
 # Stripe
 STRIPE_SECRET_KEY=<CREATE_NEW_STRIPE_ACCOUNT>
 STRIPE_WEBHOOK_SECRET=<FROM_STRIPE_WEBHOOK_SETUP>
+STRIPE_WEBHOOK_SECRET_CONNECT=<FROM_STRIPE_CONNECT_WEBHOOK_SETUP>
 
 # ImageKit CDN (⚠️ REQUIRES NEW ACCOUNT)
 IMAGEKIT_PUBLIC_KEY=<CREATE_ACCOUNT_AT_https://imagekit.io>
@@ -280,10 +281,23 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 1. Créer un nouveau compte ou projet "Donaction"
 2. Obtenir les clés API (publishable & secret)
-3. Configurer un webhook endpoint:
+3. Configurer les webhook endpoints:
+
+   **Webhook 1 - Paiements classiques:**
    - URL: `https://donaction.nakaa.fr/service/api/klub-don-payments/stripe-web-hooks`
    - Événements à écouter: `payment_intent.succeeded`, `payment_intent.failed`
-4. Copier le webhook secret
+   - Copier le webhook secret → `STRIPE_WEBHOOK_SECRET`
+
+   **Webhook 2 - Stripe Connect:**
+   - URL: `https://donaction.nakaa.fr/service/api/stripe-connect/webhook`
+   - Événements à écouter:
+     - `account.updated`
+     - `account.external_account.created`
+     - `account.external_account.updated`
+     - `capability.updated`
+     - `person.created`
+     - `person.updated`
+   - Copier le webhook secret → `STRIPE_WEBHOOK_SECRET_CONNECT`
 
 ### ImageKit Configuration
 
