@@ -186,6 +186,7 @@ jobs:
 
       - name: Send Slack notification
         if: secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
         run: |
           curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
@@ -220,6 +221,7 @@ jobs:
 
       - name: Send Discord notification
         if: secrets.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         run: |
           curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
