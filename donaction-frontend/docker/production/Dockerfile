@@ -12,7 +12,7 @@ RUN npm run build
 
 WORKDIR /app-build
 COPY ./donaction-frontend ./
-RUN cp .env.${ENV} .env && yarn install  && yarn run build
+RUN cp .env.${ENV} .env && npm install && npm run build
 RUN cp -R ../app-saas/build/donaction-web-components public/donaction-web-components
 
 FROM node:18-alpine AS runner
