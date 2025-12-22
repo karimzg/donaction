@@ -161,17 +161,26 @@ export default factories.createCoreController(
                             tradePolicy
                         );
 
+                        // Validate donorPaysFee against trade_policy setting
+                        // Use policy setting if client tries to bypass
+                        const shouldDonorPayFee =
+                            tradePolicy.donor_pays_fee && donorPaysFee;
+
                         // If donor pays fee, add it to total amount
-                        if (donorPaysFee) {
+                        if (shouldDonorPayFee) {
                             amountInCents += applicationFeeAmount;
                         }
                     }
+
+                    // Determine actual donor pays fee value
+                    const actualDonorPaysFee =
+                        tradePolicy?.donor_pays_fee && donorPaysFee;
 
                     console.log('\n💳 ════════════════════════════════════════');
                     console.log('💳 CRÉATION PAYMENT INTENT (STRIPE CONNECT)');
                     console.log(`💳 Montant: ${amountInCents / 100}€`);
                     console.log(`💳 Frais application: ${applicationFeeAmount / 100}€`);
-                    console.log(`💳 Donateur paie frais: ${donorPaysFee}`);
+                    console.log(`💳 Donateur paie frais: ${actualDonorPaysFee}`);
                     console.log(`💳 Compte connecté: ${connectedAccount.stripe_account_id}`);
                     console.log('💳 ════════════════════════════════════════\n');
 
@@ -183,7 +192,7 @@ export default factories.createCoreController(
                             metadata: {
                                 ...metadata,
                                 payment_method: 'stripe_connect',
-                                donor_pays_fee: String(donorPaysFee || false),
+                                donor_pays_fee: String(actualDonorPaysFee),
                             },
                             on_behalf_of: connectedAccount.stripe_account_id,
                             transfer_data: {
@@ -221,7 +230,7 @@ export default factories.createCoreController(
                         {
                             donation_uuid: metadata.donUuid,
                             fee_model: tradePolicy?.fee_model,
-                            donor_pays_fee: donorPaysFee,
+                            donor_pays_fee: actualDonorPaysFee,
                             total_amount: amountInCents,
                         }
                     );
