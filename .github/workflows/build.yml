@@ -47,6 +47,7 @@ jobs:
     name: Build ${{ matrix.app }}
     runs-on: ubuntu-latest
     needs: detect-changes
+    timeout-minutes: 30
     if: |
       needs.detect-changes.outputs.admin == 'true' ||
       needs.detect-changes.outputs.frontend == 'true' ||
@@ -188,7 +189,7 @@ jobs:
         if: secrets.SLACK_WEBHOOK_URL != ''
         continue-on-error: true
         run: |
-          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          curl --silent -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
@@ -223,7 +224,7 @@ jobs:
         if: secrets.DISCORD_WEBHOOK_URL != ''
         continue-on-error: true
         run: |
-          curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
+          curl --silent -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
             -d '{
               "embeds": [{
