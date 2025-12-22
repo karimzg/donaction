@@ -3,7 +3,11 @@
  * Prevents duplicate payment intents on retry scenarios
  */
 
+import { Core } from '@strapi/strapi';
 import { KlubDonPaymentEntity } from '../_types';
+
+// Module-level strapi reference (injected at runtime)
+declare const strapi: Core.Strapi;
 
 /**
  * Finds an existing payment intent by idempotency key
