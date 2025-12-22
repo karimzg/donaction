@@ -119,6 +119,21 @@ jobs:
           echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
+      - name: Determine environment
+        if: matrix.changed == 'true'
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "env_name=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "env_name=dev" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and push Docker image
         if: matrix.changed == 'true'
         uses: docker/build-push-action@v5
@@ -127,6 +142,54 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
+            ENVIRONMENT=${{ steps.env.outputs.env_name }}
+            # API secrets
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+            APP_KEYS=${{ secrets.APP_KEYS }}
+            API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
+            TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
+            IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
+            IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+            EMAIL_BREVO_API_KEY=${{ secrets.EMAIL_BREVO_API_KEY }}
+            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+            # Frontend secrets (NEXT_PUBLIC_*)
+            NEXT_PUBLIC_ENVIRONMENT=${{ steps.env.outputs.env_name }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ secrets.NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL }}
+            NEXT_PUBLIC_STRAPI_API_TOKEN=${{ secrets.NEXT_PUBLIC_STRAPI_API_TOKEN }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET }}
+            NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_ACTIVATE_ANALYTICS=${{ secrets.NEXT_PUBLIC_ACTIVATE_ANALYTICS }}
+            NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN }}
+            NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN }}
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            # SaaS secrets (VITE_*)
+            VITE_STRAPI_API_URL=${{ secrets.VITE_STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.VITE_STRAPI_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.VITE_GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.VITE_PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.VITE_NEXT_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64

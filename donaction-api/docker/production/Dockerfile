@@ -1,11 +1,32 @@
 ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-alpine as base
-ARG ENV=prod
 ARG NODE_ENV=production
+
+# Build-time secrets (passed via --build-arg)
+ARG DATABASE_PASSWORD
+ARG DATABASE_NAME
+ARG DATABASE_USERNAME
+ARG DATABASE_HOST
+ARG DATABASE_PORT
+ARG JWT_SECRET
+ARG ADMIN_JWT_SECRET
+ARG APP_KEYS
+ARG API_TOKEN_SALT
+ARG TRANSFER_TOKEN_SALT
+ARG STRIPE_SECRET_KEY
+ARG STRIPE_WEBHOOK_SECRET
+ARG IMAGEKIT_PUBLIC_KEY
+ARG IMAGEKIT_PRIVATE_KEY
+ARG IMAGEKIT_URL_ENDPOINT
+ARG EMAIL_BREVO_API_KEY
+ARG NEXTAUTH_URL
+ARG ENVIRONMENT
+ARG GOOGLE_RECAPTCHA_SITE_KEY
+ARG KLUBR_UUID
+
 ENV NODE_ENV=${NODE_ENV}
 RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev nasm bash vips-dev git graphicsmagick imagemagick ghostscript
-ARG ENV=prod
 WORKDIR /usr/src/
 
 
@@ -15,11 +36,31 @@ RUN npm install -g node-gyp
 RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
 ENV PATH=/usr/src/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
-RUN echo 'Environment'
-RUN echo ${ENV}
-RUN ls -l
 COPY ./donaction-api/ .
-COPY ./donaction-api/.env.${ENV} ./.env
+
+# Generate .env file from build args
+RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
+    echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env && \
+    echo "DATABASE_NAME=${DATABASE_NAME}" >> .env && \
+    echo "DATABASE_USERNAME=${DATABASE_USERNAME}" >> .env && \
+    echo "DATABASE_HOST=${DATABASE_HOST}" >> .env && \
+    echo "DATABASE_PORT=${DATABASE_PORT}" >> .env && \
+    echo "JWT_SECRET=${JWT_SECRET}" >> .env && \
+    echo "ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}" >> .env && \
+    echo "APP_KEYS=${APP_KEYS}" >> .env && \
+    echo "API_TOKEN_SALT=${API_TOKEN_SALT}" >> .env && \
+    echo "TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}" >> .env && \
+    echo "STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}" >> .env && \
+    echo "STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}" >> .env && \
+    echo "IMAGEKIT_PUBLIC_KEY=${IMAGEKIT_PUBLIC_KEY}" >> .env && \
+    echo "IMAGEKIT_PRIVATE_KEY=${IMAGEKIT_PRIVATE_KEY}" >> .env && \
+    echo "IMAGEKIT_URL_ENDPOINT=${IMAGEKIT_URL_ENDPOINT}" >> .env && \
+    echo "EMAIL_BREVO_API_KEY=${EMAIL_BREVO_API_KEY}" >> .env && \
+    echo "NEXTAUTH_URL=${NEXTAUTH_URL}" >> .env && \
+    echo "ENVIRONMENT=${ENVIRONMENT}" >> .env && \
+    echo "GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}" >> .env && \
+    echo "KLUBR_UUID=${KLUBR_UUID}" >> .env
+
 RUN npm run build
 
 
