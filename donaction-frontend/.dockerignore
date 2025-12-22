@@ -1,0 +1,48 @@
+# Exclude other apps from build context (EXCEPT saas - needed for web components)
+/donaction-admin
+/donaction-api
+
+# Exclude documentation and configs
+/docs
+/aidd
+/.github
+/CODEOWNERS
+/README.md
+/LICENSE
+
+# Node modules (reinstalled during build)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# IDE and OS files
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Tests
+**/*.spec.ts
+**/*.test.ts
+**/test
+**/tests
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Next.js specific
+.next
+out
+build
+dist
+
+# Environment files (handled via build args)
+.env*
+!.env.example
