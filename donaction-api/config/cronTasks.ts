@@ -601,6 +601,49 @@ export default {
             rule: '0 0 12 * * *',
         },
     },
+    /* IDEMPOTENCY KEY CLEANUP */
+    cleanupStaleIdempotencyKeys: {
+        task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            console.log('🔄 [CRON] cleanupStaleIdempotencyKeys - START');
+
+            try {
+                // Clean up idempotency keys older than 24 hours
+                // Stripe's idempotency keys expire after 24h, so we can safely clean up older records
+                const twentyFourHoursAgo = new Date(
+                    Date.now() - 24 * 60 * 60 * 1000,
+                );
+
+                const result = await strapi.db
+                    .query('api::klub-don-payment.klub-don-payment')
+                    .updateMany({
+                        where: {
+                            idempotency_key: { $notNull: true },
+                            createdAt: { $lt: twentyFourHoursAgo.toISOString() },
+                        },
+                        data: {
+                            idempotency_key: null,
+                        },
+                    });
+
+                console.log(
+                    '✅ [CRON] cleanupStaleIdempotencyKeys - SUCCESS',
+                    `\n   📊 Clés nettoyées: ${result?.count || 0}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] cleanupStaleIdempotencyKeys - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors du nettoyage des clés'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
+                );
+            }
+
+            console.log('🏁 [CRON] cleanupStaleIdempotencyKeys - END\n');
+        },
+        // options: Every day at 3am (after Stripe sync)
+        options: {
+            rule: '0 0 3 * * *',
+        },
+    },
     /* DATA ANONYMIZATION */
     anonymizeData: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
