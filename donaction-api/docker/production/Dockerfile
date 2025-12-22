@@ -16,6 +16,7 @@ ARG API_TOKEN_SALT
 ARG TRANSFER_TOKEN_SALT
 ARG STRIPE_SECRET_KEY
 ARG STRIPE_WEBHOOK_SECRET
+ARG STRIPE_WEBHOOK_SECRET_CONNECT
 ARG IMAGEKIT_PUBLIC_KEY
 ARG IMAGEKIT_PRIVATE_KEY
 ARG IMAGEKIT_URL_ENDPOINT
@@ -38,7 +39,7 @@ ENV PATH=/usr/src/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
 COPY ./donaction-api/ .
 
-# Generate .env file from build args
+# Generate .env file for build (will NOT be copied to final image)
 RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
     echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env && \
     echo "DATABASE_NAME=${DATABASE_NAME}" >> .env && \
@@ -52,6 +53,7 @@ RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
     echo "TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}" >> .env && \
     echo "STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}" >> .env && \
     echo "STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}" >> .env && \
+    echo "STRIPE_WEBHOOK_SECRET_CONNECT=${STRIPE_WEBHOOK_SECRET_CONNECT}" >> .env && \
     echo "IMAGEKIT_PUBLIC_KEY=${IMAGEKIT_PUBLIC_KEY}" >> .env && \
     echo "IMAGEKIT_PRIVATE_KEY=${IMAGEKIT_PRIVATE_KEY}" >> .env && \
     echo "IMAGEKIT_URL_ENDPOINT=${IMAGEKIT_URL_ENDPOINT}" >> .env && \
@@ -65,9 +67,18 @@ RUN npm run build
 
 
 FROM base as final
-COPY --from=build /usr/src/node_modules ./node_modules
 WORKDIR /usr/src/app
-COPY --from=build /usr/src/app ./
+
+# Copy only necessary files (NO .env, NO src/)
+COPY --from=build /usr/src/node_modules ../node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/config ./config
+COPY --from=build /usr/src/app/public ./public
+COPY --from=build /usr/src/app/package.json ./package.json
+COPY --from=build /usr/src/app/database ./database
+COPY --from=build /usr/src/app/types ./types
+
+# Secrets must be passed as runtime ENV variables (docker run -e or docker-compose)
 ENV PATH=/usr/src/node_modules/.bin:$PATH
 RUN chown -R node:node /usr/src/app
 USER node
