@@ -559,6 +559,9 @@ export interface ApiConnectedAccountConnectedAccount
             ['individual', 'company', 'non_profit']
         >;
         capabilities: Schema.Attribute.JSON;
+        charges_enabled: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
         country: Schema.Attribute.String & Schema.Attribute.DefaultTo<'FR'>;
         created_at_stripe: Schema.Attribute.DateTime;
         createdAt: Schema.Attribute.DateTime;
@@ -573,6 +576,9 @@ export interface ApiConnectedAccountConnectedAccount
         > &
             Schema.Attribute.Private;
         onboarding_completed: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        payouts_enabled: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<false>;
         publishedAt: Schema.Attribute.DateTime;
@@ -2501,6 +2507,9 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
             Schema.Attribute.DefaultTo<0>;
         publishedAt: Schema.Attribute.DateTime;
         reference: Schema.Attribute.String;
+        stripe_connect: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<true>;
         tradePolicyLabel: Schema.Attribute.String & Schema.Attribute.Required;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

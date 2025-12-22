@@ -74,6 +74,16 @@
     "requirements": {
       "type": "json"
     },
+    "charges_enabled": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "payouts_enabled": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
     "uuid": {
       "type": "customField",
       "customField": "plugin::strapi-advanced-uuid.uuid",

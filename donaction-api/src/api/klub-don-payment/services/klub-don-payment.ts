@@ -14,10 +14,16 @@ export default factories.createCoreService(
             status,
             donUuid,
             intent,
+            idempotencyKey,
+            applicationFeeAmount,
+            paymentMethod,
         }: {
             status: string;
             donUuid: string;
             intent: Stripe.PaymentIntent;
+            idempotencyKey?: string;
+            applicationFeeAmount?: number;
+            paymentMethod?: 'stripe_classic' | 'stripe_connect';
         }) {
             try {
                 const klubrDon: KlubDonEntity = await strapi.db
@@ -35,6 +41,7 @@ export default factories.createCoreService(
                         client_secret: intent.client_secret,
                         currency: intent.currency,
                         payment_method:
+                            paymentMethod ||
                             intent.payment_method ||
                             intent?.last_payment_error?.payment_method?.id ||
                             '',
@@ -46,6 +53,10 @@ export default factories.createCoreService(
                             '',
                         status: intent.status,
                         klub_don: klubrDon.id,
+                        ...(idempotencyKey && { idempotency_key: idempotencyKey }),
+                        ...(applicationFeeAmount !== undefined && {
+                            application_fee_amount: applicationFeeAmount / 100,
+                        }),
                     },
                 };
                 const payment = klubrDon.klub_don_payments.find(
