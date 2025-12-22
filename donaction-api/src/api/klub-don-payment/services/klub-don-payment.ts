@@ -55,7 +55,7 @@ export default factories.createCoreService(
                         klub_don: klubrDon.id,
                         ...(idempotencyKey && { idempotency_key: idempotencyKey }),
                         ...(applicationFeeAmount !== undefined && {
-                            application_fee_amount: applicationFeeAmount / 100,
+                            application_fee_amount: applicationFeeAmount,
                         }),
                     },
                 };
