@@ -110,11 +110,13 @@ jobs:
             ENV_TAG="dev"
           fi
 
-          # Build tag list
-          TAGS="${{ matrix.image }}:${ENV_TAG},${{ matrix.image }}:sha-${{ github.sha }}"
+          # Build tag list with short SHA (7 chars)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="${{ matrix.image }}:${ENV_TAG},${{ matrix.image }}:sha-${SHORT_SHA}"
 
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         if: matrix.changed == 'true'
