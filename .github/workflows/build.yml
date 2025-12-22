@@ -183,9 +183,9 @@ jobs:
           echo "apps=${APPS}" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
-        if: vars.SLACK_WEBHOOK_URL != ''
+        if: secrets.SLACK_WEBHOOK_URL != ''
         run: |
-          curl -X POST ${{ vars.SLACK_WEBHOOK_URL }} \
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
@@ -217,9 +217,9 @@ jobs:
             }'
 
       - name: Send Discord notification
-        if: vars.DISCORD_WEBHOOK_URL != ''
+        if: secrets.DISCORD_WEBHOOK_URL != ''
         run: |
-          curl -X POST ${{ vars.DISCORD_WEBHOOK_URL }} \
+          curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
             -H 'Content-Type: application/json' \
             -d '{
               "embeds": [{
