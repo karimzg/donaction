@@ -55,8 +55,8 @@ jobs:
             echo "environment=production" >> $GITHUB_OUTPUT
             echo "env_name=prod" >> $GITHUB_OUTPUT
           else
-            echo "environment=staging" >> $GITHUB_OUTPUT
-            echo "env_name=re7" >> $GITHUB_OUTPUT
+            echo "::error::Unknown branch pattern: ${{ github.ref }}. Expected demo/*, release/*, or hotfix/*"
+            exit 1
           fi
 
   build:
