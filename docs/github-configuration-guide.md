@@ -216,6 +216,35 @@ git push origin release/current
 3. Trigger emergency rebuild
 4. Audit access logs for unauthorized usage
 
+### 3.5 Adding New Secrets to Apps
+
+When adding a new secret to an application, follow the pattern for that app:
+
+**API, Frontend, SaaS (Node.js apps):**
+1. Add `ARG SECRET_NAME` to Dockerfile
+2. Add `echo "SECRET_NAME=${SECRET_NAME}" >> .env` in the .env generation block
+3. Add `SECRET_NAME=${{ secrets.SECRET_NAME }}` to workflow build-args
+4. Add GitHub secret to both staging and production environments
+
+**Admin (Angular app):**
+1. Add placeholder in environment files:
+   ```typescript
+   // environment.prod.ts & environment.re7.ts
+   mySecret: '__MY_SECRET__',  // Double underscore pattern
+   ```
+2. Add `ARG MY_SECRET` to Dockerfile
+3. Add sed replacement in Dockerfile:
+   ```dockerfile
+   sed -i "s|__MY_SECRET__|${MY_SECRET}|g" src/environments/environment.${ENVIRONMENT}.ts
+   ```
+4. Add `MY_SECRET=${{ secrets.MY_SECRET }}` to workflow build-args (Admin section)
+5. Add GitHub secret to both staging and production environments
+
+**Validation:** All Dockerfiles validate critical secrets at build time. Add validation for required secrets:
+```dockerfile
+RUN if [ -z "$MY_SECRET" ]; then echo "ERROR: MY_SECRET is required" && exit 1; fi
+```
+
 ---
 
 ## Phase 4: Branch Protection Rules
