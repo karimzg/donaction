@@ -136,8 +136,8 @@ jobs:
           echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
-        if: matrix.changed == 'true'
+      - name: Build and push API
+        if: matrix.changed == 'true' && matrix.app == 'api'
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.context }}
@@ -147,7 +147,6 @@ jobs:
           build-args: |
             NODE_ENV=production
             ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
-            # API secrets
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
@@ -168,7 +167,20 @@ jobs:
             NEXTAUTH_URL=${{ secrets.FRONT_URL }}
             GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
             KLUBR_UUID=${{ secrets.KLUBR_UUID }}
-            # Frontend secrets (NEXT_PUBLIC_*)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Frontend
+        if: matrix.changed == 'true' && matrix.app == 'frontend'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
             NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.FRONT_URL }}
             NEXT_PUBLIC_API_URL=${{ secrets.STRAPI_API_URL }}
@@ -183,7 +195,6 @@ jobs:
             NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
             NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            # SaaS secrets (VITE_*)
             VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
             VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
             VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
@@ -193,10 +204,48 @@ jobs:
             VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
             VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
             VITE_NEXT_URL=${{ secrets.FRONT_URL }}
-            # Admin secrets (Angular)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push SaaS
+        if: matrix.changed == 'true' && matrix.app == 'saas'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Admin
+        if: matrix.changed == 'true' && matrix.app == 'admin'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
             STRAPI_ADMIN_API_TOKEN=${{ secrets.STRAPI_ADMIN_API_TOKEN }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
