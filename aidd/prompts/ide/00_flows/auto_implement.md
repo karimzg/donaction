@@ -66,14 +66,38 @@ All commands execute in:
    - If ambiguous: ask user to clarify apps
    - Wait for user approval to proceed with context
    - Load approved context files into memory
-2. Generate technical plan: Use `/plan <issue-url>` with loaded context
+2. **Context Validation:**
+   - Display loaded context with format:
+     ```
+     📋 **Context Loaded for Issue #<number>**
+
+     **Detected Apps:** <app1>, <app2>
+
+     **Loaded Files:**
+     - ✅ CLAUDE.md
+     - ✅ docs/memory-bank/<app>/AGENTS.md
+     - ✅ docs/rules/<app>/naming-conventions.md
+     - ✅ [additional files...]
+
+     Would you like to:
+     - [ ] Proceed with this context
+     - [ ] Add more files (specify paths)
+     ```
+   - Wait for user confirmation or additional file requests
+   - If additional files requested: load them and re-display context
+3. **Model Selection for Planning:**
+   - Ask user (checkboxes - single choice):
+     - [ ] Opus 4.5 (recommended - best for complex planning)
+     - [ ] Sonnet 4.5 (faster, good for simple tasks)
+   - Note: All other tasks (implement, commit, review, PR) use Sonnet by default
+4. Generate technical plan: Use `/plan <issue-url>` with loaded context and selected model
    - IF validate plan OR validate both: wait for user approval before continuing
-3. Implement changes: Use `/implement`
+5. Implement changes: Use `/implement`
    - IF validate implementation OR validate both: wait for user approval before continuing
-4. Run tests: Execute test suite if applicable
-5. Commit changes: Use `/commit`
-6. Code review: Use `/review_code`
-7. Create PR: Use `/create_github_pull_request`
+6. Run tests: Execute test suite if applicable
+7. Commit changes: Use `/commit`
+8. Code review: Use `/review_code`
+9. Create PR: Use `/create_github_pull_request`
 
 **Completion Phase:**
 

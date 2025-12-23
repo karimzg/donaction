@@ -39,6 +39,12 @@ ENV PATH=/usr/src/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
 COPY ./donaction-api/ .
 
+# Validate required secrets are present
+RUN if [ -z "$DATABASE_PASSWORD" ]; then echo "ERROR: DATABASE_PASSWORD is required" && exit 1; fi && \
+    if [ -z "$JWT_SECRET" ]; then echo "ERROR: JWT_SECRET is required" && exit 1; fi && \
+    if [ -z "$ADMIN_JWT_SECRET" ]; then echo "ERROR: ADMIN_JWT_SECRET is required" && exit 1; fi && \
+    if [ -z "$APP_KEYS" ]; then echo "ERROR: APP_KEYS is required" && exit 1; fi
+
 # Generate .env file for build (will NOT be copied to final image)
 RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
     echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env && \

@@ -35,6 +35,11 @@ WORKDIR /app-saas
 COPY ./donaction-saas ./
 RUN npm install
 
+# Validate required secrets
+RUN if [ -z "$VITE_STRAPI_API_TOKEN" ]; then echo "ERROR: VITE_STRAPI_API_TOKEN is required" && exit 1; fi && \
+    if [ -z "$NEXT_PUBLIC_STRAPI_API_TOKEN" ]; then echo "ERROR: NEXT_PUBLIC_STRAPI_API_TOKEN is required" && exit 1; fi && \
+    if [ -z "$NEXTAUTH_SECRET" ]; then echo "ERROR: NEXTAUTH_SECRET is required" && exit 1; fi
+
 # Generate SaaS .env from build args
 RUN echo "VITE_STRAPI_API_URL=${VITE_STRAPI_API_URL}" > .env && \
     echo "VITE_STRAPI_API_TOKEN=${VITE_STRAPI_API_TOKEN}" >> .env && \

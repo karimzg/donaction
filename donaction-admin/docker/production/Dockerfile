@@ -17,6 +17,9 @@ RUN npm install --legacy-peer-deps
 
 COPY /donaction-admin .
 
+# Validate required secrets
+RUN if [ -z "$STRAPI_ADMIN_API_TOKEN" ]; then echo "ERROR: STRAPI_ADMIN_API_TOKEN is required" && exit 1; fi
+
 # Replace placeholders in environment file
 RUN sed -i "s|STRAPI_ADMIN_API_TOKEN_PLACEHOLDER|${STRAPI_ADMIN_API_TOKEN}|g" src/environments/environment.${ENVIRONMENT}.ts && \
     sed -i "s|GOOGLE_CLIENT_ID_PLACEHOLDER|${GOOGLE_CLIENT_ID}|g" src/environments/environment.${ENVIRONMENT}.ts && \
