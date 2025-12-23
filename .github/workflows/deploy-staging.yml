@@ -21,6 +21,10 @@ permissions:
   contents: read
   packages: read
 
+env:
+  STAGING_DOMAIN: re7.donaction.fr
+  STAGING_ENV: re7
+
 jobs:
   validate:
     name: Validate Deployment Request
@@ -30,6 +34,7 @@ jobs:
       deploy_api: ${{ steps.apps.outputs.api }}
       deploy_admin: ${{ steps.apps.outputs.admin }}
       deploy_saas: ${{ steps.apps.outputs.saas }}
+      services_list: ${{ steps.apps.outputs.services_list }}
     steps:
       - name: Validate confirmation
         if: github.event.inputs.confirmation != 'DEPLOY'
@@ -46,22 +51,70 @@ jobs:
           fi
           echo "Branch validation passed: $BRANCH"
 
+      - name: Validate required secrets
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          MISSING=""
+          [[ -z "$SSH_PRIVATE_KEY" ]] && MISSING="$MISSING SSH_PRIVATE_KEY"
+          [[ -z "$SSH_HOST" ]] && MISSING="$MISSING SSH_HOST"
+          [[ -z "$SSH_USER" ]] && MISSING="$MISSING SSH_USER"
+          [[ -z "$DATABASE_HOST" ]] && MISSING="$MISSING DATABASE_HOST"
+          [[ -z "$JWT_SECRET" ]] && MISSING="$MISSING JWT_SECRET"
+
+          if [[ -n "$MISSING" ]]; then
+            echo "::error::Missing required secrets:$MISSING"
+            echo "Please configure these secrets in the 'staging' environment."
+            exit 1
+          fi
+
+          echo "✓ All required secrets are configured"
+
       - name: Determine apps to deploy
         id: apps
         run: |
           APPS="${{ github.event.inputs.apps }}"
+          SERVICES=""
 
           if [[ "$APPS" == "all" ]]; then
             echo "frontend=true" >> $GITHUB_OUTPUT
             echo "api=true" >> $GITHUB_OUTPUT
             echo "admin=true" >> $GITHUB_OUTPUT
             echo "saas=true" >> $GITHUB_OUTPUT
+            SERVICES="frontend api admin saas"
           else
-            echo "frontend=$([[ "$APPS" == *"frontend"* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-            echo "api=$([[ "$APPS" == *"api"* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-            echo "admin=$([[ "$APPS" == *"admin"* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-            echo "saas=$([[ "$APPS" == *"saas"* ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+            if [[ "$APPS" == *"frontend"* ]]; then
+              echo "frontend=true" >> $GITHUB_OUTPUT
+              SERVICES="$SERVICES frontend"
+            else
+              echo "frontend=false" >> $GITHUB_OUTPUT
+            fi
+            if [[ "$APPS" == *"api"* ]]; then
+              echo "api=true" >> $GITHUB_OUTPUT
+              SERVICES="$SERVICES api"
+            else
+              echo "api=false" >> $GITHUB_OUTPUT
+            fi
+            if [[ "$APPS" == *"admin"* ]]; then
+              echo "admin=true" >> $GITHUB_OUTPUT
+              SERVICES="$SERVICES admin"
+            else
+              echo "admin=false" >> $GITHUB_OUTPUT
+            fi
+            if [[ "$APPS" == *"saas"* ]]; then
+              echo "saas=true" >> $GITHUB_OUTPUT
+              SERVICES="$SERVICES saas"
+            else
+              echo "saas=false" >> $GITHUB_OUTPUT
+            fi
           fi
+
+          echo "services_list=${SERVICES}" >> $GITHUB_OUTPUT
+          echo "Will deploy: ${SERVICES:-none}"
 
   deploy:
     name: Deploy to Staging Server
@@ -69,6 +122,9 @@ jobs:
     needs: validate
     environment: staging
     timeout-minutes: 15
+    outputs:
+      deployed_services: ${{ needs.validate.outputs.services_list }}
+      deployment_time: ${{ steps.deploy.outputs.deployment_time }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -80,10 +136,65 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Check port availability
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "Checking port availability..."
+            PORTS="3000 1437 4200 5000"
+            BLOCKED=""
+
+            for PORT in $PORTS; do
+              # Check if port is in use by non-docker process
+              PID=$(sudo lsof -t -i:$PORT 2>/dev/null | head -1)
+              if [[ -n "$PID" ]]; then
+                PROCESS=$(ps -p $PID -o comm= 2>/dev/null)
+                # Allow if it's docker or our containers
+                if [[ "$PROCESS" != "docker"* ]] && ! docker ps --format '{{.Ports}}' | grep -q ":$PORT->"; then
+                  BLOCKED="$BLOCKED $PORT(used by $PROCESS)"
+                fi
+              fi
+            done
+
+            if [[ -n "$BLOCKED" ]]; then
+              echo "::error::Ports blocked by non-Docker processes:$BLOCKED"
+              exit 1
+            fi
+
+            echo "✓ All required ports are available"
+          EOF
+
+      - name: Check SSL certificate
+        continue-on-error: true
+        run: |
+          echo "Checking SSL certificate for ${{ env.STAGING_DOMAIN }}..."
+
+          # Check certificate expiry
+          EXPIRY=$(echo | openssl s_client -servername ${{ env.STAGING_DOMAIN }} \
+            -connect ${{ env.STAGING_DOMAIN }}:443 2>/dev/null | \
+            openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+
+          if [[ -n "$EXPIRY" ]]; then
+            EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || date -j -f "%b %d %T %Y %Z" "$EXPIRY" +%s 2>/dev/null)
+            NOW_EPOCH=$(date +%s)
+            DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+
+            if [[ $DAYS_LEFT -lt 7 ]]; then
+              echo "::warning::SSL certificate expires in $DAYS_LEFT days! Consider renewing."
+            elif [[ $DAYS_LEFT -lt 30 ]]; then
+              echo "::notice::SSL certificate expires in $DAYS_LEFT days."
+            else
+              echo "✓ SSL certificate valid for $DAYS_LEFT days"
+            fi
+          else
+            echo "::notice::Could not check SSL certificate (new deployment?)"
+          fi
+
       - name: Create deployment directory
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             mkdir -p ~/donaction-staging/nginx
+            mkdir -p ~/donaction-staging/backups
+            mkdir -p ~/donaction-staging/logs
           EOF
 
       - name: Copy docker-compose.yml
@@ -98,82 +209,153 @@ jobs:
             infrastructure/staging/nginx/donaction.conf \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/nginx/
 
-      - name: Generate .env file on server
+      - name: Generate and copy .env file
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOFSCRIPT'
-            cat > ~/donaction-staging/.env << 'ENVEOF'
+          # Generate .env locally (secrets are masked in logs)
+          cat > /tmp/staging.env << EOF
           # Auto-generated by GitHub Actions
+          # Deployed: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          # Branch: ${{ github.ref_name }}
+          # Commit: ${{ github.sha }}
           NODE_ENV=production
-          ENVIRONMENT=re7
+          ENVIRONMENT=${{ env.STAGING_ENV }}
 
           # Database
-          DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-          DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-          DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
+          DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
+          DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
+          DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"
+          DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"
 
           # Strapi Authentication
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
-          APP_KEYS=${{ secrets.APP_KEYS }}
-          API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
-          TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          ADMIN_JWT_SECRET="${{ secrets.ADMIN_JWT_SECRET }}"
+          APP_KEYS="${{ secrets.APP_KEYS }}"
+          API_TOKEN_SALT="${{ secrets.API_TOKEN_SALT }}"
+          TRANSFER_TOKEN_SALT="${{ secrets.TRANSFER_TOKEN_SALT }}"
 
           # Stripe
-          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STRIPE_WEBHOOK_SECRET_CONNECT=${{ secrets.STRIPE_WEBHOOK_SECRET_CONNECT }}
+          STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}"
+          STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+          STRIPE_WEBHOOK_SECRET_CONNECT="${{ secrets.STRIPE_WEBHOOK_SECRET_CONNECT }}"
 
           # ImageKit
-          IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
-          IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-          IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          IMAGEKIT_PUBLIC_KEY="${{ secrets.IMAGEKIT_PUBLIC_KEY }}"
+          IMAGEKIT_PRIVATE_KEY="${{ secrets.IMAGEKIT_PRIVATE_KEY }}"
+          IMAGEKIT_URL_ENDPOINT="${{ secrets.IMAGEKIT_URL_ENDPOINT }}"
 
           # Email
-          EMAIL_BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          EMAIL_BREVO_API_KEY="${{ secrets.BREVO_API_KEY }}"
 
           # Google Services
-          GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+          GOOGLE_RECAPTCHA_SITE_KEY="${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}"
 
           # Application URLs
-          NEXTAUTH_URL=${{ secrets.FRONT_URL }}
-          KLUBR_UUID=${{ secrets.KLUBR_UUID }}
-          ENVEOF
-            chmod 600 ~/donaction-staging/.env
-          EOFSCRIPT
+          NEXT_PUBLIC_API_URL="https://${{ env.STAGING_DOMAIN }}/service"
+          NEXT_PUBLIC_FRONT_URL="https://${{ env.STAGING_DOMAIN }}"
+          NEXTAUTH_URL="${{ secrets.FRONT_URL }}"
+          NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}"
+          KLUBR_UUID="${{ secrets.KLUBR_UUID }}"
+          EOF
+
+          # SCP the file securely
+          scp -i ~/.ssh/id_rsa /tmp/staging.env ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/.env
+
+          # Clean up local temp file
+          rm -f /tmp/staging.env
+
+          # Set permissions on server
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'chmod 600 ~/donaction-staging/.env'
 
       - name: Login to GHCR on server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          EOF
+
+      - name: Backup current deployment
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/donaction-staging
+
+            # Save current image tags for rollback
+            if docker compose ps -q 2>/dev/null | grep -q .; then
+              echo "Backing up current deployment state..."
+              docker compose config --images > backups/images-$(date +%Y%m%d-%H%M%S).txt
+              cp docker-compose.yml backups/docker-compose-$(date +%Y%m%d-%H%M%S).yml
+            else
+              echo "No existing deployment to backup"
+            fi
+
+            # Keep only last 5 backups
+            ls -t backups/images-*.txt 2>/dev/null | tail -n +6 | xargs -r rm
+            ls -t backups/docker-compose-*.yml 2>/dev/null | tail -n +6 | xargs -r rm
           EOF
 
       - name: Pull Docker images
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          SERVICES="${{ needs.validate.outputs.services_list }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
-            echo "Pulling latest images from GHCR..."
-            docker compose pull
+            echo "Pulling images for: ${SERVICES:-all services}..."
+            if [[ -n "$SERVICES" ]]; then
+              docker compose pull $SERVICES
+            else
+              docker compose pull
+            fi
             echo "Images pulled successfully"
           EOF
 
       - name: Deploy containers
+        id: deploy
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          SERVICES="${{ needs.validate.outputs.services_list }}"
+          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
+
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
 
-            echo "Stopping existing containers..."
-            docker compose down --remove-orphans
+            echo "Deploying: ${SERVICES:-all services}..."
 
-            echo "Starting containers..."
-            docker compose up -d
+            if [[ -n "$SERVICES" ]]; then
+              # Selective deployment: restart only specified services
+              docker compose up -d --no-deps $SERVICES
+            else
+              # Full deployment
+              echo "Stopping existing containers..."
+              docker compose down --remove-orphans
 
-            echo "Cleaning up old images..."
-            docker image prune -af --filter "until=24h"
+              echo "Starting containers..."
+              docker compose up -d
+            fi
 
             echo "Container status:"
             docker compose ps
+          EOF
+
+      - name: Write deployment log
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/donaction-staging
+            LOG_FILE="logs/deployments.log"
+
+            # Append deployment entry
+            echo "---" >> "$LOG_FILE"
+            echo "timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$LOG_FILE"
+            echo "branch: ${{ github.ref_name }}" >> "$LOG_FILE"
+            echo "commit: ${{ github.sha }}" >> "$LOG_FILE"
+            echo "actor: ${{ github.actor }}" >> "$LOG_FILE"
+            echo "run_id: ${{ github.run_id }}" >> "$LOG_FILE"
+            echo "services: ${{ needs.validate.outputs.services_list }}" >> "$LOG_FILE"
+            echo "images:" >> "$LOG_FILE"
+            docker compose config --images | sed 's/^/  - /' >> "$LOG_FILE"
+
+            # Keep log file under 1MB (rotate if needed)
+            if [[ $(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null) -gt 1048576 ]]; then
+              mv "$LOG_FILE" "logs/deployments-$(date +%Y%m%d).log"
+              echo "# Deployment Log (rotated $(date))" > "$LOG_FILE"
+            fi
           EOF
 
       - name: Install nginx configuration
@@ -193,7 +375,7 @@ jobs:
             # Reload nginx
             sudo systemctl reload nginx
 
-            echo "Nginx configuration updated and reloaded"
+            echo "✓ Nginx configuration updated and reloaded"
           EOF
 
       - name: Wait for services to start
@@ -202,27 +384,108 @@ jobs:
       - name: Health check
         id: health
         run: |
-          echo "Performing health check on https://re7.donaction.fr/health..."
+          echo "Performing health checks..."
 
           MAX_RETRIES=5
           RETRY_DELAY=10
+          FAILED=""
 
+          # Check nginx health endpoint
+          echo "Checking nginx /health endpoint..."
           for i in $(seq 1 $MAX_RETRIES); do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://re7.donaction.fr/health || echo "000")
-
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.STAGING_DOMAIN }}/health || echo "000")
             if [[ "$HTTP_STATUS" == "200" ]]; then
-              echo "Health check passed! Status: $HTTP_STATUS"
-              echo "status=success" >> $GITHUB_OUTPUT
-              exit 0
+              echo "✓ Nginx health check passed"
+              break
             fi
-
-            echo "Attempt $i/$MAX_RETRIES - Status: $HTTP_STATUS. Retrying in ${RETRY_DELAY}s..."
+            if [[ $i -eq $MAX_RETRIES ]]; then
+              FAILED="$FAILED nginx"
+            fi
+            echo "Attempt $i/$MAX_RETRIES - Nginx status: $HTTP_STATUS. Retrying..."
             sleep $RETRY_DELAY
           done
 
-          echo "Health check failed after $MAX_RETRIES attempts"
-          echo "status=failure" >> $GITHUB_OUTPUT
-          exit 1
+          # Check API health via container
+          echo "Checking API container health..."
+          API_HEALTHY=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'docker inspect --format="{{.State.Health.Status}}" donaction_api 2>/dev/null || echo "unknown"')
+
+          if [[ "$API_HEALTHY" == "healthy" ]]; then
+            echo "✓ API container health check passed"
+          else
+            echo "⚠ API container status: $API_HEALTHY"
+            # Also check API endpoint directly
+            for i in $(seq 1 $MAX_RETRIES); do
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.STAGING_DOMAIN }}/service/_health || echo "000")
+              if [[ "$API_STATUS" == "200" ]]; then
+                echo "✓ API endpoint responding"
+                break
+              fi
+              if [[ $i -eq $MAX_RETRIES ]]; then
+                FAILED="$FAILED api"
+              fi
+              echo "Attempt $i/$MAX_RETRIES - API status: $API_STATUS. Retrying..."
+              sleep $RETRY_DELAY
+            done
+          fi
+
+          if [[ -n "$FAILED" ]]; then
+            echo "::error::Health check failed for:$FAILED"
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "All health checks passed!"
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Rollback on failure
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          echo "::warning::Deployment failed, attempting rollback..."
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/donaction-staging
+
+            # Find most recent backup
+            BACKUP_COMPOSE=$(ls -t backups/docker-compose-*.yml 2>/dev/null | head -1)
+
+            if [[ -n "$BACKUP_COMPOSE" ]]; then
+              echo "Rolling back to: $BACKUP_COMPOSE"
+              cp "$BACKUP_COMPOSE" docker-compose.yml
+              docker compose down --remove-orphans
+              docker compose up -d
+              echo "Rollback completed"
+              docker compose ps
+
+              # Log rollback
+              echo "---" >> logs/deployments.log
+              echo "timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> logs/deployments.log
+              echo "action: ROLLBACK" >> logs/deployments.log
+              echo "from_run: ${{ github.run_id }}" >> logs/deployments.log
+              echo "backup_used: $BACKUP_COMPOSE" >> logs/deployments.log
+            else
+              echo "No backup available for rollback"
+            fi
+          EOF
+
+      - name: Cleanup old images
+        if: success()
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "Cleaning up old images (keeping last 48h)..."
+            docker image prune -af --filter "until=48h"
+          EOF
+
+      - name: Logout from GHCR
+        if: always()
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            docker logout ghcr.io 2>/dev/null || true
+          EOF
+
+      - name: Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
 
   notify:
     name: Send Notifications
@@ -247,17 +510,38 @@ jobs:
             echo "title=Staging Deployment Failed" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate deployment summary
+        run: |
+          SERVICES="${{ needs.validate.outputs.services_list }}"
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | Staging (${{ env.STAGING_DOMAIN }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Services** | ${SERVICES:-all} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status** | ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 [Frontend](https://${{ env.STAGING_DOMAIN }})" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔌 [API](https://${{ env.STAGING_DOMAIN }}/service)" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚙️ [Admin](https://${{ env.STAGING_DOMAIN }}/admin)" >> $GITHUB_STEP_SUMMARY
+
       - name: Send Slack notification
         if: vars.SLACK_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
-          if [[ -z "$WEBHOOK_URL" ]]; then
+          if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
             echo "Slack webhook not configured, skipping"
             exit 0
           fi
 
-          curl -X POST "$WEBHOOK_URL" \
+          SERVICES="${{ needs.validate.outputs.services_list }}"
+          curl -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "${{ steps.status.outputs.emoji }} ${{ steps.status.outputs.title }}",
@@ -266,12 +550,17 @@ jobs:
                 "fields": [
                   {
                     "title": "Environment",
-                    "value": "Staging (re7.donaction.fr)",
+                    "value": "Staging (${{ env.STAGING_DOMAIN }})",
                     "short": true
                   },
                   {
                     "title": "Branch",
                     "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Services",
+                    "value": "'"${SERVICES:-all}"'",
                     "short": true
                   },
                   {
@@ -291,14 +580,16 @@ jobs:
       - name: Send Discord notification
         if: vars.DISCORD_WEBHOOK_URL || secrets.DISCORD_WEBHOOK_URL
         continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
-          if [[ -z "$WEBHOOK_URL" ]]; then
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
             echo "Discord webhook not configured, skipping"
             exit 0
           fi
 
-          curl -X POST "$WEBHOOK_URL" \
+          SERVICES="${{ needs.validate.outputs.services_list }}"
+          curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
               "embeds": [{
@@ -307,12 +598,17 @@ jobs:
                 "fields": [
                   {
                     "name": "Environment",
-                    "value": "Staging (re7.donaction.fr)",
+                    "value": "Staging (${{ env.STAGING_DOMAIN }})",
                     "inline": true
                   },
                   {
                     "name": "Branch",
                     "value": "${{ github.ref_name }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Services",
+                    "value": "'"${SERVICES:-all}"'",
                     "inline": true
                   },
                   {
@@ -322,7 +618,7 @@ jobs:
                   },
                   {
                     "name": "URLs",
-                    "value": "[Frontend](https://re7.donaction.fr) | [API](https://re7.donaction.fr/service) | [Admin](https://re7.donaction.fr/admin)",
+                    "value": "[Frontend](https://${{ env.STAGING_DOMAIN }}) | [API](https://${{ env.STAGING_DOMAIN }}/service) | [Admin](https://${{ env.STAGING_DOMAIN }}/admin)",
                     "inline": false
                   }
                 ]
