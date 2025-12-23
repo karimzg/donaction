@@ -46,28 +46,29 @@ RUN if [ -z "$DATABASE_PASSWORD" ]; then echo "ERROR: DATABASE_PASSWORD is requi
     if [ -z "$APP_KEYS" ]; then echo "ERROR: APP_KEYS is required" && exit 1; fi
 
 # Generate .env file for build (will NOT be copied to final image)
-RUN echo "NODE_ENV=${NODE_ENV}" > .env && \
-    echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env && \
-    echo "DATABASE_NAME=${DATABASE_NAME}" >> .env && \
-    echo "DATABASE_USERNAME=${DATABASE_USERNAME}" >> .env && \
-    echo "DATABASE_HOST=${DATABASE_HOST}" >> .env && \
-    echo "DATABASE_PORT=${DATABASE_PORT}" >> .env && \
-    echo "JWT_SECRET=${JWT_SECRET}" >> .env && \
-    echo "ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}" >> .env && \
-    echo "APP_KEYS=${APP_KEYS}" >> .env && \
-    echo "API_TOKEN_SALT=${API_TOKEN_SALT}" >> .env && \
-    echo "TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}" >> .env && \
-    echo "STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}" >> .env && \
-    echo "STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}" >> .env && \
-    echo "STRIPE_WEBHOOK_SECRET_CONNECT=${STRIPE_WEBHOOK_SECRET_CONNECT}" >> .env && \
-    echo "IMAGEKIT_PUBLIC_KEY=${IMAGEKIT_PUBLIC_KEY}" >> .env && \
-    echo "IMAGEKIT_PRIVATE_KEY=${IMAGEKIT_PRIVATE_KEY}" >> .env && \
-    echo "IMAGEKIT_URL_ENDPOINT=${IMAGEKIT_URL_ENDPOINT}" >> .env && \
-    echo "EMAIL_BREVO_API_KEY=${EMAIL_BREVO_API_KEY}" >> .env && \
-    echo "NEXTAUTH_URL=${NEXTAUTH_URL}" >> .env && \
-    echo "ENVIRONMENT=${ENVIRONMENT}" >> .env && \
-    echo "GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}" >> .env && \
-    echo "KLUBR_UUID=${KLUBR_UUID}" >> .env
+# Values are quoted to handle special characters and empty values
+RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
+    echo 'DATABASE_PASSWORD="'"${DATABASE_PASSWORD}"'"' >> .env && \
+    echo 'DATABASE_NAME="'"${DATABASE_NAME}"'"' >> .env && \
+    echo 'DATABASE_USERNAME="'"${DATABASE_USERNAME}"'"' >> .env && \
+    echo 'DATABASE_HOST="'"${DATABASE_HOST}"'"' >> .env && \
+    echo 'DATABASE_PORT="'"${DATABASE_PORT}"'"' >> .env && \
+    echo 'JWT_SECRET="'"${JWT_SECRET}"'"' >> .env && \
+    echo 'ADMIN_JWT_SECRET="'"${ADMIN_JWT_SECRET}"'"' >> .env && \
+    echo 'APP_KEYS="'"${APP_KEYS}"'"' >> .env && \
+    echo 'API_TOKEN_SALT="'"${API_TOKEN_SALT}"'"' >> .env && \
+    echo 'TRANSFER_TOKEN_SALT="'"${TRANSFER_TOKEN_SALT}"'"' >> .env && \
+    echo 'STRIPE_SECRET_KEY="'"${STRIPE_SECRET_KEY}"'"' >> .env && \
+    echo 'STRIPE_WEBHOOK_SECRET="'"${STRIPE_WEBHOOK_SECRET}"'"' >> .env && \
+    echo 'STRIPE_WEBHOOK_SECRET_CONNECT="'"${STRIPE_WEBHOOK_SECRET_CONNECT}"'"' >> .env && \
+    echo 'IMAGEKIT_PUBLIC_KEY="'"${IMAGEKIT_PUBLIC_KEY}"'"' >> .env && \
+    echo 'IMAGEKIT_PRIVATE_KEY="'"${IMAGEKIT_PRIVATE_KEY}"'"' >> .env && \
+    echo 'IMAGEKIT_URL_ENDPOINT="'"${IMAGEKIT_URL_ENDPOINT}"'"' >> .env && \
+    echo 'EMAIL_BREVO_API_KEY="'"${EMAIL_BREVO_API_KEY}"'"' >> .env && \
+    echo 'NEXTAUTH_URL="'"${NEXTAUTH_URL}"'"' >> .env && \
+    echo 'ENVIRONMENT="'"${ENVIRONMENT}"'"' >> .env && \
+    echo 'GOOGLE_RECAPTCHA_SITE_KEY="'"${GOOGLE_RECAPTCHA_SITE_KEY}"'"' >> .env && \
+    echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env
 
 RUN npm run build
 
@@ -85,12 +86,15 @@ COPY --from=build /usr/src/app/database ./database
 COPY --from=build /usr/src/app/types ./types
 
 # Secrets must be passed as runtime ENV variables (docker run -e or docker-compose)
-# Defaults for non-sensitive config (can be overridden at runtime)
 ENV NODE_ENV=production
-ENV DATABASE_HOST=localhost
 ENV DATABASE_PORT=5432
 ENV PATH=/usr/src/node_modules/.bin:$PATH
-RUN chown -R node:node /usr/src/app
+
+# Copy and setup entrypoint for runtime secret validation
+COPY --from=build /usr/src/app/docker/production/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && chown -R node:node /usr/src/app
+
 USER node
 EXPOSE 1437
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "run", "start"]
