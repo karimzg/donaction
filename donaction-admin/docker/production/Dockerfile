@@ -28,6 +28,13 @@ RUN sed -i "s|STRAPI_ADMIN_API_TOKEN_PLACEHOLDER|${STRAPI_ADMIN_API_TOKEN}|g" sr
     sed -i "s|GOOGLE_MAPS_API_KEY_PLACEHOLDER|${GOOGLE_MAPS_API_KEY}|g" src/environments/environment.${ENVIRONMENT}.ts && \
     sed -i "s|KLUBR_UUID_PLACEHOLDER|${KLUBR_UUID}|g" src/environments/environment.${ENVIRONMENT}.ts
 
+# Validate placeholders were replaced
+RUN if grep -q "_PLACEHOLDER" src/environments/environment.${ENVIRONMENT}.ts; then \
+      echo "ERROR: Unreplaced placeholders found:" && \
+      grep "_PLACEHOLDER" src/environments/environment.${ENVIRONMENT}.ts && \
+      exit 1; \
+    fi
+
 RUN sed -i 's/<!--<link rel="manifest" href="\/public\/manifest.webmanifest">-->/<link rel="manifest" href="\/admin\/public\/manifest.webmanifest">/' /app/src/index.html
 RUN npm run build -- --configuration=${ENVIRONMENT} --base-href=/admin/
 
