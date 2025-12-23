@@ -170,6 +170,52 @@ gh api repos/karimzg/donaction/environments/staging/secrets
 gh api repos/karimzg/donaction/environments/production/secrets
 ```
 
+### 3.4 Secret Rotation
+
+**When to rotate secrets:**
+- Scheduled: Every 90 days for sensitive secrets (JWT, API tokens)
+- Incident: Immediately if secret exposure suspected
+- Personnel: When team members with access leave
+
+**Rotation procedure (zero-downtime):**
+
+1. **Generate new secret value** (do NOT invalidate old one yet)
+
+2. **Update GitHub secret:**
+```bash
+gh secret set SECRET_NAME --env production --body "new_value"
+```
+
+3. **Trigger rebuild of affected apps:**
+```bash
+# Push empty commit to trigger workflow
+git commit --allow-empty -m "chore: rotate SECRET_NAME"
+git push origin release/current
+```
+
+4. **Verify new deployment works:**
+- Check app health endpoints
+- Test critical flows (login, payments)
+- Monitor error logs for 15 minutes
+
+5. **Invalidate old secret** in source system (Stripe dashboard, database, etc.)
+
+**Rollback if rotation fails:**
+```bash
+# Restore previous secret value
+gh secret set SECRET_NAME --env production --body "old_value"
+
+# Trigger rebuild
+git revert HEAD
+git push origin release/current
+```
+
+**Emergency rotation (secret compromised):**
+1. Immediately invalidate old secret in source system
+2. Generate and set new secret in GitHub
+3. Trigger emergency rebuild
+4. Audit access logs for unauthorized usage
+
 ---
 
 ## Phase 4: Branch Protection Rules

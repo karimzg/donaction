@@ -20,7 +20,8 @@ RUN npm install
 COPY donaction-saas ./
 
 # Validate required secrets
-RUN if [ -z "$VITE_STRAPI_API_TOKEN" ]; then echo "ERROR: VITE_STRAPI_API_TOKEN is required" && exit 1; fi
+RUN if [ -z "$VITE_STRAPI_API_URL" ]; then echo "ERROR: VITE_STRAPI_API_URL is required" && exit 1; fi && \
+    if [ -z "$VITE_STRAPI_API_TOKEN" ]; then echo "ERROR: VITE_STRAPI_API_TOKEN is required" && exit 1; fi
 
 # Generate .env file from build args
 RUN echo "VITE_STRAPI_API_URL=${VITE_STRAPI_API_URL}" > .env && \

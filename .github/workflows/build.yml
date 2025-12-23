@@ -195,6 +195,8 @@ jobs:
             NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
             NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            # VITE_* vars needed because Frontend builds SaaS internally
+            # (duplicated with SaaS step - GitHub Actions doesn't support YAML anchors)
             VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
             VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
             VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}

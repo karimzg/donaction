@@ -85,6 +85,10 @@ COPY --from=build /usr/src/app/database ./database
 COPY --from=build /usr/src/app/types ./types
 
 # Secrets must be passed as runtime ENV variables (docker run -e or docker-compose)
+# Defaults for non-sensitive config (can be overridden at runtime)
+ENV NODE_ENV=production
+ENV DATABASE_HOST=localhost
+ENV DATABASE_PORT=5432
 ENV PATH=/usr/src/node_modules/.bin:$PATH
 RUN chown -R node:node /usr/src/app
 USER node
