@@ -25,6 +25,8 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       api: ${{ steps.filter.outputs.api }}
       saas: ${{ steps.filter.outputs.saas }}
+      environment: ${{ steps.env.outputs.environment }}
+      env_name: ${{ steps.env.outputs.env_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,10 +45,25 @@ jobs:
             saas:
               - 'donaction-saas/**'
 
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "env_name=re7" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Unknown branch pattern: ${{ github.ref }}. Expected demo/*, release/*, or hotfix/*"
+            exit 1
+          fi
+
   build:
     name: Build ${{ matrix.app }}
     runs-on: ubuntu-latest
     needs: detect-changes
+    environment: ${{ needs.detect-changes.outputs.environment }}
     timeout-minutes: 30
     if: |
       needs.detect-changes.outputs.admin == 'true' ||
@@ -119,14 +136,118 @@ jobs:
           echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
-        if: matrix.changed == 'true'
+      - name: Build and push API
+        if: matrix.changed == 'true' && matrix.app == 'api'
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+            APP_KEYS=${{ secrets.APP_KEYS }}
+            API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
+            TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            STRIPE_WEBHOOK_SECRET_CONNECT=${{ secrets.STRIPE_WEBHOOK_SECRET_CONNECT }}
+            IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
+            IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
+            IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+            EMAIL_BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+            NEXTAUTH_URL=${{ secrets.FRONT_URL }}
+            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Frontend
+        if: matrix.changed == 'true' && matrix.app == 'frontend'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
+            NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.FRONT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.STRAPI_API_URL }}
+            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ secrets.STRAPI_API_URL }}
+            NEXT_PUBLIC_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            NEXT_PUBLIC_ACTIVATE_ANALYTICS=${{ secrets.FRONT_ACTIVATE_ANALYTICS }}
+            NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            # VITE_* vars needed because Frontend builds SaaS internally
+            # (duplicated with SaaS step - GitHub Actions doesn't support YAML anchors)
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push SaaS
+        if: matrix.changed == 'true' && matrix.app == 'saas'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Admin
+        if: matrix.changed == 'true' && matrix.app == 'admin'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            STRAPI_ADMIN_API_TOKEN=${{ secrets.STRAPI_ADMIN_API_TOKEN }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
