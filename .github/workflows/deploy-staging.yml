@@ -24,6 +24,7 @@ permissions:
 env:
   STAGING_DOMAIN: re7.donaction.fr
   STAGING_ENV: re7
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
   validate:
@@ -379,9 +380,11 @@ jobs:
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
           IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
             export IMAGE_TAG="${IMAGE_TAG}"
+            export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
             echo "Pulling images for: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
             if [[ -n "$SERVICES" ]]; then
               docker compose pull $SERVICES
@@ -396,6 +399,7 @@ jobs:
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
           IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
 
@@ -403,6 +407,7 @@ jobs:
             set -x  # Enable verbose logging for debugging
             cd ~/donaction-staging
             export IMAGE_TAG="${IMAGE_TAG}"
+            export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
 
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
@@ -645,7 +650,7 @@ jobs:
 
             # Cleanup old images for each Donaction service
             CUTOFF_DATE=$(date -d '48 hours ago' +%s)
-            REPOS=("ghcr.io/karimzg/donaction-frontend" "ghcr.io/karimzg/donaction-api" "ghcr.io/karimzg/donaction-admin" "ghcr.io/karimzg/donaction-saas")
+            REPOS=("${{ env.IMAGE_REGISTRY }}/donaction-frontend" "${{ env.IMAGE_REGISTRY }}/donaction-api" "${{ env.IMAGE_REGISTRY }}/donaction-admin" "${{ env.IMAGE_REGISTRY }}/donaction-saas")
 
             for REPO in "${REPOS[@]}"; do
               docker images "$REPO" --format "{{.ID}} {{.CreatedAt}}" | while read -r IMAGE_ID CREATED; do
