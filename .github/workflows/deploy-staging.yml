@@ -537,8 +537,14 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             # Reload nginx now that containers are healthy
-            sudo systemctl reload nginx
-            echo "✓ Nginx reloaded successfully"
+            if ! sudo systemctl reload nginx; then
+              echo "::error::Nginx reload failed"
+              exit 1
+            fi
+
+            # Verify config is still valid after reload
+            sudo nginx -t
+            echo "✓ Nginx reloaded and verified successfully"
           EOF
 
       - name: Rollback on failure
