@@ -259,6 +259,7 @@ jobs:
           DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
           DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"
           DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"
+          DATABASE_SSL="${{ secrets.DATABASE_SSL }}"
 
           # Strapi Authentication
           JWT_SECRET="${{ secrets.JWT_SECRET }}"
