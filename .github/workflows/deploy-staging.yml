@@ -126,6 +126,7 @@ jobs:
     outputs:
       deployed_services: ${{ needs.validate.outputs.services_list }}
       deployment_time: ${{ steps.deploy.outputs.deployment_time }}
+      service_status: ${{ steps.health.outputs.service_status }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -556,6 +557,14 @@ jobs:
             FAILED="$FAILED saas"
           fi
 
+          # Build service status string for notifications
+          SERVICE_STATUS=""
+          [[ "$API_HEALTHY" == "healthy" || "$API_STATUS" == "200" ]] && SERVICE_STATUS="api:ok" || SERVICE_STATUS="api:fail"
+          [[ "$FRONTEND_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,frontend:ok" || SERVICE_STATUS="$SERVICE_STATUS,frontend:fail"
+          [[ "$ADMIN_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,admin:ok" || SERVICE_STATUS="$SERVICE_STATUS,admin:fail"
+          [[ "$SAAS_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,saas:ok" || SERVICE_STATUS="$SERVICE_STATUS,saas:fail"
+          echo "service_status=$SERVICE_STATUS" >> $GITHUB_OUTPUT
+
           if [[ -n "$FAILED" ]]; then
             echo "::error::Health check failed for:$FAILED"
             echo "status=failure" >> $GITHUB_OUTPUT
@@ -700,6 +709,25 @@ jobs:
             echo "title=Staging Deployment Failed" >> $GITHUB_OUTPUT
           fi
 
+      - name: Format service status
+        id: format-status
+        run: |
+          # Convert "api:ok,frontend:ok,admin:ok,saas:ok" to "✅ Api ✅ Frontend ✅ Admin ✅ Saas"
+          RAW_STATUS="${{ needs.deploy.outputs.service_status }}"
+          FORMATTED=""
+          IFS=',' read -ra SERVICES <<< "$RAW_STATUS"
+          for svc in "${SERVICES[@]}"; do
+            NAME=$(echo "$svc" | cut -d: -f1)
+            STATUS=$(echo "$svc" | cut -d: -f2)
+            NAME_CAPITALIZED="$(tr '[:lower:]' '[:upper:]' <<< ${NAME:0:1})${NAME:1}"
+            if [[ "$STATUS" == "ok" ]]; then
+              FORMATTED="$FORMATTED ✅ $NAME_CAPITALIZED"
+            else
+              FORMATTED="$FORMATTED ❌ $NAME_CAPITALIZED"
+            fi
+          done
+          echo "formatted=${FORMATTED# }" >> $GITHUB_OUTPUT
+
       - name: Generate deployment summary
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
@@ -731,6 +759,7 @@ jobs:
           fi
 
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          SERVICE_STATUS="${{ steps.format-status.outputs.formatted }}"
           curl -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
@@ -752,6 +781,11 @@ jobs:
                     "title": "Services",
                     "value": "'"${SERVICES:-all}"'",
                     "short": true
+                  },
+                  {
+                    "title": "Service Status",
+                    "value": "'"${SERVICE_STATUS:-N/A}"'",
+                    "short": false
                   },
                   {
                     "title": "Deployed by",
@@ -779,6 +813,7 @@ jobs:
           fi
 
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          SERVICE_STATUS="${{ steps.format-status.outputs.formatted }}"
           curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
@@ -800,6 +835,11 @@ jobs:
                     "name": "Services",
                     "value": "'"${SERVICES:-all}"'",
                     "inline": true
+                  },
+                  {
+                    "name": "Service Status",
+                    "value": "'"${SERVICE_STATUS:-N/A}"'",
+                    "inline": false
                   },
                   {
                     "name": "Deployed by",
