@@ -262,15 +262,44 @@ The workflow automatically rolls back if health checks fail after deployment.
 ```bash
 cd ~/donaction-staging
 
-# List available backups
-ls -la backups/
+# List available backups (sorted by date)
+ls -lt backups/
 
-# Restore previous docker-compose
-cp backups/docker-compose-YYYYMMDD-HHMMSS.yml docker-compose.yml
+# Identify the backup timestamp (e.g., 20241224-143000)
+TIMESTAMP=YYYYMMDD-HHMMSS
+
+# Restore docker-compose.yml
+cp backups/docker-compose-${TIMESTAMP}.yml docker-compose.yml
+
+# Restore .env file if available
+if [ -f backups/.env-${TIMESTAMP} ]; then
+  cp backups/.env-${TIMESTAMP} .env
+  chmod 600 .env
+  echo "✓ .env restored"
+else
+  echo "⚠ No .env backup found for this timestamp"
+fi
+
+# Pull previous images (important!)
+docker compose pull
 
 # Restart with previous config
-docker compose down
+docker compose down --remove-orphans
 docker compose up -d
+
+# Verify rollback
+docker compose ps
+docker compose logs -f --tail=50
+```
+
+**Testing the rollback:**
+```bash
+# Check container health
+docker inspect --format='{{.State.Health.Status}}' donaction_api
+
+# Test endpoints
+curl -I https://re7.donaction.fr/health
+curl https://re7.donaction.fr/service/_health
 ```
 
 ### View Deployment History
