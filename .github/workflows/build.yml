@@ -219,6 +219,8 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
+      # SaaS widget build - VITE_* vars duplicated from Frontend step
+      # (GitHub Actions doesn't support YAML anchors for reuse)
       - name: Build and push SaaS
         if: matrix.changed == 'true' && matrix.app == 'saas'
         uses: docker/build-push-action@v5
