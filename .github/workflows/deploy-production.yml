@@ -902,6 +902,21 @@ jobs:
                 exit 1
               fi
 
+              # Verify API health endpoint
+              MAX_RETRIES=3
+              for i in $(seq 1 $MAX_RETRIES); do
+                if wget -q --spider http://localhost:1537/health 2>/dev/null; then
+                  echo "API health check passed after rollback"
+                  break
+                fi
+                if [[ $i -eq $MAX_RETRIES ]]; then
+                  echo "::error::API health check failed after rollback"
+                  docker compose logs api --tail=20
+                  exit 1
+                fi
+                sleep 5
+              done
+
               set +x
               echo "Rollback verification passed"
               docker compose ps
