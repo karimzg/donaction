@@ -564,7 +564,22 @@ jobs:
 
               docker compose down --remove-orphans
               docker compose up -d
-              echo "Rollback completed"
+
+              # Wait for services to start after rollback
+              echo "Waiting for services to start after rollback..."
+              sleep 30
+
+              # Verify rollback succeeded - check for unhealthy/exited containers
+              if docker compose ps | grep -qE 'unhealthy|exited|Exit'; then
+                echo "::error::Rollback failed - containers unhealthy"
+                echo "Container status:"
+                docker compose ps
+                echo "Container logs:"
+                docker compose logs --tail=50
+                exit 1
+              fi
+
+              echo "✓ Rollback verification passed"
               docker compose ps
 
               # Log rollback
