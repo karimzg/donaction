@@ -412,16 +412,17 @@ jobs:
 
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
+            # Use --wait to wait for containers to be healthy (up to 120s timeout)
             if [[ -n "$SERVICES" ]]; then
               # Selective deployment: restart only specified services
-              docker compose up -d --no-deps $SERVICES
+              docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
               # Full deployment
               echo "Stopping existing containers..."
               docker compose down --remove-orphans
 
               echo "Starting containers..."
-              docker compose up -d
+              docker compose up -d --wait --wait-timeout 120
             fi
 
             set +x  # Disable verbose logging
@@ -469,9 +470,6 @@ jobs:
 
             echo "✓ Nginx configuration installed (reload after services start)"
           EOF
-
-      - name: Wait for services to start
-        run: sleep 30
 
       - name: Health check
         id: health
@@ -618,11 +616,9 @@ jobs:
               docker compose pull
 
               docker compose down --remove-orphans
-              docker compose up -d
+              docker compose up -d --wait --wait-timeout 120
 
-              # Wait for services to start after rollback
-              echo "Waiting for services to start after rollback..."
-              sleep 30
+              echo "Verifying services after rollback..."
 
               # Verify rollback succeeded - check for unhealthy/exited containers
               if docker compose ps | grep -qE 'unhealthy|exited|Exit'; then

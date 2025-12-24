@@ -323,11 +323,12 @@ jobs:
             export IMAGE_TAG="${IMAGE_TAG}"
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
+            # Use --wait to wait for containers to be healthy (up to 120s timeout)
             if [[ -n "$SERVICES" ]]; then
-              docker compose up -d --no-deps $SERVICES
+              docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
               docker compose down --remove-orphans
-              docker compose up -d
+              docker compose up -d --wait --wait-timeout 120
             fi
             docker compose ps
           EOF
@@ -341,9 +342,6 @@ jobs:
                         /etc/nginx/sites-enabled/donaction-staging.conf
             sudo nginx -t
           EOF
-
-      - name: Wait for services to start
-        run: sleep 30
 
       - name: Health check staging
         run: |
@@ -699,13 +697,14 @@ jobs:
 
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
+            # Use --wait to wait for containers to be healthy (up to 120s timeout)
             if [[ -n "$SERVICES" ]]; then
-              docker compose up -d --no-deps $SERVICES
+              docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
               echo "Stopping existing containers..."
               docker compose down --remove-orphans
               echo "Starting containers..."
-              docker compose up -d
+              docker compose up -d --wait --wait-timeout 120
             fi
 
             set +x
@@ -746,9 +745,6 @@ jobs:
             sudo nginx -t
             echo "Nginx configuration installed"
           EOF
-
-      - name: Wait for services to start
-        run: sleep 30
 
       - name: Health check
         id: health
@@ -908,10 +904,9 @@ jobs:
               echo "Pulling previous images..."
               docker compose pull
               docker compose down --remove-orphans
-              docker compose up -d
+              docker compose up -d --wait --wait-timeout 120
 
-              echo "Waiting for services to start after rollback..."
-              sleep 30
+              echo "Verifying services after rollback..."
 
               if docker compose ps | grep -qE 'unhealthy|exited|Exit'; then
                 set +x
