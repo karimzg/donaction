@@ -400,6 +400,7 @@ jobs:
           echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
 
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+            set -x  # Enable verbose logging for debugging
             cd ~/donaction-staging
             export IMAGE_TAG="${IMAGE_TAG}"
 
@@ -417,6 +418,7 @@ jobs:
               docker compose up -d
             fi
 
+            set +x  # Disable verbose logging
             echo "Container status:"
             docker compose ps
           EOF
@@ -578,6 +580,7 @@ jobs:
         run: |
           echo "::warning::Deployment failed, attempting rollback..."
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -x  # Enable verbose logging for rollback debugging
             cd ~/donaction-staging
 
             # Find most recent backup
@@ -609,6 +612,7 @@ jobs:
 
               # Verify rollback succeeded - check for unhealthy/exited containers
               if docker compose ps | grep -qE 'unhealthy|exited|Exit'; then
+                set +x  # Disable verbose for error output
                 echo "::error::Rollback failed - containers unhealthy"
                 echo "Container status:"
                 docker compose ps
@@ -617,6 +621,7 @@ jobs:
                 exit 1
               fi
 
+              set +x  # Disable verbose logging
               echo "✓ Rollback verification passed"
               docker compose ps
 
