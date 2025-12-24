@@ -1167,7 +1167,7 @@ jobs:
 
           SERVICES="${{ needs.validate.outputs.services_list }}"
           VERSION="${{ needs.validate.outputs.version }}"
-          SERVICE_STATUS="${{ steps.format-status.outputs.formatted }}"
+          SERVICE_STATUS="${{ steps.service_format.outputs.formatted }}"
           curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
