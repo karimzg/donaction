@@ -313,8 +313,12 @@ jobs:
             # Save current image tags for rollback
             if docker compose ps -q 2>/dev/null | grep -q .; then
               echo "Backing up current deployment state..."
-              docker compose config --images > backups/images-$(date +%Y%m%d-%H%M%S).txt
-              cp docker-compose.yml backups/docker-compose-$(date +%Y%m%d-%H%M%S).yml
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+              docker compose config --images > backups/images-${TIMESTAMP}.txt
+              cp docker-compose.yml backups/docker-compose-${TIMESTAMP}.yml
+              if [[ -f .env ]]; then
+                cp .env backups/.env-${TIMESTAMP}
+              fi
             else
               echo "No existing deployment to backup"
             fi
@@ -322,6 +326,7 @@ jobs:
             # Keep only last 5 backups
             ls -t backups/images-*.txt 2>/dev/null | tail -n +6 | xargs -r rm
             ls -t backups/docker-compose-*.yml 2>/dev/null | tail -n +6 | xargs -r rm
+            ls -t backups/.env-* 2>/dev/null | tail -n +6 | xargs -r rm
           EOF
 
       - name: Pull Docker images
@@ -519,10 +524,20 @@ jobs:
 
             # Find most recent backup
             BACKUP_COMPOSE=$(ls -t backups/docker-compose-*.yml 2>/dev/null | head -1)
+            BACKUP_ENV=$(ls -t backups/.env-* 2>/dev/null | head -1)
 
             if [[ -n "$BACKUP_COMPOSE" ]]; then
               echo "Rolling back to: $BACKUP_COMPOSE"
               cp "$BACKUP_COMPOSE" docker-compose.yml
+
+              # Restore .env if backup exists
+              if [[ -n "$BACKUP_ENV" ]]; then
+                echo "Restoring .env from: $BACKUP_ENV"
+                cp "$BACKUP_ENV" .env
+              else
+                echo "⚠ No .env backup found"
+              fi
+
               docker compose down --remove-orphans
               docker compose up -d
               echo "Rollback completed"
@@ -534,6 +549,7 @@ jobs:
               echo "action: ROLLBACK" >> logs/deployments.log
               echo "from_run: ${{ github.run_id }}" >> logs/deployments.log
               echo "backup_used: $BACKUP_COMPOSE" >> logs/deployments.log
+              echo "env_restored: ${BACKUP_ENV:-none}" >> logs/deployments.log
             else
               echo "No backup available for rollback"
             fi
