@@ -476,7 +476,7 @@ jobs:
             echo "⚠ API container status: $API_HEALTHY"
             # Also check API endpoint directly
             for i in $(seq 1 $MAX_RETRIES); do
-              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.STAGING_DOMAIN }}/service/_health || echo "000")
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.STAGING_DOMAIN }}/service/health || echo "000")
               if [[ "$API_STATUS" == "200" ]]; then
                 echo "✓ API endpoint responding"
                 break

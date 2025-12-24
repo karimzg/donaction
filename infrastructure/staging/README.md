@@ -247,7 +247,7 @@ echo | openssl s_client -connect re7.donaction.fr:443 2>/dev/null | openssl x509
 #### Cannot connect to database
 ```bash
 # Test from API container
-docker exec donaction_api wget -qO- http://localhost:1437/_health
+docker exec donaction_api wget -qO- http://localhost:1437/health
 
 # Check .env file
 cat ~/donaction-staging/.env | grep DATABASE
@@ -299,7 +299,7 @@ docker inspect --format='{{.State.Health.Status}}' donaction_api
 
 # Test endpoints
 curl -I https://re7.donaction.fr/health
-curl https://re7.donaction.fr/service/_health
+curl https://re7.donaction.fr/service/health
 ```
 
 ### View Deployment History
@@ -323,7 +323,7 @@ tail -100 ~/donaction-staging/logs/deployments.log
 curl -I https://re7.donaction.fr/health
 
 # API health
-curl https://re7.donaction.fr/service/_health
+curl https://re7.donaction.fr/service/health
 
 # All containers
 docker compose ps
