@@ -4,12 +4,14 @@ Staging environment deployment for `re7.donaction.fr`.
 
 ## Overview
 
-| Component | Port | URL |
-|-----------|------|-----|
-| Frontend (Next.js) | 3000 | https://re7.donaction.fr |
-| API (Strapi) | 1437 | https://re7.donaction.fr/service |
-| Admin (Angular) | 4200 | https://re7.donaction.fr/admin |
-| SaaS (Svelte) | 5000 | https://re7.donaction.fr/saas |
+| Component | Host Port | Container Port | URL |
+|-----------|-----------|----------------|-----|
+| Frontend (Next.js) | 3100 | 3000 | https://re7.donaction.fr |
+| API (Strapi) | 1537 | 1437 | https://re7.donaction.fr/service |
+| Admin (Angular) | 4300 | 80 | https://re7.donaction.fr/admin |
+| SaaS (Svelte) | 5100 | 80 | https://re7.donaction.fr/saas |
+
+> **Note**: Host ports (3100, 1537, 4300, 5100) avoid conflicts with existing Klubr application on shared VPS.
 
 ## Files
 
@@ -193,8 +195,13 @@ docker system prune -af
 #### Port conflicts
 ```bash
 # Check what's using a port
-sudo lsof -i :3000
-sudo netstat -tlnp | grep 3000
+sudo lsof -i :3100  # Frontend
+sudo lsof -i :1537  # API
+sudo lsof -i :4300  # Admin
+sudo lsof -i :5100  # SaaS
+
+# Or check all staging ports
+sudo netstat -tlnp | grep -E '3100|1537|4300|5100'
 
 # Kill conflicting process
 sudo kill -9 <PID>
