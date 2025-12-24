@@ -324,11 +324,11 @@ jobs:
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
             # Use --wait to wait for containers to be healthy (up to 120s timeout)
+            # Always use rolling update (no down) for zero-downtime deployments
             if [[ -n "$SERVICES" ]]; then
               docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
-              docker compose down --remove-orphans
-              docker compose up -d --wait --wait-timeout 120
+              docker compose up -d --wait --wait-timeout 120 --remove-orphans
             fi
             docker compose ps
           EOF
@@ -702,13 +702,12 @@ jobs:
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
             # Use --wait to wait for containers to be healthy (up to 120s timeout)
+            # Always use rolling update (no down) for zero-downtime deployments
             if [[ -n "$SERVICES" ]]; then
               docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
-              echo "Stopping existing containers..."
-              docker compose down --remove-orphans
-              echo "Starting containers..."
-              docker compose up -d --wait --wait-timeout 120
+              # Full deployment: pull and restart all services with rolling update
+              docker compose up -d --wait --wait-timeout 120 --remove-orphans
             fi
 
             set +x

@@ -413,16 +413,13 @@ jobs:
             echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
             # Use --wait to wait for containers to be healthy (up to 120s timeout)
+            # Always use rolling update (no down) for zero-downtime deployments
             if [[ -n "$SERVICES" ]]; then
               # Selective deployment: restart only specified services
               docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
             else
-              # Full deployment
-              echo "Stopping existing containers..."
-              docker compose down --remove-orphans
-
-              echo "Starting containers..."
-              docker compose up -d --wait --wait-timeout 120
+              # Full deployment: pull and restart all services with rolling update
+              docker compose up -d --wait --wait-timeout 120 --remove-orphans
             fi
 
             set +x  # Disable verbose logging
