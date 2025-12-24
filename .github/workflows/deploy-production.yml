@@ -947,6 +947,48 @@ jobs:
             fi
           EOF
 
+      - name: Notify rollback
+        if: failure() && steps.deploy.outcome == 'success'
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          # Send Slack rollback notification
+          if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "text": ":warning: Production Deployment Rolled Back",
+                "attachments": [{
+                  "color": "warning",
+                  "fields": [
+                    {"title": "Environment", "value": "Production (${{ env.PROD_DOMAIN }})", "short": true},
+                    {"title": "Branch", "value": "${{ github.ref_name }}", "short": true},
+                    {"title": "Triggered by", "value": "${{ github.actor }}", "short": true},
+                    {"title": "Workflow", "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>", "short": true}
+                  ]
+                }]
+              }'
+          fi
+
+          # Send Discord rollback notification
+          if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
+            curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "embeds": [{
+                  "title": "⚠️ Production Deployment Rolled Back",
+                  "color": 16776960,
+                  "fields": [
+                    {"name": "Environment", "value": "Production (${{ env.PROD_DOMAIN }})", "inline": true},
+                    {"name": "Branch", "value": "${{ github.ref_name }}", "inline": true},
+                    {"name": "Triggered by", "value": "${{ github.actor }}", "inline": true}
+                  ]
+                }]
+              }'
+          fi
+
       - name: Cleanup old images
         if: success()
         run: |
