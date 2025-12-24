@@ -136,6 +136,39 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Validate required secrets
+        run: |
+          MISSING=""
+          REQUIRED_SECRETS=(
+            "SSH_USER:${{ secrets.SSH_USER }}"
+            "SSH_HOST:${{ secrets.SSH_HOST }}"
+            "DATABASE_HOST:${{ secrets.DATABASE_HOST }}"
+            "DATABASE_NAME:${{ secrets.DATABASE_NAME }}"
+            "DATABASE_USERNAME:${{ secrets.DATABASE_USERNAME }}"
+            "DATABASE_PASSWORD:${{ secrets.DATABASE_PASSWORD }}"
+            "JWT_SECRET:${{ secrets.JWT_SECRET }}"
+            "ADMIN_JWT_SECRET:${{ secrets.ADMIN_JWT_SECRET }}"
+            "APP_KEYS:${{ secrets.APP_KEYS }}"
+            "API_TOKEN_SALT:${{ secrets.API_TOKEN_SALT }}"
+            "TRANSFER_TOKEN_SALT:${{ secrets.TRANSFER_TOKEN_SALT }}"
+            "STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}"
+            "NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}"
+          )
+
+          for SECRET in "${REQUIRED_SECRETS[@]}"; do
+            KEY="${SECRET%%:*}"
+            VALUE="${SECRET#*:}"
+            if [[ -z "$VALUE" ]]; then
+              MISSING="$MISSING $KEY"
+            fi
+          done
+
+          if [[ -n "$MISSING" ]]; then
+            echo "❌ Missing required secrets:$MISSING"
+            exit 1
+          fi
+          echo "✅ All required secrets are configured"
+
       - name: Check port availability
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
