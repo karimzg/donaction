@@ -1,3 +1,10 @@
+# Donaction Production Docker Compose
+#
+# Health Check Strategy:
+# - Container healthchecks validate individual service health (internal ports)
+# - Workflow healthchecks validate full stack through nginx (external endpoints)
+# This dual approach ensures both container-level and application-level health.
+
 services:
   frontend:
     image: ghcr.io/karimzg/donaction-frontend:${IMAGE_TAG:-latest}
