@@ -181,8 +181,8 @@ jobs:
               PID=$(sudo lsof -t -i:$PORT 2>/dev/null | head -1)
               if [[ -n "$PID" ]]; then
                 PROCESS=$(ps -p $PID -o comm= 2>/dev/null)
-                # Allow if it's docker or our containers
-                if [[ "$PROCESS" != "docker"* ]] && ! docker ps --format '{{.Ports}}' | grep -q ":$PORT->"; then
+                # Allow if it's docker or our containers (use exact port match)
+                if [[ "$PROCESS" != "docker"* ]] && ! docker ps --format '{{.Ports}}' | grep -q ":${PORT}->"; then
                   BLOCKED="$BLOCKED $PORT(used by $PROCESS)"
                 fi
               fi
@@ -413,10 +413,7 @@ jobs:
             # Test nginx configuration
             sudo nginx -t
 
-            # Reload nginx
-            sudo systemctl reload nginx
-
-            echo "✓ Nginx configuration updated and reloaded"
+            echo "✓ Nginx configuration installed (reload after services start)"
           EOF
 
       - name: Wait for services to start
@@ -514,6 +511,15 @@ jobs:
 
           echo "All health checks passed!"
           echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Reload nginx
+        if: success()
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # Reload nginx now that containers are healthy
+            sudo systemctl reload nginx
+            echo "✓ Nginx reloaded successfully"
+          EOF
 
       - name: Rollback on failure
         if: failure() && steps.deploy.outcome == 'success'
