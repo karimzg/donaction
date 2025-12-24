@@ -499,12 +499,24 @@ jobs:
           EOF
 
       - name: Check SSL certificate
-        continue-on-error: true
         run: |
           echo "Checking SSL certificate for ${{ env.PROD_DOMAIN }}..."
+
+          # Check certificate files exist on server
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            CERT_PATH="/etc/letsencrypt/live/www.donaction.fr"
+            if [[ ! -f "$CERT_PATH/fullchain.pem" ]] || [[ ! -f "$CERT_PATH/privkey.pem" ]]; then
+              echo "::error::SSL certificate files not found at $CERT_PATH"
+              echo "Please run: sudo certbot certonly --nginx -d www.donaction.fr -d donaction.fr"
+              exit 1
+            fi
+            echo "SSL certificate files exist"
+          EOF
+
+          # Check certificate expiry
           CERT_INFO=$(echo | openssl s_client -servername ${{ env.PROD_DOMAIN }} \
             -connect ${{ env.PROD_DOMAIN }}:443 2>/dev/null | \
-            openssl x509 -noout -enddate 2>/dev/null)
+            openssl x509 -noout -enddate 2>/dev/null) || true
 
           if [[ -n "$CERT_INFO" ]]; then
             EXPIRY=$(echo "$CERT_INFO" | cut -d= -f2)
@@ -520,7 +532,7 @@ jobs:
               fi
             fi
           else
-            echo "::notice::Could not check SSL certificate (new deployment?)"
+            echo "::notice::Could not check SSL certificate expiry (new deployment?)"
           fi
 
       - name: Verify disk space
