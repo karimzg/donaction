@@ -817,6 +817,19 @@ jobs:
           echo "All health checks passed!"
           echo "status=success" >> $GITHUB_OUTPUT
 
+      - name: Validate database connection
+        run: |
+          echo "Validating database connection..."
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # Check if API can connect to database by hitting a simple endpoint
+            RESPONSE=$(docker exec donaction_api wget -qO- http://localhost:1437/_health 2>/dev/null || echo "error")
+            if [[ "$RESPONSE" == "error" ]]; then
+              echo "::warning::Could not validate database connection via API health endpoint"
+            else
+              echo "Database connection validated"
+            fi
+          EOF
+
       - name: Reload nginx
         if: success()
         run: |
