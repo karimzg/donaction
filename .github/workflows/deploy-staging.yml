@@ -465,6 +465,42 @@ jobs:
             done
           fi
 
+          # Check frontend container
+          echo "Checking frontend container..."
+          FRONTEND_STATUS=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'docker inspect --format="{{.State.Status}}" donaction_frontend 2>/dev/null || echo "unknown"')
+
+          if [[ "$FRONTEND_STATUS" == "running" ]]; then
+            echo "✓ Frontend container running"
+          else
+            echo "⚠ Frontend container status: $FRONTEND_STATUS"
+            FAILED="$FAILED frontend"
+          fi
+
+          # Check admin container
+          echo "Checking admin container..."
+          ADMIN_STATUS=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'docker inspect --format="{{.State.Status}}" donaction_admin 2>/dev/null || echo "unknown"')
+
+          if [[ "$ADMIN_STATUS" == "running" ]]; then
+            echo "✓ Admin container running"
+          else
+            echo "⚠ Admin container status: $ADMIN_STATUS"
+            FAILED="$FAILED admin"
+          fi
+
+          # Check saas container
+          echo "Checking saas container..."
+          SAAS_STATUS=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'docker inspect --format="{{.State.Status}}" donaction_saas 2>/dev/null || echo "unknown"')
+
+          if [[ "$SAAS_STATUS" == "running" ]]; then
+            echo "✓ SaaS container running"
+          else
+            echo "⚠ SaaS container status: $SAAS_STATUS"
+            FAILED="$FAILED saas"
+          fi
+
           if [[ -n "$FAILED" ]]; then
             echo "::error::Health check failed for:$FAILED"
             echo "status=failure" >> $GITHUB_OUTPUT
