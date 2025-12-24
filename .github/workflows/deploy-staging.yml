@@ -235,13 +235,19 @@ jobs:
         run: |
           scp -i ~/.ssh/id_rsa \
             infrastructure/staging/docker-compose.yml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/ || {
+            echo "::error::Failed to copy docker-compose.yml"
+            exit 1
+          }
 
       - name: Copy nginx configuration
         run: |
           scp -i ~/.ssh/id_rsa \
             infrastructure/staging/nginx/donaction.conf \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/nginx/
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/nginx/ || {
+            echo "::error::Failed to copy nginx configuration"
+            exit 1
+          }
 
       - name: Generate and copy .env file
         run: |
