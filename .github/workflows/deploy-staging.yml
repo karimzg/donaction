@@ -637,8 +637,22 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             echo "Cleaning up old Donaction images (keeping last 48h)..."
-            # Only prune donaction images to avoid affecting shared server
-            docker image prune -af --filter "until=48h" --filter "label=org.opencontainers.image.source=https://github.com/karimzg/donaction" 2>/dev/null || echo "No old images to remove"
+
+            # Cleanup old images for each Donaction service
+            CUTOFF_DATE=$(date -d '48 hours ago' +%s)
+            REPOS=("ghcr.io/karimzg/donaction-frontend" "ghcr.io/karimzg/donaction-api" "ghcr.io/karimzg/donaction-admin" "ghcr.io/karimzg/donaction-saas")
+
+            for REPO in "${REPOS[@]}"; do
+              docker images "$REPO" --format "{{.ID}} {{.CreatedAt}}" | while read -r IMAGE_ID CREATED; do
+                IMAGE_DATE=$(date -d "$CREATED" +%s 2>/dev/null || echo 0)
+                if [[ $IMAGE_DATE -lt $CUTOFF_DATE ]]; then
+                  echo "Removing old image: $REPO ($IMAGE_ID)"
+                  docker rmi "$IMAGE_ID" 2>/dev/null || true
+                fi
+              done
+            done
+
+            echo "✓ Image cleanup completed"
           EOF
 
       - name: Logout from GHCR
