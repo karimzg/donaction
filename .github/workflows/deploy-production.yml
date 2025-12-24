@@ -523,6 +523,18 @@ jobs:
             echo "::notice::Could not check SSL certificate (new deployment?)"
           fi
 
+      - name: Verify disk space
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            AVAILABLE=$(df -BG /home | tail -1 | awk '{print $4}' | sed 's/G//')
+            echo "Available disk space: ${AVAILABLE}GB"
+            if [[ $AVAILABLE -lt 5 ]]; then
+              echo "::error::Insufficient disk space: ${AVAILABLE}GB available (minimum 5GB required)"
+              exit 1
+            fi
+            echo "Disk space check passed"
+          EOF
+
       - name: Create deployment directory
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
