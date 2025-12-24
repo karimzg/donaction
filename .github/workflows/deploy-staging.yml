@@ -454,7 +454,7 @@ jobs:
             fi
           EOF
 
-      - name: Install nginx configuration
+      - name: Install and reload nginx configuration
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             # Copy nginx config to sites-available
@@ -465,10 +465,18 @@ jobs:
             sudo ln -sf /etc/nginx/sites-available/donaction-staging.conf \
                         /etc/nginx/sites-enabled/donaction-staging.conf
 
-            # Test nginx configuration
-            sudo nginx -t
+            # Test and reload nginx before health checks (which use nginx endpoints)
+            if ! sudo nginx -t; then
+              echo "::error::Nginx configuration test failed"
+              exit 1
+            fi
 
-            echo "✓ Nginx configuration installed (reload after services start)"
+            if ! sudo systemctl reload nginx; then
+              echo "::error::Nginx reload failed"
+              exit 1
+            fi
+
+            echo "✓ Nginx configuration installed and reloaded"
           EOF
 
       - name: Health check
@@ -571,21 +579,6 @@ jobs:
 
           echo "All health checks passed!"
           echo "status=success" >> $GITHUB_OUTPUT
-
-      - name: Reload nginx
-        if: success()
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            # Reload nginx now that containers are healthy
-            if ! sudo systemctl reload nginx; then
-              echo "::error::Nginx reload failed"
-              exit 1
-            fi
-
-            # Verify config is still valid after reload
-            sudo nginx -t
-            echo "✓ Nginx reloaded and verified successfully"
-          EOF
 
       - name: Rollback on failure
         if: failure() && steps.deploy.outcome == 'success'

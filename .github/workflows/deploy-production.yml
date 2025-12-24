@@ -333,14 +333,26 @@ jobs:
             docker compose ps
           EOF
 
-      - name: Install nginx configuration
+      - name: Install and reload nginx configuration
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             sudo cp ~/donaction-staging/nginx/donaction.conf \
                     /etc/nginx/sites-available/donaction-staging.conf
             sudo ln -sf /etc/nginx/sites-available/donaction-staging.conf \
                         /etc/nginx/sites-enabled/donaction-staging.conf
-            sudo nginx -t
+
+            # Test and reload nginx before health checks
+            if ! sudo nginx -t; then
+              echo "::error::Nginx configuration test failed"
+              exit 1
+            fi
+
+            if ! sudo systemctl reload nginx; then
+              echo "::error::Nginx reload failed"
+              exit 1
+            fi
+
+            echo "Nginx configuration installed and reloaded"
           EOF
 
       - name: Health check staging
@@ -361,14 +373,6 @@ jobs:
             echo "Attempt $i/$MAX_RETRIES - Status: $HTTP_STATUS. Retrying..."
             sleep $RETRY_DELAY
           done
-
-      - name: Reload nginx
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            sudo systemctl reload nginx
-            sudo nginx -t
-            echo "Nginx reloaded successfully"
-          EOF
 
       - name: Cleanup SSH key
         if: always()
@@ -735,15 +739,26 @@ jobs:
             fi
           EOF
 
-      - name: Install nginx configuration
+      - name: Install and reload nginx configuration
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             sudo cp ~/donaction-production/nginx/donaction.conf \
                     /etc/nginx/sites-available/donaction-production.conf
             sudo ln -sf /etc/nginx/sites-available/donaction-production.conf \
                         /etc/nginx/sites-enabled/donaction-production.conf
-            sudo nginx -t
-            echo "Nginx configuration installed"
+
+            # Test and reload nginx before health checks (which use nginx endpoints)
+            if ! sudo nginx -t; then
+              echo "::error::Nginx configuration test failed"
+              exit 1
+            fi
+
+            if ! sudo systemctl reload nginx; then
+              echo "::error::Nginx reload failed"
+              exit 1
+            fi
+
+            echo "Nginx configuration installed and reloaded"
           EOF
 
       - name: Health check
@@ -867,18 +882,6 @@ jobs:
             else
               echo "Database connection validated"
             fi
-          EOF
-
-      - name: Reload nginx
-        if: success()
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            if ! sudo systemctl reload nginx; then
-              echo "::error::Nginx reload failed"
-              exit 1
-            fi
-            sudo nginx -t
-            echo "Nginx reloaded and verified successfully"
           EOF
 
       - name: Rollback on failure
