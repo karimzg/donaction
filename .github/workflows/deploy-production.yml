@@ -414,6 +414,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       deployment_time: ${{ steps.deploy.outputs.deployment_time }}
+      service_status: ${{ steps.health.outputs.service_status }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -757,6 +758,7 @@ jobs:
           MAX_RETRIES=5
           RETRY_DELAY=10
           FAILED=""
+          SERVICE_STATUS=""
 
           # Check nginx health endpoint
           echo "Checking nginx /health endpoint..."
@@ -778,14 +780,17 @@ jobs:
           API_HEALTHY=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             'docker inspect --format="{{.State.Health.Status}}" donaction_api 2>/dev/null || echo "unknown"')
 
+          API_OK=false
           if [[ "$API_HEALTHY" == "healthy" ]]; then
             echo "API container health check passed"
+            API_OK=true
           else
             echo "API container status: $API_HEALTHY"
             for i in $(seq 1 $MAX_RETRIES); do
               API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.PROD_DOMAIN }}/service/health || echo "000")
               if [[ "$API_STATUS" == "200" ]]; then
                 echo "API endpoint responding"
+                API_OK=true
                 break
               fi
               if [[ $i -eq $MAX_RETRIES ]]; then
@@ -795,6 +800,11 @@ jobs:
               sleep $RETRY_DELAY
             done
           fi
+          if [[ "$API_OK" == "true" ]]; then
+            SERVICE_STATUS="${SERVICE_STATUS}api:ok,"
+          else
+            SERVICE_STATUS="${SERVICE_STATUS}api:failed,"
+          fi
 
           # Check frontend container
           echo "Checking frontend container..."
@@ -803,9 +813,11 @@ jobs:
 
           if [[ "$FRONTEND_STATUS" == "running" ]]; then
             echo "Frontend container running"
+            SERVICE_STATUS="${SERVICE_STATUS}frontend:ok,"
           else
             echo "Frontend container status: $FRONTEND_STATUS"
             FAILED="$FAILED frontend"
+            SERVICE_STATUS="${SERVICE_STATUS}frontend:failed,"
           fi
 
           # Check admin container
@@ -815,9 +827,11 @@ jobs:
 
           if [[ "$ADMIN_STATUS" == "running" ]]; then
             echo "Admin container running"
+            SERVICE_STATUS="${SERVICE_STATUS}admin:ok,"
           else
             echo "Admin container status: $ADMIN_STATUS"
             FAILED="$FAILED admin"
+            SERVICE_STATUS="${SERVICE_STATUS}admin:failed,"
           fi
 
           # Check saas container
@@ -827,10 +841,15 @@ jobs:
 
           if [[ "$SAAS_STATUS" == "running" ]]; then
             echo "SaaS container running"
+            SERVICE_STATUS="${SERVICE_STATUS}saas:ok"
           else
             echo "SaaS container status: $SAAS_STATUS"
             FAILED="$FAILED saas"
+            SERVICE_STATUS="${SERVICE_STATUS}saas:failed"
           fi
+
+          # Output service status for notifications
+          echo "service_status=${SERVICE_STATUS}" >> $GITHUB_OUTPUT
 
           if [[ -n "$FAILED" ]]; then
             echo "::error::Health check failed for:$FAILED"
@@ -1050,6 +1069,36 @@ jobs:
           echo "- [API](https://${{ env.PROD_DOMAIN }}/service)" >> $GITHUB_STEP_SUMMARY
           echo "- [Admin](https://${{ env.PROD_DOMAIN }}/admin)" >> $GITHUB_STEP_SUMMARY
 
+      - name: Format service status
+        id: service_format
+        run: |
+          # Convert service_status to readable format
+          # Input: api:ok,frontend:ok,admin:ok,saas:ok
+          # Output: API, Frontend, Admin, SaaS (with emojis)
+          SERVICE_STATUS="${{ needs.deploy-production.outputs.service_status }}"
+          FORMATTED=""
+
+          if [[ -n "$SERVICE_STATUS" ]]; then
+            # Parse each service status
+            for item in $(echo "$SERVICE_STATUS" | tr ',' ' '); do
+              SERVICE=$(echo "$item" | cut -d: -f1)
+              STATUS=$(echo "$item" | cut -d: -f2)
+
+              # Capitalize service name
+              SERVICE_NAME=$(echo "$SERVICE" | sed 's/.*/\u&/')
+
+              if [[ "$STATUS" == "ok" ]]; then
+                FORMATTED="${FORMATTED}✅ ${SERVICE_NAME} "
+              else
+                FORMATTED="${FORMATTED}❌ ${SERVICE_NAME} "
+              fi
+            done
+          else
+            FORMATTED="N/A"
+          fi
+
+          echo "formatted=${FORMATTED}" >> $GITHUB_OUTPUT
+
       - name: Send Slack notification
         if: vars.SLACK_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
@@ -1063,6 +1112,7 @@ jobs:
 
           SERVICES="${{ needs.validate.outputs.services_list }}"
           VERSION="${{ needs.validate.outputs.version }}"
+          SERVICE_STATUS="${{ steps.service_format.outputs.formatted }}"
           curl -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
@@ -1086,14 +1136,14 @@ jobs:
                     "short": true
                   },
                   {
-                    "title": "Services",
-                    "value": "'"${SERVICES:-all}"'",
-                    "short": true
-                  },
-                  {
                     "title": "Deployed by",
                     "value": "${{ github.actor }}",
                     "short": true
+                  },
+                  {
+                    "title": "Service Status",
+                    "value": "'"${SERVICE_STATUS}"'",
+                    "short": false
                   },
                   {
                     "title": "Workflow",
@@ -1117,6 +1167,7 @@ jobs:
 
           SERVICES="${{ needs.validate.outputs.services_list }}"
           VERSION="${{ needs.validate.outputs.version }}"
+          SERVICE_STATUS="${{ steps.format-status.outputs.formatted }}"
           curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d '{
@@ -1143,6 +1194,11 @@ jobs:
                     "name": "Services",
                     "value": "'"${SERVICES:-all}"'",
                     "inline": true
+                  },
+                  {
+                    "name": "Service Status",
+                    "value": "'"${SERVICE_STATUS:-N/A}"'",
+                    "inline": false
                   },
                   {
                     "name": "Deployed by",
