@@ -153,6 +153,7 @@ jobs:
             "TRANSFER_TOKEN_SALT:${{ secrets.TRANSFER_TOKEN_SALT }}"
             "STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}"
             "NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}"
+            "KLUBR_UUID:${{ secrets.KLUBR_UUID }}"
           )
 
           for SECRET in "${REQUIRED_SECRETS[@]}"; do
