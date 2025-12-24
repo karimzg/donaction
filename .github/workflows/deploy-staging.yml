@@ -269,9 +269,8 @@ jobs:
 
       - name: Login to GHCR on server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          EOF
+          echo "${{ secrets.GITHUB_TOKEN }}" | ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
 
       - name: Backup current deployment
         run: |
@@ -295,9 +294,11 @@ jobs:
       - name: Pull Docker images
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          IMAGE_TAG="${{ github.ref_name }}"
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
-            echo "Pulling images for: ${SERVICES:-all services}..."
+            export IMAGE_TAG="${IMAGE_TAG}"
+            echo "Pulling images for: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
             if [[ -n "$SERVICES" ]]; then
               docker compose pull $SERVICES
             else
@@ -310,13 +311,15 @@ jobs:
         id: deploy
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          IMAGE_TAG="${{ github.ref_name }}"
           DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
 
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
+            export IMAGE_TAG="${IMAGE_TAG}"
 
-            echo "Deploying: ${SERVICES:-all services}..."
+            echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
             if [[ -n "$SERVICES" ]]; then
               # Selective deployment: restart only specified services
