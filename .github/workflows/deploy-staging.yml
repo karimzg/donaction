@@ -590,8 +590,11 @@ jobs:
         if: success()
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            echo "Cleaning up old images (keeping last 48h)..."
-            docker image prune -af --filter "until=48h"
+            echo "Cleaning up old Donaction images (keeping last 48h)..."
+            # Only remove donaction images to avoid affecting shared server
+            docker images 'ghcr.io/karimzg/donaction-*' --format '{{.Repository}}:{{.Tag}} {{.ID}} {{.CreatedAt}}' | \
+              awk -v cutoff="$(date -d '48 hours ago' '+%Y-%m-%d %H:%M:%S')" '$3" "$4" "$5 < cutoff {print $2}' | \
+              xargs -r docker rmi -f 2>/dev/null || echo "No old images to remove"
           EOF
 
       - name: Logout from GHCR
