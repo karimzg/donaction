@@ -565,6 +565,10 @@ jobs:
                 echo "⚠ No .env backup found"
               fi
 
+              # Pull old images before starting
+              echo "Pulling previous images..."
+              docker compose pull
+
               docker compose down --remove-orphans
               docker compose up -d
               echo "Rollback completed"
