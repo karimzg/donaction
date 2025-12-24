@@ -414,7 +414,7 @@ jobs:
             docker compose config --images | sed 's/^/  - /' >> "$LOG_FILE"
 
             # Keep log file under 1MB (rotate if needed)
-            if [[ $(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null) -gt 1048576 ]]; then
+            if [[ $(stat -c%s "$LOG_FILE" 2>/dev/null || echo 0) -gt 1048576 ]]; then
               mv "$LOG_FILE" "logs/deployments-$(date +%Y%m%d).log"
               echo "# Deployment Log (rotated $(date))" > "$LOG_FILE"
             fi
