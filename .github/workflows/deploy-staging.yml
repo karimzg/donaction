@@ -202,22 +202,28 @@ jobs:
         run: |
           echo "Checking SSL certificate for ${{ env.STAGING_DOMAIN }}..."
 
-          # Check certificate expiry
-          EXPIRY=$(echo | openssl s_client -servername ${{ env.STAGING_DOMAIN }} \
+          # Check certificate expiry using openssl
+          CERT_INFO=$(echo | openssl s_client -servername ${{ env.STAGING_DOMAIN }} \
             -connect ${{ env.STAGING_DOMAIN }}:443 2>/dev/null | \
-            openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+            openssl x509 -noout -enddate 2>/dev/null)
 
-          if [[ -n "$EXPIRY" ]]; then
-            EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || date -j -f "%b %d %T %Y %Z" "$EXPIRY" +%s 2>/dev/null)
-            NOW_EPOCH=$(date +%s)
-            DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+          if [[ -n "$CERT_INFO" ]]; then
+            EXPIRY=$(echo "$CERT_INFO" | cut -d= -f2)
 
-            if [[ $DAYS_LEFT -lt 7 ]]; then
-              echo "::warning::SSL certificate expires in $DAYS_LEFT days! Consider renewing."
-            elif [[ $DAYS_LEFT -lt 30 ]]; then
-              echo "::notice::SSL certificate expires in $DAYS_LEFT days."
+            # Use GNU date (ubuntu-latest runner)
+            if EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null); then
+              NOW_EPOCH=$(date +%s)
+              DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+
+              if [[ $DAYS_LEFT -lt 7 ]]; then
+                echo "::warning::SSL certificate expires in $DAYS_LEFT days! Consider renewing."
+              elif [[ $DAYS_LEFT -lt 30 ]]; then
+                echo "::notice::SSL certificate expires in $DAYS_LEFT days."
+              else
+                echo "✓ SSL certificate valid for $DAYS_LEFT days"
+              fi
             else
-              echo "✓ SSL certificate valid for $DAYS_LEFT days"
+              echo "::notice::Could not parse certificate expiry date"
             fi
           else
             echo "::notice::Could not check SSL certificate (new deployment?)"
