@@ -173,7 +173,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             echo "Checking port availability..."
-            PORTS="3000 1437 4200 5000"
+            PORTS="3100 1537 4300 5100"
             BLOCKED=""
 
             for PORT in $PORTS; do
