@@ -181,8 +181,8 @@ jobs:
               PID=$(sudo lsof -t -i:$PORT 2>/dev/null | head -1)
               if [[ -n "$PID" ]]; then
                 PROCESS=$(ps -p $PID -o comm= 2>/dev/null)
-                # Allow if it's docker or our containers (use exact port match)
-                if [[ "$PROCESS" != "docker"* ]] && ! docker ps --format '{{.Ports}}' | grep -q ":${PORT}->"; then
+                # Allow if it's docker or our containers (match Docker port format)
+                if [[ "$PROCESS" != "docker"* ]] && ! docker ps --format '{{.Ports}}' | grep -qE ":${PORT}->|:${PORT}/"; then
                   BLOCKED="$BLOCKED $PORT(used by $PROCESS)"
                 fi
               fi
