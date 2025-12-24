@@ -170,6 +170,26 @@ jobs:
           fi
           echo "✅ All required secrets are configured"
 
+      - name: Validate Docker Compose v2
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            if ! command -v docker compose &> /dev/null; then
+              echo "::error::Docker Compose v2 not installed on server"
+              echo "Please install Docker Compose v2: https://docs.docker.com/compose/install/"
+              exit 1
+            fi
+
+            # Verify it's actually v2 (not v1 aliased)
+            VERSION=$(docker compose version --short 2>/dev/null || echo "")
+            if [[ "$VERSION" =~ ^1\. ]]; then
+              echo "::error::Docker Compose v1 detected, v2 required"
+              echo "Current version: $VERSION"
+              exit 1
+            fi
+
+            echo "✓ Docker Compose v2 installed: $VERSION"
+          EOF
+
       - name: Check port availability
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
