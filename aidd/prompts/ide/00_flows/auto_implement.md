@@ -46,7 +46,7 @@ Ask user (checkboxes - single choice):
 
 **Setup Phase:**
 
-1. Extract issue number and create branch name: `feat/issue-<number>`
+1. Extract issue number and create branch name: `feature/issue-<number>`
 2. Fetch issue details: `gh issue view <number> --json body,title,url`
 3. Branch setup:
    - IF worktree: `git worktree add worktrees/<branch> -b <branch>`

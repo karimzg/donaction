@@ -28,7 +28,7 @@ donaction/
 
 ### Git
 - [GIT] Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`
-- [GIT] Branch naming: `feat/`, `fix/`, `release/`, `hotfix/`, `demo/`, `epic/`
+- [GIT] Branch naming: `feature/`, `fix/`, `release/`, `hotfix/`, `demo/`, `epic/`
 - [GIT] Deployment branches: `release/*`, `hotfix/*`, `demo/*` only
 
 ### Security
