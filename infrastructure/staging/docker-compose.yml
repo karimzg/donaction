@@ -1,0 +1,103 @@
+# Donaction Staging Docker Compose
+#
+# Health Check Strategy:
+# - Container healthchecks validate individual service health (internal ports)
+# - Workflow healthchecks validate full stack through nginx (external endpoints)
+# This dual approach ensures both container-level and application-level health.
+
+services:
+  postgres:
+    image: postgres:16.6-alpine
+    container_name: donaction_postgres
+    restart: unless-stopped
+    ports:
+      - "5532:5432"
+    env_file:
+      - .env
+    # PostgreSQL auto-creates database from POSTGRES_DB if it doesn't exist
+    # No manual initialization required - just set DATABASE_NAME in .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-frontend:${IMAGE_TAG:-dev}
+    container_name: donaction_frontend
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    env_file:
+      - .env
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  admin:
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-admin:${IMAGE_TAG:-dev}
+    container_name: donaction_admin
+    restart: unless-stopped
+    ports:
+      - "4300:80"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  api:
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-api:${IMAGE_TAG:-dev}
+    container_name: donaction_api
+    restart: unless-stopped
+    ports:
+      - "1537:1437"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:1437/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  saas:
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-saas:${IMAGE_TAG:-dev}
+    container_name: donaction_saas
+    restart: unless-stopped
+    ports:
+      - "5100:80"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

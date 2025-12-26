@@ -1,0 +1,39 @@
+# CODEOWNERS for Donaction Platform
+#
+# This file defines code ownership for automatic reviewer assignment.
+# Each line is a file pattern followed by one or more owners.
+# Owners are automatically requested for review when PRs modify matching files.
+#
+# Order matters: last matching pattern takes precedence.
+#
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owner (fallback)
+* @karimzg
+
+# Documentation
+/docs/ @karimzg
+/README.md @karimzg
+
+# CI/CD and Infrastructure
+/.github/ @karimzg
+/docker-compose.yml @karimzg
+/docker-compose.*.yml @karimzg
+
+# Admin App (Angular 19)
+/donaction-admin/ @karimzg
+
+# Backend API (Strapi 5)
+/donaction-api/ @karimzg
+
+# Frontend (Next.js 14)
+/donaction-frontend/ @karimzg
+
+# SaaS Widget (Svelte 5)
+/donaction-saas/ @karimzg
+
+# Configuration Files
+/.env.* @karimzg
+/*/env.* @karimzg
+/package.json @karimzg
+/package-lock.json @karimzg

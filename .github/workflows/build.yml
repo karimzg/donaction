@@ -1,0 +1,394 @@
+name: Docker Build & Push
+
+on:
+  push:
+    branches:
+      - 'demo/**'
+      - 'release/**'
+      - 'hotfix/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  detect-changes:
+    name: Detect Changed Apps
+    runs-on: ubuntu-latest
+    outputs:
+      admin: ${{ steps.filter.outputs.admin }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      saas: ${{ steps.filter.outputs.saas }}
+      environment: ${{ steps.env.outputs.environment }}
+      env_name: ${{ steps.env.outputs.env_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            admin:
+              - 'donaction-admin/**'
+            frontend:
+              - 'donaction-frontend/**'
+            api:
+              - 'donaction-api/**'
+            saas:
+              - 'donaction-saas/**'
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "env_name=re7" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Unknown branch pattern: ${{ github.ref }}. Expected demo/*, release/*, or hotfix/*"
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    environment: ${{ needs.detect-changes.outputs.environment }}
+    timeout-minutes: 30
+    if: |
+      needs.detect-changes.outputs.admin == 'true' ||
+      needs.detect-changes.outputs.frontend == 'true' ||
+      needs.detect-changes.outputs.api == 'true' ||
+      needs.detect-changes.outputs.saas == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: admin
+            context: .
+            dockerfile: donaction-admin/docker/production/Dockerfile
+            image: ghcr.io/karimzg/donaction-admin
+            changed: ${{ needs.detect-changes.outputs.admin }}
+          - app: frontend
+            context: .
+            dockerfile: donaction-frontend/docker/production/Dockerfile
+            image: ghcr.io/karimzg/donaction-frontend
+            changed: ${{ needs.detect-changes.outputs.frontend }}
+          - app: api
+            context: .
+            dockerfile: donaction-api/docker/production/Dockerfile
+            image: ghcr.io/karimzg/donaction-api
+            changed: ${{ needs.detect-changes.outputs.api }}
+          - app: saas
+            context: .
+            dockerfile: donaction-saas/docker/production/Dockerfile
+            image: ghcr.io/karimzg/donaction-saas
+            changed: ${{ needs.detect-changes.outputs.saas }}
+    steps:
+      - name: Skip if app not changed
+        if: matrix.changed != 'true'
+        run: echo "Skipping ${{ matrix.app }} - no changes detected"
+
+      - name: Checkout repository
+        if: matrix.changed == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        if: matrix.changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: matrix.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tags
+        if: matrix.changed == 'true'
+        id: tags
+        run: |
+          # Determine environment tag based on branch
+          if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
+            ENV_TAG="dev"
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+            ENV_TAG="prod"
+          else
+            ENV_TAG="dev"
+          fi
+
+          # Build tag list with short SHA (7 chars)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="${{ matrix.image }}:${ENV_TAG},${{ matrix.image }}:sha-${SHORT_SHA}"
+
+          # Extract semantic version from release/hotfix branch names
+          # e.g., release/v1.2.3 -> v1.2.3
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [[ "$BRANCH_NAME" =~ ^(release|hotfix)/(v[0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[2]}"
+            TAGS="${TAGS},${{ matrix.image }}:${VERSION}"
+            echo "Adding semantic version tag: ${VERSION}"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build and push API
+        if: matrix.changed == 'true' && matrix.app == 'api'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          # NOTE: Database credentials are passed at runtime via .env file, NOT at build time
+          # This prevents credentials from being stored in Docker image layers
+          build-args: |
+            NODE_ENV=production
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Frontend
+        if: matrix.changed == 'true' && matrix.app == 'frontend'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
+            NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.FRONT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.STRAPI_API_URL }}
+            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ secrets.STRAPI_API_URL }}
+            NEXT_PUBLIC_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            NEXT_PUBLIC_ACTIVATE_ANALYTICS=${{ secrets.FRONT_ACTIVATE_ANALYTICS }}
+            NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            # VITE_* vars needed because Frontend builds SaaS internally
+            # (duplicated with SaaS step - GitHub Actions doesn't support YAML anchors)
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      # SaaS widget build - VITE_* vars duplicated from Frontend step
+      # (GitHub Actions doesn't support YAML anchors for reuse)
+      - name: Build and push SaaS
+        if: matrix.changed == 'true' && matrix.app == 'saas'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push Admin
+        if: matrix.changed == 'true' && matrix.app == 'admin'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            STRAPI_ADMIN_API_TOKEN=${{ secrets.STRAPI_ADMIN_API_TOKEN }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output build summary
+        if: matrix.changed == 'true'
+        run: |
+          echo "✅ Built and pushed ${{ matrix.app }}"
+          echo "📦 Image: ${{ matrix.image }}"
+          echo "🏷️  Tags: ${{ steps.tags.outputs.tags }}"
+
+  notify:
+    name: Notify Build Status
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build]
+    if: always()
+    steps:
+      - name: Determine build status
+        id: status
+        run: |
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "color=good" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "discord_color=3066993" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "color=danger" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "discord_color=15158332" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Collect built apps
+        id: apps
+        run: |
+          APPS=""
+          if [[ "${{ needs.detect-changes.outputs.admin }}" == "true" ]]; then
+            APPS="${APPS}admin, "
+          fi
+          if [[ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]]; then
+            APPS="${APPS}frontend, "
+          fi
+          if [[ "${{ needs.detect-changes.outputs.api }}" == "true" ]]; then
+            APPS="${APPS}api, "
+          fi
+          if [[ "${{ needs.detect-changes.outputs.saas }}" == "true" ]]; then
+            APPS="${APPS}saas, "
+          fi
+
+          # Remove trailing comma and space
+          APPS=${APPS%, }
+
+          if [[ -z "$APPS" ]]; then
+            APPS="none (no changes detected)"
+          fi
+
+          echo "apps=${APPS}" >> $GITHUB_OUTPUT
+
+      - name: Check notification configuration
+        run: |
+          if [[ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+            echo "⚠️  SLACK_WEBHOOK_URL not configured - skipping Slack notification"
+          fi
+          if [[ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]]; then
+            echo "⚠️  DISCORD_WEBHOOK_URL not configured - skipping Discord notification"
+          fi
+
+      - name: Send Slack notification
+        if: secrets.SLACK_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          echo "📤 Sending Slack notification..."
+          RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
+              "attachments": [{
+                "color": "${{ steps.status.outputs.color }}",
+                "fields": [
+                  {
+                    "title": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Apps Built",
+                    "value": "${{ steps.apps.outputs.apps }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Commit",
+                    "value": "<${{ github.event.head_commit.url }}|${{ github.sha }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "Workflow",
+                    "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>",
+                    "short": true
+                  }
+                ]
+              }]
+            }')
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            echo "✅ Slack notification sent successfully"
+          else
+            echo "❌ Slack notification failed with HTTP code: $HTTP_CODE"
+          fi
+
+      - name: Send Discord notification
+        if: secrets.DISCORD_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          echo "📤 Sending Discord notification..."
+          RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "embeds": [{
+                "title": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
+                "color": ${{ steps.status.outputs.discord_color }},
+                "fields": [
+                  {
+                    "name": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Apps Built",
+                    "value": "${{ steps.apps.outputs.apps }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Commit",
+                    "value": "[${{ github.sha }}](${{ github.event.head_commit.url }})",
+                    "inline": true
+                  },
+                  {
+                    "name": "Workflow",
+                    "value": "[View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+                    "inline": true
+                  }
+                ],
+                "timestamp": "${{ github.event.head_commit.timestamp }}"
+              }]
+            }')
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "204" ]]; then
+            echo "✅ Discord notification sent successfully"
+          else
+            echo "❌ Discord notification failed with HTTP code: $HTTP_CODE"
+          fi

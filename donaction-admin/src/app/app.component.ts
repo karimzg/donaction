@@ -32,6 +32,7 @@ export class AppComponent {
       this.SWService.initVersionUpdateTracker();
       this.logUpdateService.init();
       // this.notificationsService.setBadge(5);
+      // ...
     }
   }
 }
