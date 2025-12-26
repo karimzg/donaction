@@ -473,7 +473,14 @@ jobs:
               exit 1
             fi
 
-            echo "✓ Nginx configuration installed and reloaded"
+            # Verify nginx is actually running after reload
+            sleep 1
+            if ! sudo systemctl is-active --quiet nginx; then
+              echo "::error::Nginx is not running after reload"
+              exit 1
+            fi
+
+            echo "✓ Nginx configuration installed, reloaded, and verified running"
           EOF
 
       - name: Health check
@@ -566,6 +573,21 @@ jobs:
           [[ "$FRONTEND_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,frontend:ok" || SERVICE_STATUS="$SERVICE_STATUS,frontend:fail"
           [[ "$ADMIN_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,admin:ok" || SERVICE_STATUS="$SERVICE_STATUS,admin:fail"
           [[ "$SAAS_STATUS" == "running" ]] && SERVICE_STATUS="$SERVICE_STATUS,saas:ok" || SERVICE_STATUS="$SERVICE_STATUS,saas:fail"
+
+          # Validate database connection via API health endpoint
+          echo "Validating database connection..."
+          DB_RESPONSE=$(ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'docker exec donaction_api wget -qO- http://localhost:1437/_health 2>/dev/null || echo "error"')
+
+          if [[ "$DB_RESPONSE" != "error" ]]; then
+            echo "✓ Database connection validated"
+            SERVICE_STATUS="$SERVICE_STATUS,db:ok"
+          else
+            echo "::warning::Database connection check failed"
+            FAILED="$FAILED database"
+            SERVICE_STATUS="$SERVICE_STATUS,db:fail"
+          fi
+
           echo "service_status=$SERVICE_STATUS" >> $GITHUB_OUTPUT
 
           if [[ -n "$FAILED" ]]; then
@@ -637,16 +659,15 @@ jobs:
             fi
           EOF
 
-      - name: Notify rollback
+      - name: Notify rollback via Slack
+        id: rollback_slack
         if: failure() && steps.deploy.outcome == 'success'
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          # Send Slack rollback notification
           if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
-            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            curl -s -f -X POST "$SLACK_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d '{
                 "text": ":warning: Staging Deployment Rolled Back",
@@ -662,9 +683,15 @@ jobs:
               }'
           fi
 
-          # Send Discord rollback notification
+      - name: Notify rollback via Discord
+        id: rollback_discord
+        if: failure() && steps.deploy.outcome == 'success'
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
           if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
-            curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+            curl -s -f -X POST "$DISCORD_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d '{
                 "embeds": [{
@@ -679,6 +706,26 @@ jobs:
               }'
           fi
 
+      - name: Create rollback issue as fallback
+        if: failure() && steps.deploy.outcome == 'success' && steps.rollback_slack.outcome == 'failure' && steps.rollback_discord.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Staging Rollback - ${{ github.ref_name }}',
+              body: `## Staging Deployment Rolled Back
+
+            **Environment:** Staging (${{ env.STAGING_DOMAIN }})
+            **Branch:** ${{ github.ref_name }}
+            **Triggered by:** @${{ github.actor }}
+            **Run:** [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ⚠️ Both Slack and Discord notifications failed. Please investigate the rollback.`,
+              labels: ['staging', 'rollback']
+            });
+
       - name: Cleanup old images
         if: success()
         run: |
@@ -689,12 +736,21 @@ jobs:
             CUTOFF_DATE=$(date -d '48 hours ago' +%s)
             REPOS=("${{ env.IMAGE_REGISTRY }}/donaction-frontend" "${{ env.IMAGE_REGISTRY }}/donaction-api" "${{ env.IMAGE_REGISTRY }}/donaction-admin" "${{ env.IMAGE_REGISTRY }}/donaction-saas")
 
+            # Get list of images currently in use by running containers
+            RUNNING_IMAGES=$(docker ps --format "{{.Image}}" | sort -u)
+
             for REPO in "${REPOS[@]}"; do
-              docker images "$REPO" --format "{{.ID}} {{.CreatedAt}}" | while read -r IMAGE_ID CREATED; do
+              docker images "$REPO" --format "{{.ID}} {{.Repository}}:{{.Tag}} {{.CreatedAt}}" | while read -r IMAGE_ID IMAGE_NAME CREATED; do
+                # Skip images currently in use
+                if echo "$RUNNING_IMAGES" | grep -qF "$IMAGE_NAME"; then
+                  echo "Skipping in-use image: $IMAGE_NAME ($IMAGE_ID)"
+                  continue
+                fi
+
                 # Use far-future fallback to prevent accidental deletion on parse failure
                 IMAGE_DATE=$(date -d "$CREATED" +%s 2>/dev/null || echo 9999999999)
                 if [[ $IMAGE_DATE -lt $CUTOFF_DATE ]]; then
-                  echo "Removing old image: $REPO ($IMAGE_ID)"
+                  echo "Removing old image: $IMAGE_NAME ($IMAGE_ID)"
                   docker rmi "$IMAGE_ID" 2>/dev/null || true
                 fi
               done
