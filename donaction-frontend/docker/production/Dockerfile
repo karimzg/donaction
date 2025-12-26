@@ -33,7 +33,7 @@ ARG NEXTAUTH_SECRET
 
 WORKDIR /app-saas
 COPY ./donaction-saas ./
-RUN npm install
+RUN npm install --include=dev
 
 # Validate required secrets
 RUN if [ -z "$VITE_STRAPI_API_TOKEN" ]; then echo "ERROR: VITE_STRAPI_API_TOKEN is required" && exit 1; fi && \
@@ -72,7 +72,7 @@ RUN echo "NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}" > .env && \
     echo "NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN}" >> .env && \
     echo "NEXTAUTH_SECRET=${NEXTAUTH_SECRET}" >> .env
 
-RUN npm install && npm run build
+RUN npm install --include=dev && npm run build
 RUN cp -R ../app-saas/build/donaction-web-components public/donaction-web-components
 
 FROM node:18-alpine AS runner

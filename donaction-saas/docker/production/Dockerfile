@@ -15,7 +15,7 @@ WORKDIR /app
 
 COPY donaction-saas/package*.json ./
 
-RUN npm install
+RUN npm install --include=dev
 
 COPY donaction-saas ./
 
@@ -40,7 +40,13 @@ FROM nginx:alpine
 
 COPY --from=builder /app/build /usr/share/nginx/html/saas
 
-COPY donaction-saas/nginx/nginx.conf /etc/nginx/conf.d/default.conf 2>/dev/null || echo "server { listen 80; root /usr/share/nginx/html/saas; index index.html; location / { try_files \$uri \$uri/ /index.html; } }" > /etc/nginx/conf.d/default.conf
+# Copy nginx config or create default SPA config
+COPY donaction-saas/nginx/nginx.conf* /tmp/
+RUN if [ -f /tmp/nginx.conf ]; then \
+      cp /tmp/nginx.conf /etc/nginx/conf.d/default.conf; \
+    else \
+      printf 'server {\n  listen 80;\n  root /usr/share/nginx/html/saas;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf; \
+    fi
 
 EXPOSE 80
 
