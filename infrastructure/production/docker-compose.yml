@@ -1,4 +1,4 @@
-# Donaction Staging Docker Compose
+# Donaction Production Docker Compose
 #
 # Health Check Strategy:
 # - Container healthchecks validate individual service health (internal ports)
@@ -7,7 +7,7 @@
 
 services:
   frontend:
-    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-frontend:${IMAGE_TAG:-dev}
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-frontend:${IMAGE_TAG:-latest}
     container_name: donaction_frontend
     restart: unless-stopped
     ports:
@@ -24,7 +24,7 @@ services:
       start_period: 60s
 
   admin:
-    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-admin:${IMAGE_TAG:-dev}
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-admin:${IMAGE_TAG:-latest}
     container_name: donaction_admin
     restart: unless-stopped
     ports:
@@ -39,7 +39,7 @@ services:
       start_period: 30s
 
   api:
-    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-api:${IMAGE_TAG:-dev}
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-api:${IMAGE_TAG:-latest}
     container_name: donaction_api
     restart: unless-stopped
     ports:
@@ -54,7 +54,7 @@ services:
       start_period: 60s
 
   saas:
-    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-saas:${IMAGE_TAG:-dev}
+    image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-saas:${IMAGE_TAG:-latest}
     container_name: donaction_saas
     restart: unless-stopped
     ports:

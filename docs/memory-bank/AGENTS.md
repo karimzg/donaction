@@ -27,7 +27,7 @@ donaction/
 
 ### Git
 - [GIT] Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`
-- [GIT] Branch naming: `feat/`, `fix/`, `release/`, `demo/`
+- [GIT] Branch naming: `feat/`, `fix/`, `release/`, `hotfix/`, `demo/`
 
 ### Security
 - [SEC] Never hardcode credentials → use `.env` files
