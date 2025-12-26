@@ -6,6 +6,37 @@
 # This dual approach ensures both container-level and application-level health.
 
 services:
+  postgres:
+    image: postgres:16.6-alpine
+    container_name: donaction_postgres
+    restart: unless-stopped
+    ports:
+      - "5532:5432"
+    env_file:
+      - .env
+    # PostgreSQL auto-creates database from POSTGRES_DB if it doesn't exist
+    # No manual initialization required - just set DATABASE_NAME in .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   frontend:
     image: ${IMAGE_REGISTRY:-ghcr.io/karimzg}/donaction-frontend:${IMAGE_TAG:-dev}
     container_name: donaction_frontend
@@ -46,6 +77,9 @@ services:
       - "1537:1437"
     env_file:
       - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:1437/health"]
       interval: 30s

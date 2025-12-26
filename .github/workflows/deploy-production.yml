@@ -214,6 +214,8 @@ jobs:
             mkdir -p ~/donaction-staging/nginx
             mkdir -p ~/donaction-staging/backups
             mkdir -p ~/donaction-staging/logs
+            mkdir -p ~/donaction-staging/data/pgdata
+            mkdir -p ~/donaction-staging/data/private-pdf
           EOF
 
       - name: Copy docker-compose.yml
@@ -239,7 +241,7 @@ jobs:
           NODE_ENV=production
           ENVIRONMENT=re7
 
-          # Database
+          # Database (PostgreSQL Container)
           DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
           DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
           DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
@@ -506,7 +508,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             echo "Checking port availability..."
-            PORTS="3100 1537 4300 5100"
+            PORTS="3100 1537 4300 5100 5532"
             BLOCKED=""
 
             for PORT in $PORTS; do
@@ -582,6 +584,8 @@ jobs:
             mkdir -p ~/donaction-production/nginx
             mkdir -p ~/donaction-production/backups
             mkdir -p ~/donaction-production/logs
+            mkdir -p ~/donaction-production/data/pgdata
+            mkdir -p ~/donaction-production/data/private-pdf
           EOF
 
       - name: Copy docker-compose.yml
@@ -608,7 +612,7 @@ jobs:
           NODE_ENV=production
           ENVIRONMENT=${{ env.PROD_ENV }}
 
-          # Database
+          # Database (PostgreSQL Container)
           DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
           DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
           DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
@@ -708,6 +712,35 @@ jobs:
               docker compose pull
             fi
             echo "Images pulled successfully"
+          EOF
+
+      - name: Run database migrations
+        if: contains(needs.validate.outputs.services_list, 'api') || needs.validate.outputs.services_list == ''
+        run: |
+          IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+            cd ~/donaction-production
+            export IMAGE_TAG="${IMAGE_TAG}"
+            export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
+
+            echo "Ensuring PostgreSQL is running..."
+            docker compose up -d postgres
+
+            # Wait for PostgreSQL to be healthy
+            echo "Waiting for PostgreSQL to be healthy..."
+            timeout 60 bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
+
+            echo "Running Strapi database migrations..."
+            # Run migrations using the new API image
+            # Note: Strapi 5 auto-migrates schema on startup, but explicit migration ensures consistency
+            if docker compose run --rm --no-deps api npm run strapi -- database:migrate 2>&1 | tee /tmp/migration.log; then
+              echo "✅ Migrations completed successfully"
+            else
+              echo "::warning::Migration command returned non-zero. Check output above."
+              echo "::warning::Strapi will attempt auto-migration on startup."
+              cat /tmp/migration.log || true
+            fi
           EOF
 
       - name: Deploy containers
