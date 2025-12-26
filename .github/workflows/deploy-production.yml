@@ -714,6 +714,30 @@ jobs:
             echo "Images pulled successfully"
           EOF
 
+      - name: Run database migrations
+        if: contains(needs.validate.outputs.services_list, 'api') || needs.validate.outputs.services_list == ''
+        run: |
+          IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+            cd ~/donaction-production
+            export IMAGE_TAG="${IMAGE_TAG}"
+            export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
+
+            echo "Ensuring PostgreSQL is running..."
+            docker compose up -d postgres
+
+            # Wait for PostgreSQL to be healthy
+            echo "Waiting for PostgreSQL to be healthy..."
+            timeout 60 bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
+
+            echo "Running Strapi database migrations..."
+            # Run migrations using the new API image
+            docker compose run --rm --no-deps api npm run strapi -- database:migrate || {
+              echo "::warning::Migration command not available or failed. Strapi will auto-migrate on startup."
+            }
+          EOF
+
       - name: Deploy containers
         id: deploy
         run: |

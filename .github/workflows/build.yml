@@ -153,29 +153,11 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          # NOTE: Database credentials are passed at runtime via .env file, NOT at build time
+          # This prevents credentials from being stored in Docker image layers
           build-args: |
             NODE_ENV=production
             ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
-            APP_KEYS=${{ secrets.APP_KEYS }}
-            API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
-            TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
-            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
-            STRIPE_WEBHOOK_SECRET_CONNECT=${{ secrets.STRIPE_WEBHOOK_SECRET_CONNECT }}
-            IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
-            IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-            IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
-            EMAIL_BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-            NEXTAUTH_URL=${{ secrets.FRONT_URL }}
-            GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
-            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64

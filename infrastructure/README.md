@@ -102,6 +102,46 @@ sudo nginx -t
 - Ensure firewall allows port 80
 - ACME challenge requires HTTP access
 
+## PostgreSQL Backup & Restore
+
+### Manual Backup
+
+```bash
+# Run backup script (from VPS)
+cd ~/donaction-staging  # or ~/donaction-production
+./scripts/backup-postgres.sh ./backups/postgres
+
+# Or directly with docker
+docker exec donaction_postgres pg_dump -U $DATABASE_USERNAME -d $DATABASE_NAME | gzip > backup.sql.gz
+```
+
+### Restore from Backup
+
+```bash
+# Stop API to prevent connections
+docker compose stop api
+
+# Restore database
+gunzip -c backup.sql.gz | docker exec -i donaction_postgres psql -U $DATABASE_USERNAME -d $DATABASE_NAME
+
+# Restart API
+docker compose start api
+```
+
+### Automated Backups
+
+Set up cron job on VPS:
+
+```bash
+# Daily backup at 2:00 AM
+echo "0 2 * * * cd ~/donaction-production && ./scripts/backup-postgres.sh ./backups/postgres >> ./logs/backup.log 2>&1" | crontab -
+```
+
+### Backup Retention
+
+- Backups older than 7 days are automatically deleted
+- Store backups: `~/donaction-{staging|production}/backups/postgres/`
+
 ## Deployment
 
 See `.github/workflows/` for CI/CD deployment workflows:
