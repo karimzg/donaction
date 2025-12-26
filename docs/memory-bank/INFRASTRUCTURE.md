@@ -4,9 +4,9 @@
 
 ## Environments
 
-| Environment | Domain | VPS | Branch |
-|-------------|--------|-----|--------|
-| Staging | staging.donaction.fr | Staging VPS | Any branch |
+| Environment | Domain           | VPS | Branch |
+|-------------|------------------|-----|--------|
+| Staging | re7.donaction.fr | Staging VPS | Any branch |
 | Production | www.donaction.fr | Production VPS | release/*, hotfix/* |
 
 ## Docker Compose Patterns
