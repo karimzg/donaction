@@ -416,9 +416,14 @@ jobs:
 
             echo "Running Strapi database migrations..."
             # Run migrations using the new API image
-            docker compose run --rm --no-deps api npm run strapi -- database:migrate || {
-              echo "::warning::Migration command not available or failed. Strapi will auto-migrate on startup."
-            }
+            # Note: Strapi 5 auto-migrates schema on startup, but explicit migration ensures consistency
+            if docker compose run --rm --no-deps api npm run strapi -- database:migrate 2>&1 | tee /tmp/migration.log; then
+              echo "✅ Migrations completed successfully"
+            else
+              echo "::warning::Migration command returned non-zero. Check output above."
+              echo "::warning::Strapi will attempt auto-migration on startup."
+              cat /tmp/migration.log || true
+            fi
           EOF
 
       - name: Deploy containers

@@ -17,10 +17,8 @@ echo "Starting PostgreSQL backup..."
 echo "Backup file: $BACKUP_FILE"
 
 # Create backup using pg_dump from the postgres container
-docker exec donaction_postgres pg_dump \
-  -U "$DATABASE_USERNAME" \
-  -d "$DATABASE_NAME" \
-  --no-password \
+# Uses container's internal POSTGRES_USER and POSTGRES_DB env vars
+docker exec donaction_postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"' \
   | gzip > "$BACKUP_FILE"
 
 # Verify backup was created
