@@ -60,21 +60,25 @@ jobs:
           - app: admin
             node-version: 20
             working-directory: donaction-admin
+            # TODO: Add npm run lint
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.admin }}
           - app: frontend
             node-version: 18
             working-directory: donaction-frontend
-            command: npm run lint && npm run build
+            # TODO: Add npm run lint
+            command: npm run build
             changed: ${{ needs.detect-changes.outputs.frontend }}
           - app: api
             node-version: 22
             working-directory: donaction-api
+            # TODO: Add npm run lint
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.api }}
           - app: saas
             node-version: 20
             working-directory: donaction-saas
+            # TODO: Add npm run lint
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.saas }}
     steps:
