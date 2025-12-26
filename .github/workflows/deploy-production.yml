@@ -1000,7 +1000,8 @@ jobs:
 
             for REPO in "${REPOS[@]}"; do
               docker images "$REPO" --format "{{.ID}} {{.CreatedAt}}" | while read -r IMAGE_ID CREATED; do
-                IMAGE_DATE=$(date -d "$CREATED" +%s 2>/dev/null || echo 0)
+                # Use far-future fallback to prevent accidental deletion on parse failure
+                IMAGE_DATE=$(date -d "$CREATED" +%s 2>/dev/null || echo 9999999999)
                 if [[ $IMAGE_DATE -lt $CUTOFF_DATE ]]; then
                   echo "Removing old image: $REPO ($IMAGE_ID)"
                   docker rmi "$IMAGE_ID" 2>/dev/null || true
