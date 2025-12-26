@@ -18,6 +18,9 @@ WEBROOT_PATH="${CERTBOT_WEBROOT:-/var/www/certbot}"
 EMAIL="${CERTBOT_EMAIL:-hello@donaction.fr}"
 LOG_FILE="${CERTBOT_LOG:-/var/log/certbot-setup.log}"
 
+# State tracking
+CERTS_GENERATED=false
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -108,29 +111,44 @@ install_certbot() {
     log "Certbot installed: $(certbot --version)"
 }
 
+# Get domains for current environment
+get_domains() {
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+        echo "re7.donaction.fr"
+    else
+        echo "donaction.fr www.donaction.fr"
+    fi
+}
+
+# Get primary domain (for cert path)
+get_cert_name() {
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+        echo "re7.donaction.fr"
+    else
+        echo "www.donaction.fr"
+    fi
+}
+
 # Create webroot directory
 create_webroot() {
-    log "Creating webroot directory at $WEBROOT_PATH..."
+    if [[ -n "$DRY_RUN" ]]; then
+        log "Dry-run: Would create webroot at $WEBROOT_PATH"
+        return 0
+    fi
 
+    log "Creating webroot directory at $WEBROOT_PATH..."
     mkdir -p "$WEBROOT_PATH"
     chown -R www-data:www-data "$WEBROOT_PATH"
     chmod 755 "$WEBROOT_PATH"
-
     log "Webroot directory created"
 }
 
 # Generate certificates
 generate_certificates() {
-    local domains=""
-    local cert_name=""
-
-    if [[ "$ENVIRONMENT" == "staging" ]]; then
-        domains="-d re7.donaction.fr"
-        cert_name="re7.donaction.fr"
-    else
-        domains="-d donaction.fr -d www.donaction.fr"
-        cert_name="www.donaction.fr"
-    fi
+    local cert_name
+    cert_name=$(get_cert_name)
+    local domains
+    domains=$(get_domains)
 
     log "Generating certificates for: $domains"
 
@@ -155,12 +173,10 @@ generate_certificates() {
     log "Running certbot..."
     local certbot_args=(certonly --webroot -w "$WEBROOT_PATH" --email "$EMAIL" --agree-tos --non-interactive)
 
-    # Add domains
-    if [[ "$ENVIRONMENT" == "staging" ]]; then
-        certbot_args+=(-d re7.donaction.fr)
-    else
-        certbot_args+=(-d donaction.fr -d www.donaction.fr)
-    fi
+    # Add domains from helper function
+    for domain in $domains; do
+        certbot_args+=(-d "$domain")
+    done
 
     # Add dry-run flag if needed
     if [[ -n "$DRY_RUN" ]]; then
@@ -171,13 +187,14 @@ generate_certificates() {
     # Execute certbot
     if certbot "${certbot_args[@]}"; then
         log "Certificate generation successful"
+        CERTS_GENERATED=true
     else
         error "Certificate generation failed"
         exit 1
     fi
 }
 
-# Setup auto-renewal cron
+# Setup auto-renewal cron (idempotent)
 setup_cron() {
     local cron_file="/etc/cron.d/certbot-renew"
     local cron_job="0 0,12 * * * root certbot renew --quiet --post-hook \"systemctl reload nginx\" >> /var/log/certbot-renew.log 2>&1"
@@ -185,6 +202,12 @@ setup_cron() {
     if [[ -n "$DRY_RUN" ]]; then
         log "Dry-run: Would create cron job at $cron_file"
         log "Dry-run: $cron_job"
+        return 0
+    fi
+
+    # Check if cron file already exists with same content
+    if [[ -f "$cron_file" ]] && grep -q "certbot renew" "$cron_file"; then
+        log "Cron job already configured at $cron_file"
         return 0
     fi
 
@@ -219,10 +242,15 @@ test_renewal() {
     fi
 }
 
-# Reload nginx
+# Reload nginx (only if certificates were generated)
 reload_nginx() {
     if [[ -n "$DRY_RUN" ]]; then
         log "Dry-run: Would reload nginx"
+        return 0
+    fi
+
+    if [[ "$CERTS_GENERATED" == "false" ]]; then
+        log "No new certificates generated - skipping nginx reload"
         return 0
     fi
 
