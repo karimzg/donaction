@@ -80,6 +80,15 @@ jobs:
           APPS="${{ github.event.inputs.apps }}"
           SERVICES=""
 
+          # Validate apps input against allowed values
+          VALID_APPS="frontend api admin saas all"
+          for APP in ${APPS//,/ }; do
+            if [[ ! " $VALID_APPS " =~ " $APP " ]]; then
+              echo "::error::Invalid app name: '$APP'. Allowed values: $VALID_APPS"
+              exit 1
+            fi
+          done
+
           if [[ "$APPS" == "all" ]]; then
             echo "frontend=true" >> $GITHUB_OUTPUT
             echo "api=true" >> $GITHUB_OUTPUT
