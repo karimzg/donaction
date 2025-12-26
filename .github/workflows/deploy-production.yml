@@ -214,6 +214,8 @@ jobs:
             mkdir -p ~/donaction-staging/nginx
             mkdir -p ~/donaction-staging/backups
             mkdir -p ~/donaction-staging/logs
+            mkdir -p ~/donaction-staging/data/pgdata
+            mkdir -p ~/donaction-staging/data/private-pdf
           EOF
 
       - name: Copy docker-compose.yml
@@ -239,7 +241,7 @@ jobs:
           NODE_ENV=production
           ENVIRONMENT=re7
 
-          # Database
+          # Database (PostgreSQL Container)
           DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
           DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
           DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
@@ -506,7 +508,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             echo "Checking port availability..."
-            PORTS="3100 1537 4300 5100"
+            PORTS="3100 1537 4300 5100 5532"
             BLOCKED=""
 
             for PORT in $PORTS; do
@@ -582,6 +584,8 @@ jobs:
             mkdir -p ~/donaction-production/nginx
             mkdir -p ~/donaction-production/backups
             mkdir -p ~/donaction-production/logs
+            mkdir -p ~/donaction-production/data/pgdata
+            mkdir -p ~/donaction-production/data/private-pdf
           EOF
 
       - name: Copy docker-compose.yml
@@ -608,7 +612,7 @@ jobs:
           NODE_ENV=production
           ENVIRONMENT=${{ env.PROD_ENV }}
 
-          # Database
+          # Database (PostgreSQL Container)
           DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
           DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
           DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
