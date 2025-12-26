@@ -1256,7 +1256,6 @@ jobs:
           echo "formatted=${FORMATTED}" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
-        if: vars.SLACK_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -1311,7 +1310,6 @@ jobs:
             }'
 
       - name: Send Discord notification
-        if: vars.DISCORD_WEBHOOK_URL || secrets.DISCORD_WEBHOOK_URL
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

@@ -309,7 +309,6 @@ jobs:
           fi
 
       - name: Send Slack notification
-        if: secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         run: |
           echo "📤 Sending Slack notification..."
@@ -351,7 +350,6 @@ jobs:
           fi
 
       - name: Send Discord notification
-        if: secrets.DISCORD_WEBHOOK_URL
         continue-on-error: true
         run: |
           echo "📤 Sending Discord notification..."
