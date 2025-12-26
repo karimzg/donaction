@@ -13,16 +13,19 @@
 
 set -euo pipefail
 
-# Configuration
-WEBROOT_PATH="/var/www/certbot"
-EMAIL="hello@donaction.fr"
-LOG_FILE="/var/log/certbot-setup.log"
+# Configuration (can be overridden via environment variables)
+WEBROOT_PATH="${CERTBOT_WEBROOT:-/var/www/certbot}"
+EMAIL="${CERTBOT_EMAIL:-hello@donaction.fr}"
+LOG_FILE="${CERTBOT_LOG:-/var/log/certbot-setup.log}"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Ensure log directory exists
+mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null || LOG_FILE="/tmp/certbot-setup.log"
 
 log() {
     echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
@@ -92,13 +95,16 @@ parse_args() {
     fi
 }
 
-# Install Certbot
+# Install Certbot (idempotent - skips if already installed)
 install_certbot() {
-    log "Installing Certbot and nginx plugin..."
+    if command -v certbot &> /dev/null; then
+        log "Certbot already installed: $(certbot --version)"
+        return 0
+    fi
 
+    log "Installing Certbot and nginx plugin..."
     apt-get update -qq
     apt-get install -y certbot python3-certbot-nginx
-
     log "Certbot installed: $(certbot --version)"
 }
 
@@ -131,25 +137,39 @@ generate_certificates() {
     # Check if certificate already exists
     if [[ -d "/etc/letsencrypt/live/$cert_name" ]] && [[ -z "$DRY_RUN" ]]; then
         warn "Certificate already exists at /etc/letsencrypt/live/$cert_name"
-        read -p "Do you want to renew/expand it? (y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log "Skipping certificate generation"
+        # Check if running interactively
+        if [[ -t 0 ]]; then
+            read -p "Do you want to renew/expand it? (y/N) " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                log "Skipping certificate generation"
+                return 0
+            fi
+        else
+            log "Non-interactive mode: skipping existing certificate"
             return 0
         fi
     fi
 
-    # Build certbot command
-    local certbot_cmd="certbot certonly --webroot -w $WEBROOT_PATH $domains"
-    certbot_cmd="$certbot_cmd --email $EMAIL --agree-tos --non-interactive"
+    # Run certbot directly (avoiding eval for security)
+    log "Running certbot..."
+    local certbot_args=(certonly --webroot -w "$WEBROOT_PATH" --email "$EMAIL" --agree-tos --non-interactive)
 
+    # Add domains
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+        certbot_args+=(-d re7.donaction.fr)
+    else
+        certbot_args+=(-d donaction.fr -d www.donaction.fr)
+    fi
+
+    # Add dry-run flag if needed
     if [[ -n "$DRY_RUN" ]]; then
-        certbot_cmd="$certbot_cmd --dry-run"
+        certbot_args+=(--dry-run)
         log "Running in dry-run mode..."
     fi
 
-    # Run certbot
-    if eval "$certbot_cmd"; then
+    # Execute certbot
+    if certbot "${certbot_args[@]}"; then
         log "Certificate generation successful"
     else
         error "Certificate generation failed"
@@ -184,10 +204,14 @@ EOF
     log "Cron job created at $cron_file"
 }
 
-# Test renewal
+# Test renewal (skip if already in dry-run mode to avoid redundancy)
 test_renewal() {
-    log "Testing certificate renewal with dry-run..."
+    if [[ -n "$DRY_RUN" ]]; then
+        log "Skipping renewal test (already in dry-run mode)"
+        return 0
+    fi
 
+    log "Testing certificate renewal with dry-run..."
     if certbot renew --dry-run; then
         log "Renewal test passed"
     else
@@ -245,6 +269,15 @@ print_summary() {
     echo ""
 }
 
+# Check nginx is installed
+check_nginx() {
+    if ! command -v nginx &> /dev/null; then
+        error "Nginx not installed. Please install nginx first."
+        exit 1
+    fi
+    log "Nginx found: $(nginx -v 2>&1)"
+}
+
 # Main
 main() {
     check_root
@@ -256,6 +289,7 @@ main() {
         warn "Running in DRY-RUN mode - no changes will be made"
     fi
 
+    check_nginx
     install_certbot
     create_webroot
     generate_certificates
