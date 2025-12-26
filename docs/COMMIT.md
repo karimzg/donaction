@@ -23,7 +23,7 @@ type(scope): description
 | `feat`       | New feature                              |
 | `fix`        | Bug fix                                  |
 | `docs`       | Documentation only                       |
-| `refactor`   | Code change (no feat/fix)                |
+| `refactor`   | Code change (no feature/fix)                |
 | `perf`       | Performance improvement                  |
 | `test`       | Add/update tests                         |
 | `chore`      | Build, config, deps                      |
