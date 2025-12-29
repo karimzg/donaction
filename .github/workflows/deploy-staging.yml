@@ -311,6 +311,7 @@ jobs:
           ENVIRONMENT=${{ env.STAGING_ENV }}
 
           # Database (PostgreSQL Container)
+          DATABASE_CLIENT=postgres
           DATABASE_HOST=${{ secrets.DATABASE_HOST }}
           DATABASE_PORT=${{ secrets.DATABASE_PORT }}
           DATABASE_NAME=${{ secrets.DATABASE_NAME }}
