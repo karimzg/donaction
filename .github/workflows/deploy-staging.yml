@@ -375,9 +375,25 @@ jobs:
           ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "echo '$ENV_BASE64' | base64 -d > ~/donaction-staging/.env && chmod 600 ~/donaction-staging/.env"
 
-          # Verify file was created
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "if [ -f ~/donaction-staging/.env ]; then echo '✓ .env file created successfully'; wc -l ~/donaction-staging/.env; else echo '::error::.env file was not created'; exit 1; fi"
+          # Verify file was created with detailed debugging
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'VERIFY'
+            echo "=== Debug info ==="
+            echo "HOME: $HOME"
+            echo "User: $(whoami)"
+            echo "Full path: $(realpath ~/donaction-staging 2>/dev/null || echo 'N/A')"
+            echo "=== Directory listing ==="
+            ls -la ~/donaction-staging/
+            echo "=== .env check ==="
+            if [ -f ~/donaction-staging/.env ]; then
+              echo "✓ .env file exists"
+              echo "Lines: $(wc -l < ~/donaction-staging/.env)"
+              echo "Size: $(stat -c%s ~/donaction-staging/.env) bytes"
+              head -5 ~/donaction-staging/.env | sed 's/=.*/=***/'
+            else
+              echo "::error::.env file was not created"
+              exit 1
+            fi
+          VERIFY
 
       - name: Login to GHCR on server
         run: |
