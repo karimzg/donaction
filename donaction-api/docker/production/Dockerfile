@@ -70,6 +70,9 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
 
 RUN npm run build
 
+# Prune dev dependencies for smaller production image
+RUN npm prune --production
+
 
 FROM base as final
 WORKDIR /usr/src/app
