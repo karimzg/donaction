@@ -39,6 +39,7 @@
     "sharp": "^0.33.5",
     "sib-api-v3-sdk": "^8.5.0",
     "strapi-advanced-uuid": "^2.0.2",
+    "strapi-health-plugin": "^1.2.2",
     "strapi-provider-upload-imagekit": "https://github.com/karimzg/strapi-provider-upload-imagekit.git#1191a39c71de7286c2a95e6bf2dab7d84b428c70",
     "stripe": "^17.6.0",
     "styled-components": "^6.0.0",
