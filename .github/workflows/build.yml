@@ -109,8 +109,6 @@ jobs:
     environment: ${{ needs.detect-changes.outputs.environment }}
     timeout-minutes: 15
     if: always() && needs.detect-changes.outputs.saas == 'true' && needs.approve-saas.result == 'success'
-    outputs:
-      image_tag: ${{ steps.tags.outputs.env_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
