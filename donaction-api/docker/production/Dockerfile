@@ -70,6 +70,9 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
 
 RUN npm run build
 
+# Compile config TypeScript files to JavaScript for production
+RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop --resolveJsonModule --skipLibCheck
+
 # Prune dev dependencies for smaller production image
 RUN npm prune --production
 
@@ -80,7 +83,7 @@ WORKDIR /usr/src/app
 # Copy only necessary files (NO .env, NO src/)
 COPY --from=build /usr/src/node_modules ../node_modules
 COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/config ./config
+COPY --from=build /usr/src/app/dist/config ./config
 COPY --from=build /usr/src/app/public ./public
 COPY --from=build /usr/src/app/package.json ./package.json
 COPY --from=build /usr/src/app/database ./database
