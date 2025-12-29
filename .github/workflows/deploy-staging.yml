@@ -30,6 +30,7 @@ jobs:
   validate:
     name: Validate Deployment Request
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       deploy_frontend: ${{ steps.apps.outputs.frontend }}
       deploy_api: ${{ steps.apps.outputs.api }}
