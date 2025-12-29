@@ -71,7 +71,7 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
 RUN npm run build
 
 # Compile config TypeScript files to JavaScript for production
-RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop --resolveJsonModule --skipLibCheck
+RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop --resolveJsonModule --skipLibCheck --sourceMap false
 
 # Prune dev dependencies for smaller production image
 RUN npm prune --production
