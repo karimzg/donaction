@@ -864,7 +864,6 @@ jobs:
           echo "- ⚙️ [Admin](https://${{ env.STAGING_DOMAIN }}/admin)" >> $GITHUB_STEP_SUMMARY
 
       - name: Send Slack notification
-        if: vars.SLACK_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -918,7 +917,6 @@ jobs:
             }'
 
       - name: Send Discord notification
-        if: vars.DISCORD_WEBHOOK_URL || secrets.DISCORD_WEBHOOK_URL
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

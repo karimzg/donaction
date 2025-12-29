@@ -34,16 +34,14 @@ WORKDIR /usr/src/
 FROM base as build
 COPY ./donaction-api/package.json ./donaction-api/package-lock.json ./
 RUN npm install -g node-gyp
-RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --include=dev
 ENV PATH=/usr/src/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
 COPY ./donaction-api/ .
 
-# Validate required secrets are present
-RUN if [ -z "$DATABASE_PASSWORD" ]; then echo "ERROR: DATABASE_PASSWORD is required" && exit 1; fi && \
-    if [ -z "$JWT_SECRET" ]; then echo "ERROR: JWT_SECRET is required" && exit 1; fi && \
-    if [ -z "$ADMIN_JWT_SECRET" ]; then echo "ERROR: ADMIN_JWT_SECRET is required" && exit 1; fi && \
-    if [ -z "$APP_KEYS" ]; then echo "ERROR: APP_KEYS is required" && exit 1; fi
+# NOTE: Secret validation removed from build time
+# Secrets are validated at runtime by entrypoint.sh
+# This allows building images without secrets (CI/CD best practice)
 
 # Generate .env file for build (will NOT be copied to final image)
 # Values are quoted to handle special characters and empty values
@@ -71,6 +69,9 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
     echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env
 
 RUN npm run build
+
+# Prune dev dependencies for smaller production image
+RUN npm prune --production
 
 
 FROM base as final

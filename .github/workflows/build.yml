@@ -27,6 +27,7 @@ jobs:
       saas: ${{ steps.filter.outputs.saas }}
       environment: ${{ steps.env.outputs.environment }}
       env_name: ${{ steps.env.outputs.env_name }}
+      env_tag: ${{ steps.env.outputs.env_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,64 +52,71 @@ jobs:
           if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
             echo "env_name=re7" >> $GITHUB_OUTPUT
+            echo "env_tag=dev" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
             echo "environment=production" >> $GITHUB_OUTPUT
             echo "env_name=prod" >> $GITHUB_OUTPUT
+            echo "env_tag=prod" >> $GITHUB_OUTPUT
           else
             echo "::error::Unknown branch pattern: ${{ github.ref }}. Expected demo/*, release/*, or hotfix/*"
             exit 1
           fi
 
-  build:
-    name: Build ${{ matrix.app }}
+  # Manual approval gates - require reviewer approval before building
+  approve-saas:
+    name: Approve SaaS Build
     runs-on: ubuntu-latest
     needs: detect-changes
-    environment: ${{ needs.detect-changes.outputs.environment }}
-    timeout-minutes: 30
-    if: |
-      needs.detect-changes.outputs.admin == 'true' ||
-      needs.detect-changes.outputs.frontend == 'true' ||
-      needs.detect-changes.outputs.api == 'true' ||
-      needs.detect-changes.outputs.saas == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - app: admin
-            context: .
-            dockerfile: donaction-admin/docker/production/Dockerfile
-            image: ghcr.io/karimzg/donaction-admin
-            changed: ${{ needs.detect-changes.outputs.admin }}
-          - app: frontend
-            context: .
-            dockerfile: donaction-frontend/docker/production/Dockerfile
-            image: ghcr.io/karimzg/donaction-frontend
-            changed: ${{ needs.detect-changes.outputs.frontend }}
-          - app: api
-            context: .
-            dockerfile: donaction-api/docker/production/Dockerfile
-            image: ghcr.io/karimzg/donaction-api
-            changed: ${{ needs.detect-changes.outputs.api }}
-          - app: saas
-            context: .
-            dockerfile: donaction-saas/docker/production/Dockerfile
-            image: ghcr.io/karimzg/donaction-saas
-            changed: ${{ needs.detect-changes.outputs.saas }}
+    if: needs.detect-changes.outputs.saas == 'true'
+    environment: approve-saas
     steps:
-      - name: Skip if app not changed
-        if: matrix.changed != 'true'
-        run: echo "Skipping ${{ matrix.app }} - no changes detected"
+      - run: echo "✅ SaaS build approved"
 
+  approve-admin:
+    name: Approve Admin Build
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.admin == 'true'
+    environment: approve-admin
+    steps:
+      - run: echo "✅ Admin build approved"
+
+  approve-api:
+    name: Approve API Build
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api == 'true'
+    environment: approve-api
+    steps:
+      - run: echo "✅ API build approved"
+
+  # Frontend approval only needed when SaaS wasn't changed
+  # (if SaaS changed, SaaS approval already gates the flow)
+  approve-frontend:
+    name: Approve Frontend Build
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true' && needs.detect-changes.outputs.saas != 'true'
+    environment: approve-frontend
+    steps:
+      - run: echo "✅ Frontend build approved"
+
+  # SaaS must build first - Frontend depends on its registry image
+  build-saas:
+    name: Build SaaS
+    runs-on: ubuntu-latest
+    needs: [detect-changes, approve-saas]
+    environment: ${{ needs.detect-changes.outputs.environment }}
+    timeout-minutes: 15
+    if: always() && needs.detect-changes.outputs.saas == 'true' && needs.approve-saas.result == 'success'
+    steps:
       - name: Checkout repository
-        if: matrix.changed == 'true'
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        if: matrix.changed == 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        if: matrix.changed == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -116,62 +124,105 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine tags
-        if: matrix.changed == 'true'
         id: tags
         run: |
-          # Determine environment tag based on branch
-          if [[ "${{ github.ref }}" == refs/heads/demo/* ]]; then
-            ENV_TAG="dev"
-          elif [[ "${{ github.ref }}" == refs/heads/release/* ]] || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
-            ENV_TAG="prod"
-          else
-            ENV_TAG="dev"
-          fi
-
-          # Build tag list with short SHA (7 chars)
+          ENV_TAG="${{ needs.detect-changes.outputs.env_tag }}"
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          TAGS="${{ matrix.image }}:${ENV_TAG},${{ matrix.image }}:sha-${SHORT_SHA}"
+          TAGS="ghcr.io/karimzg/donaction-saas:${ENV_TAG},ghcr.io/karimzg/donaction-saas:sha-${SHORT_SHA}"
 
-          # Extract semantic version from release/hotfix branch names
-          # e.g., release/v1.2.3 -> v1.2.3
           BRANCH_NAME="${{ github.ref_name }}"
           if [[ "$BRANCH_NAME" =~ ^(release|hotfix)/(v[0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
             VERSION="${BASH_REMATCH[2]}"
-            TAGS="${TAGS},${{ matrix.image }}:${VERSION}"
-            echo "Adding semantic version tag: ${VERSION}"
+            TAGS="${TAGS},ghcr.io/karimzg/donaction-saas:${VERSION}"
           fi
 
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
-          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
-      - name: Build and push API
-        if: matrix.changed == 'true' && matrix.app == 'api'
+      - name: Build and push SaaS
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: .
+          file: donaction-saas/docker/production/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
-          # NOTE: Database credentials are passed at runtime via .env file, NOT at build time
-          # This prevents credentials from being stored in Docker image layers
           build-args: |
-            NODE_ENV=production
-            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
+            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
+            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
+      - name: Output build summary
+        run: |
+          echo "✅ Built and pushed SaaS"
+          echo "📦 Image: ghcr.io/karimzg/donaction-saas"
+          echo "🏷️  Tags: ${{ steps.tags.outputs.tags }}"
+
+  # Frontend depends on SaaS registry image
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-saas, approve-frontend]
+    environment: ${{ needs.detect-changes.outputs.environment }}
+    timeout-minutes: 30
+    # Runs if:
+    # - Frontend changed AND
+    # - build-saas succeeded or was skipped AND
+    # - approve-frontend succeeded or was skipped (skipped when SaaS changed)
+    if: |
+      always() &&
+      needs.detect-changes.outputs.frontend == 'true' &&
+      needs.detect-changes.result == 'success' &&
+      (needs.build-saas.result == 'success' || needs.build-saas.result == 'skipped') &&
+      (needs.approve-frontend.result == 'success' || needs.approve-frontend.result == 'skipped')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tags
+        id: tags
+        run: |
+          ENV_TAG="${{ needs.detect-changes.outputs.env_tag }}"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="ghcr.io/karimzg/donaction-frontend:${ENV_TAG},ghcr.io/karimzg/donaction-frontend:sha-${SHORT_SHA}"
+
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [[ "$BRANCH_NAME" =~ ^(release|hotfix)/(v[0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[2]}"
+            TAGS="${TAGS},ghcr.io/karimzg/donaction-frontend:${VERSION}"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "env_tag=${ENV_TAG}" >> $GITHUB_OUTPUT
+
       - name: Build and push Frontend
-        if: matrix.changed == 'true' && matrix.app == 'frontend'
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: .
+          file: donaction-frontend/docker/production/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
             NODE_ENV=production
+            SAAS_VERSION=${{ needs.detect-changes.outputs.env_tag }}
             NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.FRONT_URL }}
             NEXT_PUBLIC_API_URL=${{ secrets.STRAPI_API_URL }}
@@ -186,51 +237,58 @@ jobs:
             NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
             NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            # VITE_* vars needed because Frontend builds SaaS internally
-            # (duplicated with SaaS step - GitHub Actions doesn't support YAML anchors)
-            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
-            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
-            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
-            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
-            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
-            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
-            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
-            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-      # SaaS widget build - VITE_* vars duplicated from Frontend step
-      # (GitHub Actions doesn't support YAML anchors for reuse)
-      - name: Build and push SaaS
-        if: matrix.changed == 'true' && matrix.app == 'saas'
-        uses: docker/build-push-action@v5
+      - name: Output build summary
+        run: |
+          echo "✅ Built and pushed Frontend"
+          echo "📦 Image: ghcr.io/karimzg/donaction-frontend"
+          echo "🏷️  Tags: ${{ steps.tags.outputs.tags }}"
+
+  # Admin build (requires approval)
+  build-admin:
+    name: Build Admin
+    runs-on: ubuntu-latest
+    needs: [detect-changes, approve-admin]
+    environment: ${{ needs.detect-changes.outputs.environment }}
+    timeout-minutes: 30
+    if: always() && needs.detect-changes.outputs.admin == 'true' && needs.approve-admin.result == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: ${{ steps.tags.outputs.tags }}
-          build-args: |
-            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
-            VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
-            VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
-            VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
-            VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
-            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
-            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
-            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tags
+        id: tags
+        run: |
+          ENV_TAG="${{ needs.detect-changes.outputs.env_tag }}"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="ghcr.io/karimzg/donaction-admin:${ENV_TAG},ghcr.io/karimzg/donaction-admin:sha-${SHORT_SHA}"
+
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [[ "$BRANCH_NAME" =~ ^(release|hotfix)/(v[0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[2]}"
+            TAGS="${TAGS},ghcr.io/karimzg/donaction-admin:${VERSION}"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Build and push Admin
-        if: matrix.changed == 'true' && matrix.app == 'admin'
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: .
+          file: donaction-admin/docker/production/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
@@ -246,22 +304,84 @@ jobs:
           platforms: linux/amd64
 
       - name: Output build summary
-        if: matrix.changed == 'true'
         run: |
-          echo "✅ Built and pushed ${{ matrix.app }}"
-          echo "📦 Image: ${{ matrix.image }}"
+          echo "✅ Built and pushed Admin"
+          echo "📦 Image: ghcr.io/karimzg/donaction-admin"
+          echo "🏷️  Tags: ${{ steps.tags.outputs.tags }}"
+
+  # API build (requires approval)
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    needs: [detect-changes, approve-api]
+    environment: ${{ needs.detect-changes.outputs.environment }}
+    timeout-minutes: 30
+    if: always() && needs.detect-changes.outputs.api == 'true' && needs.approve-api.result == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tags
+        id: tags
+        run: |
+          ENV_TAG="${{ needs.detect-changes.outputs.env_tag }}"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAGS="ghcr.io/karimzg/donaction-api:${ENV_TAG},ghcr.io/karimzg/donaction-api:sha-${SHORT_SHA}"
+
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [[ "$BRANCH_NAME" =~ ^(release|hotfix)/(v[0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[2]}"
+            TAGS="${TAGS},ghcr.io/karimzg/donaction-api:${VERSION}"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build and push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: donaction-api/docker/production/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_ENV=production
+            ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output build summary
+        run: |
+          echo "✅ Built and pushed API"
+          echo "📦 Image: ghcr.io/karimzg/donaction-api"
           echo "🏷️  Tags: ${{ steps.tags.outputs.tags }}"
 
   notify:
     name: Notify Build Status
     runs-on: ubuntu-latest
-    needs: [detect-changes, build]
+    needs: [detect-changes, build-saas, build-frontend, build-admin, build-api]
     if: always()
     steps:
       - name: Determine build status
         id: status
         run: |
-          if [[ "${{ needs.build.result }}" == "success" ]]; then
+          # Check all build jobs - success if all succeeded or were skipped
+          SAAS_OK=${{ needs.build-saas.result == 'success' || needs.build-saas.result == 'skipped' }}
+          FRONTEND_OK=${{ needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped' }}
+          ADMIN_OK=${{ needs.build-admin.result == 'success' || needs.build-admin.result == 'skipped' }}
+          API_OK=${{ needs.build-api.result == 'success' || needs.build-api.result == 'skipped' }}
+
+          if [[ "$SAAS_OK" == "true" && "$FRONTEND_OK" == "true" && "$ADMIN_OK" == "true" && "$API_OK" == "true" ]]; then
             echo "status=success" >> $GITHUB_OUTPUT
             echo "color=good" >> $GITHUB_OUTPUT
             echo "emoji=✅" >> $GITHUB_OUTPUT
@@ -309,7 +429,6 @@ jobs:
           fi
 
       - name: Send Slack notification
-        if: secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         run: |
           echo "📤 Sending Slack notification..."
@@ -351,7 +470,6 @@ jobs:
           fi
 
       - name: Send Discord notification
-        if: secrets.DISCORD_WEBHOOK_URL
         continue-on-error: true
         run: |
           echo "📤 Sending Discord notification..."

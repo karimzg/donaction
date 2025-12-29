@@ -1,19 +1,11 @@
-# phase build
+# Pull SaaS assets from GHCR registry
+ARG SAAS_VERSION=dev
+FROM ghcr.io/karimzg/donaction-saas:${SAAS_VERSION} AS saas
 
+# Build Frontend
 FROM node:18-alpine AS builder
 
 ARG NODE_ENV=production
-
-# SaaS build args (VITE_*)
-ARG VITE_STRAPI_API_URL
-ARG VITE_STRAPI_API_TOKEN
-ARG VITE_STRIPE_PUBLISHABLE_KEY
-ARG VITE_GOOGLE_RECAPTCHA_SITE_KEY
-ARG VITE_GOOGLE_MAPS_KEY
-ARG VITE_GOOGLE_GA_TRACKING_ID
-ARG VITE_ACTIVATE_ANALYTICS
-ARG VITE_PLAUSIBLE_DATA_DOMAIN
-ARG VITE_NEXT_URL
 
 # Frontend build args (NEXT_PUBLIC_*)
 ARG NEXT_PUBLIC_ENVIRONMENT
@@ -31,29 +23,11 @@ ARG NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN
 ARG NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN
 ARG NEXTAUTH_SECRET
 
-WORKDIR /app-saas
-COPY ./donaction-saas ./
-RUN npm install
-
 # Validate required secrets
-RUN if [ -z "$VITE_STRAPI_API_TOKEN" ]; then echo "ERROR: VITE_STRAPI_API_TOKEN is required" && exit 1; fi && \
-    if [ -z "$NEXT_PUBLIC_STRAPI_API_TOKEN" ]; then echo "ERROR: NEXT_PUBLIC_STRAPI_API_TOKEN is required" && exit 1; fi && \
+RUN if [ -z "$NEXT_PUBLIC_STRAPI_API_TOKEN" ]; then echo "ERROR: NEXT_PUBLIC_STRAPI_API_TOKEN is required" && exit 1; fi && \
     if [ -z "$NEXTAUTH_SECRET" ]; then echo "ERROR: NEXTAUTH_SECRET is required" && exit 1; fi
 
-# Generate SaaS .env from build args
-RUN echo "VITE_STRAPI_API_URL=${VITE_STRAPI_API_URL}" > .env && \
-    echo "VITE_STRAPI_API_TOKEN=${VITE_STRAPI_API_TOKEN}" >> .env && \
-    echo "VITE_STRIPE_PUBLISHABLE_KEY=${VITE_STRIPE_PUBLISHABLE_KEY}" >> .env && \
-    echo "VITE_GOOGLE_RECAPTCHA_SITE_KEY=${VITE_GOOGLE_RECAPTCHA_SITE_KEY}" >> .env && \
-    echo "VITE_GOOGLE_MAPS_KEY=${VITE_GOOGLE_MAPS_KEY}" >> .env && \
-    echo "VITE_GOOGLE_GA_TRACKING_ID=${VITE_GOOGLE_GA_TRACKING_ID}" >> .env && \
-    echo "VITE_ACTIVATE_ANALYTICS=${VITE_ACTIVATE_ANALYTICS}" >> .env && \
-    echo "VITE_PLAUSIBLE_DATA_DOMAIN=${VITE_PLAUSIBLE_DATA_DOMAIN}" >> .env && \
-    echo "VITE_NEXT_URL=${VITE_NEXT_URL}" >> .env
-
-RUN npm run build
-
-WORKDIR /app-build
+WORKDIR /app
 COPY ./donaction-frontend ./
 
 # Generate Frontend .env from build args
@@ -72,16 +46,18 @@ RUN echo "NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}" > .env && \
     echo "NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN}" >> .env && \
     echo "NEXTAUTH_SECRET=${NEXTAUTH_SECRET}" >> .env
 
-RUN npm install && npm run build
-RUN cp -R ../app-saas/build/donaction-web-components public/donaction-web-components
+RUN npm install --include=dev && npm run build
+
+# Copy SaaS web components from registry image
+COPY --from=saas /usr/share/nginx/html/saas/donaction-web-components ./public/donaction-web-components
 
 FROM node:18-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app-build/public ./public
+COPY --from=builder /app/public ./public
 RUN mkdir .next
-COPY --from=builder  /app-build/.next/standalone ./
-COPY --from=builder  /app-build/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 EXPOSE 3000
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
