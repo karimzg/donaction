@@ -159,6 +159,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -240,6 +244,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -302,6 +310,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -359,6 +371,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |

@@ -12,6 +12,11 @@ on:
         required: false
         default: 'all'
         type: string
+      image_tag:
+        description: 'Image tag to deploy (default: dev, or use sha-xxxxx for specific version)'
+        required: false
+        default: ''
+        type: string
 
 concurrency:
   group: deploy-staging
@@ -37,12 +42,26 @@ jobs:
       deploy_admin: ${{ steps.apps.outputs.admin }}
       deploy_saas: ${{ steps.apps.outputs.saas }}
       services_list: ${{ steps.apps.outputs.services_list }}
+      image_tag: ${{ steps.image.outputs.tag }}
     steps:
       - name: Validate confirmation
         if: github.event.inputs.confirmation != 'DEPLOY'
         run: |
           echo "::error::Confirmation failed. You must type 'DEPLOY' to proceed."
           exit 1
+
+      - name: Determine image tag
+        id: image
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+          if [[ -z "$INPUT_TAG" ]]; then
+            IMAGE_TAG="dev"
+            echo "Using default tag: dev"
+          else
+            IMAGE_TAG="$INPUT_TAG"
+            echo "Using specified tag: $IMAGE_TAG"
+          fi
+          echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Validate branch
         run: |
@@ -383,7 +402,7 @@ jobs:
       - name: Pull Docker images
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
-          IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_TAG="${{ needs.validate.outputs.image_tag }}"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
@@ -401,7 +420,7 @@ jobs:
       - name: Run database migrations
         if: contains(needs.validate.outputs.services_list, 'api') || needs.validate.outputs.services_list == ''
         run: |
-          IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_TAG="${{ needs.validate.outputs.image_tag }}"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd ~/donaction-staging
@@ -431,7 +450,7 @@ jobs:
         id: deploy
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
-          IMAGE_TAG="${{ github.ref_name }}"
+          IMAGE_TAG="${{ needs.validate.outputs.image_tag }}"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
