@@ -75,7 +75,8 @@ RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop
     rm -f dist/config/*.map
 
 # Prune dev dependencies for smaller production image
-RUN npm prune --production
+# Re-install @strapi/logger which is needed by config/logger.ts at runtime
+RUN npm prune --production && npm install @strapi/logger
 
 
 FROM base as final
