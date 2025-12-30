@@ -1,0 +1,202 @@
+name: 'Notify Build Status'
+description: 'Send build notifications to Slack and Discord'
+
+inputs:
+  saas-result:
+    description: 'Result of saas build job'
+    required: true
+  frontend-result:
+    description: 'Result of frontend build job'
+    required: true
+  admin-result:
+    description: 'Result of admin build job'
+    required: true
+  api-result:
+    description: 'Result of api build job'
+    required: true
+  saas-changed:
+    description: 'Whether saas changed'
+    required: true
+  frontend-changed:
+    description: 'Whether frontend changed'
+    required: true
+  admin-changed:
+    description: 'Whether admin changed'
+    required: true
+  api-changed:
+    description: 'Whether api changed'
+    required: true
+  slack-webhook-url:
+    description: 'Slack webhook URL'
+    required: false
+  discord-webhook-url:
+    description: 'Discord webhook URL'
+    required: false
+  github-ref-name:
+    description: 'Git branch name'
+    required: true
+  github-sha:
+    description: 'Git commit SHA'
+    required: true
+  github-server-url:
+    description: 'GitHub server URL'
+    required: true
+  github-repository:
+    description: 'GitHub repository'
+    required: true
+  github-run-id:
+    description: 'GitHub Actions run ID'
+    required: true
+  commit-url:
+    description: 'URL to the commit'
+    required: true
+  commit-timestamp:
+    description: 'Commit timestamp'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Determine build status
+      id: status
+      shell: bash
+      run: |
+        SAAS_OK=${{ inputs.saas-result == 'success' || inputs.saas-result == 'skipped' }}
+        FRONTEND_OK=${{ inputs.frontend-result == 'success' || inputs.frontend-result == 'skipped' }}
+        ADMIN_OK=${{ inputs.admin-result == 'success' || inputs.admin-result == 'skipped' }}
+        API_OK=${{ inputs.api-result == 'success' || inputs.api-result == 'skipped' }}
+
+        if [[ "$SAAS_OK" == "true" && "$FRONTEND_OK" == "true" && "$ADMIN_OK" == "true" && "$API_OK" == "true" ]]; then
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "color=good" >> $GITHUB_OUTPUT
+          echo "emoji=✅" >> $GITHUB_OUTPUT
+          echo "discord_color=3066993" >> $GITHUB_OUTPUT
+        else
+          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "color=danger" >> $GITHUB_OUTPUT
+          echo "emoji=❌" >> $GITHUB_OUTPUT
+          echo "discord_color=15158332" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Collect built apps
+      id: apps
+      shell: bash
+      run: |
+        APPS=""
+        if [[ "${{ inputs.admin-changed }}" == "true" ]]; then
+          APPS="${APPS}admin, "
+        fi
+        if [[ "${{ inputs.frontend-changed }}" == "true" ]]; then
+          APPS="${APPS}frontend, "
+        fi
+        if [[ "${{ inputs.api-changed }}" == "true" ]]; then
+          APPS="${APPS}api, "
+        fi
+        if [[ "${{ inputs.saas-changed }}" == "true" ]]; then
+          APPS="${APPS}saas, "
+        fi
+
+        APPS=${APPS%, }
+
+        if [[ -z "$APPS" ]]; then
+          APPS="none (no changes detected)"
+        fi
+
+        echo "apps=${APPS}" >> $GITHUB_OUTPUT
+
+    - name: Check notification configuration
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.slack-webhook-url }}" ]]; then
+          echo "⚠️  SLACK_WEBHOOK_URL not configured - skipping Slack notification"
+        fi
+        if [[ -z "${{ inputs.discord-webhook-url }}" ]]; then
+          echo "⚠️  DISCORD_WEBHOOK_URL not configured - skipping Discord notification"
+        fi
+
+    - name: Send Slack notification
+      if: inputs.slack-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        echo "📤 Sending Slack notification..."
+        RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ inputs.slack-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
+            "attachments": [{
+              "color": "${{ steps.status.outputs.color }}",
+              "fields": [
+                {
+                  "title": "Branch",
+                  "value": "${{ inputs.github-ref-name }}",
+                  "short": true
+                },
+                {
+                  "title": "Apps Built",
+                  "value": "${{ steps.apps.outputs.apps }}",
+                  "short": true
+                },
+                {
+                  "title": "Commit",
+                  "value": "<${{ inputs.commit-url }}|${{ inputs.github-sha }}>",
+                  "short": true
+                },
+                {
+                  "title": "Workflow",
+                  "value": "<${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }}|View Run>",
+                  "short": true
+                }
+              ]
+            }]
+          }')
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        if [[ "$HTTP_CODE" == "200" ]]; then
+          echo "✅ Slack notification sent successfully"
+        else
+          echo "❌ Slack notification failed with HTTP code: $HTTP_CODE"
+        fi
+
+    - name: Send Discord notification
+      if: inputs.discord-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        echo "📤 Sending Discord notification..."
+        RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ inputs.discord-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "embeds": [{
+              "title": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
+              "color": ${{ steps.status.outputs.discord_color }},
+              "fields": [
+                {
+                  "name": "Branch",
+                  "value": "${{ inputs.github-ref-name }}",
+                  "inline": true
+                },
+                {
+                  "name": "Apps Built",
+                  "value": "${{ steps.apps.outputs.apps }}",
+                  "inline": true
+                },
+                {
+                  "name": "Commit",
+                  "value": "[${{ inputs.github-sha }}](${{ inputs.commit-url }})",
+                  "inline": true
+                },
+                {
+                  "name": "Workflow",
+                  "value": "[View Run](${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }})",
+                  "inline": true
+                }
+              ],
+              "timestamp": "${{ inputs.commit-timestamp }}"
+            }]
+          }')
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "204" ]]; then
+          echo "✅ Discord notification sent successfully"
+        else
+          echo "❌ Discord notification failed with HTTP code: $HTTP_CODE"
+        fi
