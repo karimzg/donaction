@@ -34,10 +34,11 @@ WORKDIR /usr/src/
 FROM base as build
 COPY ./donaction-api/package.json ./donaction-api/package-lock.json ./
 RUN npm install -g node-gyp
-RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --include=dev
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
 ENV PATH=/usr/src/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
 COPY ./donaction-api/ .
+RUN ls -l -a
 
 # NOTE: Secret validation removed from build time
 # Secrets are validated at runtime by entrypoint.sh
@@ -67,16 +68,16 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
     echo 'ENVIRONMENT="'"${ENVIRONMENT}"'"' >> .env && \
     echo 'GOOGLE_RECAPTCHA_SITE_KEY="'"${GOOGLE_RECAPTCHA_SITE_KEY}"'"' >> .env && \
     echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env
-
+RUN cat .env
 RUN npm run build
 
-# Compile config TypeScript files to JavaScript for production
-RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop --resolveJsonModule --skipLibCheck && \
-    rm -f dist/config/*.map
-
-# Prune dev dependencies for smaller production image
-# Re-install @strapi/logger which is needed by config/logger.ts at runtime
-RUN npm prune --production && npm install @strapi/logger
+## Compile config TypeScript files to JavaScript for production
+#RUN npx tsc config/*.ts --outDir dist/config --module CommonJS --esModuleInterop --resolveJsonModule --skipLibCheck && \
+#    rm -f dist/config/*.map
+#
+## Prune dev dependencies for smaller production image
+## Re-install @strapi/logger which is needed by config/logger.ts at runtime
+#RUN npm prune --production && npm install @strapi/logger
 
 
 FROM base as final
@@ -84,12 +85,14 @@ WORKDIR /usr/src/app
 
 # Copy only necessary files (NO .env, NO src/)
 COPY --from=build /usr/src/node_modules ../node_modules
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/dist/config ./config
-COPY --from=build /usr/src/app/public ./public
-COPY --from=build /usr/src/app/package.json ./package.json
-COPY --from=build /usr/src/app/database ./database
-COPY --from=build /usr/src/app/types ./types
+#COPY --from=build /usr/src/app/dist ./dist
+#COPY --from=build /usr/src/app/dist/config ./config
+#COPY --from=build /usr/src/app/public ./public
+#COPY --from=build /usr/src/app/package.json ./package.json
+#COPY --from=build /usr/src/app/database ./database
+#COPY --from=build /usr/src/app/types ./types
+COPY --from=build /usr/src/app ./
+RUN ls -l -a
 
 # Secrets must be passed as runtime ENV variables (docker run -e or docker-compose)
 ENV NODE_ENV=production
@@ -102,5 +105,5 @@ RUN chmod +x /entrypoint.sh && chown -R node:node /usr/src/app
 
 USER node
 EXPOSE 1437
-ENTRYPOINT ["/entrypoint.sh"]
+#ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "run", "start"]
