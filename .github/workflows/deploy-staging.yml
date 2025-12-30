@@ -335,6 +335,7 @@ jobs:
           IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
           IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
           IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          IMAGEKIT_UPLOAD_ENVIRONMENT=staging
 
           # Email
           EMAIL_BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
