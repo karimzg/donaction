@@ -55,6 +55,27 @@
         "disable-regenerate": true,
         "disable-auto-fill": true
       }
+    },
+    "idempotency_key": {
+      "type": "string",
+      "unique": true
+    },
+    "refund_status": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "pending",
+        "partial",
+        "full"
+      ],
+      "default": "none",
+      "required": true
+    },
+    "platform_fee_amount": {
+      "type": "decimal"
+    },
+    "application_fee_amount": {
+      "type": "decimal"
     }
   }
 }
