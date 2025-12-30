@@ -357,6 +357,8 @@ jobs:
       - name: Pull Docker images
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          # NOTE: Using "dev" tag is intentional for staging pre-validation
+          # Production deployment (deploy-production job) uses needs.validate.outputs.image_tag
           IMAGE_TAG="dev"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
@@ -374,6 +376,7 @@ jobs:
       - name: Deploy containers
         run: |
           SERVICES="${{ needs.validate.outputs.services_list }}"
+          # NOTE: Using "dev" tag is intentional for staging pre-validation
           IMAGE_TAG="dev"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
           ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
