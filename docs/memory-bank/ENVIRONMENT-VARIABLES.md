@@ -83,7 +83,7 @@ These variables are read when the container starts. They can be changed by updat
 |----------|-------------|---------|
 | `NODE_ENV` | `production` | No |
 | `ENVIRONMENT` | `re7` or `prod` | No |
-| `DATABASE_HOST` | PostgreSQL host | Yes |
+| `DATABASE_HOST` | PostgreSQL host (typically `postgres` for container) | No |
 | `DATABASE_PORT` | PostgreSQL port | No |
 | `DATABASE_NAME` | Database name | No |
 | `DATABASE_USERNAME` | Database user | Yes |
@@ -116,23 +116,32 @@ These variables are read when the container starts. They can be changed by updat
 | `release/*` | `production` | `:prod` |
 | `hotfix/*` | `production` | `:prod` |
 
-### Secret Scopes
+### Secrets vs Variables
 
-Secrets are configured per GitHub environment:
+GitHub Actions supports both **Secrets** (sensitive) and **Variables** (non-sensitive).
 
 ```
 Repository
 ├── staging (environment)
-│   ├── SSH_HOST → staging server
-│   ├── STRIPE_SECRET_KEY → test mode key
-│   ├── FRONT_URL → https://re7.donaction.fr
-│   └── ... (staging values)
+│   │
+│   ├── Variables (non-sensitive)
+│   │   ├── SSH_HOST → staging server hostname
+│   │   ├── SSH_USER → SSH username
+│   │   ├── FRONT_URL → https://re7.donaction.fr
+│   │   ├── DATABASE_HOST → postgres (container name)
+│   │   ├── DATABASE_PORT → 5432
+│   │   ├── DATABASE_NAME → donaction_staging
+│   │   └── KLUBR_UUID, IMAGEKIT_URL_ENDPOINT, etc.
+│   │
+│   └── Secrets (sensitive)
+│       ├── SSH_PRIVATE_KEY → SSH key for deployment
+│       ├── STRIPE_SECRET_KEY → test mode key
+│       ├── DATABASE_PASSWORD → database password
+│       └── ... (API tokens, secrets)
 │
 └── production (environment)
-    ├── SSH_HOST → production server
-    ├── STRIPE_SECRET_KEY → live mode key
-    ├── FRONT_URL → https://www.donaction.fr
-    └── ... (production values)
+    ├── Variables → production values
+    └── Secrets → production secrets
 ```
 
 ---
