@@ -1,31 +1,59 @@
-name: 'Notify Build Status'
-description: 'Send build notifications to Slack and Discord'
+name: 'Notify Status'
+description: 'Send build/deploy/rollback notifications to Slack and Discord'
 
 inputs:
+  mode:
+    description: 'Notification mode: build | deploy | rollback'
+    required: false
+    default: 'build'
+  # Build mode inputs
   saas-result:
-    description: 'Result of saas build job'
-    required: true
+    description: 'Result of saas build job (build mode)'
+    required: false
   frontend-result:
-    description: 'Result of frontend build job'
-    required: true
+    description: 'Result of frontend build job (build mode)'
+    required: false
   admin-result:
-    description: 'Result of admin build job'
-    required: true
+    description: 'Result of admin build job (build mode)'
+    required: false
   api-result:
-    description: 'Result of api build job'
-    required: true
+    description: 'Result of api build job (build mode)'
+    required: false
   saas-changed:
-    description: 'Whether saas changed'
-    required: true
+    description: 'Whether saas changed (build mode)'
+    required: false
   frontend-changed:
-    description: 'Whether frontend changed'
-    required: true
+    description: 'Whether frontend changed (build mode)'
+    required: false
   admin-changed:
-    description: 'Whether admin changed'
-    required: true
+    description: 'Whether admin changed (build mode)'
+    required: false
   api-changed:
-    description: 'Whether api changed'
-    required: true
+    description: 'Whether api changed (build mode)'
+    required: false
+  # Deploy/rollback mode inputs
+  status:
+    description: 'Deployment status: success | failure (deploy/rollback mode)'
+    required: false
+  domain:
+    description: 'Deployment domain (deploy/rollback mode)'
+    required: false
+  environment-name:
+    description: 'Environment name: Staging | Production (deploy/rollback mode)'
+    required: false
+  version:
+    description: 'Version tag (deploy mode, production only)'
+    required: false
+  service-status:
+    description: 'Service status string (deploy mode)'
+    required: false
+  services-deployed:
+    description: 'Services deployed (deploy mode)'
+    required: false
+  deployed-by:
+    description: 'User who triggered deployment (deploy mode)'
+    required: false
+  # Common inputs
   slack-webhook-url:
     description: 'Slack webhook URL'
     required: false
@@ -49,16 +77,17 @@ inputs:
     required: true
   commit-url:
     description: 'URL to the commit'
-    required: true
+    required: false
   commit-timestamp:
     description: 'Commit timestamp'
-    required: true
+    required: false
 
 runs:
   using: 'composite'
   steps:
-    - name: Determine build status
-      id: status
+    - name: Determine status (build mode)
+      if: inputs.mode == 'build'
+      id: build-status
       shell: bash
       run: |
         SAAS_OK=${{ inputs.saas-result == 'success' || inputs.saas-result == 'skipped' }}
@@ -71,132 +100,179 @@ runs:
           echo "color=good" >> $GITHUB_OUTPUT
           echo "emoji=✅" >> $GITHUB_OUTPUT
           echo "discord_color=3066993" >> $GITHUB_OUTPUT
+          echo "title=Docker Build success" >> $GITHUB_OUTPUT
         else
           echo "status=failure" >> $GITHUB_OUTPUT
           echo "color=danger" >> $GITHUB_OUTPUT
           echo "emoji=❌" >> $GITHUB_OUTPUT
           echo "discord_color=15158332" >> $GITHUB_OUTPUT
+          echo "title=Docker Build failure" >> $GITHUB_OUTPUT
         fi
 
-    - name: Collect built apps
-      id: apps
-      shell: bash
-      run: |
+        # Collect built apps
         APPS=""
-        if [[ "${{ inputs.admin-changed }}" == "true" ]]; then
-          APPS="${APPS}admin, "
-        fi
-        if [[ "${{ inputs.frontend-changed }}" == "true" ]]; then
-          APPS="${APPS}frontend, "
-        fi
-        if [[ "${{ inputs.api-changed }}" == "true" ]]; then
-          APPS="${APPS}api, "
-        fi
-        if [[ "${{ inputs.saas-changed }}" == "true" ]]; then
-          APPS="${APPS}saas, "
-        fi
-
+        [[ "${{ inputs.admin-changed }}" == "true" ]] && APPS="${APPS}admin, "
+        [[ "${{ inputs.frontend-changed }}" == "true" ]] && APPS="${APPS}frontend, "
+        [[ "${{ inputs.api-changed }}" == "true" ]] && APPS="${APPS}api, "
+        [[ "${{ inputs.saas-changed }}" == "true" ]] && APPS="${APPS}saas, "
         APPS=${APPS%, }
-
-        if [[ -z "$APPS" ]]; then
-          APPS="none (no changes detected)"
-        fi
-
+        [[ -z "$APPS" ]] && APPS="none (no changes detected)"
         echo "apps=${APPS}" >> $GITHUB_OUTPUT
 
-    - name: Check notification configuration
+    - name: Determine status (deploy mode)
+      if: inputs.mode == 'deploy'
+      id: deploy-status
       shell: bash
       run: |
-        if [[ -z "${{ inputs.slack-webhook-url }}" ]]; then
-          echo "⚠️  SLACK_WEBHOOK_URL not configured - skipping Slack notification"
-        fi
-        if [[ -z "${{ inputs.discord-webhook-url }}" ]]; then
-          echo "⚠️  DISCORD_WEBHOOK_URL not configured - skipping Discord notification"
+        if [[ "${{ inputs.status }}" == "success" ]]; then
+          echo "color=good" >> $GITHUB_OUTPUT
+          echo "emoji=✅" >> $GITHUB_OUTPUT
+          echo "discord_color=3066993" >> $GITHUB_OUTPUT
+          echo "title=${{ inputs.environment-name }} Deployment Successful" >> $GITHUB_OUTPUT
+        else
+          echo "color=danger" >> $GITHUB_OUTPUT
+          echo "emoji=❌" >> $GITHUB_OUTPUT
+          echo "discord_color=15158332" >> $GITHUB_OUTPUT
+          echo "title=${{ inputs.environment-name }} Deployment Failed" >> $GITHUB_OUTPUT
         fi
 
-    - name: Send Slack notification
-      if: inputs.slack-webhook-url != ''
+    - name: Determine status (rollback mode)
+      if: inputs.mode == 'rollback'
+      id: rollback-status
+      shell: bash
+      run: |
+        echo "color=warning" >> $GITHUB_OUTPUT
+        echo "emoji=⚠️" >> $GITHUB_OUTPUT
+        echo "discord_color=16776960" >> $GITHUB_OUTPUT
+        echo "title=${{ inputs.environment-name }} Deployment Rolled Back" >> $GITHUB_OUTPUT
+
+    - name: Send Slack notification (build)
+      if: inputs.mode == 'build' && inputs.slack-webhook-url != ''
       continue-on-error: true
       shell: bash
       run: |
-        echo "📤 Sending Slack notification..."
-        RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ inputs.slack-webhook-url }} \
+        curl -s -X POST ${{ inputs.slack-webhook-url }} \
           -H 'Content-Type: application/json' \
           -d '{
-            "text": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
+            "text": "${{ steps.build-status.outputs.emoji }} ${{ steps.build-status.outputs.title }}",
             "attachments": [{
-              "color": "${{ steps.status.outputs.color }}",
+              "color": "${{ steps.build-status.outputs.color }}",
               "fields": [
-                {
-                  "title": "Branch",
-                  "value": "${{ inputs.github-ref-name }}",
-                  "short": true
-                },
-                {
-                  "title": "Apps Built",
-                  "value": "${{ steps.apps.outputs.apps }}",
-                  "short": true
-                },
-                {
-                  "title": "Commit",
-                  "value": "<${{ inputs.commit-url }}|${{ inputs.github-sha }}>",
-                  "short": true
-                },
-                {
-                  "title": "Workflow",
-                  "value": "<${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }}|View Run>",
-                  "short": true
-                }
+                {"title": "Branch", "value": "${{ inputs.github-ref-name }}", "short": true},
+                {"title": "Apps Built", "value": "${{ steps.build-status.outputs.apps }}", "short": true},
+                {"title": "Commit", "value": "<${{ inputs.commit-url }}|${{ inputs.github-sha }}>", "short": true},
+                {"title": "Workflow", "value": "<${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }}|View Run>", "short": true}
               ]
             }]
-          }')
-        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-        if [[ "$HTTP_CODE" == "200" ]]; then
-          echo "✅ Slack notification sent successfully"
-        else
-          echo "❌ Slack notification failed with HTTP code: $HTTP_CODE"
-        fi
+          }'
 
-    - name: Send Discord notification
-      if: inputs.discord-webhook-url != ''
+    - name: Send Slack notification (deploy)
+      if: inputs.mode == 'deploy' && inputs.slack-webhook-url != ''
       continue-on-error: true
       shell: bash
       run: |
-        echo "📤 Sending Discord notification..."
-        RESPONSE=$(curl --silent -w "\n%{http_code}" -X POST ${{ inputs.discord-webhook-url }} \
+        VERSION_FIELD=""
+        if [[ -n "${{ inputs.version }}" ]]; then
+          VERSION_FIELD='{"title": "Version", "value": "${{ inputs.version }}", "short": true},'
+        fi
+
+        curl -s -X POST ${{ inputs.slack-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "${{ steps.deploy-status.outputs.emoji }} ${{ steps.deploy-status.outputs.title }}",
+            "attachments": [{
+              "color": "${{ steps.deploy-status.outputs.color }}",
+              "fields": [
+                {"title": "Environment", "value": "${{ inputs.environment-name }} (${{ inputs.domain }})", "short": true},
+                {"title": "Branch", "value": "${{ inputs.github-ref-name }}", "short": true},
+                '"${VERSION_FIELD}"'
+                {"title": "Services", "value": "${{ inputs.services-deployed }}", "short": true},
+                {"title": "Deployed by", "value": "${{ inputs.deployed-by }}", "short": true},
+                {"title": "Service Status", "value": "${{ inputs.service-status }}", "short": false},
+                {"title": "Workflow", "value": "<${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }}|View Run>", "short": true}
+              ]
+            }]
+          }'
+
+    - name: Send Slack notification (rollback)
+      if: inputs.mode == 'rollback' && inputs.slack-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        curl -s -X POST ${{ inputs.slack-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "text": "${{ steps.rollback-status.outputs.emoji }} ${{ steps.rollback-status.outputs.title }}",
+            "attachments": [{
+              "color": "${{ steps.rollback-status.outputs.color }}",
+              "fields": [
+                {"title": "Environment", "value": "${{ inputs.environment-name }} (${{ inputs.domain }})", "short": true},
+                {"title": "Branch", "value": "${{ inputs.github-ref-name }}", "short": true},
+                {"title": "Triggered by", "value": "${{ inputs.deployed-by }}", "short": true},
+                {"title": "Workflow", "value": "<${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }}|View Run>", "short": true}
+              ]
+            }]
+          }'
+
+    - name: Send Discord notification (build)
+      if: inputs.mode == 'build' && inputs.discord-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        curl -s -X POST ${{ inputs.discord-webhook-url }} \
           -H 'Content-Type: application/json' \
           -d '{
             "embeds": [{
-              "title": "${{ steps.status.outputs.emoji }} Docker Build ${{ steps.status.outputs.status }}",
-              "color": ${{ steps.status.outputs.discord_color }},
+              "title": "${{ steps.build-status.outputs.emoji }} ${{ steps.build-status.outputs.title }}",
+              "color": ${{ steps.build-status.outputs.discord_color }},
               "fields": [
-                {
-                  "name": "Branch",
-                  "value": "${{ inputs.github-ref-name }}",
-                  "inline": true
-                },
-                {
-                  "name": "Apps Built",
-                  "value": "${{ steps.apps.outputs.apps }}",
-                  "inline": true
-                },
-                {
-                  "name": "Commit",
-                  "value": "[${{ inputs.github-sha }}](${{ inputs.commit-url }})",
-                  "inline": true
-                },
-                {
-                  "name": "Workflow",
-                  "value": "[View Run](${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }})",
-                  "inline": true
-                }
+                {"name": "Branch", "value": "${{ inputs.github-ref-name }}", "inline": true},
+                {"name": "Apps Built", "value": "${{ steps.build-status.outputs.apps }}", "inline": true},
+                {"name": "Commit", "value": "[${{ inputs.github-sha }}](${{ inputs.commit-url }})", "inline": true},
+                {"name": "Workflow", "value": "[View Run](${{ inputs.github-server-url }}/${{ inputs.github-repository }}/actions/runs/${{ inputs.github-run-id }})", "inline": true}
               ],
               "timestamp": "${{ inputs.commit-timestamp }}"
             }]
-          }')
-        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-        if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "204" ]]; then
-          echo "✅ Discord notification sent successfully"
-        else
-          echo "❌ Discord notification failed with HTTP code: $HTTP_CODE"
-        fi
+          }'
+
+    - name: Send Discord notification (deploy)
+      if: inputs.mode == 'deploy' && inputs.discord-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        curl -s -X POST ${{ inputs.discord-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "embeds": [{
+              "title": "${{ steps.deploy-status.outputs.title }}",
+              "color": ${{ steps.deploy-status.outputs.discord_color }},
+              "fields": [
+                {"name": "Environment", "value": "${{ inputs.environment-name }} (${{ inputs.domain }})", "inline": true},
+                {"name": "Branch", "value": "${{ inputs.github-ref-name }}", "inline": true},
+                {"name": "Version", "value": "${{ inputs.version || 'N/A' }}", "inline": true},
+                {"name": "Services", "value": "${{ inputs.services-deployed || 'all' }}", "inline": true},
+                {"name": "Service Status", "value": "${{ inputs.service-status || 'N/A' }}", "inline": false},
+                {"name": "Deployed by", "value": "${{ inputs.deployed-by }}", "inline": true},
+                {"name": "URLs", "value": "[Frontend](https://${{ inputs.domain }}) | [API](https://${{ inputs.domain }}/service) | [Admin](https://${{ inputs.domain }}/admin)", "inline": false}
+              ]
+            }]
+          }'
+
+    - name: Send Discord notification (rollback)
+      if: inputs.mode == 'rollback' && inputs.discord-webhook-url != ''
+      continue-on-error: true
+      shell: bash
+      run: |
+        curl -s -X POST ${{ inputs.discord-webhook-url }} \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "embeds": [{
+              "title": "${{ steps.rollback-status.outputs.emoji }} ${{ steps.rollback-status.outputs.title }}",
+              "color": ${{ steps.rollback-status.outputs.discord_color }},
+              "fields": [
+                {"name": "Environment", "value": "${{ inputs.environment-name }} (${{ inputs.domain }})", "inline": true},
+                {"name": "Branch", "value": "${{ inputs.github-ref-name }}", "inline": true},
+                {"name": "Triggered by", "value": "${{ inputs.deployed-by }}", "inline": true}
+              ]
+            }]
+          }'

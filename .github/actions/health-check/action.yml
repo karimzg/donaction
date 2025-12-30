@@ -1,0 +1,162 @@
+name: 'Health Check'
+description: 'Check health of deployed services'
+
+inputs:
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+  domain:
+    description: 'Domain to check'
+    required: true
+  check-db:
+    description: 'Check database connection'
+    required: false
+    default: 'true'
+  max-retries:
+    description: 'Maximum retry attempts'
+    required: false
+    default: '5'
+  retry-delay:
+    description: 'Delay between retries in seconds'
+    required: false
+    default: '10'
+
+outputs:
+  service-status:
+    description: 'Comma-separated service status (e.g., api:ok,frontend:ok)'
+    value: ${{ steps.check.outputs.service_status }}
+  status:
+    description: 'Overall status (success/failure)'
+    value: ${{ steps.check.outputs.status }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Health check
+      id: check
+      shell: bash
+      run: |
+        echo "Performing health checks..."
+
+        MAX_RETRIES=${{ inputs.max-retries }}
+        RETRY_DELAY=${{ inputs.retry-delay }}
+        FAILED=""
+        SERVICE_STATUS=""
+
+        # Check nginx health endpoint
+        echo "Checking nginx /health endpoint..."
+        for i in $(seq 1 $MAX_RETRIES); do
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ inputs.domain }}/health || echo "000")
+          if [[ "$HTTP_STATUS" == "200" ]]; then
+            echo "Nginx health check passed"
+            break
+          fi
+          if [[ $i -eq $MAX_RETRIES ]]; then
+            FAILED="$FAILED nginx"
+          fi
+          echo "Attempt $i/$MAX_RETRIES - Nginx status: $HTTP_STATUS. Retrying..."
+          sleep $RETRY_DELAY
+        done
+
+        # Check API container health
+        echo "Checking API container health..."
+        API_HEALTHY=$(ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+          'docker inspect --format="{{.State.Health.Status}}" donaction_api 2>/dev/null || echo "unknown"')
+
+        API_OK=false
+        if [[ "$API_HEALTHY" == "healthy" ]]; then
+          echo "API container health check passed"
+          API_OK=true
+        else
+          echo "API container status: $API_HEALTHY"
+          for i in $(seq 1 $MAX_RETRIES); do
+            API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ inputs.domain }}/service/health || echo "000")
+            if [[ "$API_STATUS" == "200" ]]; then
+              echo "API endpoint responding"
+              API_OK=true
+              break
+            fi
+            if [[ $i -eq $MAX_RETRIES ]]; then
+              FAILED="$FAILED api"
+            fi
+            echo "Attempt $i/$MAX_RETRIES - API status: $API_STATUS. Retrying..."
+            sleep $RETRY_DELAY
+          done
+        fi
+        [[ "$API_OK" == "true" ]] && SERVICE_STATUS="api:ok" || SERVICE_STATUS="api:failed"
+
+        # Check frontend container
+        echo "Checking frontend container..."
+        FRONTEND_STATUS=$(ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+          'docker inspect --format="{{.State.Status}}" donaction_frontend 2>/dev/null || echo "unknown"')
+
+        if [[ "$FRONTEND_STATUS" == "running" ]]; then
+          echo "Frontend container running"
+          SERVICE_STATUS="$SERVICE_STATUS,frontend:ok"
+        else
+          echo "Frontend container status: $FRONTEND_STATUS"
+          FAILED="$FAILED frontend"
+          SERVICE_STATUS="$SERVICE_STATUS,frontend:failed"
+        fi
+
+        # Check admin container
+        echo "Checking admin container..."
+        ADMIN_STATUS=$(ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+          'docker inspect --format="{{.State.Status}}" donaction_admin 2>/dev/null || echo "unknown"')
+
+        if [[ "$ADMIN_STATUS" == "running" ]]; then
+          echo "Admin container running"
+          SERVICE_STATUS="$SERVICE_STATUS,admin:ok"
+        else
+          echo "Admin container status: $ADMIN_STATUS"
+          FAILED="$FAILED admin"
+          SERVICE_STATUS="$SERVICE_STATUS,admin:failed"
+        fi
+
+        # Check saas container
+        echo "Checking saas container..."
+        SAAS_STATUS=$(ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+          'docker inspect --format="{{.State.Status}}" donaction_saas 2>/dev/null || echo "unknown"')
+
+        if [[ "$SAAS_STATUS" == "running" ]]; then
+          echo "SaaS container running"
+          SERVICE_STATUS="$SERVICE_STATUS,saas:ok"
+        else
+          echo "SaaS container status: $SAAS_STATUS"
+          FAILED="$FAILED saas"
+          SERVICE_STATUS="$SERVICE_STATUS,saas:failed"
+        fi
+
+        # Check database connection
+        if [[ "${{ inputs.check-db }}" == "true" ]]; then
+          echo "Validating database connection..."
+          DB_RESPONSE=$(ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+            'docker exec donaction_api wget -qO- http://localhost:1437/_health 2>/dev/null || echo "error"')
+
+          if [[ "$DB_RESPONSE" != "error" ]]; then
+            echo "Database connection validated"
+            SERVICE_STATUS="$SERVICE_STATUS,db:ok"
+          else
+            echo "::warning::Database connection check failed"
+            FAILED="$FAILED database"
+            SERVICE_STATUS="$SERVICE_STATUS,db:failed"
+          fi
+        fi
+
+        echo "service_status=$SERVICE_STATUS" >> $GITHUB_OUTPUT
+
+        if [[ -n "$FAILED" ]]; then
+          echo "::error::Health check failed for:$FAILED"
+          echo "status=failure" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        echo "All health checks passed!"
+        echo "status=success" >> $GITHUB_OUTPUT

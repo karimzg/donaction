@@ -1,0 +1,127 @@
+name: 'Deploy Containers'
+description: 'Backup, pull, migrate, and deploy containers via SSH'
+
+inputs:
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+  deploy-dir:
+    description: 'Deployment directory on server'
+    required: true
+  services-list:
+    description: 'Space-separated list of services to deploy (empty for all)'
+    required: false
+    default: ''
+  image-tag:
+    description: 'Docker image tag to deploy'
+    required: true
+  image-registry:
+    description: 'Docker image registry'
+    required: true
+  run-migrations:
+    description: 'Run database migrations'
+    required: false
+    default: 'false'
+
+outputs:
+  deployment-time:
+    description: 'Deployment timestamp'
+    value: ${{ steps.deploy.outputs.deployment_time }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Backup current deployment
+      shell: bash
+      run: |
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << 'EOF'
+          cd ${{ inputs.deploy-dir }}
+          if docker compose ps -q 2>/dev/null | grep -q .; then
+            echo "Backing up current deployment state..."
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            docker compose config --images > backups/images-${TIMESTAMP}.txt
+            cp docker-compose.yml backups/docker-compose-${TIMESTAMP}.yml
+            if [[ -f .env ]]; then
+              cp .env backups/.env-${TIMESTAMP}
+            fi
+          else
+            echo "No existing deployment to backup"
+          fi
+          # Keep only last 5 backups
+          ls -t backups/images-*.txt 2>/dev/null | tail -n +6 | xargs -r rm
+          ls -t backups/docker-compose-*.yml 2>/dev/null | tail -n +6 | xargs -r rm
+          ls -t backups/.env-* 2>/dev/null | tail -n +6 | xargs -r rm
+        EOF
+
+    - name: Pull Docker images
+      shell: bash
+      run: |
+        SERVICES="${{ inputs.services-list }}"
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+          cd ${{ inputs.deploy-dir }}
+          export IMAGE_TAG="${{ inputs.image-tag }}"
+          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+          echo "Pulling images for: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
+          if [[ -n "$SERVICES" ]]; then
+            docker compose pull $SERVICES
+          else
+            docker compose pull
+          fi
+          echo "Images pulled successfully"
+        EOF
+
+    - name: Run database migrations
+      if: inputs.run-migrations == 'true'
+      shell: bash
+      run: |
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+          cd ${{ inputs.deploy-dir }}
+          export IMAGE_TAG="${{ inputs.image-tag }}"
+          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+
+          echo "Ensuring PostgreSQL is running..."
+          docker compose up -d postgres
+
+          echo "Waiting for PostgreSQL to be healthy..."
+          timeout 60 bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
+
+          echo "Running Strapi database migrations..."
+          if docker compose run --rm --no-deps api npm run strapi -- database:migrate 2>&1 | tee /tmp/migration.log; then
+            echo "Migrations completed successfully"
+          else
+            echo "::warning::Migration command returned non-zero. Strapi will attempt auto-migration on startup."
+            cat /tmp/migration.log || true
+          fi
+        EOF
+
+    - name: Deploy containers
+      id: deploy
+      shell: bash
+      run: |
+        SERVICES="${{ inputs.services-list }}"
+        DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
+
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+          cd ${{ inputs.deploy-dir }}
+          export IMAGE_TAG="${{ inputs.image-tag }}"
+          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+
+          echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
+
+          if [[ -n "$SERVICES" ]]; then
+            docker compose up -d --no-deps --wait --wait-timeout 120 $SERVICES
+          else
+            docker compose up -d --wait --wait-timeout 120 --remove-orphans
+          fi
+
+          echo "Container status:"
+          docker compose ps
+        EOF

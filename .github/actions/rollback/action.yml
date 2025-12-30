@@ -1,0 +1,89 @@
+name: 'Rollback Deployment'
+description: 'Rollback to previous deployment from backup'
+
+inputs:
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+  deploy-dir:
+    description: 'Deployment directory on server'
+    required: true
+  github-run-id:
+    description: 'GitHub run ID for logging'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Rollback deployment
+      shell: bash
+      run: |
+        echo "::warning::Deployment failed, attempting rollback..."
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << 'EOF'
+          set -x
+          cd ${{ inputs.deploy-dir }}
+
+          # Find most recent backup
+          BACKUP_COMPOSE=$(ls -t backups/docker-compose-*.yml 2>/dev/null | head -1)
+          BACKUP_ENV=$(ls -t backups/.env-* 2>/dev/null | head -1)
+
+          if [[ -n "$BACKUP_COMPOSE" ]]; then
+            echo "Rolling back to: $BACKUP_COMPOSE"
+            cp "$BACKUP_COMPOSE" docker-compose.yml
+
+            if [[ -n "$BACKUP_ENV" ]]; then
+              echo "Restoring .env from: $BACKUP_ENV"
+              cp "$BACKUP_ENV" .env
+            fi
+
+            echo "Pulling previous images..."
+            docker compose pull
+            docker compose down --remove-orphans
+            docker compose up -d --wait --wait-timeout 120
+
+            echo "Verifying services after rollback..."
+
+            if docker compose ps | grep -qE 'unhealthy|exited|Exit'; then
+              set +x
+              echo "::error::Rollback failed - containers unhealthy"
+              docker compose ps
+              docker compose logs --tail=50
+              exit 1
+            fi
+
+            # Verify API health endpoint
+            MAX_RETRIES=3
+            for i in $(seq 1 $MAX_RETRIES); do
+              if wget -q --spider http://localhost:1537/health 2>/dev/null; then
+                echo "API health check passed after rollback"
+                break
+              fi
+              if [[ $i -eq $MAX_RETRIES ]]; then
+                echo "::error::API health check failed after rollback"
+                docker compose logs api --tail=20
+                exit 1
+              fi
+              sleep 5
+            done
+
+            set +x
+            echo "Rollback verification passed"
+            docker compose ps
+
+            # Log rollback
+            echo "---" >> logs/deployments.log
+            echo "timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> logs/deployments.log
+            echo "action: ROLLBACK" >> logs/deployments.log
+            echo "from_run: ${{ inputs.github-run-id }}" >> logs/deployments.log
+            echo "backup_used: $BACKUP_COMPOSE" >> logs/deployments.log
+          else
+            echo "No backup available for rollback"
+          fi
+        EOF
