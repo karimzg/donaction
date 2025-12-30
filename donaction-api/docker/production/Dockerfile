@@ -25,6 +25,7 @@ ARG NEXTAUTH_URL
 ARG ENVIRONMENT
 ARG GOOGLE_RECAPTCHA_SITE_KEY
 ARG KLUBR_UUID
+ARG STRAPI_PUBLIC_URL
 
 ENV NODE_ENV=${NODE_ENV}
 RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev nasm bash vips-dev git graphicsmagick imagemagick ghostscript
@@ -67,7 +68,8 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
     echo 'NEXTAUTH_URL="'"${NEXTAUTH_URL}"'"' >> .env && \
     echo 'ENVIRONMENT="'"${ENVIRONMENT}"'"' >> .env && \
     echo 'GOOGLE_RECAPTCHA_SITE_KEY="'"${GOOGLE_RECAPTCHA_SITE_KEY}"'"' >> .env && \
-    echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env
+    echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env && \
+    echo 'STRAPI_PUBLIC_URL="'"${STRAPI_PUBLIC_URL}"'"' >> .env
 RUN cat .env
 RUN npm run build
 

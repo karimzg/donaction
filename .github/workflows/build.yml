@@ -368,6 +368,7 @@ jobs:
           build-args: |
             NODE_ENV=production
             ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            STRAPI_PUBLIC_URL=${{ vars.STRAPI_PUBLIC_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
