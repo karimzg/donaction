@@ -1,0 +1,34 @@
+name: 'GCC Credentials Setup'
+description: 'Create Google Cloud credentials file on remote server'
+
+inputs:
+  gcc-credentials:
+    description: 'Base64-encoded GCP service account JSON'
+    required: true
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+  deploy-dir:
+    description: 'Deployment directory on remote server'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Create GCC credentials file
+      shell: bash
+      run: |
+        echo "${{ inputs.gcc-credentials }}" | base64 -d > /tmp/donaction-gcc-config.json
+        scp -P ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa \
+          /tmp/donaction-gcc-config.json \
+          ${{ inputs.ssh-user }}@${{ inputs.ssh-host }}:${{ inputs.deploy-dir }}/data/donaction-gcc-config.json
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} \
+          "chmod 600 ${{ inputs.deploy-dir }}/data/donaction-gcc-config.json"
+        rm -f /tmp/donaction-gcc-config.json

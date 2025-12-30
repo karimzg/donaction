@@ -185,6 +185,15 @@ jobs:
             mkdir -p ~/donaction-staging/{nginx,backups,logs,data/pgdata,data/private-pdf}
           EOF
 
+      - name: Create GCC credentials file
+        uses: ./.github/actions/gcc-credentials
+        with:
+          gcc-credentials: ${{ secrets.GOOGLE_GCC_CREDENTIALS }}
+          ssh-user: ${{ vars.SSH_USER }}
+          ssh-host: ${{ vars.SSH_HOST }}
+          ssh-port: ${{ env.SSH_PORT }}
+          deploy-dir: ${{ env.DEPLOY_DIR_STAGING }}
+
       - name: Copy deployment files
         run: |
           scp -P ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa \
@@ -417,6 +426,15 @@ jobs:
           ssh -p ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             mkdir -p ~/donaction-production/{nginx,backups,logs,data/pgdata,data/private-pdf}
           EOF
+
+      - name: Create GCC credentials file
+        uses: ./.github/actions/gcc-credentials
+        with:
+          gcc-credentials: ${{ secrets.GOOGLE_GCC_CREDENTIALS }}
+          ssh-user: ${{ vars.SSH_USER }}
+          ssh-host: ${{ vars.SSH_HOST }}
+          ssh-port: ${{ env.SSH_PORT }}
+          deploy-dir: ${{ env.DEPLOY_DIR_PROD }}
 
       - name: Copy deployment files
         run: |

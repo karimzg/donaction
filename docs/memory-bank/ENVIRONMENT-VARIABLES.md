@@ -106,6 +106,7 @@ These variables are read when the container starts. They can be changed by updat
 | `GOOGLE_PROJECT_NUMBER` | GCP project number (for API key management) | No |
 | `GOOGLE_API_KEY_ID` | GCP API key identifier (for restriction updates) | No |
 | `GOOGLE_PROJECT_ID` | GCP project ID (for reCAPTCHA Enterprise) | No |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to GCP service account JSON file | No |
 
 ---
 
