@@ -86,4 +86,4 @@ src/
 - `docs/FORMS.md` - Form patterns
 - `docs/BACKEND_COMMUNICATION.md` - API integration
 
-v1
+v1.1
