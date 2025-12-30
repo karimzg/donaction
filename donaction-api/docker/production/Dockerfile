@@ -85,13 +85,16 @@ WORKDIR /usr/src/app
 
 # Copy only necessary files (NO .env, NO src/)
 COPY --from=build /usr/src/node_modules ../node_modules
-#COPY --from=build /usr/src/app/dist ./dist
-#COPY --from=build /usr/src/app/dist/config ./config
-#COPY --from=build /usr/src/app/public ./public
-#COPY --from=build /usr/src/app/package.json ./package.json
-#COPY --from=build /usr/src/app/database ./database
-#COPY --from=build /usr/src/app/types ./types
-COPY --from=build /usr/src/app ./
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/dist/config ./config
+COPY --from=build /usr/src/app/public ./public
+COPY --from=build /usr/src/app/package.json ./package.json
+COPY --from=build /usr/src/app/database ./database
+COPY --from=build /usr/src/app/types ./types
+COPY --from=build /usr/src/app/src ./src
+#COPY --from=build /usr/src/app/.env ./.env
+#COPY --from=build /usr/src/app/data ./data
+#COPY --from=build /usr/src/app ./
 RUN ls -l -a
 
 # Secrets must be passed as runtime ENV variables (docker run -e or docker-compose)
