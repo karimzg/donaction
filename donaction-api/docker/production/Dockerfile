@@ -84,7 +84,7 @@ FROM base as final
 WORKDIR /usr/src/app
 
 # Copy only necessary files (NO .env, NO src/)
-COPY --from=build /usr/src/node_modules ./node_modules
+COPY --from=build /usr/src/node_modules ../node_modules
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/dist/config ./config
 COPY --from=build /usr/src/app/public ./public
