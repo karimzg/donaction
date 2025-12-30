@@ -105,5 +105,5 @@ RUN chmod +x /entrypoint.sh && chown -R node:node /usr/src/app
 
 USER node
 EXPOSE 1437
-#ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "run", "start"]
