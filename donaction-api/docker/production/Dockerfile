@@ -94,7 +94,6 @@ COPY --from=build /usr/src/app/package.json ./package.json
 COPY --from=build /usr/src/app/database ./database
 COPY --from=build /usr/src/app/types ./types
 COPY --from=build /usr/src/app/src ./src
-#COPY --from=build /usr/src/app/.env ./.env
 COPY --from=build /usr/src/app/data ./data
 COPY --from=build /usr/src/app/tsconfig.json ./tsconfig.json
 #COPY --from=build /usr/src/app ./

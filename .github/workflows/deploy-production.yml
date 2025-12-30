@@ -176,16 +176,16 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 63009 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 63009 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Validate required secrets
         run: |
           MISSING=""
           REQUIRED_SECRETS=(
-            "SSH_USER:${{ secrets.SSH_USER }}"
-            "SSH_HOST:${{ secrets.SSH_HOST }}"
-            "DATABASE_HOST:${{ secrets.DATABASE_HOST }}"
-            "DATABASE_NAME:${{ secrets.DATABASE_NAME }}"
+            "SSH_USER:${{ vars.SSH_USER }}"
+            "SSH_HOST:${{ vars.SSH_HOST }}"
+            "DATABASE_HOST:${{ vars.DATABASE_HOST }}"
+            "DATABASE_NAME:${{ vars.DATABASE_NAME }}"
             "DATABASE_USERNAME:${{ secrets.DATABASE_USERNAME }}"
             "DATABASE_PASSWORD:${{ secrets.DATABASE_PASSWORD }}"
             "JWT_SECRET:${{ secrets.JWT_SECRET }}"
@@ -195,7 +195,7 @@ jobs:
             "TRANSFER_TOKEN_SALT:${{ secrets.TRANSFER_TOKEN_SALT }}"
             "STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}"
             "NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}"
-            "KLUBR_UUID:${{ secrets.KLUBR_UUID }}"
+            "KLUBR_UUID:${{ vars.KLUBR_UUID }}"
           )
 
           for SECRET in "${REQUIRED_SECRETS[@]}"; do
@@ -214,7 +214,7 @@ jobs:
 
       - name: Validate Docker Compose v2
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             if ! command -v docker compose &> /dev/null; then
               echo "::error::Docker Compose v2 not installed on server"
               exit 1
@@ -229,7 +229,7 @@ jobs:
 
       - name: Create deployment directory
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             mkdir -p ~/donaction-staging/nginx
             mkdir -p ~/donaction-staging/backups
             mkdir -p ~/donaction-staging/logs
@@ -241,13 +241,13 @@ jobs:
         run: |
           scp -P 63009 -i ~/.ssh/id_rsa \
             infrastructure/staging/docker-compose.yml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:~/donaction-staging/
 
       - name: Copy nginx configuration
         run: |
           scp -P 63009 -i ~/.ssh/id_rsa \
             infrastructure/staging/nginx/donaction.conf \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-staging/nginx/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:~/donaction-staging/nginx/
 
       - name: Generate and copy .env file
         run: |
@@ -262,12 +262,12 @@ jobs:
 
           # Database (PostgreSQL Container)
           DATABASE_CLIENT=postgres
-          DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-          DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+          DATABASE_HOST=${{ vars.DATABASE_HOST }}
+          DATABASE_PORT=${{ vars.DATABASE_PORT }}
+          DATABASE_NAME=${{ vars.DATABASE_NAME }}
           DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-          DATABASE_SSL=${{ secrets.DATABASE_SSL }}
+          DATABASE_SSL=${{ vars.DATABASE_SSL }}
 
           # Strapi Authentication
           JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -284,7 +284,7 @@ jobs:
           # ImageKit
           IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
           IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-          IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          IMAGEKIT_URL_ENDPOINT=${{ vars.IMAGEKIT_URL_ENDPOINT }}
           IMAGEKIT_UPLOAD_ENVIRONMENT=staging
 
           # Email
@@ -301,9 +301,9 @@ jobs:
           NEXT_PUBLIC_API_URL=https://${{ env.STAGING_DOMAIN }}/service
           NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=https://${{ env.STAGING_DOMAIN }}/service
           NEXT_PUBLIC_FRONT_URL=https://${{ env.STAGING_DOMAIN }}
-          NEXTAUTH_URL=${{ secrets.FRONT_URL }}
+          NEXTAUTH_URL=${{ vars.FRONT_URL }}
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+          KLUBR_UUID=${{ vars.KLUBR_UUID }}
 
           # Strapi API Access
           STRAPI_API_URL=https://${{ env.STAGING_DOMAIN }}/service
@@ -316,29 +316,29 @@ jobs:
           VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
           VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
-          VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
-          VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+          VITE_ACTIVATE_ANALYTICS=${{ vars.VITE_ACTIVATE_ANALYTICS }}
+          VITE_PLAUSIBLE_DATA_DOMAIN=${{ vars.PLAUSIBLE_DATA_DOMAIN }}
           VITE_NEXT_URL=https://${{ env.STAGING_DOMAIN }}
           ENVEOF
           )
 
           # Encode and send to server, decode there
           ENV_BASE64=$(echo "$ENV_CONTENT" | base64 -w 0)
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "echo '$ENV_BASE64' | base64 -d > ~/donaction-staging/.env && chmod 600 ~/donaction-staging/.env"
 
           # Verify file was created
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "if [ -f ~/donaction-staging/.env ]; then echo '✓ .env file created successfully'; wc -l ~/donaction-staging/.env; else echo '::error::.env file was not created'; exit 1; fi"
 
       - name: Login to GHCR on server
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          echo "${{ secrets.GITHUB_TOKEN }}" | ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
 
       - name: Backup current deployment
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             cd ~/donaction-staging
             if docker compose ps -q 2>/dev/null | grep -q .; then
               echo "Backing up current deployment state..."
@@ -359,7 +359,7 @@ jobs:
           SERVICES="${{ needs.validate.outputs.services_list }}"
           IMAGE_TAG="dev"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
             cd ~/donaction-staging
             export IMAGE_TAG="${IMAGE_TAG}"
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
@@ -376,7 +376,7 @@ jobs:
           SERVICES="${{ needs.validate.outputs.services_list }}"
           IMAGE_TAG="dev"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
             cd ~/donaction-staging
             export IMAGE_TAG="${IMAGE_TAG}"
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
@@ -393,7 +393,7 @@ jobs:
 
       - name: Install and reload nginx configuration
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             sudo cp ~/donaction-staging/nginx/donaction.conf \
                     /etc/nginx/sites-available/donaction-staging.conf
             sudo ln -sf /etc/nginx/sites-available/donaction-staging.conf \
@@ -484,16 +484,16 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 63009 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 63009 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Validate required secrets
         run: |
           MISSING=""
           REQUIRED_SECRETS=(
-            "SSH_USER:${{ secrets.SSH_USER }}"
-            "SSH_HOST:${{ secrets.SSH_HOST }}"
-            "DATABASE_HOST:${{ secrets.DATABASE_HOST }}"
-            "DATABASE_NAME:${{ secrets.DATABASE_NAME }}"
+            "SSH_USER:${{ vars.SSH_USER }}"
+            "SSH_HOST:${{ vars.SSH_HOST }}"
+            "DATABASE_HOST:${{ vars.DATABASE_HOST }}"
+            "DATABASE_NAME:${{ vars.DATABASE_NAME }}"
             "DATABASE_USERNAME:${{ secrets.DATABASE_USERNAME }}"
             "DATABASE_PASSWORD:${{ secrets.DATABASE_PASSWORD }}"
             "JWT_SECRET:${{ secrets.JWT_SECRET }}"
@@ -503,7 +503,7 @@ jobs:
             "TRANSFER_TOKEN_SALT:${{ secrets.TRANSFER_TOKEN_SALT }}"
             "STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}"
             "NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}"
-            "KLUBR_UUID:${{ secrets.KLUBR_UUID }}"
+            "KLUBR_UUID:${{ vars.KLUBR_UUID }}"
           )
 
           for SECRET in "${REQUIRED_SECRETS[@]}"; do
@@ -522,7 +522,7 @@ jobs:
 
       - name: Validate Docker Compose v2
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             if ! command -v docker compose &> /dev/null; then
               echo "::error::Docker Compose v2 not installed on server"
               exit 1
@@ -537,7 +537,7 @@ jobs:
 
       - name: Check port availability
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             echo "Checking port availability..."
             PORTS="3100 1537 4300 5100 5532"
             BLOCKED=""
@@ -564,7 +564,7 @@ jobs:
           echo "Checking SSL certificate for ${{ env.PROD_DOMAIN }}..."
 
           # Check certificate files exist on server
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             CERT_PATH="/etc/letsencrypt/live/www.donaction.fr"
             if [[ ! -f "$CERT_PATH/fullchain.pem" ]] || [[ ! -f "$CERT_PATH/privkey.pem" ]]; then
               echo "::error::SSL certificate files not found at $CERT_PATH"
@@ -599,7 +599,7 @@ jobs:
 
       - name: Verify disk space
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             AVAILABLE=$(df -BG /home | tail -1 | awk '{print $4}' | sed 's/G//')
             echo "Available disk space: ${AVAILABLE}GB"
             if [[ $AVAILABLE -lt 5 ]]; then
@@ -611,7 +611,7 @@ jobs:
 
       - name: Create deployment directory
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             mkdir -p ~/donaction-production/nginx
             mkdir -p ~/donaction-production/backups
             mkdir -p ~/donaction-production/logs
@@ -623,13 +623,13 @@ jobs:
         run: |
           scp -P 63009 -i ~/.ssh/id_rsa \
             infrastructure/production/docker-compose.yml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-production/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:~/donaction-production/
 
       - name: Copy nginx configuration
         run: |
           scp -P 63009 -i ~/.ssh/id_rsa \
             infrastructure/production/nginx/donaction.conf \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/donaction-production/nginx/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:~/donaction-production/nginx/
 
       - name: Generate and copy .env file
         run: |
@@ -645,12 +645,12 @@ jobs:
 
           # Database (PostgreSQL Container)
           DATABASE_CLIENT=postgres
-          DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-          DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+          DATABASE_HOST=${{ vars.DATABASE_HOST }}
+          DATABASE_PORT=${{ vars.DATABASE_PORT }}
+          DATABASE_NAME=${{ vars.DATABASE_NAME }}
           DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-          DATABASE_SSL=${{ secrets.DATABASE_SSL }}
+          DATABASE_SSL=${{ vars.DATABASE_SSL }}
 
           # Strapi Authentication
           JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -667,7 +667,7 @@ jobs:
           # ImageKit
           IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
           IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-          IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          IMAGEKIT_URL_ENDPOINT=${{ vars.IMAGEKIT_URL_ENDPOINT }}
           IMAGEKIT_UPLOAD_ENVIRONMENT=production
 
           # Email
@@ -684,9 +684,9 @@ jobs:
           NEXT_PUBLIC_API_URL=https://${{ env.PROD_DOMAIN }}/service
           NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=https://${{ env.PROD_DOMAIN }}/service
           NEXT_PUBLIC_FRONT_URL=https://${{ env.PROD_DOMAIN }}
-          NEXTAUTH_URL=${{ secrets.FRONT_URL }}
+          NEXTAUTH_URL=${{ vars.FRONT_URL }}
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+          KLUBR_UUID=${{ vars.KLUBR_UUID }}
 
           # Strapi API Access
           STRAPI_API_URL=https://${{ env.PROD_DOMAIN }}/service
@@ -699,24 +699,24 @@ jobs:
           VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
           VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
-          VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
-          VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+          VITE_ACTIVATE_ANALYTICS=${{ vars.VITE_ACTIVATE_ANALYTICS }}
+          VITE_PLAUSIBLE_DATA_DOMAIN=${{ vars.PLAUSIBLE_DATA_DOMAIN }}
           VITE_NEXT_URL=https://${{ env.PROD_DOMAIN }}
           ENVEOF
           )
 
           # Encode and send to server, decode there
           ENV_BASE64=$(echo "$ENV_CONTENT" | base64 -w 0)
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "echo '$ENV_BASE64' | base64 -d > ~/donaction-production/.env && chmod 600 ~/donaction-production/.env"
 
           # Verify file was created
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "if [ -f ~/donaction-production/.env ]; then echo '✓ .env file created successfully'; wc -l ~/donaction-production/.env; else echo '::error::.env file was not created'; exit 1; fi"
 
       - name: Login to GHCR on server
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          echo "${{ secrets.GITHUB_TOKEN }}" | ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
 
       - name: Verify images exist in registry
@@ -751,7 +751,7 @@ jobs:
 
       - name: Backup current deployment
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             cd ~/donaction-production
             if docker compose ps -q 2>/dev/null | grep -q .; then
               echo "Backing up current deployment state..."
@@ -774,7 +774,7 @@ jobs:
           SERVICES="${{ needs.validate.outputs.services_list }}"
           IMAGE_TAG="${{ needs.validate.outputs.image_tag }}"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
             cd ~/donaction-production
             export IMAGE_TAG="${IMAGE_TAG}"
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
@@ -792,7 +792,7 @@ jobs:
         run: |
           IMAGE_TAG="${{ needs.validate.outputs.image_tag }}"
           IMAGE_REGISTRY="${{ env.IMAGE_REGISTRY }}"
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
             cd ~/donaction-production
             export IMAGE_TAG="${IMAGE_TAG}"
             export IMAGE_REGISTRY="${IMAGE_REGISTRY}"
@@ -825,7 +825,7 @@ jobs:
           DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
 
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << EOF
             set -x
             cd ~/donaction-production
             export IMAGE_TAG="${IMAGE_TAG}"
@@ -849,7 +849,7 @@ jobs:
 
       - name: Write deployment log
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             cd ~/donaction-production
             LOG_FILE="logs/deployments.log"
 
@@ -872,7 +872,7 @@ jobs:
 
       - name: Install and reload nginx configuration
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             sudo cp ~/donaction-production/nginx/donaction.conf \
                     /etc/nginx/sites-available/donaction-production.conf
             sudo ln -sf /etc/nginx/sites-available/donaction-production.conf \
@@ -926,7 +926,7 @@ jobs:
 
           # Check API health via container
           echo "Checking API container health..."
-          API_HEALTHY=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          API_HEALTHY=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             'docker inspect --format="{{.State.Health.Status}}" donaction_api 2>/dev/null || echo "unknown"')
 
           API_OK=false
@@ -957,7 +957,7 @@ jobs:
 
           # Check frontend container
           echo "Checking frontend container..."
-          FRONTEND_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          FRONTEND_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             'docker inspect --format="{{.State.Status}}" donaction_frontend 2>/dev/null || echo "unknown"')
 
           if [[ "$FRONTEND_STATUS" == "running" ]]; then
@@ -971,7 +971,7 @@ jobs:
 
           # Check admin container
           echo "Checking admin container..."
-          ADMIN_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          ADMIN_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             'docker inspect --format="{{.State.Status}}" donaction_admin 2>/dev/null || echo "unknown"')
 
           if [[ "$ADMIN_STATUS" == "running" ]]; then
@@ -985,7 +985,7 @@ jobs:
 
           # Check saas container
           echo "Checking saas container..."
-          SAAS_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          SAAS_STATUS=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             'docker inspect --format="{{.State.Status}}" donaction_saas 2>/dev/null || echo "unknown"')
 
           if [[ "$SAAS_STATUS" == "running" ]]; then
@@ -1000,7 +1000,7 @@ jobs:
           # Validate database connection via API health endpoint
           echo "Validating database connection..."
           DB_OK=false
-          DB_RESPONSE=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          DB_RESPONSE=$(ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
             'docker exec donaction_api wget -qO- http://localhost:1437/_health 2>/dev/null || echo "error"')
 
           if [[ "$DB_RESPONSE" != "error" ]]; then
@@ -1028,7 +1028,7 @@ jobs:
       - name: Verify database connection details
         run: |
           echo "Validating database connection..."
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             # Check if API can connect to database by hitting a simple endpoint
             RESPONSE=$(docker exec donaction_api wget -qO- http://localhost:1437/_health 2>/dev/null || echo "error")
             if [[ "$RESPONSE" == "error" ]]; then
@@ -1042,7 +1042,7 @@ jobs:
         if: failure() && steps.deploy.outcome == 'success'
         run: |
           echo "::warning::Deployment failed, attempting rollback..."
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             set -x
             cd ~/donaction-production
 
@@ -1172,7 +1172,7 @@ jobs:
       - name: Cleanup old images
         if: success()
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             echo "Cleaning up old Donaction images (keeping last 48h)..."
 
             CUTOFF_DATE=$(date -d '48 hours ago' +%s)
@@ -1204,7 +1204,7 @@ jobs:
       - name: Logout from GHCR
         if: always()
         run: |
-          ssh -p 63009 -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p 63009 -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
             docker logout ghcr.io 2>/dev/null || true
           EOF
 
