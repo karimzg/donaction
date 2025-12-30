@@ -165,7 +165,7 @@ jobs:
             NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
             NEXT_PUBLIC_SITE_URL=${{ vars.FRONT_URL }}
             NEXT_PUBLIC_API_URL=${{ vars.STRAPI_PUBLIC_URL }}
-            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ vars.STRAPI_PUBLIC_URL }}
+            STRAPI_PUBLIC_URL=${{ vars.STRAPI_PUBLIC_URL }}
             NEXT_PUBLIC_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
