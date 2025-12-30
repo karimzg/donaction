@@ -54,11 +54,8 @@ RUN npm install --include=dev && npm run build
 COPY --from=saas /usr/share/nginx/html/saas/donaction-web-components ./public/donaction-web-components
 
 FROM node:18-alpine AS runner
-
-ARG NEXT_CONTAINER_SITE_URL
-ENV NEXT_CONTAINER_SITE_URL=${NEXT_CONTAINER_SITE_URL}
-
 WORKDIR /app
+COPY --from=builder /app/.env ./
 COPY --from=builder /app/public ./public
 RUN mkdir .next
 COPY --from=builder /app/.next/standalone ./
