@@ -147,18 +147,22 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
-            VITE_STRAPI_API_URL=${{ secrets.STRAPI_API_URL }}
+            VITE_STRAPI_API_URL=${{ vars.STRAPI_PUBLIC_URL }}
             VITE_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
             VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
             VITE_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
             VITE_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
             VITE_GOOGLE_GA_TRACKING_ID=${{ secrets.GOOGLE_GA_TRACKING_ID }}
-            VITE_ACTIVATE_ANALYTICS=${{ secrets.VITE_ACTIVATE_ANALYTICS }}
-            VITE_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
-            VITE_NEXT_URL=${{ secrets.FRONT_URL }}
+            VITE_ACTIVATE_ANALYTICS=${{ vars.VITE_ACTIVATE_ANALYTICS }}
+            VITE_PLAUSIBLE_DATA_DOMAIN=${{ vars.PLAUSIBLE_DATA_DOMAIN }}
+            VITE_NEXT_URL=${{ vars.FRONT_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -224,22 +228,26 @@ jobs:
             NODE_ENV=production
             SAAS_VERSION=${{ needs.detect-changes.outputs.env_tag }}
             NEXT_PUBLIC_ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.FRONT_URL }}
-            NEXT_PUBLIC_API_URL=${{ secrets.STRAPI_API_URL }}
-            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ secrets.STRAPI_API_URL }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.FRONT_URL }}
+            NEXT_PUBLIC_API_URL=${{ vars.STRAPI_PUBLIC_URL }}
+            NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL=${{ vars.STRAPI_PUBLIC_URL }}
             NEXT_PUBLIC_STRAPI_API_TOKEN=${{ secrets.STRAPI_FRONT_API_TOKEN }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
             NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
             NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLIC_KEY }}
-            NEXT_PUBLIC_ACTIVATE_ANALYTICS=${{ secrets.FRONT_ACTIVATE_ANALYTICS }}
-            NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ secrets.PLAUSIBLE_DATA_DOMAIN }}
+            NEXT_PUBLIC_ACTIVATE_ANALYTICS=${{ vars.FRONT_ACTIVATE_ANALYTICS }}
+            NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN=${{ vars.PLAUSIBLE_DATA_DOMAIN }}
             NEXT_PUBLIC_KLUBR_SPONSORSHIP_FORM_TOKEN=${{ secrets.FRONT_SPONSORSHIP_FORM_TOKEN }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -298,10 +306,14 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GOOGLE_RECAPTCHA_SITE_KEY=${{ secrets.GOOGLE_RECAPTCHA_SITE_KEY }}
             GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
-            KLUBR_UUID=${{ secrets.KLUBR_UUID }}
+            KLUBR_UUID=${{ vars.KLUBR_UUID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -356,9 +368,14 @@ jobs:
           build-args: |
             NODE_ENV=production
             ENVIRONMENT=${{ needs.detect-changes.outputs.env_name }}
+            STRAPI_PUBLIC_URL=${{ vars.STRAPI_PUBLIC_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          labels: |
+            org.opencontainers.image.environment=${{ needs.detect-changes.outputs.environment }}
+            org.opencontainers.image.source.branch=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Output build summary
         run: |
@@ -370,7 +387,7 @@ jobs:
     name: Notify Build Status
     runs-on: ubuntu-latest
     needs: [detect-changes, build-saas, build-frontend, build-admin, build-api]
-    if: always()
+    if: always() && !cancelled()
     steps:
       - name: Determine build status
         id: status

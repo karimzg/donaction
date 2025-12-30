@@ -59,7 +59,7 @@ services:
     env_file: .env
     environment:
       #DATABASE_CLIENT: ${DATABASE_CLIENT}
-      DATABASE_HOST: donaction_postgres_v5
+      DATABASE_HOST: donaction_postgres
       #DATABASE_NAME: ${DATABASE_NAME}
       #DATABASE_USERNAME: ${DATABASE_USERNAME}
       #DATABASE_PASSWORD: ${DATABASE_PASSWORD}
