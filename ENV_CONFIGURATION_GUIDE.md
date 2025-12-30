@@ -11,7 +11,7 @@ ENVIRONMENT=development  # ou production, re7
 
 # Database PostgreSQL
 DATABASE_CLIENT=postgres
-DATABASE_HOST=donaction_postgres_v5
+DATABASE_HOST=donaction_postgres
 DATABASE_NAME=donaction_db
 DATABASE_USERNAME=donaction_user
 DATABASE_PASSWORD=<GENERATE_SECURE_PASSWORD>
@@ -96,7 +96,7 @@ JWT_SECRET=<GENERATE_WITH: openssl rand -base64 32>
 
 # Database (same as root)
 DATABASE_CLIENT=postgres
-DATABASE_HOST=donaction_postgres_v5
+DATABASE_HOST=donaction_postgres
 DATABASE_PORT=5432
 DATABASE_NAME=donaction_db
 DATABASE_USERNAME=donaction_user
