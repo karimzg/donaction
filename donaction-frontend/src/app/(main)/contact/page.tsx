@@ -8,6 +8,7 @@ import { SITE_URL } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 import { cookies } from 'next/headers';
 import srcLoader from '@/core/helpers/srcLoader';
+import ImageHtml from "@/components/media/ImageHtml";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const res = await getContactPage(cookies().toString());
