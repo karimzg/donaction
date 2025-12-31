@@ -189,8 +189,8 @@ const getAvatar = (data: SponsorItem) => {
 				height={50}
 				src={
 					data.civility === 'Monsieur'
-						? 'https://ik.imagekit.io/klubr/Avatars/Men/man2_3534a8eff8_tBR7yhA3R.svg'
-						: 'https://ik.imagekit.io/klubr/Avatars/Women/woman1_3799eed3ed_Jxipo0vY0Y.svg'
+						? 'https://ik.imagekit.io/donaction/Avatars/Men/man10_4058349b21_4Wp9nTYIvW.svg'
+						: 'https://ik.imagekit.io/donaction/Avatars/Women/woman1_3effe1afa7_yF1igwCIeX.svg'
 				}
 				alt={'mécène'}
 			/>

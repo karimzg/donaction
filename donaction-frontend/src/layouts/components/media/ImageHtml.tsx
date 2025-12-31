@@ -7,7 +7,7 @@ import config from '@/config/config.json';
 type ExtendedImageProps = ImageProps & ExtraProps;
 
 const ImageHtml: React.FC<ExtendedImageProps> = (props: ExtendedImageProps) => {
-	const providerURL = 'https://ik.imagekit.io/klubr/';
+	const providerURL = 'https://ik.imagekit.io/donaction/';
 	const mediaBreakpoints = config.media_breakpoints;
 	const srcLoader = ({ src, width }: { src?: string; width?: number }) => {
 		if (!src) {
@@ -75,7 +75,7 @@ const ImageHtml: React.FC<ExtendedImageProps> = (props: ExtendedImageProps) => {
 	const isStaticSvg = (src?: { src?: string }) => src?.src && src.src.toString().endsWith('.svg');
 	const isSvg = (src?: string) => typeof src === 'string' && src.toString().endsWith('.svg');
 	const providedByImageKit = (src?: string) =>
-		src?.toString().startsWith('https://ik.imagekit.io/klubr/');
+		src?.toString().startsWith('https://ik.imagekit.io/donaction/');
 	const cleanedProps = (prop: ExtendedImageProps) => {
 		// remove namedtransformation from props by destructuring
 		const { namedtransformation, nosizes, priority, ...rest } = prop;

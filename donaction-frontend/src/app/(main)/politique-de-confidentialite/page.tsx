@@ -21,7 +21,7 @@ export async function generateMetadata() {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/klubr_home_page_a7944e5376_gyyKlN99P.jpg?updatedAt=1717622748902',
+					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
 					width: 800,
 					height: 385,
 					alt: 'Politique de confidentialité',
@@ -59,7 +59,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/klubr_home_page_a7944e5376_gyyKlN99P.jpg?updatedAt=1717622748902',
+			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
 			width: '800',
 			height: '385',
 		},
