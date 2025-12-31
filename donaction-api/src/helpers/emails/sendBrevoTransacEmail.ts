@@ -37,7 +37,7 @@ async function sendBrevoTransacEmail(props: any) {
                 to:
                     process.env.EMAIL_BREVO_ENV !== 'prod'
                         ? [
-                              { email: 'hamach78@gmail.com' },
+                              // { email: 'hamach78@gmail.com' },
                               { email: 'k.zgoulli@gmail.com' },
                           ]
                         : props.to,
