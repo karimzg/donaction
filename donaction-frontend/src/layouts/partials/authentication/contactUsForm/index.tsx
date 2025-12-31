@@ -9,7 +9,7 @@ import ImageHtml from "@/components/media/ImageHtml";
 interface ContactContent {
 	title: string;
 	content: string;
-	imageUrl: string;
+	imageUrl?: string;
 }
 
 const ContactUsForm: React.FC<ContactContent> = ({title, content, imageUrl}) => {
@@ -22,7 +22,7 @@ const ContactUsForm: React.FC<ContactContent> = ({title, content, imageUrl}) => 
 					{content}
 				</p>
 			</div>
-			<ImageHtml className='md:hidden block mx-auto' src={imageUrl} width={427} height={374} alt='contact-us'/>
+            { imageUrl && (<ImageHtml className='md:hidden block mx-auto' src={imageUrl} width={427} height={374} alt='contact-us'/>)}
 			<div className='w-full flex flex-col items-center'>
 				{getIterableFields(
 					contactUsInfo(config.defaultValues, session?.data?.email),
