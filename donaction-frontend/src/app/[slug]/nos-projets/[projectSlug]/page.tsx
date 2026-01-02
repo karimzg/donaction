@@ -28,10 +28,9 @@ import { getServerSession } from 'next-auth';
 import { SITE_URL } from '@/core/services/endpoints';
 import { getDonsByKlubOrProjet } from '@/core/services/don';
 import { SportsEvent, WithContext } from 'schema-dts';
-import { format } from 'date-fns';
+import { endOfDay, format, isAfter } from 'date-fns';
 import frLocale from 'date-fns/locale/fr';
 import SponsorshipForm from '@/partials/_sponsorshipForm';
-import TemplateReference from '@/partials/common/templateReference';
 import DonateButton from '@/partials/common/donateButton';
 import srcLoader from '@/core/helpers/srcLoader';
 
@@ -138,6 +137,7 @@ export default async function ProjectPage({
 			redirect(`/${klub.slug}`);
 		},
 	);
+    const status = isAfter(new Date(), endOfDay(new Date(projet.dateLimiteFinancementProjet)));
 	const primaryColor = klub?.klubr_house?.primary_color || '#FFFFFF';
 	const secondaryColor = klub?.klubr_house?.secondary_color || '#000000';
 	const textColor = klub?.klubr_house?.header_text_color || '#000000';
@@ -334,7 +334,9 @@ export default async function ProjectPage({
 					'px-4 py-2 bg-white rounded-full absolute right-[10px] top-[65px] z-10 boxBoxShadow',
 				)}
 			/>
-			<DonateButton color={klubHouse.primary_color} color2={klubHouse.secondary_color} />
+            {klub?.donationEligible && !status && (
+                <DonateButton color={klubHouse.primary_color} color2={klubHouse.secondary_color} />
+            )}
 			<div className='projectPageContainer flex flex-col items-center justify-center gap-4 text-black'>
 				<div className='minMaxWidth flex flex-col gap-2'>
 					<Breadcrumb
@@ -361,21 +363,23 @@ export default async function ProjectPage({
 						/>
 					</div>
 					<div className='minMaxWidth'>
-						<ProjectDescription projet={projet} ourSponsors={ourSponsors} />
+                        <ProjectDescription projet={projet} ourSponsors={ourSponsors} donationEligible={klub?.donationEligible && !status} />
 					</div>
 				</div>
 
-				<div className='w-full md:minMaxWidth mt-20' id='PAYEMENT_FORM_ID'>
-					<h2 className={'w-full text-center text-xl font-semibold mb-8'}>
-						Soutenez-nous en 3 clics ! <br /> Simple et rapide
-					</h2>
-					<SponsorshipForm
-						club={klub}
-						project={projet}
-						klubrUuid={klub.uuid}
-						projectUuid={projet.uuid}
-					/>
-				</div>
+                {klub?.donationEligible && !status && (
+                    <div className='w-full md:minMaxWidth mt-20' id='PAYEMENT_FORM_ID'>
+                        <h2 className={'w-full text-center text-xl font-semibold mb-8'}>
+                            Soutenez-nous en 3 clics ! <br /> Simple et rapide
+                        </h2>
+                        <SponsorshipForm
+                            club={klub}
+                            project={projet}
+                            klubrUuid={klub.uuid}
+                            projectUuid={projet.uuid}
+                        />
+                    </div>
+                )}
 				{!!projet?.contenu.length ? (
 					<div className='minMaxWidth mt-20'>
 						{projet.contenu.map((section, index) => displaySection(section, index))}

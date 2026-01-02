@@ -302,7 +302,9 @@ export default async function club({ params }: { params: { slug: string } }) {
 					'px-4 py-2 bg-white rounded-full absolute left-unset right-[10px] top-[65px] z-10 boxBoxShadow text-[#8312C8]',
 				)}
 			/>
-			<DonateButton color={klubHouse.primary_color} color2={klubHouse.secondary_color} />
+            {klub?.donationEligible && (
+                <DonateButton color={klubHouse.primary_color} color2={klubHouse.secondary_color} />
+            )}
 			<div className='clubPageContainer flex flex-col items-center justify-center gap-10 md:mt-10'>
 				<ClubIntroduction
 					uuid={klub.uuid}
@@ -312,6 +314,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 					slogan={klub.slogan}
 					introMedia={klubHouse.couvertureMedia}
 					logo={klub.logo}
+                    donationEligible={klub?.donationEligible}
 				/>
 				{!!clubInfos && (
 					<div className='grid grid-cols-3 w-full'>
@@ -355,11 +358,11 @@ export default async function club({ params }: { params: { slug: string } }) {
 					?.filter((_) => _.__component !== 'composant-atoms.section-texte-image')
 					?.map((component, _index) => displaySection(component, _index))}
 
-				{/*{klub?.donationEligible && (*/}
-				<div className='w-full md:minMaxWidth mb-20' id='PAYEMENT_FORM_ID'>
-					<SponsorshipForm club={klub} klubrUuid={klub.uuid} />
-				</div>
-				{/*)}*/}
+                {klub?.donationEligible && (
+                    <div className='w-full md:minMaxWidth mb-20' id='PAYEMENT_FORM_ID'>
+                        <SponsorshipForm club={klub} klubrUuid={klub.uuid} />
+                    </div>
+                )}
 
 				{klubHouse?.partnerList?.length ? (
 					<PartnersSection list={klubHouse?.partnerList} primaryColor={primaryColor} />
