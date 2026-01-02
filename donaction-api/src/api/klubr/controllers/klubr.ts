@@ -1032,18 +1032,18 @@ export default factories.createCoreController(
                     return ctx.badRequest(`Member already linked`);
                 }
 
-                // if (!ctx.request.body.data?.slug || ctx.request.body.data.slug === 'null') {
-                //   if (ctx.request.body.data.denomination) {
-                //     ctx.request.body.data.slug = slugify(ctx.request.body.data.denomination);
-                //     const slugAlreadyExists = await strapi.db.query("api::klubr.klubr").findOne({
-                //       where: {slug: ctx.request.body.data.slug}
-                //     })
-                //     if (slugAlreadyExists) {
-                //       ctx.request.body.data.slug = ctx.request.body.data.slug + '-' + formattedCurrentDate(2);
-                //       console.log("SLUG ALREADY EXISTS, NEW SLUG: ", ctx.request.body.data.slug);
-                //     }
-                //   }
-                // }
+                /* SLUG */
+                if (!ctx.request.body.data?.slug || ctx.request.body.data.slug === 'null') {
+                    if (ctx.request.body.data.denomination) {
+                        try {
+                            ctx.request.body.data.slug = await strapi
+                                .service('api::klubr.klubr')
+                                .getSlug(ctx.request.body.data.denomination);
+                        } catch (error) {
+                            return ctx.badRequest(error.message);
+                        }
+                    }
+                }
 
                 /* GET DEFAULT TRADE POLICY */
                 const defaultTradePolicyId: TradePolicyEntity = await strapi
@@ -1086,10 +1086,19 @@ export default factories.createCoreController(
                             googlePlace: ctx.request.body.data.googlePlace,
                             trade_policy: defaultTradePolicyId,
                             federationLink: federationId,
+                            slug: ctx.request.body.data.slug,
                         },
                     });
 
                 /* CREATE KLUBR HOUSE */
+                let klubrHouseSlug: string;
+                try {
+                    klubrHouseSlug = await strapi
+                        .service('api::klubr-house.klubr-house')
+                        .getSlug(ctx.request.body.data.denomination);
+                } catch (error) {
+                    return ctx.badRequest(error.message);
+                }
                 const res: KlubrHouseEntity = await strapi
                     .documents('api::klubr-house.klubr-house')
                     .create({
