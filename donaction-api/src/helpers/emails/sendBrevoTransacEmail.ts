@@ -17,9 +17,11 @@ const BREVO_TEMPLATES = {
 async function sendBrevoTransacEmail(props: any) {
     return new Promise(async (resolve, reject) => {
         try {
+            console.log('Sending Brevo transactional email with props:', props);
             const apiInstance = await getBrevoInstance(
                 'TransactionalEmailsApi',
             );
+            console.log('Brevo TransactionalEmailsApi instance created');
             const formattedAttachments = props?.attachments?.map(
                 (attachment: any) => {
                     const fileContent = fs
@@ -31,6 +33,7 @@ async function sendBrevoTransacEmail(props: any) {
                     };
                 },
             );
+            console.log('Formatted attachments:', formattedAttachments);
             const res = await apiInstance.sendTransacEmail({
                 subject: props.subject,
                 from: props.from || { name: 'Klubr', email: 'hello@donaction.fr' },
@@ -51,8 +54,10 @@ async function sendBrevoTransacEmail(props: any) {
                 attachment: formattedAttachments,
                 tags: [...props.tags, `env-${process.env.EMAIL_BREVO_ENV}`],
             });
+            console.log('Brevo email sent successfully:', res);
             resolve(res);
         } catch (e) {
+            console.error('Error sending Brevo email:', e);
             reject(e);
         }
     });
