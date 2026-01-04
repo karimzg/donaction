@@ -1107,6 +1107,7 @@ export default factories.createCoreController(
                         data: {
                             title: ctx.request.body.data.denomination,
                             klubr: entity?.id,
+                            slug: klubrHouseSlug,
                             description: [
                                 {
                                     type: 'paragraph',
