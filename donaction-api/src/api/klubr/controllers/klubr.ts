@@ -1148,10 +1148,7 @@ export default factories.createCoreController(
                         },
                     });
 
-                console.log('----------------- Creating klub-presentation ---');
-                console.log('Creating klub-presentation with googlePlace info');
                 const googleMap = getGmapObj(gPlace);
-                console.log('googleMap', googleMap);
                 const club_presentation = [
                     {
                         __component: 'club-presentation.localisation',
@@ -1196,7 +1193,7 @@ export default factories.createCoreController(
                         googleMap,
                     },
                 ];
-                console.log('club_presentation', club_presentation);
+
                 await strapi.documents('api::klubr-house.klubr-house').update({
                     documentId: res.documentId,
                     data: {
@@ -1205,7 +1202,6 @@ export default factories.createCoreController(
                         club_presentation: club_presentation,
                     },
                 });
-                console.log('------------------ klub house updated');
 
                 const member = await strapi
                     .documents('api::klubr-membre.klubr-membre')
@@ -1215,11 +1211,10 @@ export default factories.createCoreController(
                             klubr: entity?.id,
                         },
                     });
-                console.log('------------------ klubr member updated');
+
                 await strapi.services[
                     'api::klubr-membre.klubr-membre'
                 ].sendClubCreationEmail({ ...member, klubr: entity });
-                console.log('------------------ Creation email sent');
                 return entity;
             } catch (e) {
                 console.log(e);
