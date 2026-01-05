@@ -4,6 +4,7 @@
 
 import { Core, factories } from '@strapi/strapi';
 import { CLUB_STATUS } from '../../../helpers/clubStatus';
+import { COLORS, logBlock } from '../../../helpers/logger';
 import {
     FederationEntity,
     KlubDonEntity,
@@ -17,6 +18,50 @@ import {
     TradePolicyEntity,
     UserEntity,
 } from '../../../_types';
+
+/**
+ * Type for tracking created entities during klubr creation
+ */
+type CreatedEntity = {
+    uid: string;
+    documentId: string;
+};
+
+/**
+ * Rollback helper: deletes created entities in reverse order on failure
+ */
+const rollbackCreatedEntities = async (
+    strapi: Core.Strapi,
+    entities: CreatedEntity[],
+): Promise<void> => {
+    const results: { uid: string; documentId: string; status: 'deleted' | 'failed' }[] = [];
+
+    for (let i = entities.length - 1; i >= 0; i--) {
+        const entity = entities[i];
+        try {
+            await strapi.documents(entity.uid as any).delete({
+                documentId: entity.documentId,
+            });
+            results.push({ ...entity, status: 'deleted' });
+        } catch (error) {
+            results.push({ ...entity, status: 'failed' });
+        }
+    }
+
+    const hasErrors = results.some((r) => r.status === 'failed');
+    logBlock({
+        statusColor: hasErrors ? COLORS.yellow : COLORS.green,
+        separatorColor: COLORS.red,
+        prefix: '🔄 Rollback',
+        entries: [
+            { key: '📦 ENTITIES', value: entities.length },
+            ...results.map((r) => ({
+                key: r.status === 'deleted' ? '✅ DELETED' : '❌ FAILED',
+                value: `${r.uid} (${r.documentId})`,
+            })),
+        ],
+    });
+};
 import { removeCodes, removeId } from '../../../helpers/sanitizeHelpers';
 import path from 'path';
 import fs from 'fs';
@@ -33,6 +78,7 @@ import {
     getState,
     getWebSite,
 } from '../../../helpers/gcc/googlePlaceHelpers';
+import { BREVO_TEMPLATES, sendBrevoTransacEmail } from "../../../helpers/emails/sendBrevoTransacEmail";
 
 export default factories.createCoreController(
     'api::klubr.klubr',
@@ -998,6 +1044,8 @@ export default factories.createCoreController(
         },
         async createKlubrByMember() {
             const ctx = strapi.requestContext.get();
+            const createdEntities: CreatedEntity[] = [];
+
             try {
                 const memberUuid = ctx.params['memberUuid'];
 
@@ -1057,19 +1105,18 @@ export default factories.createCoreController(
                     : Number(ctx.request.body.data.federationLink);
 
                 if (federationId) {
-                    const entity: FederationEntity = await strapi.db
+                    const federation: FederationEntity = await strapi.db
                         .query('api::federation.federation')
                         .findOne({
                             where: { id: federationId },
                         });
-                    federationId = entity ? (entity.id as number) : null;
+                    federationId = federation ? (federation.id as number) : null;
                 }
 
                 /* CREATE KLUBR */
-                const entity: KlubrEntity = await strapi
-                    .documents('api::klubr.klubr')
-                    .create({
-                        // TODO: make fields optional to remove ts-ignore
+                let entity: KlubrEntity;
+                try {
+                    entity = await strapi.documents('api::klubr.klubr').create({
                         // @ts-ignore
                         data: {
                             denomination: ctx.request.body.data.denomination,
@@ -1089,6 +1136,14 @@ export default factories.createCoreController(
                             slug: ctx.request.body.data.slug,
                         },
                     });
+                    createdEntities.push({
+                        uid: 'api::klubr.klubr',
+                        documentId: entity.documentId,
+                    });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to create klubr:', e);
+                    return ctx.badRequest(`Erreur lors de la création du club: ${e}`);
+                }
 
                 /* CREATE KLUBR HOUSE */
                 let klubrHouseSlug: string;
@@ -1099,127 +1154,230 @@ export default factories.createCoreController(
                 } catch (error) {
                     return ctx.badRequest(error.message);
                 }
-                const res: KlubrHouseEntity = await strapi
-                    .documents('api::klubr-house.klubr-house')
-                    .create({
-                        // TODO: make fields optional to remove ts-ignore
-                        // @ts-ignore
-                        data: {
-                            title: ctx.request.body.data.denomination,
-                            klubr: entity?.id,
-                            slug: klubrHouseSlug,
-                            description: [
+                let klubrHouse: KlubrHouseEntity;
+                try {
+                    klubrHouse = await strapi
+                        .documents('api::klubr-house.klubr-house')
+                        .create({
+                            // @ts-ignore
+                            data: {
+                                title: ctx.request.body.data.denomination,
+                                klubr: entity?.id,
+                                slug: klubrHouseSlug,
+                                description: [
+                                    {
+                                        type: 'paragraph',
+                                        children: [
+                                            {
+                                                type: 'text',
+                                                text: 'Décrivez ici votre club (historique, objectifs, valeurs, etc.) ...',
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        });
+                    createdEntities.push({
+                        uid: 'api::klubr-house.klubr-house',
+                        documentId: klubrHouse.documentId,
+                    });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to create klubr-house:', e);
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                    return ctx.badRequest(`Erreur lors de la création de la maison du club: ${e}`);
+                }
+
+                /* CREATE KLUBR INFO */
+                try {
+                    const klubr_info1 = await strapi
+                        .service('api::klubr.klubr')
+                        .setKlubrInfosRequiredFieldsCompletion(entity, true);
+
+                    const klubr_info2 = {
+                        requiredDocsValidatedCompletion: 0,
+                        requiredDocsWaitingValidationCompletion: 0,
+                        requiredDocsRefusedCompletion: 0,
+                    };
+                    const klubrInfo = await strapi
+                        .documents('api::klubr-info.klubr-info')
+                        .create({
+                            data: {
+                                klubr: entity?.id,
+                                ...klubr_info1,
+                                ...klubr_info2,
+                            },
+                        });
+                    createdEntities.push({
+                        uid: 'api::klubr-info.klubr-info',
+                        documentId: klubrInfo.documentId,
+                    });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to create klubr-info:', e);
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                    return ctx.badRequest(`Erreur lors de la création des infos du club: ${e}`);
+                }
+
+                /* CREATE KLUBR DOCUMENT */
+                try {
+                    const klubrDocument = await strapi
+                        .documents('api::klubr-document.klubr-document')
+                        .create({
+                            data: {
+                                klubr: entity?.id,
+                            },
+                        });
+                    createdEntities.push({
+                        uid: 'api::klubr-document.klubr-document',
+                        documentId: klubrDocument.documentId,
+                    });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to create klubr-document:', e);
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                    return ctx.badRequest(`Erreur lors de la création des documents du club: ${e}`);
+                }
+
+                /* UPDATE KLUBR HOUSE with club_presentation */
+                try {
+                    const googleMap = getGmapObj(gPlace);
+                    const club_presentation = [
+                        {
+                            __component: 'club-presentation.localisation',
+                            titre: 'Où sommes-nous ?',
+                            telContact: getPhone(gPlace) || '',
+                            emailContact: klubrMember.email || null,
+                            adresseComplete: [
                                 {
                                     type: 'paragraph',
                                     children: [
                                         {
+                                            text: getAddress(gPlace) + ',',
                                             type: 'text',
-                                            text: 'Décrivez ici votre club (historique, objectifs, valeurs, etc.) ...',
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'paragraph',
+                                    children: [
+                                        {
+                                            text:
+                                                getPostCode(gPlace) +
+                                                ', ' +
+                                                getCity(gPlace),
+                                            type: 'text',
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'paragraph',
+                                    children: [
+                                        {
+                                            text:
+                                                getDistrict(gPlace) +
+                                                ', ' +
+                                                getState(gPlace),
+                                            type: 'text',
                                         },
                                     ],
                                 },
                             ],
+                            googleMap,
                         },
-                    });
+                    ];
 
-                /* CREATE klubr-documents && klubr-infos */
-                /* UPDATE KLUBR INFOS */
-                const klubr_info1 = await strapi
-                    .service('api::klubr.klubr')
-                    .setKlubrInfosRequiredFieldsCompletion(entity, true);
-
-                const klubr_info2 = {
-                    requiredDocsValidatedCompletion: 0,
-                    requiredDocsWaitingValidationCompletion: 0,
-                    requiredDocsRefusedCompletion: 0,
-                };
-                await strapi.documents('api::klubr-info.klubr-info').create({
-                    data: {
-                        klubr: entity?.id,
-                        ...klubr_info1,
-                        ...klubr_info2,
-                    },
-                });
-                await strapi
-                    .documents('api::klubr-document.klubr-document')
-                    .create({
+                    await strapi.documents('api::klubr-house.klubr-house').update({
+                        documentId: klubrHouse.documentId,
                         data: {
-                            klubr: entity?.id,
+                            // @ts-ignore
+                            club_presentation: club_presentation,
                         },
                     });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to update klubr-house:', e);
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                    return ctx.badRequest(`Erreur lors de la mise à jour de la maison du club: ${e}`);
+                }
 
-                const googleMap = getGmapObj(gPlace);
-                const club_presentation = [
-                    {
-                        __component: 'club-presentation.localisation',
-                        titre: 'Où sommes-nous ?',
-                        telContact: getPhone(gPlace) || '',
-                        emailContact: klubrMember.email || null,
-                        adresseComplete: [
-                            {
-                                type: 'paragraph',
-                                children: [
-                                    {
-                                        text: getAddress(gPlace) + ',',
-                                        type: 'text',
-                                    },
-                                ],
+                /* UPDATE KLUBR MEMBRE */
+                let member: KlubrMemberEntity;
+                try {
+                    member = await strapi
+                        .documents('api::klubr-membre.klubr-membre')
+                        .update({
+                            documentId: klubrMember.documentId,
+                            data: {
+                                klubr: entity?.id,
                             },
-                            {
-                                type: 'paragraph',
-                                children: [
-                                    {
-                                        text:
-                                            getPostCode(gPlace) +
-                                            ', ' +
-                                            getCity(gPlace),
-                                        type: 'text',
-                                    },
-                                ],
+                        });
+                } catch (e) {
+                    console.error('[createKlubrByMember] Failed to update klubr-membre:', e);
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                    return ctx.badRequest(`Erreur lors de la mise à jour du membre: ${e}`);
+                }
+
+                /* SEND EMAIL - No rollback on failure */
+                let emailSent = true;
+                try {
+                    await strapi.services[
+                        'api::klubr-membre.klubr-membre'
+                    ].sendClubCreationEmail({ ...member, klubr: entity });
+                } catch (e) {
+                    emailSent = false;
+                    console.error('[createKlubrByMember] Failed to send club creation email:', e);
+
+                    // Notify admin about email failure
+                    try {
+                        const {
+                            sendBrevoTransacEmail,
+                            BREVO_TEMPLATES,
+                        } = require('../../../helpers/emails/sendBrevoTransacEmail');
+
+                        await sendBrevoTransacEmail({
+                            subject: `[ALERTE] Échec envoi email création club: ${entity.denomination}`,
+                            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+                            to: [{ email: process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr' }],
+                            params: {
+                                ALERT_TYPE: 'Échec envoi email',
+                                CLUB_NAME: entity.denomination,
+                                MEMBER_EMAIL: klubrMember.email,
+                                ERROR_MESSAGE: String(e),
+                                KLUBR_UUID: entity.uuid,
                             },
-                            {
-                                type: 'paragraph',
-                                children: [
-                                    {
-                                        text:
-                                            getDistrict(gPlace) +
-                                            ', ' +
-                                            getState(gPlace),
-                                        type: 'text',
-                                    },
-                                ],
-                            },
-                        ],
-                        googleMap,
-                    },
-                ];
-
-                await strapi.documents('api::klubr-house.klubr-house').update({
-                    documentId: res.documentId,
-                    data: {
-                        // TODO: make fields optional to remove ts-ignore
-                        // @ts-ignore
-                        club_presentation: club_presentation,
-                    },
-                });
-
-                const member = await strapi
-                    .documents('api::klubr-membre.klubr-membre')
-                    .update({
-                        documentId: klubrMember.documentId,
-                        data: {
-                            klubr: entity?.id,
-                        },
-                    });
-
-                await strapi.services[
-                    'api::klubr-membre.klubr-membre'
-                ].sendClubCreationEmail({ ...member, klubr: entity });
-                return entity;
+                            tags: ['admin-alert', 'email-failure', 'club-creation'],
+                        });
+                    } catch (adminEmailError) {
+                        console.error('[createKlubrByMember] Failed to send admin alert:', adminEmailError);
+                    }
+                }
+                console.log('[createKlubrByMember] Club created successfully with UUID:', { ...entity, emailSent });
+                return { ...entity, emailSent };
             } catch (e) {
-                console.log(e);
+                console.error('[createKlubrByMember] Unexpected error:', e);
+                if (createdEntities.length > 0) {
+                    await rollbackCreatedEntities(strapi, createdEntities);
+                }
+                try {
+                    const {
+                        sendBrevoTransacEmail,
+                        BREVO_TEMPLATES,
+                    } = require('../../../helpers/emails/sendBrevoTransacEmail');
+
+                    await sendBrevoTransacEmail({
+                        subject: `[ALERTE] Échec  : ${ctx.request.body.data.denomination}`,
+                        templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+                        to: [{ email: process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr' }],
+                        params: {
+                            ALERT_TYPE: 'Échec création association',
+                            CLUB_NAME: ctx.request.body.data.denomination,
+                            MEMBER_EMAIL: ctx.params['memberUuid'],
+                            ERROR_MESSAGE: String(e),
+                        },
+                        tags: ['admin-alert', 'email-failure', 'club-creation'],
+                    });
+                } catch (adminEmailError) {
+                    console.error('[createKlubrByMember] Failed to send admin alert:', adminEmailError);
+                }
                 return ctx.badRequest(
-                    `An error occured while creating club: ${e}`,
+                    `Une erreur est survenue lors de la création du club: ${e}`,
                 );
             }
         },

@@ -163,7 +163,8 @@ export default function useNewClubForm() {
 										cookie,
 									);
 									document.cookie = `klubrCreationDirigeant=${cookie}; path=/; max-age=0; Secure; SameSite=Strict`;
-									router.push(`/new-club/congratulations?clubUuid=${res?.uuid}`);
+                                    const emailParam = res?.emailSent === false ? '&emailSent=failed' : '';
+                                    router.push(`/new-club/congratulations?clubUuid=${res?.uuid}${emailParam}`);
 								} else {
 									console.log(status);
 									dispatch(
