@@ -29,6 +29,10 @@ inputs:
     description: 'Run database migrations'
     required: false
     default: 'false'
+  db-ready-timeout:
+    description: 'Timeout in seconds for PostgreSQL ready check'
+    required: false
+    default: '60'
 
 outputs:
   deployment-time:
@@ -102,8 +106,8 @@ runs:
           echo "Ensuring PostgreSQL is running..."
           docker compose up -d postgres
 
-          echo "Waiting for PostgreSQL to be healthy..."
-          timeout 60 bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
+          echo "Waiting for PostgreSQL to be healthy (timeout: ${{ inputs.db-ready-timeout }}s)..."
+          timeout ${{ inputs.db-ready-timeout }} bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
 
           echo "Running Strapi database migrations..."
           if docker compose run --rm --no-deps api npm run strapi -- database:migrate 2>&1 | tee /tmp/migration.log; then
