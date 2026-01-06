@@ -1,6 +1,23 @@
 name: 'Rollback Deployment'
 description: 'Rollback to previous deployment from backup'
 
+# ⚠️ LIMITATIONS
+# This rollback action only restores:
+# - Docker Compose configuration (docker-compose.yml)
+# - Environment variables (.env file)
+# - Docker images (pulls previous versions)
+#
+# NOT restored by this action:
+# - Database migrations (Strapi migrations are forward-only)
+# - Nginx configuration changes (requires manual intervention)
+# - External service state (Stripe webhooks, third-party integrations)
+# - Uploaded media files (stored in ImageKit, not affected)
+#
+# MANUAL INTERVENTION REQUIRED if:
+# - Database schema was modified (restore from PostgreSQL backup)
+# - Nginx config changed (restore /etc/nginx/sites-available manually)
+# - SSL certificates updated (no rollback needed, cert renewal is idempotent)
+
 inputs:
   ssh-user:
     description: 'SSH user'
