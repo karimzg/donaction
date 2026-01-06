@@ -2,6 +2,7 @@ import getBrevoInstance from './getBrevoInstance';
 import * as fs from 'fs';
 
 const BREVO_TEMPLATES = {
+    ADMIN_ALERT: 27,
     FORGOT_PASSWORD: 9,
     MEMBER_INVITATION: 5,
     MEMBER_RELAUNCH: 24,
@@ -37,7 +38,7 @@ async function sendBrevoTransacEmail(props: any) {
                 to:
                     process.env.EMAIL_BREVO_ENV !== 'prod'
                         ? [
-                              { email: 'hamach78@gmail.com' },
+                              // { email: 'hamach78@gmail.com' },
                               { email: 'k.zgoulli@gmail.com' },
                           ]
                         : props.to,

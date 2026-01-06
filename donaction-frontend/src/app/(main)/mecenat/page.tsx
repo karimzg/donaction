@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/mecenat-klubr.png?updatedAt=1728301399306',
+					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/mecenat-donaction.png',
 					width: 800,
 					height: 385,
 					alt: 'Le mécénat simplifié',
@@ -65,7 +65,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/klubr/tr:w-1200,ar-1.91-1/Pages/mecenat-klubr.png?updatedAt=1728301399306',
+			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/mecenat-donaction.png',
 			width: '800',
 			height: '385',
 		},
@@ -80,7 +80,7 @@ export default async function Page() {
 				<SlideMecenat
 					isRounded
 					slides={mecenatResult?.data?.attributes?.slider || []}
-					imageUrl={'https://ik.imagekit.io/klubr/Pages/mecenat-klubr.png?updatedAt=1728301399306'}
+					imageUrl={'https://ik.imagekit.io/donaction/Pages/mecenat-donaction.png'}
 				/>
 			</div>
 			<DescriptionMecenat />

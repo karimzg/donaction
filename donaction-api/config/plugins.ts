@@ -46,7 +46,7 @@ export default ({ env }: { env: any }) => ({
                 ),
                 urlEndpoint: env(
                     'IMAGEKIT_URL_ENDPOINT',
-                    'https://ik.imagekit.io/klubr',
+                    'https://ik.imagekit.io/donaction',
                 ),
                 params: {
                     folderAvatars: env('IMAGEKIT_STRAPI_AVATAR_FOLDER', '/11'),

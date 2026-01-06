@@ -125,4 +125,4 @@ https://drive.google.com/file/d/1pa-5abK5j3SZqg90r81atc5m3Am2WEZV/view?usp=drive
 - `validator`
 - `submit`
 
-v1
+v1.2

@@ -103,6 +103,10 @@ These variables are read when the container starts. They can be changed by updat
 | `EMAIL_BREVO_API_KEY` | Brevo API key | Yes |
 | `GOOGLE_RECAPTCHA_SITE_KEY` | reCAPTCHA key | No |
 | `GOOGLE_MAPS_API_KEY` | Maps API key | No |
+| `GOOGLE_PROJECT_NUMBER` | GCP project number (for API key management) | No |
+| `GOOGLE_API_KEY_ID` | GCP API key identifier (for restriction updates) | No |
+| `GOOGLE_PROJECT_ID` | GCP project ID (for reCAPTCHA Enterprise) | No |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to GCP service account JSON file | No |
 
 ---
 

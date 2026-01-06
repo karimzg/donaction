@@ -16,6 +16,7 @@ import {
     checkSvgAndTransform,
     MEDIAS_TRANSFORMATIONS,
 } from '../../../helpers/medias';
+import { slugify } from '../../../helpers/string';
 
 export default factories.createCoreService(
     'api::klubr.klubr',
@@ -130,6 +131,34 @@ export default factories.createCoreService(
             } else {
                 return docStatus;
             }
+        },
+
+        /**
+         * Generate a unique slug for a klubr based on its denomination.
+         * Tries base slug, then -2, -3 suffixes. Throws error after 3 collisions.
+         */
+        async getSlug(denomination: string): Promise<string> {
+            const baseSlug = slugify(denomination);
+            const MAX_ATTEMPTS = 3;
+
+            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+                const candidateSlug =
+                    attempt === 1 ? baseSlug : `${baseSlug}-${attempt}`;
+
+                const existing = await strapi.db
+                    .query('api::klubr.klubr')
+                    .findOne({
+                        where: { slug: candidateSlug },
+                    });
+
+                if (!existing) {
+                    return candidateSlug;
+                }
+            }
+
+            throw new Error(
+                `Impossible de générer un identifiant unique pour "${denomination}" après ${MAX_ATTEMPTS} tentatives. Une association avec la même dénomination existe peut-être déjà.`,
+            );
         },
     }),
 );

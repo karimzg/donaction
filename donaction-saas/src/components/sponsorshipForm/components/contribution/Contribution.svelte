@@ -117,7 +117,7 @@
   <!--{#if rejectedContribution || DEFAULT_VALUES.contributionAKlubr === 0}-->
   <!--  <div class="videoPlayerContainer">-->
   <!--    <VideoPlayer-->
-  <!--      src="https://ik.imagekit.io/klubr/Klubs/klubr/House/klubr_house_d2307f7ea5_c8xlQ7qIN.mp4"-->
+  <!--      src="https://ik.imagekit.io/donaction/Klubs/klubr/House/klubr_house_d2307f7ea5_c8xlQ7qIN.mp4"-->
   <!--    />-->
   <!--  </div>-->
   <!--{/if}-->

@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Media } from "@shared/utils/models/media";
 
-const providerURL = 'https://ik.imagekit.io/klubr/';
+const providerURL = 'https://ik.imagekit.io/donaction/';
 export type MediaPreset =
   'avatar'
   | 'avatar_big'

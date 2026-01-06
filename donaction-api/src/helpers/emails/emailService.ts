@@ -71,7 +71,7 @@ export default async function sendEmail(emailPayload) {
                       },
                   ]
                 : [
-                      { email: 'hamach78@gmail.com' },
+                      // { email: 'hamach78@gmail.com' },
                       { email: 'k.zgoulli@gmail.com' },
                   ],
         sender: {

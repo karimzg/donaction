@@ -13,6 +13,7 @@ import Milestone from '@/partials/projectPage/milestone';
 interface IProjectDescription {
 	projet: KlubProjet;
 	ourSponsors: ISponsorList;
+    donationEligible?: boolean;
 }
 
 const ProjectDescription: React.FC<IProjectDescription> = (props) => {
@@ -25,6 +26,7 @@ const ProjectDescription: React.FC<IProjectDescription> = (props) => {
 	const getAuthorRole = (membre?: KlubrMembre) => {
 		return membre ? (membre.fonction ? `${membre.fonction}` : '') : '';
 	};
+    const donationEligible = props.donationEligible ?? true;
 
 	return (
 		<div
@@ -59,9 +61,11 @@ const ProjectDescription: React.FC<IProjectDescription> = (props) => {
 					)}
 				</div>
 				<div className={'flex flex-row flex-wrap gap-2 items-center mt-4'}>
-					<Link href='?PAYEMENT_FORM=true' className='btn btn-primary py-[8px] px-[30px]'>
-						Je soutiens le Projet
-					</Link>
+                    {donationEligible && (
+                        <Link href='?PAYEMENT_FORM=true' className='btn btn-primary py-[8px] px-[30px]'>
+                            Je soutiens le Projet
+                        </Link>
+                    )}
 					<div className={'relative'}>
 						<ShareCta
 							size={'default'}

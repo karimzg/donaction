@@ -8,7 +8,7 @@ type ExtendedImageProps = ImageProps & ExtraProps;
 const ImageKit: React.FC<ExtendedImageProps> = (props) => {
 	/* Not Used */
 	/*
-	const providerURL = 'https://ik.imagekit.io/klubr/';
+	const providerURL = 'https://ik.imagekit.io/donaction/';
 	const mediaBreakpoints = config.media_breakpoints;
 	const srcLoader = ({ src, width }) => {
 		if (!src) {

@@ -1,0 +1,56 @@
+name: 'Cleanup Old Images'
+description: 'Remove old Docker images not in use'
+
+inputs:
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+  image-registry:
+    description: 'Docker image registry'
+    required: true
+  retention-hours:
+    description: 'Hours to retain old images'
+    required: false
+    default: '48'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cleanup old images
+      shell: bash
+      run: |
+        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << 'EOF'
+          echo "Cleaning up old Donaction images (keeping last ${{ inputs.retention-hours }}h)..."
+
+          CUTOFF_DATE=$(date -d '${{ inputs.retention-hours }} hours ago' +%s)
+          REPOS=("${{ inputs.image-registry }}/donaction-frontend" "${{ inputs.image-registry }}/donaction-api" "${{ inputs.image-registry }}/donaction-admin" "${{ inputs.image-registry }}/donaction-saas")
+
+          # Get list of images currently in use by running containers
+          RUNNING_IMAGES=$(docker ps --format "{{.Image}}" | sort -u)
+
+          for REPO in "${REPOS[@]}"; do
+            docker images "$REPO" --format "{{.ID}} {{.Repository}}:{{.Tag}} {{.CreatedAt}}" | while read -r IMAGE_ID IMAGE_NAME CREATED; do
+              # Skip images currently in use
+              if echo "$RUNNING_IMAGES" | grep -qF "$IMAGE_NAME"; then
+                echo "Skipping in-use image: $IMAGE_NAME ($IMAGE_ID)"
+                continue
+              fi
+
+              # Use far-future fallback to prevent accidental deletion on parse failure
+              IMAGE_DATE=$(date -d "$CREATED" +%s 2>/dev/null || echo 9999999999)
+              if [[ $IMAGE_DATE -lt $CUTOFF_DATE ]]; then
+                echo "Removing old image: $IMAGE_NAME ($IMAGE_ID)"
+                docker rmi "$IMAGE_ID" 2>/dev/null || true
+              fi
+            done
+          done
+
+          echo "Image cleanup completed"
+        EOF

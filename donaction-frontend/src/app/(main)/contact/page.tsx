@@ -2,14 +2,13 @@ import NeedHelp from '@/partials/mecenatPage/needHelp';
 import ContactUsForm from '@/partials/authentication/contactUsForm';
 import React from 'react';
 import { getContactPage } from '@/core/services/cms';
-import Image from 'next/image';
-import contactUS from '../../../../public/images/icons/contact/contact.svg';
 import './page.scss';
 import { Metadata } from 'next';
 import { SITE_URL } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 import { cookies } from 'next/headers';
 import srcLoader from '@/core/helpers/srcLoader';
+import ImageHtml from "@/components/media/ImageHtml";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const res = await getContactPage(cookies().toString());
@@ -63,6 +62,7 @@ export default async function Page() {
 			height: '374',
 		},
 	};
+    const visuel = content.data.attributes.visuel?.data?.attributes;
 	return (
 		<div className='flex flex-col items-center justify-center gap-16 text-black w-full min-h-[25rem] bg-white z-0 mb-20 mt-10'>
 			<script
@@ -70,13 +70,16 @@ export default async function Page() {
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
 			<div className='grid grid-cols-1 md:grid-cols-2 gap-6 w-full minMaxWidth items-center px-6 md:px-0 md:mt-10'>
-				{/*contactMaxWidth grid grid-cols-1 md:grid-cols-2 gap-6 w-full items-center px-6 md:px-0 md:mt-10 mx-auto*/}
-				{/*// TODO: implement ImageHtml namedtransformation*/}
-				<Image className='md:block hidden mx-auto' src={contactUS as string} alt='contact-us' />
+                {visuel && (<ImageHtml
+                    src={visuel?.url}
+                    alt={visuel?.alternativeText || 'Contactez-nous'}
+                    width={427}
+                    height={324}
+                    className={'md:block hidden mx-auto'}
+                />)}
 				<ContactUsForm
 					title={content.data.attributes.titre}
 					content={content.data.attributes.contenu[0].children[0].text}
-					imageUrl={content.data.attributes.visuel.data.attributes.url}
 				/>
 			</div>
 

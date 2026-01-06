@@ -1,0 +1,31 @@
+name: 'Validate Secrets'
+description: 'Validate that required secrets are configured'
+
+inputs:
+  secrets:
+    description: 'Multiline list of SECRET_NAME:value pairs to validate'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate required secrets
+      shell: bash
+      run: |
+        MISSING=""
+
+        while IFS= read -r line; do
+          [[ -z "$line" ]] && continue
+          KEY="${line%%:*}"
+          VALUE="${line#*:}"
+          if [[ -z "$VALUE" ]]; then
+            MISSING="$MISSING $KEY"
+          fi
+        done <<< "${{ inputs.secrets }}"
+
+        if [[ -n "$MISSING" ]]; then
+          echo "::error::Missing required secrets:$MISSING"
+          exit 1
+        fi
+
+        echo "All required secrets are configured"

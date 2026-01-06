@@ -77,6 +77,8 @@ services:
       - "1537:1437"
     env_file:
       - .env
+    volumes:
+      - ./data/donaction-gcc-config.json:/usr/src/app/donaction-gcc-config.json:ro
     depends_on:
       postgres:
         condition: service_healthy

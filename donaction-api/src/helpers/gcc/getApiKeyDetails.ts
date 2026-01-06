@@ -1,5 +1,6 @@
 import getAccessToken from "./getAccessToken";
 import {API_KEY_URL} from "./endpoints";
+import logger from "../../../config/logger";
 
 
 interface IResponseJSON {
@@ -35,7 +36,10 @@ export default async function getApiKeyDetails(): Promise<IResponseJSON> {
              *     "etag": string
              * }
              */
+            console.log("00 - getApiKeyDetails called");
             const accessToken: string = await getAccessToken();
+            console.log("01 - accessToken", accessToken);
+            console.log("01 - API_KEY_URL", API_KEY_URL);
             const response = await fetch(API_KEY_URL, {
                 method: "GET",
                 headers: {

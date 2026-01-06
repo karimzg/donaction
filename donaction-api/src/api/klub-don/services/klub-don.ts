@@ -452,12 +452,12 @@ export default factories.createCoreService(
                     nom: 'Zgoulli (ADMIN DE KLUBR)',
                     role: { name: 'Admin' },
                 },
-                {
-                    email: 'hamach78@gmail.com',
-                    prenom: 'Med',
-                    nom: 'Chouiref (DEV)',
-                    role: { name: 'Admin' },
-                },
+                // {
+                //     email: 'hamach78@gmail.com',
+                //     prenom: 'Med',
+                //     nom: 'Chouiref (DEV)',
+                //     role: { name: 'Admin' },
+                // },
             ];
             admins
                 .filter((user) => user?.email)

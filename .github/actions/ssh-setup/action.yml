@@ -1,0 +1,36 @@
+name: 'SSH Setup'
+description: 'Setup SSH connection for deployment'
+
+inputs:
+  ssh-private-key:
+    description: 'SSH private key'
+    required: true
+  ssh-host:
+    description: 'SSH host'
+    required: true
+  ssh-user:
+    description: 'SSH user'
+    required: true
+  ssh-port:
+    description: 'SSH port'
+    required: false
+    default: '63009'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup SSH
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ inputs.ssh-private-key }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -p ${{ inputs.ssh-port }} -H ${{ inputs.ssh-host }} >> ~/.ssh/known_hosts
+
+    - name: Validate SSH connection
+      shell: bash
+      run: |
+        if ! ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} "echo 'SSH connection successful'"; then
+          echo "::error::SSH connection failed"
+          exit 1
+        fi

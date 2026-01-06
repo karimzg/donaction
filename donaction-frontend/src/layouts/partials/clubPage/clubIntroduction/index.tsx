@@ -19,6 +19,7 @@ interface IClubIntroduction {
 	slug: string;
 	titleLevel?: 1 | 2;
 	isProject?: KlubProjet;
+    donationEligible?: boolean;
 }
 
 const ClubIntroduction: React.FC<IClubIntroduction> = ({
@@ -31,6 +32,7 @@ const ClubIntroduction: React.FC<IClubIntroduction> = ({
 	slug,
 	titleLevel = 1,
 	isProject,
+    donationEligible = true,
 }) => {
 	const isImage = introMedia && /\.(jpg|jpeg|png|gif|svg)$/i.test(introMedia.url);
 	const isVideo =
@@ -85,6 +87,7 @@ const ClubIntroduction: React.FC<IClubIntroduction> = ({
 					/>
 				)}
 				{!isProject ? (
+                    donationEligible && (
 					<div
 						className={`clubIntroContainer__iSupport bg-[#FFFFFF91] flex flex-col items-center justify-center absolute bottom-0 right-0 p-4 md:rounded-br-3xl rounded-tl-3xl cursor-pointer md:min-w-[115px]`}
 					>
@@ -93,6 +96,7 @@ const ClubIntroduction: React.FC<IClubIntroduction> = ({
 						</Link>
 						<p className='font-black text-black md:text-lg text-base md:leading-3'>Je soutiens</p>
 					</div>
+                    )
 				) : (
 					<TemplateReference
 						projet={isProject}
