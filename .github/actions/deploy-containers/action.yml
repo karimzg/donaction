@@ -38,6 +38,19 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Validate SSH key exists
+      shell: bash
+      run: |
+        if [[ ! -f ~/.ssh/id_rsa ]]; then
+          echo "::error::SSH key not found at ~/.ssh/id_rsa. Run ssh-setup action first."
+          exit 1
+        fi
+        if [[ ! -r ~/.ssh/id_rsa ]]; then
+          echo "::error::SSH key at ~/.ssh/id_rsa is not readable."
+          exit 1
+        fi
+        echo "✓ SSH key validated"
+
     - name: Backup current deployment
       shell: bash
       run: |
