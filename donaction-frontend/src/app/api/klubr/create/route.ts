@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const STRAPI_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1437';
-const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
+const STRAPI_API_TOKEN = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
 
 // Validate environment variables at module load (fail fast)
 if (!STRAPI_API_TOKEN) {
