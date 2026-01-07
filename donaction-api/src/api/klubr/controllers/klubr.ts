@@ -44,6 +44,7 @@ const rollbackCreatedEntities = async (
             });
             results.push({ ...entity, status: 'deleted' });
         } catch (error) {
+            console.error(`❌ Rollback failed for ${entity.uid} (${entity.documentId}):`, error);
             results.push({ ...entity, status: 'failed' });
         }
     }
