@@ -1176,7 +1176,7 @@ Access via `process.env`:
 
 ```typescript
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-const apiToken = process.env.STRAPI_API_TOKEN;
+const apiToken = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
 const nodeEnv = process.env.NODE_ENV;
 ```
 
