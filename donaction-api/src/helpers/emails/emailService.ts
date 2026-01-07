@@ -45,6 +45,11 @@ export const sendEmailViaStrapiProvider = async (
         finalBcc = finalBcc && finalBcc !== '' ? `${finalBcc}, ${ADMIN_EMAIL_BCC}` : ADMIN_EMAIL_BCC;
     }
 
+    // Prefix subject with environment tag when not in production
+    const brevoEnv = process.env.EMAIL_BREVO_ENV || 'dev';
+    const finalSubject =
+        brevoEnv !== 'prod' ? `[${brevoEnv.toUpperCase()}] - ${subject}` : subject;
+
     try {
         const result = await emailService.send({
             to: finalTo,
@@ -53,7 +58,7 @@ export const sendEmailViaStrapiProvider = async (
             bcc: finalBcc,
             replyTo,
             html,
-            subject,
+            subject: finalSubject,
             attachments,
         });
 
