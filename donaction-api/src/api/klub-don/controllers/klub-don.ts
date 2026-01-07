@@ -339,11 +339,13 @@ export default factories.createCoreController(
         async update() {
             const ctx = strapi.requestContext.get();
             try {
-                if (!ctx.request.body?.data['formToken']) {
+                const { formToken, ...cleanData } = ctx.request.body?.data || {};
+                if (!formToken) {
                     return ctx.badRequest('Missing reCaptcha token.');
                 }
+                ctx.request.body.data = cleanData;
                 const result = await createAssessment({
-                    token: ctx.request.body?.data['formToken'],
+                    token: formToken,
                     recaptchaAction: 'UPDATE_DONATION',
                 });
                 if (!result) {
@@ -458,17 +460,18 @@ export default factories.createCoreController(
         async create() {
             const ctx = strapi.requestContext.get();
             try {
-                if (!ctx.request.body?.data['formToken']) {
+                const { formToken, ...cleanData } = ctx.request.body?.data || {};
+                if (!formToken) {
                     return ctx.badRequest('Missing reCaptcha token.');
                 }
+                ctx.request.body.data = cleanData;
                 const result = await createAssessment({
-                    token: ctx.request.body?.data['formToken'],
+                    token: formToken,
                     recaptchaAction: 'CREATE_DONATION',
                 });
                 if (!result) {
                     return ctx.badRequest('Captcha verification failed');
                 }
-                delete ctx.request.body?.data['formToken'];
                 if (ctx.request.body?.data?.klubr) {
                     const klubr: KlubrEntity = await strapi.db
                         .query('api::klubr.klubr')
