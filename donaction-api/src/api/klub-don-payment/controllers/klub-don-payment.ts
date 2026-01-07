@@ -10,7 +10,7 @@ import {
     TradePolicyEntity,
     ConnectedAccountEntity,
 } from '../../../_types';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import {
     findExistingPaymentByIdempotencyKey,
     isValidIdempotencyKey,
@@ -18,9 +18,8 @@ import {
 import {
     calculateApplicationFee,
     logFinancialAction,
+    stripe,
 } from '../../../helpers/stripe-connect-helper';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default factories.createCoreController(
     'api::klub-don-payment.klub-don-payment',
