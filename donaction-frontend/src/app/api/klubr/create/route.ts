@@ -214,10 +214,12 @@ export async function POST(request: NextRequest) {
             error
         );
 
+        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+
         return NextResponse.json(
             {
                 error: 'Erreur interne du serveur',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );
