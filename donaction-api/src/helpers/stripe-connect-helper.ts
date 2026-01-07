@@ -13,12 +13,10 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 /**
- * Centralized Stripe client with validated API key and pinned version.
+ * Centralized Stripe client with validated API key.
  * Use this client everywhere instead of creating new Stripe instances.
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-02-24.acacia',
-});
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /**
  * Business type for Stripe connected accounts
