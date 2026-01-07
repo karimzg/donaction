@@ -2,7 +2,7 @@
  * klubr controller
  */
 
-import { Core, factories } from '@strapi/strapi';
+import { Core, factories, UID } from '@strapi/strapi';
 import { CLUB_STATUS } from '../../../helpers/clubStatus';
 import { COLORS, logBlock } from '../../../helpers/logger';
 import {
@@ -23,7 +23,7 @@ import {
  * Type for tracking created entities during klubr creation
  */
 type CreatedEntity = {
-    uid: string;
+    uid: UID.ContentType;
     documentId: string;
 };
 
@@ -39,7 +39,7 @@ const rollbackCreatedEntities = async (
     for (let i = entities.length - 1; i >= 0; i--) {
         const entity = entities[i];
         try {
-            await strapi.documents(entity.uid as any).delete({
+            await strapi.documents(entity.uid).delete({
                 documentId: entity.documentId,
             });
             results.push({ ...entity, status: 'deleted' });
