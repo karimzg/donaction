@@ -111,4 +111,4 @@ jobs:
         run: ${{ matrix.command }}
         env:
           # Dummy values for build-time validation (not used at runtime)
-          STRAPI_API_TOKEN: ${{ matrix.app == 'frontend' && 'build-placeholder' || '' }}
+          NEXT_PUBLIC_STRAPI_API_TOKEN: ${{ matrix.app == 'frontend' && 'build-placeholder' || '' }}
