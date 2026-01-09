@@ -1,11 +1,7 @@
 ---
-name: "angular-http-service"
-description: "Create Angular HTTP service with proper error handling, interceptors integration, and Observable patterns"
-triggers: ["create service", "HTTP service", "API service", "create repository", "data service", "fetch data", "call api", "HTTP client"]
-tags: ["angular", "http", "service", "rxjs", "typescript"]
-priority: high
-scope: file
-output: code
+name: skill:creating-http-services
+description: Creates Angular HTTP services with error handling and Observable patterns. Use when building API communication in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # Angular HTTP Service with Error Handling

@@ -1,11 +1,7 @@
 ---
-name: "jwt-token-management"
-description: "Manage JWT tokens with Strapi users-permissions plugin including storage, validation, and session management"
-triggers: ["jwt", "token", "authentication", "session", "login", "auth token", "bearer token"]
-tags: ["jwt", "authentication", "strapi", "security", "backend"]
-priority: high
-scope: global
-output: code
+name: skill:managing-jwt-tokens
+description: Manages JWT tokens with Strapi users-permissions plugin for authentication. Use when implementing auth flows in donaction-api.
+model: claude-sonnet-4-5
 ---
 
 # JWT Token Management

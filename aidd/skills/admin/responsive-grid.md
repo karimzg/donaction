@@ -1,11 +1,7 @@
 ---
-name: "responsive-grid-layout"
-description: "Create responsive CSS Grid layout with auto-fill columns and consistent gap spacing for listing pages"
-triggers: ["responsive grid", "grid layout", "listing grid", "auto-fill columns", "CSS Grid", "create grid", "card grid", "responsive layout"]
-tags: ["css", "grid", "responsive", "layout"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-responsive-grids
+description: Creates responsive CSS Grid layouts with auto-fill columns for listing pages. Use when building grid layouts in donaction-admin.
+model: claude-haiku-4-5
 ---
 
 # Responsive Grid Layout

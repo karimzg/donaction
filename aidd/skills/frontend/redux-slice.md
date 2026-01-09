@@ -1,11 +1,7 @@
 ---
-name: "redux-toolkit-slice"
-description: "Create Redux Toolkit slices for global client-side state management"
-triggers: ["redux", "slice", "createSlice", "state management", "global state", "auth state"]
-tags: ["nextjs", "redux", "frontend", "typescript", "state"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-redux-slices
+description: Creates Redux Toolkit slices for global client-side state. Use when adding global state management in donaction-frontend.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Redux Toolkit Slices

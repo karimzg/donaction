@@ -1,11 +1,7 @@
 ---
-name: "strapi-document-service"
-description: "Use Strapi Document Service API for CRUD operations with documentId, draft/publish, and filters"
-triggers: ["document service", "documentId", "findMany", "findOne", "strapi crud", "publish draft", "create document", "update document", "delete document", "query documents"]
-tags: ["strapi", "backend", "api", "typescript", "crud"]
-priority: high
-scope: module
-output: code
+name: skill:using-document-service
+description: Uses Strapi Document Service API for CRUD operations with documentId and draft/publish. Use when querying or modifying data in donaction-api.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Strapi Document Service API
