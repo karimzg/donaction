@@ -19,7 +19,7 @@
     "commissionPercentage": {
       "type": "decimal",
       "required": true,
-      "default": 6
+      "default": 4
     },
     "noBilling": {
       "type": "boolean",
