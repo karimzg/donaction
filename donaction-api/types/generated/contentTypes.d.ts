@@ -2470,6 +2470,8 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         draftAndPublish: false;
     };
     attributes: {
+        allow_donor_fee_choice: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<true>;
         allowKlubrContribution: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<true>;
@@ -2486,6 +2488,10 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         donor_pays_fee: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<false>;
+        donor_pays_fee_club: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<false>;
+        donor_pays_fee_project: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<true>;
         fee_model: Schema.Attribute.Enumeration<
             ['percentage_only', 'fixed_only', 'percentage_plus_fixed']
         > &
