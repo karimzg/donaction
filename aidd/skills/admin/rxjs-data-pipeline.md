@@ -1,11 +1,7 @@
 ---
-name: "rxjs-data-pipeline"
-description: "Create RxJS observable stream with proper operators, error handling, and automatic cleanup using takeUntilDestroyed"
-triggers: ["create observable", "RxJS stream", "data pipeline", "observable chain", "switchMap", "handle stream", "async data", "operator chain"]
-tags: ["rxjs", "angular", "observable", "typescript"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-rxjs-pipelines
+description: Creates RxJS observable streams with operators, error handling, and takeUntilDestroyed cleanup. Use when building async data flows in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # RxJS Data Stream Pipeline

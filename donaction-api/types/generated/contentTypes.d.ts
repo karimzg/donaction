@@ -34,11 +34,18 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
                 minLength: 1;
             }> &
             Schema.Attribute.DefaultTo<''>;
+        encryptedKey: Schema.Attribute.Text &
+            Schema.Attribute.SetMinMaxLength<{
+                minLength: 1;
+            }>;
         expiresAt: Schema.Attribute.DateTime;
         lastUsedAt: Schema.Attribute.DateTime;
         lifespan: Schema.Attribute.BigInteger;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
-        localizations: Schema.Attribute.Relation<'oneToMany', 'admin::api-token'> &
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'admin::api-token'
+        > &
             Schema.Attribute.Private;
         name: Schema.Attribute.String &
             Schema.Attribute.Required &
@@ -51,7 +58,9 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
             'admin::api-token-permission'
         >;
         publishedAt: Schema.Attribute.DateTime;
-        type: Schema.Attribute.Enumeration<['read-only', 'full-access', 'custom']> &
+        type: Schema.Attribute.Enumeration<
+            ['read-only', 'full-access', 'custom']
+        > &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<'read-only'>;
         updatedAt: Schema.Attribute.DateTime;
@@ -129,13 +138,17 @@ export interface AdminPermission extends Struct.CollectionTypeSchema {
             Schema.Attribute.SetMinMaxLength<{
                 minLength: 1;
             }>;
-        actionParameters: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<{}>;
+        actionParameters: Schema.Attribute.JSON &
+            Schema.Attribute.DefaultTo<{}>;
         conditions: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
-        localizations: Schema.Attribute.Relation<'oneToMany', 'admin::permission'> &
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'admin::permission'
+        > &
             Schema.Attribute.Private;
         properties: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<{}>;
         publishedAt: Schema.Attribute.DateTime;
@@ -190,7 +203,10 @@ export interface AdminRole extends Struct.CollectionTypeSchema {
             Schema.Attribute.SetMinMaxLength<{
                 minLength: 1;
             }>;
-        permissions: Schema.Attribute.Relation<'oneToMany', 'admin::permission'>;
+        permissions: Schema.Attribute.Relation<
+            'oneToMany',
+            'admin::permission'
+        >;
         publishedAt: Schema.Attribute.DateTime;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -396,7 +412,10 @@ export interface ApiBlogBlog extends Struct.CollectionTypeSchema {
             Schema.Attribute.Private;
         image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
-        localizations: Schema.Attribute.Relation<'oneToMany', 'api::blog.blog'> &
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::blog.blog'
+        > &
             Schema.Attribute.Private;
         longDescription: Schema.Attribute.RichText & Schema.Attribute.Required;
         nom: Schema.Attribute.String;
@@ -407,8 +426,20 @@ export interface ApiBlogBlog extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -439,6 +470,20 @@ export interface ApiCguKlubCguKlub extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -475,6 +520,94 @@ export interface ApiCguCgu extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
+    };
+}
+
+export interface ApiConnectedAccountConnectedAccount
+    extends Struct.CollectionTypeSchema {
+    collectionName: 'connected_accounts';
+    info: {
+        description: 'Stripe Connect account information for klubrs';
+        displayName: 'Connected Account';
+        pluralName: 'connected-accounts';
+        singularName: 'connected-account';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        account_status: Schema.Attribute.Enumeration<
+            ['pending', 'active', 'restricted', 'disabled']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'pending'>;
+        business_type: Schema.Attribute.Enumeration<
+            ['individual', 'company', 'non_profit']
+        >;
+        capabilities: Schema.Attribute.JSON;
+        charges_enabled: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        country: Schema.Attribute.String & Schema.Attribute.DefaultTo<'FR'>;
+        created_at_stripe: Schema.Attribute.DateTime;
+        createdAt: Schema.Attribute.DateTime;
+        createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        klubr: Schema.Attribute.Relation<'oneToOne', 'api::klubr.klubr'>;
+        last_sync: Schema.Attribute.DateTime;
+        locale: Schema.Attribute.String & Schema.Attribute.Private;
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::connected-account.connected-account'
+        > &
+            Schema.Attribute.Private;
+        onboarding_completed: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        payouts_enabled: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        publishedAt: Schema.Attribute.DateTime;
+        requirements: Schema.Attribute.JSON;
+        stripe_account_id: Schema.Attribute.String &
+            Schema.Attribute.Required &
+            Schema.Attribute.Unique;
+        updatedAt: Schema.Attribute.DateTime;
+        updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
+        verification_status: Schema.Attribute.Enumeration<
+            ['unverified', 'pending', 'verified', 'rejected']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'unverified'>;
     };
 }
 
@@ -510,6 +643,20 @@ export interface ApiContactContact extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': false;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': false;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -542,6 +689,86 @@ export interface ApiFederationFederation extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
+    };
+}
+
+export interface ApiFinancialAuditLogFinancialAuditLog
+    extends Struct.CollectionTypeSchema {
+    collectionName: 'financial_audit_logs';
+    info: {
+        description: 'Audit trail for financial transactions and operations';
+        displayName: 'Financial Audit Log';
+        pluralName: 'financial-audit-logs';
+        singularName: 'financial-audit-log';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        action_type: Schema.Attribute.Enumeration<
+            [
+                'transfer_created',
+                'payout_initiated',
+                'refund_processed',
+                'fee_calculated',
+            ]
+        > &
+            Schema.Attribute.Required;
+        amount: Schema.Attribute.Decimal;
+        createdAt: Schema.Attribute.DateTime;
+        createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'EUR'>;
+        klub_don: Schema.Attribute.Relation<
+            'manyToOne',
+            'api::klub-don.klub-don'
+        >;
+        klubr: Schema.Attribute.Relation<'manyToOne', 'api::klubr.klubr'>;
+        locale: Schema.Attribute.String & Schema.Attribute.Private;
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::financial-audit-log.financial-audit-log'
+        > &
+            Schema.Attribute.Private;
+        metadata: Schema.Attribute.JSON;
+        performed_at: Schema.Attribute.DateTime;
+        performed_by: Schema.Attribute.Relation<
+            'manyToOne',
+            'plugin::users-permissions.user'
+        >;
+        publishedAt: Schema.Attribute.DateTime;
+        stripe_object_id: Schema.Attribute.String;
+        updatedAt: Schema.Attribute.DateTime;
+        updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -572,7 +799,10 @@ export interface ApiInvoiceLineInvoiceLine extends Struct.CollectionTypeSchema {
         isCreditLine: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<false>;
-        klub_dons: Schema.Attribute.Relation<'oneToMany', 'api::klub-don.klub-don'>;
+        klub_dons: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::klub-don.klub-don'
+        >;
         klub_projet: Schema.Attribute.Relation<
             'oneToOne',
             'api::klub-projet.klub-projet'
@@ -595,8 +825,20 @@ export interface ApiInvoiceLineInvoiceLine extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -628,7 +870,8 @@ export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        creditTotalAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+        creditTotalAmount: Schema.Attribute.Decimal &
+            Schema.Attribute.DefaultTo<0>;
         dateBankTransfer: Schema.Attribute.DateTime;
         dateInvoice: Schema.Attribute.Date & Schema.Attribute.Required;
         firstSentEmailDate: Schema.Attribute.DateTime;
@@ -640,7 +883,10 @@ export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
             Schema.Attribute.Required &
             Schema.Attribute.Unique;
         invoicePdfPath: Schema.Attribute.String;
-        klub_dons: Schema.Attribute.Relation<'oneToMany', 'api::klub-don.klub-don'>;
+        klub_dons: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::klub-don.klub-don'
+        >;
         klubr: Schema.Attribute.Relation<'oneToOne', 'api::klubr.klubr'>;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
         localizations: Schema.Attribute.Relation<
@@ -653,8 +899,20 @@ export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         VAT: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     };
 }
@@ -673,6 +931,7 @@ export interface ApiKlubDonPaymentKlubDonPayment
     };
     attributes: {
         amount: Schema.Attribute.BigInteger & Schema.Attribute.Required;
+        application_fee_amount: Schema.Attribute.Decimal;
         client_secret: Schema.Attribute.String & Schema.Attribute.Required;
         created: Schema.Attribute.BigInteger & Schema.Attribute.Required;
         createdAt: Schema.Attribute.DateTime;
@@ -680,8 +939,12 @@ export interface ApiKlubDonPaymentKlubDonPayment
             Schema.Attribute.Private;
         currency: Schema.Attribute.String & Schema.Attribute.Required;
         error_code: Schema.Attribute.String;
+        idempotency_key: Schema.Attribute.String & Schema.Attribute.Unique;
         intent_id: Schema.Attribute.String & Schema.Attribute.Required;
-        klub_don: Schema.Attribute.Relation<'manyToOne', 'api::klub-don.klub-don'>;
+        klub_don: Schema.Attribute.Relation<
+            'manyToOne',
+            'api::klub-don.klub-don'
+        >;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
         localizations: Schema.Attribute.Relation<
             'oneToMany',
@@ -689,11 +952,31 @@ export interface ApiKlubDonPaymentKlubDonPayment
         > &
             Schema.Attribute.Private;
         payment_method: Schema.Attribute.String & Schema.Attribute.Required;
+        platform_fee_amount: Schema.Attribute.Decimal;
         publishedAt: Schema.Attribute.DateTime;
+        refund_status: Schema.Attribute.Enumeration<
+            ['none', 'pending', 'partial', 'full']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'none'>;
         status: Schema.Attribute.String;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -729,7 +1012,10 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
         >;
         isContributionDonation: Schema.Attribute.Boolean &
             Schema.Attribute.DefaultTo<false>;
-        klub_don: Schema.Attribute.Relation<'oneToOne', 'api::klub-don.klub-don'>;
+        klub_don: Schema.Attribute.Relation<
+            'oneToOne',
+            'api::klub-don.klub-don'
+        >;
         klub_don_contribution: Schema.Attribute.Relation<
             'oneToOne',
             'api::klub-don.klub-don'
@@ -773,8 +1059,20 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         withTaxReduction: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<true>;
@@ -813,7 +1111,8 @@ export interface ApiKlubProjetKlubProjet extends Struct.CollectionTypeSchema {
         >;
         isFromTemplate: Schema.Attribute.Boolean &
             Schema.Attribute.DefaultTo<false>;
-        isTemplate: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+        isTemplate: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<false>;
         klubr: Schema.Attribute.Relation<'oneToOne', 'api::klubr.klubr'>;
         klubr_membre: Schema.Attribute.Relation<
             'oneToOne',
@@ -850,7 +1149,14 @@ export interface ApiKlubProjetKlubProjet extends Struct.CollectionTypeSchema {
         slug: Schema.Attribute.UID<'titre'> & Schema.Attribute.Required;
         startDate: Schema.Attribute.Date;
         status: Schema.Attribute.Enumeration<
-            ['draft', 'waitingApproval', 'published', 'closed', 'deleted', 'billed']
+            [
+                'draft',
+                'waitingApproval',
+                'published',
+                'closed',
+                'deleted',
+                'billed',
+            ]
         > &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<'draft'>;
@@ -871,8 +1177,20 @@ export interface ApiKlubProjetKlubProjet extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -907,6 +1225,8 @@ export interface ApiKlubrDocumentKlubrDocument
             'api::klubr-document.klubr-document'
         > &
             Schema.Attribute.Private;
+        managerSignature: Schema.Attribute.JSON;
+        managerSignatureValide: Schema.Attribute.Boolean;
         publishedAt: Schema.Attribute.DateTime;
         ribAssociation: Schema.Attribute.JSON;
         ribAssociationValide: Schema.Attribute.Boolean;
@@ -915,6 +1235,20 @@ export interface ApiKlubrDocumentKlubrDocument
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -947,11 +1281,16 @@ export interface ApiKlubrDonateurKlubrDonateur
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
         dateNaissance: Schema.Attribute.Date;
-        donateurType: Schema.Attribute.Enumeration<['Particulier', 'Organisme']> &
+        donateurType: Schema.Attribute.Enumeration<
+            ['Particulier', 'Organisme']
+        > &
             Schema.Attribute.DefaultTo<'Particulier'>;
         email: Schema.Attribute.Email;
         formeJuridique: Schema.Attribute.String;
-        klubDon: Schema.Attribute.Relation<'oneToOne', 'api::klub-don.klub-don'>;
+        klubDon: Schema.Attribute.Relation<
+            'oneToOne',
+            'api::klub-don.klub-don'
+        >;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
         localizations: Schema.Attribute.Relation<
             'oneToMany',
@@ -976,8 +1315,20 @@ export interface ApiKlubrDonateurKlubrDonateur
             'oneToOne',
             'plugin::users-permissions.user'
         >;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         ville: Schema.Attribute.String;
     };
 }
@@ -1013,7 +1364,6 @@ export interface ApiKlubrHouseKlubrHouse extends Struct.CollectionTypeSchema {
                 'club-presentation.section-citation',
                 'club-presentation.pourquoi-klubr-accompagne',
                 'club-presentation.localisation',
-                'club-presentation.club-presentation',
                 'composant-atoms.section-texte-image',
             ]
         >;
@@ -1037,7 +1387,9 @@ export interface ApiKlubrHouseKlubrHouse extends Struct.CollectionTypeSchema {
             Schema.Attribute.SetMinMaxLength<{
                 maxLength: 300;
             }>;
-        partnerList: Schema.Attribute.DynamicZone<['composant-atoms.partner-item']>;
+        partnerList: Schema.Attribute.DynamicZone<
+            ['composant-atoms.partner-item']
+        >;
         poster_media: Schema.Attribute.Media<'images'>;
         poster_primary_color: Schema.Attribute.String &
             Schema.Attribute.CustomField<'plugin::color-picker.color'>;
@@ -1053,8 +1405,20 @@ export interface ApiKlubrHouseKlubrHouse extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1091,6 +1455,20 @@ export interface ApiKlubrInfoKlubrInfo extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1167,8 +1545,20 @@ export interface ApiKlubrMembreKlubrMembre extends Struct.CollectionTypeSchema {
             'manyToOne',
             'plugin::users-permissions.user'
         >;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1185,7 +1575,9 @@ export interface ApiKlubrSubscriptionKlubrSubscription
         draftAndPublish: false;
     };
     attributes: {
-        apiToken: Schema.Attribute.Text & Schema.Attribute.Unique;
+        apiToken: Schema.Attribute.Text &
+            Schema.Attribute.Private &
+            Schema.Attribute.Unique;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
@@ -1201,8 +1593,20 @@ export interface ApiKlubrSubscriptionKlubrSubscription
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         web_component: Schema.Attribute.String & Schema.Attribute.Required;
     };
 }
@@ -1242,6 +1646,10 @@ export interface ApiKlubrKlubr extends Struct.CollectionTypeSchema {
             Schema.Attribute.DefaultTo<'Sport'>;
         code: Schema.Attribute.String & Schema.Attribute.Unique;
         codeLeader: Schema.Attribute.String & Schema.Attribute.Unique;
+        connected_account: Schema.Attribute.Relation<
+            'oneToOne',
+            'api::connected-account.connected-account'
+        >;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
@@ -1305,7 +1713,10 @@ export interface ApiKlubrKlubr extends Struct.CollectionTypeSchema {
             ]
         >;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
-        localizations: Schema.Attribute.Relation<'oneToMany', 'api::klubr.klubr'> &
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::klubr.klubr'
+        > &
             Schema.Attribute.Private;
         logo: Schema.Attribute.Media<'images'>;
         nbBenevoles: Schema.Attribute.Integer;
@@ -1381,7 +1792,9 @@ export interface ApiKlubrKlubr extends Struct.CollectionTypeSchema {
             ]
         > &
             Schema.Attribute.DefaultTo<'Football'>;
-        status: Schema.Attribute.Enumeration<['draft', 'published', 'deleted']> &
+        status: Schema.Attribute.Enumeration<
+            ['draft', 'published', 'deleted']
+        > &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<'draft'>;
         template_projects_libraries: Schema.Attribute.Relation<
@@ -1395,8 +1808,20 @@ export interface ApiKlubrKlubr extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         webSite: Schema.Attribute.String;
     };
 }
@@ -1445,6 +1870,20 @@ export interface ApiMecenatReassuranceMecenatReassurance
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1475,6 +1914,20 @@ export interface ApiNewsletterNewsletter extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1509,8 +1962,20 @@ export interface ApiPageContactPageContact extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         visuel: Schema.Attribute.Media<'images'>;
     };
 }
@@ -1545,6 +2010,20 @@ export interface ApiPageCookiePageCookie extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1571,7 +2050,10 @@ export interface ApiPageHomePageHome extends Struct.SingleTypeSchema {
             'oneToMany',
             'api::klub-projet.klub-projet'
         >;
-        klubrs_featured: Schema.Attribute.Relation<'oneToMany', 'api::klubr.klubr'>;
+        klubrs_featured: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::klubr.klubr'
+        >;
         locale: Schema.Attribute.String & Schema.Attribute.Private;
         localizations: Schema.Attribute.Relation<
             'oneToMany',
@@ -1580,7 +2062,9 @@ export interface ApiPageHomePageHome extends Struct.SingleTypeSchema {
             Schema.Attribute.Private;
         metaDescription: Schema.Attribute.Text;
         metaTitle: Schema.Attribute.String;
-        partnerList: Schema.Attribute.DynamicZone<['composant-atoms.partner-item']>;
+        partnerList: Schema.Attribute.DynamicZone<
+            ['composant-atoms.partner-item']
+        >;
         publishedAt: Schema.Attribute.DateTime;
         slider: Schema.Attribute.DynamicZone<['composant-atoms.slider-hp']>;
         slug: Schema.Attribute.UID;
@@ -1588,8 +2072,20 @@ export interface ApiPageHomePageHome extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1618,6 +2114,20 @@ export interface ApiPageListeDonPageListeDon extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1657,6 +2167,89 @@ export interface ApiPageMecenatPageMecenat extends Struct.SingleTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
+    };
+}
+
+export interface ApiReceiptCancellationReceiptCancellation
+    extends Struct.CollectionTypeSchema {
+    collectionName: 'receipt_cancellations';
+    info: {
+        description: 'Donation receipt cancellation workflow';
+        displayName: 'Receipt Cancellation';
+        pluralName: 'receipt-cancellations';
+        singularName: 'receipt-cancellation';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        cancellation_reason: Schema.Attribute.Enumeration<
+            ['donor_request', 'duplicate', 'error', 'fraud', 'other']
+        > &
+            Schema.Attribute.Required;
+        createdAt: Schema.Attribute.DateTime;
+        createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        locale: Schema.Attribute.String & Schema.Attribute.Private;
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::receipt-cancellation.receipt-cancellation'
+        > &
+            Schema.Attribute.Private;
+        notes: Schema.Attribute.Text;
+        original_donation: Schema.Attribute.Relation<
+            'manyToOne',
+            'api::klub-don.klub-don'
+        >;
+        processed_at: Schema.Attribute.DateTime;
+        processed_by: Schema.Attribute.Relation<
+            'manyToOne',
+            'plugin::users-permissions.user'
+        >;
+        publishedAt: Schema.Attribute.DateTime;
+        refund_amount: Schema.Attribute.Decimal;
+        refund_stripe_id: Schema.Attribute.String;
+        requested_at: Schema.Attribute.DateTime;
+        requested_by: Schema.Attribute.Relation<
+            'manyToOne',
+            'plugin::users-permissions.user'
+        >;
+        status: Schema.Attribute.Enumeration<
+            ['pending', 'approved', 'rejected', 'completed']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'pending'>;
+        updatedAt: Schema.Attribute.DateTime;
+        updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1747,8 +2340,20 @@ export interface ApiTemplateProjectsCategoryTemplateProjectsCategory
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -1835,8 +2440,20 @@ export interface ApiTemplateProjectsLibraryTemplateProjectsLibrary
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         weight: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     };
 }
@@ -1853,6 +2470,8 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         draftAndPublish: false;
     };
     attributes: {
+        allow_donor_fee_choice: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<true>;
         allowKlubrContribution: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<true>;
@@ -1866,6 +2485,19 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         defaultTradePolicy: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<false>;
+        donor_pays_fee: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        donor_pays_fee_club: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<false>;
+        donor_pays_fee_project: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<true>;
+        fee_model: Schema.Attribute.Enumeration<
+            ['percentage_only', 'fixed_only', 'percentage_plus_fixed']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'percentage_only'>;
+        fixed_amount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
         klubDonationDescription: Schema.Attribute.String;
         klubDonationPercentage: Schema.Attribute.Decimal &
             Schema.Attribute.DefaultTo<0>;
@@ -1877,16 +2509,90 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         > &
             Schema.Attribute.Private;
         noBilling: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-        perDonationCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+        perDonationCost: Schema.Attribute.Decimal &
+            Schema.Attribute.DefaultTo<0>;
         publishedAt: Schema.Attribute.DateTime;
         reference: Schema.Attribute.String;
+        stripe_connect: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<true>;
         tradePolicyLabel: Schema.Attribute.String & Schema.Attribute.Required;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
         VATPercentage: Schema.Attribute.Decimal &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<20>;
+    };
+}
+
+export interface ApiWebhookLogWebhookLog extends Struct.CollectionTypeSchema {
+    collectionName: 'webhook_logs';
+    info: {
+        description: 'Stripe webhook event logs';
+        displayName: 'Webhook Log';
+        pluralName: 'webhook-logs';
+        singularName: 'webhook-log';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        account_id: Schema.Attribute.String;
+        createdAt: Schema.Attribute.DateTime;
+        createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        error_message: Schema.Attribute.Text;
+        event_id: Schema.Attribute.String &
+            Schema.Attribute.Required &
+            Schema.Attribute.Unique;
+        event_type: Schema.Attribute.String & Schema.Attribute.Required;
+        locale: Schema.Attribute.String & Schema.Attribute.Private;
+        localizations: Schema.Attribute.Relation<
+            'oneToMany',
+            'api::webhook-log.webhook-log'
+        > &
+            Schema.Attribute.Private;
+        payload: Schema.Attribute.JSON;
+        processed: Schema.Attribute.Boolean &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<false>;
+        processed_at: Schema.Attribute.DateTime;
+        publishedAt: Schema.Attribute.DateTime;
+        retry_count: Schema.Attribute.Integer &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<0>;
+        updatedAt: Schema.Attribute.DateTime;
+        updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+            Schema.Attribute.Private;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -2115,7 +2821,10 @@ export interface PluginReviewWorkflowsWorkflowStage
         > &
             Schema.Attribute.Private;
         name: Schema.Attribute.String;
-        permissions: Schema.Attribute.Relation<'manyToMany', 'admin::permission'>;
+        permissions: Schema.Attribute.Relation<
+            'manyToMany',
+            'admin::permission'
+        >;
         publishedAt: Schema.Attribute.DateTime;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -2153,7 +2862,10 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
         ext: Schema.Attribute.String;
-        folder: Schema.Attribute.Relation<'manyToOne', 'plugin::upload.folder'> &
+        folder: Schema.Attribute.Relation<
+            'manyToOne',
+            'plugin::upload.folder'
+        > &
             Schema.Attribute.Private;
         folderPath: Schema.Attribute.String &
             Schema.Attribute.Required &
@@ -2205,7 +2917,10 @@ export interface PluginUploadFolder extends Struct.CollectionTypeSchema {
         };
     };
     attributes: {
-        children: Schema.Attribute.Relation<'oneToMany', 'plugin::upload.folder'>;
+        children: Schema.Attribute.Relation<
+            'oneToMany',
+            'plugin::upload.folder'
+        >;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
@@ -2395,7 +3110,9 @@ export interface PluginUsersPermissionsUser
             'manyToOne',
             'plugin::users-permissions.role'
         >;
-        status: Schema.Attribute.Enumeration<['pending', 'validated', 'deleted']> &
+        status: Schema.Attribute.Enumeration<
+            ['pending', 'validated', 'deleted']
+        > &
             Schema.Attribute.DefaultTo<'pending'>;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -2405,8 +3122,20 @@ export interface PluginUsersPermissionsUser
             Schema.Attribute.SetMinMaxLength<{
                 minLength: 3;
             }>;
-        uuid: Schema.Attribute.UID &
-            Schema.Attribute.CustomField<'plugin::strapi-advanced-uuid.uuid'>;
+        uuid: Schema.Attribute.UID<
+            undefined,
+            {
+                'disable-auto-fill': true;
+                'disable-regenerate': true;
+            }
+        > &
+            Schema.Attribute.CustomField<
+                'plugin::strapi-advanced-uuid.uuid',
+                {
+                    'disable-auto-fill': true;
+                    'disable-regenerate': true;
+                }
+            >;
     };
 }
 
@@ -2423,8 +3152,10 @@ declare module '@strapi/strapi' {
             'api::blog.blog': ApiBlogBlog;
             'api::cgu-klub.cgu-klub': ApiCguKlubCguKlub;
             'api::cgu.cgu': ApiCguCgu;
+            'api::connected-account.connected-account': ApiConnectedAccountConnectedAccount;
             'api::contact.contact': ApiContactContact;
             'api::federation.federation': ApiFederationFederation;
+            'api::financial-audit-log.financial-audit-log': ApiFinancialAuditLogFinancialAuditLog;
             'api::invoice-line.invoice-line': ApiInvoiceLineInvoiceLine;
             'api::invoice.invoice': ApiInvoiceInvoice;
             'api::klub-don-payment.klub-don-payment': ApiKlubDonPaymentKlubDonPayment;
@@ -2444,9 +3175,11 @@ declare module '@strapi/strapi' {
             'api::page-home.page-home': ApiPageHomePageHome;
             'api::page-liste-don.page-liste-don': ApiPageListeDonPageListeDon;
             'api::page-mecenat.page-mecenat': ApiPageMecenatPageMecenat;
+            'api::receipt-cancellation.receipt-cancellation': ApiReceiptCancellationReceiptCancellation;
             'api::template-projects-category.template-projects-category': ApiTemplateProjectsCategoryTemplateProjectsCategory;
             'api::template-projects-library.template-projects-library': ApiTemplateProjectsLibraryTemplateProjectsLibrary;
             'api::trade-policy.trade-policy': ApiTradePolicyTradePolicy;
+            'api::webhook-log.webhook-log': ApiWebhookLogWebhookLog;
             'plugin::content-releases.release': PluginContentReleasesRelease;
             'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
             'plugin::i18n.locale': PluginI18NLocale;

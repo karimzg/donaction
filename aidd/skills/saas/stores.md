@@ -1,11 +1,7 @@
 ---
-name: "svelte-stores"
-description: "Create Svelte stores for cross-component shared state with writable, readable, and derived patterns"
-triggers: ["svelte store", "writable", "readable", "derived", "shared state", "store pattern"]
-tags: ["svelte", "saas", "state", "typescript"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-svelte-stores
+description: Creates Svelte stores for cross-component shared state. Use when building shared state in donaction-saas widgets.
+model: claude-haiku-4-5
 ---
 
 # Skill: Svelte Stores

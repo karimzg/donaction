@@ -131,6 +131,9 @@ jobs:
             STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}
             NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}
             KLUBR_UUID:${{ vars.KLUBR_UUID }}
+            EMAIL_SMTP_USER:${{ secrets.EMAIL_SMTP_USER }}
+            EMAIL_SMTP_PASS:${{ secrets.EMAIL_SMTP_PASS }}
+            ADMIN_EMAIL_BCC:${{ secrets.ADMIN_EMAIL_BCC }}
 
       - name: Validate Docker Compose v2
         run: |
@@ -205,6 +208,9 @@ jobs:
           export STRIPE_PUBLIC_KEY="${{ secrets.STRIPE_PUBLIC_KEY }}"
           export VITE_ACTIVATE_ANALYTICS="${{ vars.VITE_ACTIVATE_ANALYTICS }}"
           export PLAUSIBLE_DATA_DOMAIN="${{ vars.PLAUSIBLE_DATA_DOMAIN }}"
+          export EMAIL_SMTP_USER="${{ secrets.EMAIL_SMTP_USER }}"
+          export EMAIL_SMTP_PASS="${{ secrets.EMAIL_SMTP_PASS }}"
+          export ADMIN_EMAIL_BCC="${{ secrets.ADMIN_EMAIL_BCC }}"
 
           envsubst < .github/templates/env.staging.template > /tmp/.env.staging
 

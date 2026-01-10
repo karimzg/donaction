@@ -1,11 +1,7 @@
 ---
-name: "nextjs-server-components"
-description: "Create Next.js server components with async data fetching and no client-side interactivity"
-triggers: ["server component", "async component", "fetch data", "page component", "layout", "SSR component", "static page", "server render"]
-tags: ["nextjs", "react", "frontend", "typescript", "server"]
-priority: high
-scope: file
-output: code
+name: skill:creating-server-components
+description: Creates Next.js server components with async data fetching. Use when building pages or layouts in donaction-frontend that need SSR data.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Next.js Server Components

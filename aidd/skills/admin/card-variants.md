@@ -1,11 +1,7 @@
 ---
-name: "card-component-variants"
-description: "Create card component with multiple style variants (default, elevated, flat, interactive) following design system patterns"
-triggers: ["card component", "card variants", "card styles", "content container", "create card", "card design", "container component", "display card"]
-tags: ["component", "card", "design-system", "ui"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-card-components
+description: Creates card components with style variants (default, elevated, flat, interactive). Use when building reusable content containers in donaction-admin.
+model: claude-haiku-4-5
 ---
 
 # Card Component with Variants

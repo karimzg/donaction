@@ -1,4 +1,5 @@
 import { Data } from '@strapi/strapi';
+import Stripe from 'stripe';
 
 export type BlogEntity = Data.ContentType<'api::blog.blog'>;
 export type CguEntity = Data.ContentType<'api::cgu.cgu'>;
@@ -40,6 +41,12 @@ export type TemplateProjectsLibraryEntity =
     Data.ContentType<'api::template-projects-library.template-projects-library'>;
 export type TradePolicyEntity =
     Data.ContentType<'api::trade-policy.trade-policy'>;
+export type ConnectedAccountEntity =
+    Data.ContentType<'api::connected-account.connected-account'>;
+export type FinancialAuditLogEntity =
+    Data.ContentType<'api::financial-audit-log.financial-audit-log'>;
+export type ReceiptCancellationEntity =
+    Data.ContentType<'api::receipt-cancellation.receipt-cancellation'>;
 
 export type UserEntity = Data.ContentType<'plugin::users-permissions.user'>;
 export type UserRoleEntity = Data.ContentType<'plugin::users-permissions.role'>;
@@ -62,4 +69,32 @@ export type LifecycleEvent<T> = {
     };
     result?: T;
     model: string;
+};
+
+/**
+ * Stripe webhook payload types
+ * Union type covering all possible Stripe Connect webhook event payloads
+ */
+export type StripeWebhookPayload =
+    | Stripe.Account
+    | Stripe.BankAccount
+    | Stripe.Card
+    | Stripe.Capability
+    | Stripe.Person
+    | Stripe.AccountSession
+    | Stripe.ExternalAccount;
+
+/**
+ * Webhook log entity for storing Stripe webhook events
+ */
+export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log'> & {
+    id?: number;
+    documentId?: string;
+    event_id: string;
+    event_type: string;
+    account_id?: string;
+    payload: StripeWebhookPayload;
+    processed: boolean;
+    retry_count: number;
+    error_message?: string;
 };

@@ -1,11 +1,7 @@
 ---
-name: "strapi-controllers"
-description: "Create Strapi controllers with factory pattern, sanitization, and custom routes"
-triggers: ["controller", "strapi controller", "custom endpoint", "override crud", "route handler", "api endpoint", "rest api", "sanitize query", "create controller", "update controller"]
-tags: ["strapi", "backend", "controller", "api", "typescript"]
-priority: high
-scope: module
-output: code
+name: skill:creating-strapi-controllers
+description: Creates Strapi controllers with factory pattern, sanitization, and custom routes. Use when building REST API endpoints in donaction-api.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Strapi Controllers

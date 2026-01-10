@@ -1,11 +1,7 @@
 ---
-name: "primeng-styled-component"
-description: "Create Angular component styled with PrimeNG components, TailwindCSS utilities, and custom SCSS"
-triggers: ["PrimeNG component", "styled component", "UI component", "PrimeNG table", "PrimeNG dialog", "create table", "add dialog", "primeng button"]
-tags: ["angular", "primeng", "tailwind", "scss", "ui"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-primeng-components
+description: Creates Angular components styled with PrimeNG, TailwindCSS, and custom SCSS. Use when building tables, dialogs, or UI elements in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # PrimeNG Styled Component

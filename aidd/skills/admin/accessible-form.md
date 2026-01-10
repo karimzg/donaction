@@ -1,11 +1,7 @@
 ---
-name: "accessible-form-component"
-description: "Create accessible form component with proper ARIA labels, keyboard navigation, and screen reader support"
-triggers: ["accessible form", "ARIA labels", "form accessibility", "keyboard navigation", "screen reader", "a11y form", "wcag compliance", "form semantics"]
-tags: ["accessibility", "forms", "aria", "a11y", "angular"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-accessible-forms
+description: Creates accessible form components with ARIA labels, keyboard navigation, and screen reader support. Use when building a11y-compliant forms in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # Accessible Form Component

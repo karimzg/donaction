@@ -15,12 +15,18 @@ const GET_DON_CGU = '/api/cgu';
 const GET_PROJECTS_FOR_CLUB = (uuid: string) =>
   `/api/klub-projets/byKlub/${uuid}?sort[0]=createdAt:desc&pagination[page]=1&pagination[pageSize]=20&filters[status][$eq]=published`;
 
-export const createPaymentIntent = (price: number) =>
+export const createPaymentIntent = (
+  price: number,
+  idempotencyKey?: string,
+  donorPaysFee?: boolean
+): Promise<{ intent: string; reused: boolean }> =>
   Fetch({
     endpoint: CREATE_PAYMENT_INTENT,
     method: 'POST',
     data: {
       price,
+      idempotencyKey,
+      donorPaysFee,
       metadata: {
         donUuid: FORM_CONFIG.donUuid,
         klubUuid: SUBSCRIPTION.klubr.uuid,

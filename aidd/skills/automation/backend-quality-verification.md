@@ -1,11 +1,7 @@
 ---
-name: "backend-quality-verification"
-description: "Automated quality checks for backend completion - duplication check, reuse validation, type generation, and build pipeline"
-triggers: ["verify backend", "check backend quality", "backend complete", "quality verification", "verify api", "check strapi"]
-tags: ["backend", "strapi", "quality", "typescript", "automation"]
-priority: high
-scope: module
-output: analysis
+name: skill:verifying-backend-quality
+description: Runs automated quality checks for backend completion including duplication, types, and build. Use after completing backend features.
+model: claude-opus-4-5
 ---
 
 # Backend Quality Verification

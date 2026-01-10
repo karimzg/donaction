@@ -28,5 +28,10 @@
   "includeCoAuthoredBy": false,
   "enableAllProjectMcpServers": true,
   "skipWebFetchPreflight": true,
-  "outputStyle": "aidd-style"
+  "outputStyle": "aidd-style",
+  "statusLine": {
+    "type": "command",
+    "command": ".claude/statusline.sh",
+    "padding": 0
+  }
 }

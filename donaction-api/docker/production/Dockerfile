@@ -70,7 +70,7 @@ RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
     echo 'GOOGLE_RECAPTCHA_SITE_KEY="'"${GOOGLE_RECAPTCHA_SITE_KEY}"'"' >> .env && \
     echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env && \
     echo 'STRAPI_PUBLIC_URL="'"${STRAPI_PUBLIC_URL}"'"' >> .env
-RUN cat .env
+# SECURITY: Never log .env contents - secrets would be exposed in CI/CD logs
 RUN npm run build
 
 ## Compile config TypeScript files to JavaScript for production

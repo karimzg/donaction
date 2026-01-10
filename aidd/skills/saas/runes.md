@@ -1,11 +1,7 @@
 ---
-name: "svelte-runes"
-description: "Use Svelte 5 runes ($state, $derived, $effect, $props) for reactive components"
-triggers: ["$state", "$derived", "$effect", "$props", "svelte 5", "runes", "reactive", "reactive state", "computed value", "side effect", "svelte reactivity"]
-tags: ["svelte", "saas", "reactivity", "typescript"]
-priority: high
-scope: file
-output: code
+name: skill:using-svelte-runes
+description: Uses Svelte 5 runes ($state, $derived, $effect, $props) for reactive components. Use when building reactive UI in donaction-saas.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Svelte 5 Runes

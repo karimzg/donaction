@@ -65,6 +65,9 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 .angular
 
-# leagacy
+# playwright
+.playwright-mcp
+
+# legacy
 /logs
 /docker-compose

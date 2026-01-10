@@ -8,7 +8,7 @@ Platform for associations to receive and manage sponsorships/donations.
 
 Get the network IP address of the PostgreSQL container:
 ```bash
-docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PROJECT_SLUG}_postgres_v5
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PROJECT_SLUG}_postgres
 ```
 Replace `${PROJECT_SLUG}` by `donaction`
 
