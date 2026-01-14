@@ -232,7 +232,14 @@ export default factories.createCoreController(
                     logo: true,
                     klubr_house: true,
                     trade_policy: {
-                        fields: ['allowKlubrContribution'],
+                        fields: [
+                            'allowKlubrContribution',
+                            'stripe_connect',
+                            'allow_donor_fee_choice',
+                            'donor_pays_fee_project',
+                            'donor_pays_fee_club',
+                            'commissionPercentage',
+                        ],
                     },
                 },
             };

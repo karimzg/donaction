@@ -51,6 +51,7 @@ const defVals = {
   withTaxReduction: true,
   montant: NaN,
   contributionAKlubr: NaN,
+  donorPaysFee: false,
   socialReason: '',
   siren: '',
   legalForm: '',

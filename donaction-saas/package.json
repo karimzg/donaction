@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "dev:build": "vite build --config vite.config.development.ts",
+    "dev:watch": "vite build --config vite.config.development.ts --watch",
+    "dev:serve": "vite --port 3100",
     "test": "vitest",
     "build": "BUILD_MODE=INDIVIDUAL vite build"
   },
