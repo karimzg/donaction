@@ -11,6 +11,51 @@ This documentation provides an overview of the Sponsorship Form web-component, d
 4. [Validation](#validation)
 5. [API Integration](#api-integration)
 6. [Customization and Usage](#customization-and-usage)
+7. [Development Setup](#development-setup)
+
+---
+
+## Development Setup
+
+### Prerequisites
+- API running on `localhost:1437`
+- Node.js installed
+
+### Scripts
+| Command | Description |
+|---------|-------------|
+| `npm run dev:build` | One-time build to `public/` |
+| `npm run dev:watch` | Build + watch for changes |
+| `npm run dev:serve` | Vite server on port 3100 |
+
+### Workflow (2 terminals)
+```bash
+# Terminal 1 - Watch for changes
+npm run dev:watch
+
+# Terminal 2 - Serve application
+npm run dev:serve
+```
+
+### Daily Token Update
+The `apiToken` in `index.html` (line 7) expires daily. Generate a new one:
+
+**Endpoint:** `POST http://localhost:1437/api/klubr-subscriptions`
+
+**Payload:**
+```json
+{
+    "data": {
+        "web_component": "KlubrSponsorshipForm",
+        "host": "http://localhost:3100"
+    }
+}
+```
+
+Copy the token from response and update `index.html` line 7.
+
+### klubrUuid Configuration
+The `klubrUuid` attribute in `index.html` (line 11) must be a valid UUID from your local donaction database.
 
 ---
 https://drive.google.com/file/d/1pa-5abK5j3SZqg90r81atc5m3Am2WEZV/view?usp=drive_link

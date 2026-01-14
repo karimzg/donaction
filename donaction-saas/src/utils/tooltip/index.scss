@@ -28,11 +28,21 @@
       right: unset;
     }
 
+    &.left {
+      left: 0;
+      right: unset;
+      transform: none;
+    }
+
     @media screen and (max-width: 768px) {
       max-width: 80dvw;
       &.md-left-14 {
         left: 50%;
         right: 50%;
+      }
+      &.left {
+        left: 0;
+        transform: none;
       }
     }
 
