@@ -18,12 +18,37 @@
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
   import resendFiles from '../../../../../../assets/icons/resendFiles.svg';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
-  import { calculateTaxReduction } from '../../../../logic/utils';
+  import { calculateTaxReduction, calculateFeeAmount, formatCurrency } from '../../../../logic/utils';
 
   const cgu = $state({
     title: '',
     content: []
   });
+
+  // Trade policy derived values
+  const tradePolicy = $derived(SUBSCRIPTION.klubr?.trade_policy);
+  const isStripeConnect = $derived(tradePolicy?.stripe_connect === true);
+  const allowDonorFeeChoice = $derived(tradePolicy?.allow_donor_fee_choice ?? true);
+  const showFeeChoice = $derived(isStripeConnect && allowDonorFeeChoice);
+
+  // Determine if project or club donation
+  const isProjectDonation = $derived(
+    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+  );
+
+  // Default value based on donation type
+  const defaultDonorPaysFee = $derived(
+    isProjectDonation
+      ? (tradePolicy?.donor_pays_fee_project ?? true)
+      : (tradePolicy?.donor_pays_fee_club ?? false)
+  );
+
+  // Fee calculations
+  const commissionPercentage = $derived(tradePolicy?.commissionPercentage ?? 4);
+  const feeAmount = $derived(calculateFeeAmount(DEFAULT_VALUES.montant, commissionPercentage));
+  const baseTotal = $derived(DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0));
+  const totalWithFee = $derived(baseTotal + feeAmount);
+  const netAmountAfterFee = $derived(DEFAULT_VALUES.montant - feeAmount);
 
   onMount(() => {
     if (isNaN(DEFAULT_VALUES.contributionAKlubr)) {
@@ -31,6 +56,12 @@
         ? Math.min(Math.floor(DEFAULT_VALUES.montant * 0.1), 25)
         : 0;
     }
+
+    // Initialize donorPaysFee with default value based on donation type
+    if (isStripeConnect) {
+      DEFAULT_VALUES.donorPaysFee = defaultDonorPaysFee;
+    }
+
     getKlubrCGU().then((res) => {
       cgu.title = res?.data?.attributes?.titre;
       cgu.content = res?.data?.attributes?.content;
@@ -91,11 +122,18 @@
           <p class="font-bold">{DEFAULT_VALUES.contributionAKlubr} €</p>
         </div>
       {/if}
+      {#if isStripeConnect && DEFAULT_VALUES.donorPaysFee}
+        <div class="separator w-full" style="background: #C1BFBF;" />
+        <div class="flex justify-between items-center gap-1">
+          <p>Frais de traitement</p>
+          <p class="font-bold">+{formatCurrency(feeAmount)}</p>
+        </div>
+      {/if}
       <div class="separator w-full" />
       <div class="flex justify-between items-center gap-1">
         <p>Total</p>
         <p class="font-bold">
-          {DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0)} €
+          {formatCurrency(isStripeConnect && DEFAULT_VALUES.donorPaysFee ? totalWithFee : baseTotal)}
         </p>
       </div>
       {#if DEFAULT_VALUES.withTaxReduction}
@@ -111,6 +149,68 @@
         </div>
       {/if}
     </div>
+
+    {#if showFeeChoice}
+      <div class="feeChoiceSection w-full">
+        <p class="feeChoiceTitle">Comment souhaitez-vous gérer les frais de traitement ?</p>
+
+        <label class="feeOption" class:selected={DEFAULT_VALUES.donorPaysFee === true}>
+          <input
+            type="radio"
+            name="donorPaysFee"
+            checked={DEFAULT_VALUES.donorPaysFee === true}
+            onchange={() => (DEFAULT_VALUES.donorPaysFee = true)}
+          />
+          <div class="optionContent">
+            <strong>Je paie les frais en plus de mon don</strong>
+            <p class="optionDescription">
+              L'association reçoit 100% de votre don ({formatCurrency(DEFAULT_VALUES.montant)})
+            </p>
+            <p class="feeDetail">Frais de traitement : +{formatCurrency(feeAmount)}</p>
+            <div class="optionSummary">
+              <span>Reçu fiscal : {formatCurrency(DEFAULT_VALUES.montant)}</span>
+              <span class="summaryDot">•</span>
+              <span>Total débité : {formatCurrency(totalWithFee)}</span>
+            </div>
+          </div>
+        </label>
+
+        <label class="feeOption" class:selected={DEFAULT_VALUES.donorPaysFee === false}>
+          <input
+            type="radio"
+            name="donorPaysFee"
+            checked={DEFAULT_VALUES.donorPaysFee === false}
+            onchange={() => (DEFAULT_VALUES.donorPaysFee = false)}
+          />
+          <div class="optionContent">
+            <strong>J'intègre les frais au montant de mon don</strong>
+            <p class="optionDescription">
+              L'association reçoit votre don moins les frais ({formatCurrency(netAmountAfterFee)})
+            </p>
+            <p class="feeDetail">Frais de traitement : -{formatCurrency(feeAmount)} (déduits)</p>
+            <div class="optionSummary">
+              <span>Reçu fiscal : {formatCurrency(netAmountAfterFee)}</span>
+              <span class="summaryDot">•</span>
+              <span>Total débité : {formatCurrency(baseTotal)}</span>
+            </div>
+          </div>
+        </label>
+
+        <Tooltip position="left">
+          <div slot="trigger" tabindex="0" class={'flex items-center gap-1-2 feeInfoTrigger'}>
+            <img width={20} height={20} src={alertIcon} alt={'Information sur les frais'} />
+            <small>En savoir plus sur les frais</small>
+          </div>
+          <div slot="tooltip">
+            <p>
+              Les frais ({commissionPercentage}%) couvrent les coûts bancaires (Stripe) et le
+              fonctionnement de la plateforme DONACTION.
+            </p>
+          </div>
+        </Tooltip>
+      </div>
+    {/if}
+
     <Tooltip>
       <div
         slot="trigger"

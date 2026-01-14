@@ -10,3 +10,13 @@ export function calculateTaxReduction(amount: number, isOrganization: boolean) {
     .toFixed(2)
     .replace(/\.00$/, '');
 }
+
+export function calculateFeeAmount(montant: number, commissionPercentage: number): number {
+  if (isNaN(montant) || montant <= 0) return 0;
+  return Math.round(montant * (commissionPercentage / 100) * 100) / 100;
+}
+
+export function formatCurrency(amount: number): string {
+  if (isNaN(amount)) return '0 €';
+  return amount.toFixed(2).replace(/\.00$/, '') + ' €';
+}

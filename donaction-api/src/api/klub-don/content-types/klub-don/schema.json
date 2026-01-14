@@ -130,6 +130,11 @@
       "relation": "oneToOne",
       "target": "api::klub-don.klub-don",
       "mappedBy": "klub_don_contribution"
+    },
+    "donorPaysFee": {
+      "type": "boolean",
+      "default": false,
+      "required": false
     }
   }
 }
