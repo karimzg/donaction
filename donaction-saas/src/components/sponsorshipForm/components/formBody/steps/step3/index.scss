@@ -27,6 +27,51 @@
       height: 1px;
       background: #000;
     }
+
+    .sub-line {
+      font-size: 13px;
+      color: #666;
+      padding-left: 0.5rem;
+
+      p {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .association-message {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: #f0f4f8;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+
+    &.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .icon {
+      margin-right: 0.5rem;
+    }
+
+    .tooltip-link {
+      text-decoration: underline;
+      cursor: pointer;
+      color: #1976d2;
+    }
+  }
+
+  .receipt-preview {
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+    background: #fff3e0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
   }
 
   .feeChoiceSection {
