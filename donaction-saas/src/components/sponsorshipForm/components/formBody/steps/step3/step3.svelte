@@ -104,7 +104,7 @@
       </div>
       <div class="flex justify-between items-center gap-1">
         <p>Don à {SUBSCRIPTION.klubr?.denomination}</p>
-        <p class="font-bold">{DEFAULT_VALUES.montant} €</p>
+        <p class="font-bold">{formatCurrency(DEFAULT_VALUES.montant)}</p>
       </div>
       {#if SUBSCRIPTION.allowKlubrContribution}
         <div class="separator w-full" style="background: #C1BFBF;" />
@@ -119,7 +119,7 @@
               style="text-decoration: underline; cursor: pointer;">Modifier le soutien</a
             >
           </div>
-          <p class="font-bold">{DEFAULT_VALUES.contributionAKlubr} €</p>
+          <p class="font-bold">{formatCurrency(DEFAULT_VALUES.contributionAKlubr)}</p>
         </div>
       {/if}
       {#if isStripeConnect && DEFAULT_VALUES.donorPaysFee}
