@@ -56,7 +56,9 @@
           : 0;
 
       const totalAmount = DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0) + feeAmount;
-      const response = await createPaymentIntent(totalAmount, idempotencyKey, false);
+      // Only send donorPaysFee for Stripe Connect mode (guard condition per US-FORM-003)
+      const donorPaysFeeParam = isStripeConnect ? DEFAULT_VALUES.donorPaysFee : undefined;
+      const response = await createPaymentIntent(totalAmount, idempotencyKey, donorPaysFeeParam);
 
       clientSecret = response.intent;
 
