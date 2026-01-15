@@ -59,6 +59,7 @@ async function createDonation(temp) {
         withTaxReduction: Boolean(temp.withTaxReduction),
         statusPaiment: 'notDone',
         contributionAKlubr: Number(temp.contributionAKlubr.toString()),
+        donorPaysFee: Boolean(temp.donorPaysFee),
         datePaiment: undefined,
         klubr: FORM_CONFIG.clubUuid,
         klubDonateur: undefined,

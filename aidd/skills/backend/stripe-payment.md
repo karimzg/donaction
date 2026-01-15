@@ -1,11 +1,7 @@
 ---
-name: "stripe-payment-integration"
-description: "Integrate Stripe payments with payment intent creation, webhook handling, and status checking"
-triggers: ["stripe", "payment", "payment intent", "webhook", "donation payment", "subscription payment"]
-tags: ["stripe", "payment", "backend", "strapi", "api"]
-priority: high
-scope: module
-output: code
+name: skill:integrating-stripe-payments
+description: Integrates Stripe payments with payment intents, webhooks, and status checking. Use when implementing payment features in donaction-api.
+model: claude-opus-4-5
 ---
 
 # Stripe Payment Integration

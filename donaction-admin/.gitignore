@@ -37,6 +37,10 @@ yarn-error.log
 testem.log
 /typings
 
+# tests e2e
+/playwright-report
+/test-results
+
 # Env
 /src/environments/environment.development.ts
 #environment.ts

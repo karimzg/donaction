@@ -27,6 +27,152 @@
       height: 1px;
       background: #000;
     }
+
+    .sub-line {
+      font-size: 13px;
+      color: #666;
+      padding-left: 0.5rem;
+
+      p {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .association-message {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: #f0f4f8;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+
+    &.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .icon {
+      margin-right: 0.5rem;
+    }
+
+    .tooltip-link {
+      text-decoration: underline;
+      cursor: pointer;
+      color: #1976d2;
+    }
+  }
+
+  .receipt-preview {
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+    background: #fff3e0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .feeChoiceSection {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    @media screen and (max-width: 768px) {
+      padding: 0.75rem;
+    }
+  }
+
+  .feeChoiceTitle {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .feeOption {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+
+    &:hover {
+      border-color: #aaa;
+    }
+
+    &.selected {
+      border-color: var(--primary-color, #007bff);
+      background: rgba(0, 123, 255, 0.05);
+    }
+
+    input[type="radio"] {
+      margin-right: 0.75rem;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+  }
+
+  .optionContent {
+    flex: 1;
+
+    strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 14px;
+    }
+  }
+
+  .optionDescription {
+    font-size: 13px;
+    color: #666;
+    margin: 0.25rem 0;
+  }
+
+  .feeDetail {
+    font-size: 12px;
+    color: #888;
+    margin: 0.25rem 0;
+  }
+
+  .optionSummary {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+
+    .summaryDot {
+      margin: 0 0.5rem;
+      color: #ccc;
+    }
+
+    @media screen and (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .summaryDot {
+        display: none;
+      }
+    }
+  }
+
+  .feeInfoTrigger {
+    margin-top: 0.75rem;
+    cursor: pointer;
+
+    small {
+      font-size: 12px;
+      color: #666;
+      text-decoration: underline;
+    }
   }
 
   .disclaimer {

@@ -1,11 +1,7 @@
 ---
-name: "angular-reactive-form"
-description: "Create Angular reactive form with FormGroup, FormControl, validators, and error display component"
-triggers: ["create form", "reactive form", "form validation", "Angular form", "FormGroup", "form builder", "input validation", "form submit"]
-tags: ["angular", "forms", "validation", "typescript"]
-priority: high
-scope: file
-output: code
+name: skill:creating-angular-forms
+description: Creates Angular reactive forms with FormGroup, FormControl, validators, and ErrorDisplayComponent. Use when building forms with validation in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # Angular Reactive Form with Validation

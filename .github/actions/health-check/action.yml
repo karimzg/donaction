@@ -27,6 +27,10 @@ inputs:
     description: 'Delay between retries in seconds'
     required: false
     default: '10'
+  curl-timeout:
+    description: 'Timeout in seconds for curl requests'
+    required: false
+    default: '30'
 
 outputs:
   service-status:
@@ -47,13 +51,14 @@ runs:
 
         MAX_RETRIES=${{ inputs.max-retries }}
         RETRY_DELAY=${{ inputs.retry-delay }}
+        CURL_TIMEOUT=${{ inputs.curl-timeout }}
         FAILED=""
         SERVICE_STATUS=""
 
         # Check nginx health endpoint
         echo "Checking nginx /health endpoint..."
         for i in $(seq 1 $MAX_RETRIES); do
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ inputs.domain }}/health || echo "000")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time $CURL_TIMEOUT https://${{ inputs.domain }}/health || echo "000")
           if [[ "$HTTP_STATUS" == "200" ]]; then
             echo "Nginx health check passed"
             break
@@ -77,7 +82,7 @@ runs:
         else
           echo "API container status: $API_HEALTHY"
           for i in $(seq 1 $MAX_RETRIES); do
-            API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ inputs.domain }}/service/health || echo "000")
+            API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time $CURL_TIMEOUT https://${{ inputs.domain }}/service/health || echo "000")
             if [[ "$API_STATUS" == "200" ]]; then
               echo "API endpoint responding"
               API_OK=true

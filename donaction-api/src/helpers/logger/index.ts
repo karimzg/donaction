@@ -61,3 +61,26 @@ export const logBlock = ({
 
     console.log(`${separatorColor}${separator}${COLORS.reset}`);
 };
+
+export type LogSimpleParams = {
+    message: string;
+    emoji?: string;
+    color?: ColorKey;
+    prefix?: string;
+};
+
+/**
+ * Logs a simple single-line message with optional emoji and color
+ */
+export const logSimple = ({
+    message,
+    emoji = '',
+    color = 'green',
+    prefix = 'Strapi',
+}: LogSimpleParams): void => {
+    const colorCode = COLORS[color] || COLORS.green;
+    const emojiPart = emoji ? `${emoji} ` : '';
+    console.log(
+        `${COLORS.gray}[${prefix}]${COLORS.reset} ${emojiPart}${colorCode}${message}${COLORS.reset}`,
+    );
+};

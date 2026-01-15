@@ -109,3 +109,6 @@ jobs:
         if: matrix.changed == 'true'
         working-directory: ${{ matrix.working-directory }}
         run: ${{ matrix.command }}
+        env:
+          # Dummy values for build-time validation (not used at runtime)
+          NEXT_PUBLIC_STRAPI_API_TOKEN: ${{ matrix.app == 'frontend' && 'build-placeholder' || '' }}

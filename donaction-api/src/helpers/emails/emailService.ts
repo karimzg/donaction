@@ -1,24 +1,86 @@
-// export interface email {
-//   to: string;
-//   from: string;
-//   html: string;
-//   subject: string;
-//   tags: string[];
-// }
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 const fs = require('fs');
+import { logSimple } from '../logger';
 
-const sendEmailViaStrapiProvider = async (emailPayload) => {
-    console.log('sendEmailViaStrapiProvider');
+// Admin email configuration with env fallbacks
+const ADMIN_EMAIL_PRIMARY =
+    process.env.ADMIN_EMAIL_PRIMARY || 'hello@donaction.fr';
+const ADMIN_EMAIL_BCC = process.env.ADMIN_EMAIL_BCC || 'k.zgoulli@gmail.com';
+
+export interface EmailPayload {
+    to: string;
+    from: string;
+    html: string;
+    subject: string;
+    cc?: string;
+    bcc?: string;
+    replyTo?: string;
+    attachments?: any[];
+    tags?: string[];
+    destIsAdmin?: boolean;
+}
+
+export const sendEmailViaStrapiProvider = async (
+    emailPayload: EmailPayload,
+) => {
     const emailService = strapi.plugins['email'].services.email;
-    const { to, from, html, subject, attachments, tags } = emailPayload;
-    return await emailService.send({
+    const {
         to,
-        from: 'hello@donaction.fr',
+        from,
         html,
         subject,
+        cc,
+        bcc,
+        replyTo,
         attachments,
-    });
+        destIsAdmin,
+    } = emailPayload;
+
+    // Build recipient list
+    let finalTo = to;
+    let finalBcc = bcc;
+
+    if (destIsAdmin) {
+        finalTo = finalTo && finalTo !== '' ? `${finalTo}, ${ADMIN_EMAIL_PRIMARY}` : ADMIN_EMAIL_PRIMARY;
+        finalBcc = finalBcc && finalBcc !== '' ? `${finalBcc}, ${ADMIN_EMAIL_BCC}` : ADMIN_EMAIL_BCC;
+    }
+
+    // Prefix subject with environment tag when not in production
+    const brevoEnv = process.env.EMAIL_BREVO_ENV || 'dev';
+    const finalSubject =
+        brevoEnv !== 'prod' ? `[${brevoEnv.toUpperCase()}] - ${subject}` : subject;
+
+    try {
+        const result = await emailService.send({
+            to: finalTo,
+            from: from || ADMIN_EMAIL_PRIMARY,
+            cc,
+            bcc: finalBcc,
+            replyTo,
+            html,
+            subject: finalSubject,
+            attachments,
+        });
+
+        const adminTag = destIsAdmin ? '[ADMIN] ' : '';
+        logSimple({
+            message: `Email sent → ${adminTag}${finalTo} | ${subject}`,
+            emoji: '📧',
+            color: 'green',
+            prefix: 'Email',
+        });
+
+        return result;
+    } catch (error) {
+        const adminTag = destIsAdmin ? '[ADMIN] ' : '';
+        logSimple({
+            message: `Email failed → ${adminTag}${finalTo} | ${subject}`,
+            emoji: '❌',
+            color: 'red',
+            prefix: 'Email',
+        });
+        throw error;
+    }
 };
 
 export default async function sendEmail(emailPayload) {

@@ -19,7 +19,7 @@
     "commissionPercentage": {
       "type": "decimal",
       "required": true,
-      "default": 6
+      "default": 4
     },
     "noBilling": {
       "type": "boolean",
@@ -67,6 +67,45 @@
         "disable-regenerate": true,
         "disable-auto-fill": true
       }
+    },
+    "fee_model": {
+      "type": "enumeration",
+      "enum": [
+        "percentage_only",
+        "fixed_only",
+        "percentage_plus_fixed"
+      ],
+      "default": "percentage_only",
+      "required": true
+    },
+    "fixed_amount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "donor_pays_fee": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "stripe_connect": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "donor_pays_fee_project": {
+      "type": "boolean",
+      "default": true,
+      "required": false
+    },
+    "donor_pays_fee_club": {
+      "type": "boolean",
+      "default": false,
+      "required": false
+    },
+    "allow_donor_fee_choice": {
+      "type": "boolean",
+      "default": true,
+      "required": false
     }
   }
 }

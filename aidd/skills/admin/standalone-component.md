@@ -1,11 +1,7 @@
 ---
-name: "angular-standalone-component"
-description: "Create Angular 21 standalone component with signals, modern control flow, viewChild queries, and dependency injection via inject()"
-triggers: ["create component", "standalone component", "Angular component", "signals", "new component", "generate component"]
-tags: ["angular", "typescript", "component", "signals"]
-priority: high
-scope: file
-output: code
+name: skill:creating-angular-components
+description: Creates Angular 19 standalone components with signals, modern control flow, viewChild queries, and inject() DI. Use when building new components in donaction-admin.
+model: claude-sonnet-4-5
 ---
 
 # Angular Standalone Component with Signals
