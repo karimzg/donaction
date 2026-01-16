@@ -1,0 +1,100 @@
+// DONACTION Design Tokens
+// CSS custom properties for the design system
+// Using :host for Shadow DOM (web components) compatibility
+// Note: Inter font is loaded via JS in index.svelte (Shadow DOM requirement)
+
+:host {
+  // Brand colors
+  --don-color-primary: #111827;
+  --don-color-primary-hover: #1F2937;
+  --don-color-accent: #3B82F6;
+  --don-color-accent-light: #EFF6FF;
+  --don-color-accent-border: #3B82F6;
+
+  // Semantic colors
+  --don-color-success: #059669;
+  --don-color-success-light: #F0FDF4;
+  --don-color-success-dark: #15803D;
+
+  --don-color-warning: #F59E0B;
+  --don-color-warning-light: #FFFBEB;
+  --don-color-warning-dark: #92400E;
+  --don-color-warning-border: #FCD34D;
+
+  // Neutrals
+  --don-color-bg-page: #FAFBFC;
+  --don-color-bg-card: #FFFFFF;
+  --don-color-bg-subtle: #F9FAFB;
+  --don-color-bg-input: #FFFFFF;
+  --don-color-bg-disabled: #F3F4F6;
+
+  --don-color-border: #E5E7EB;
+  --don-color-border-light: #F3F4F6;
+  --don-color-border-input: #D1D5DB;
+
+  --don-color-text-primary: #111827;
+  --don-color-text-secondary: #374151;
+  --don-color-text-muted: #6B7280;
+  --don-color-text-placeholder: #9CA3AF;
+  --don-color-text-disabled: #9CA3AF;
+  --don-color-text-inverse: #FFFFFF;
+
+  // Typography
+  --don-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --don-font-size-xs: 10px;
+  --don-font-size-sm: 12px;
+  --don-font-size-base: 14px;
+  --don-font-size-md: 15px;
+  --don-font-size-lg: 16px;
+  --don-font-size-xl: 18px;
+  --don-font-size-2xl: 20px;
+  --don-font-size-3xl: 24px;
+  --don-font-size-4xl: 28px;
+  --don-font-size-5xl: 42px;
+
+  --don-font-weight-normal: 400;
+  --don-font-weight-medium: 500;
+  --don-font-weight-semibold: 600;
+  --don-font-weight-bold: 700;
+
+  --don-line-height-tight: 1;
+  --don-line-height-snug: 1.25;
+  --don-line-height-normal: 1.4;
+  --don-line-height-relaxed: 1.6;
+
+  // Spacing
+  --don-spacing-xs: 4px;
+  --don-spacing-sm: 6px;
+  --don-spacing-md: 8px;
+  --don-spacing-lg: 12px;
+  --don-spacing-xl: 16px;
+  --don-spacing-2xl: 20px;
+  --don-spacing-3xl: 24px;
+  --don-spacing-4xl: 28px;
+  --don-spacing-5xl: 32px;
+
+  // Borders
+  --don-radius-sm: 4px;
+  --don-radius-md: 6px;
+  --don-radius-lg: 8px;
+  --don-radius-xl: 10px;
+  --don-radius-2xl: 12px;
+  --don-radius-3xl: 16px;
+  --don-radius-full: 9999px;
+
+  --don-border-width: 1px;
+  --don-border-width-thick: 2px;
+
+  // Shadows
+  --don-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --don-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --don-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --don-shadow-lg: 0 4px 12px rgba(59, 130, 246, 0.12);
+  --don-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  // Transitions
+  --don-transition-fast: 0.15s ease;
+  --don-transition-normal: 0.2s ease;
+  --don-transition-slow: 0.3s ease;
+}

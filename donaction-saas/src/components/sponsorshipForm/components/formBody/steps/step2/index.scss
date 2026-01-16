@@ -1,70 +1,140 @@
 @use '../../../../../../styles/main';
 
-.step2 {
-  width: 100%;
+// Pro logo container - PRESERVED
+.proLogoContainer {
+  label {
+    width: fit-content;
+    position: relative;
 
-  small {
-    font-size: small;
+    .picker {
+      cursor: pointer;
+      width: 85px;
+      height: 85px;
+      background-color: black;
+      border-radius: 100%;
 
-    &.description {
-      margin: 0 1rem;
-    }
-  }
-
-  form {
-    .inputField {
-      gap: .3rem;
-
-      * {
-        font-size: 14px;
+      .pen {
+        position: absolute;
+        width: 39px;
+        height: 39px;
+        border-radius: 100%;
+        background: #e4e4e5;
+        bottom: -10%;
+        right: 50%;
       }
 
-      input, select {
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 1px solid;
-        height: 36px;
-      }
-
-      input:disabled {
-        background-color: #f0f0f0;
-        color: #a0a0a0;
-        cursor: not-allowed;
-      }
-
-      &.proLogoContainer {
-        label {
-          width: fit-content;
-          position: relative;
-
-          .picker {
-            cursor: pointer;
-            width: 85px;
-            height: 85px;
-            background-color: black;
-            border-radius: 100%;
-
-            .pen {
-              position: absolute;
-              width: 39px;
-              height: 39px;
-              border-radius: 100%;
-              background: #e4e4e5;
-              bottom: -10%;
-              right: 50%;
-            }
-
-            img {
-              &.true {
-                border-radius: 100%;
-                object-fit: cover;
-                filter: invert(0%);
-              }
-            }
-          }
+      img {
+        &.true {
+          border-radius: 100%;
+          object-fit: cover;
+          filter: invert(0%);
         }
       }
     }
   }
+}
 
+// New design system styles
+.don-step2 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+}
+
+.don-step2__header {
+  text-align: center;
+  margin-bottom: var(--don-spacing-lg);
+}
+
+.don-step2__title {
+  font-size: var(--don-font-size-xl);
+  font-weight: var(--don-font-weight-bold);
+  color: var(--don-color-text-primary);
+  margin: 0 0 var(--don-spacing-lg) 0;
+}
+
+.don-step2__subtitle {
+  font-size: var(--don-font-size-base);
+  color: var(--don-color-text-muted);
+  line-height: var(--don-line-height-relaxed);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// Form
+.don-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+}
+
+.don-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-sm);
+}
+
+.don-form-label {
+  font-size: var(--don-font-size-sm);
+  font-weight: var(--don-font-weight-medium);
+  color: var(--don-color-text-secondary);
+}
+
+.don-form-input,
+.don-form-select {
+  width: 100%;
+  padding: var(--don-spacing-lg) var(--don-spacing-xl);
+  font-size: var(--don-font-size-base);
+  font-family: inherit;
+  border: var(--don-border-width) solid var(--don-color-border-input);
+  border-radius: var(--don-radius-lg);
+  background-color: var(--don-color-bg-input);
+  color: var(--don-color-text-primary);
+  outline: none;
+  transition: border-color var(--don-transition-fast);
+  box-sizing: border-box;
+  height: 44px;
+
+  &:focus {
+    border-color: var(--don-color-accent);
+  }
+
+  &::placeholder {
+    color: var(--don-color-text-placeholder);
+  }
+
+  &:disabled {
+    background-color: var(--don-color-bg-subtle);
+    color: var(--don-color-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.don-form-row {
+  display: grid;
+  gap: var(--don-spacing-xl);
+}
+
+.don-form-row--2 {
+  grid-template-columns: 1fr 1fr;
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.don-form-row--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Error
+.don-error {
+  font-size: var(--don-font-size-sm) !important;
+  color: red;
+  min-height: 16px;
 }

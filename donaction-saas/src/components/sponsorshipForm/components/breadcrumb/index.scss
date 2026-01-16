@@ -1,8 +1,11 @@
+@use '../../../../styles/main';
+
 .breadcrumbContainer {
-  font-family: Maven-Pro-semibold, sans-serif;
+  font-family: var(--don-font-family, 'Inter', sans-serif);
+  font-weight: var(--don-font-weight-semibold);
   align-self: start;
   width: 100%;
-  font-size: 14px;
+  font-size: var(--don-font-size-base);
 
   &.true {
     display: flex;
@@ -15,25 +18,25 @@
     }
   }
 
-  padding: 0 1.5rem 1.5rem;
+  padding: 0 var(--don-spacing-2xl) var(--don-spacing-2xl);
   max-width: 90%;
   flex-wrap: wrap;
   align-items: center;
   justify-content: start;
-  gap: .25rem;
-  color: #D1D5DB;
-  margin-bottom: .5rem;
+  gap: var(--don-spacing-xs);
+  color: var(--don-color-text-disabled);
+  margin-bottom: var(--don-spacing-md);
 
   p {
     all: unset;
 
     &.active {
-      color: black;
+      color: var(--don-color-text-primary);
     }
   }
 
   @media screen and (max-width: 768px) {
-    padding: .75rem 1.5rem 0.5rem;
+    padding: var(--don-spacing-lg) var(--don-spacing-2xl) var(--don-spacing-md);
     line-height: 1;
   }
 }
