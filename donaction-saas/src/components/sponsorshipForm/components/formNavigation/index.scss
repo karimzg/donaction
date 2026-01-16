@@ -2,18 +2,30 @@
 
 
 .btnContainer {
-  padding: 0 1.5rem;
+  padding: var(--don-spacing-xl) var(--don-spacing-3xl);
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1rem;
-  gap: 1rem;
+  margin-top: auto;
+  gap: var(--don-spacing-lg);
+  background-color: var(--don-color-bg-card);
+  border-top: 1px solid var(--don-color-border-light);
 
+  // Sticky footer on mobile
   @media screen and (max-width: 768px) {
-    margin-top: 1rem;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: var(--don-spacing-lg) var(--don-spacing-xl);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 var(--don-radius-3xl) var(--don-radius-3xl);
+
     .secondary-btn {
       max-width: 60px;
+      min-width: 50px;
       height: 45px;
       padding: unset;
 
@@ -29,5 +41,4 @@
     transform: rotate(180deg);
     height: 25px;
   }
-
 }

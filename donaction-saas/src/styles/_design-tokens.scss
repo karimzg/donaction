@@ -4,12 +4,18 @@
 // Note: Inter font is loaded via JS in index.svelte (Shadow DOM requirement)
 
 :host {
-  // Brand colors
-  --don-color-primary: #111827;
-  --don-color-primary-hover: #1F2937;
-  --don-color-accent: #3B82F6;
-  --don-color-accent-light: #EFF6FF;
-  --don-color-accent-border: #3B82F6;
+  // Association brand colors (dynamically injected via inline styles)
+  // These serve as fallbacks when no association colors are provided
+  --don-brand-primary: #3bacf7;
+  --don-brand-secondary: #050505;
+  --don-brand-primary-rgb: 59, 172, 247;
+
+  // System colors (use brand colors for interactive elements)
+  --don-color-primary: var(--don-brand-primary);
+  --don-color-primary-hover: color-mix(in srgb, var(--don-brand-primary) 85%, black);
+  --don-color-accent: var(--don-brand-primary);
+  --don-color-accent-light: color-mix(in srgb, var(--don-brand-primary) 10%, white);
+  --don-color-accent-border: var(--don-brand-primary);
 
   // Semantic colors
   --don-color-success: #059669;
@@ -97,4 +103,22 @@
   --don-transition-fast: 0.15s ease;
   --don-transition-normal: 0.2s ease;
   --don-transition-slow: 0.3s ease;
+}
+
+// Reduced motion support (WCAG 2.1 AA)
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    --don-transition-fast: 0.01ms !important;
+    --don-transition-normal: 0.01ms !important;
+    --don-transition-slow: 0.01ms !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

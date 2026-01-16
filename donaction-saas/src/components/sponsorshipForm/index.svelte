@@ -116,7 +116,10 @@
 
 {#if SCRIPT_LOADED === 'loaded'}
     <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
-        <div class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}>
+        <div
+            class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}
+            style="--don-brand-primary: {SUBSCRIPTION.klubr?.klubr_house?.primary_color || '#3bacf7'}; --don-brand-secondary: {SUBSCRIPTION.klubr?.klubr_house?.secondary_color || '#050505'};"
+        >
             {#if !$isCguShown}
                 <Breadcrumb index={$index} isBeingFilled={$isBeingFilled}/>
                 <img src={x} class="formX" onclick={() => isBeingFilled.set(false)}/>
@@ -142,13 +145,7 @@
             {#if !$isCguShown}
                 <FormNavigation index={$index} {submitForm}/>
             {/if}
-            <FormBanners
-                    bg1={SUBSCRIPTION.klubr?.klubr_house?.primary_color || '#FFFFFF'}
-                    bg2={SUBSCRIPTION.klubr?.klubr_house?.secondary_color || '#000000'}
-                    isBeingFilled={$isBeingFilled}
-                    isCguShown={$isCguShown}
-                    index={$index}
-            />
+            <!-- Brand colors injected via CSS variables on mainContainer -->
         </div>
         <script
                 defer
