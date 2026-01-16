@@ -139,14 +139,23 @@
   }
 }
 
-// Error message styling
-.don-error {
-  font-size: var(--don-font-size-sm) !important;
+// Error message styling - Only visible when touched + invalid
+.don-error,
+.error {
+  font-size: var(--don-font-size-sm, 12px) !important;
   color: var(--don-color-error, #DC2626);
-  min-height: 16px;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 150ms ease-out,
+    transform 150ms ease-out,
+    max-height 150ms ease-out;
   display: flex;
   align-items: center;
-  gap: var(--don-spacing-xs);
+  gap: var(--don-spacing-xs, 4px);
 
   &:not(:empty)::before {
     content: "⚠";
@@ -154,11 +163,25 @@
   }
 }
 
-// Input validation states
-.don-form-input,
-.don-form-select {
-  &:has(+ .don-error:not(:empty)) {
-    border-color: var(--don-color-error, #DC2626);
+// Show errors only when form-group is touched AND invalid
+.don-form-group.touched.invalid,
+.inputField.touched.invalid {
+  .don-error,
+  .error {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 24px;
+    min-height: 16px;
+  }
+}
+
+// Input validation states - CSS-driven based on parent class
+.don-form-group.touched.invalid,
+.inputField.touched.invalid {
+  .don-form-input,
+  .don-form-select,
+  input:not([type="file"]) {
+    border-color: var(--don-color-error, #DC2626) !important;
     background-color: var(--don-color-error-light, #FEF2F2);
 
     &:focus {
@@ -167,8 +190,20 @@
   }
 }
 
-// Valid input state (optional - shows green border when filled and valid)
-.don-form-input:not(:placeholder-shown):not(:focus):valid:not(:has(+ .don-error:not(:empty))),
-.don-form-select:not(:focus):valid:not(:has(+ .don-error:not(:empty))) {
-  border-color: var(--don-color-success, #059669);
+// Valid input state - subtle success indicator
+.don-form-group.touched.valid,
+.inputField.touched.valid {
+  .don-form-input:not(:placeholder-shown),
+  .don-form-select,
+  input:not([type="file"]):not(:placeholder-shown) {
+    border-color: var(--don-color-success, #059669);
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .don-error,
+  .error {
+    transition: none;
+  }
 }

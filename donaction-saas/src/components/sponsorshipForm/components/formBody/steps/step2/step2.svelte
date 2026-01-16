@@ -13,6 +13,7 @@
   import camera from '../../../../../../assets/icons/camera.svg';
   import pen from '../../../../../../assets/icons/pen.svg';
   import AdressInputs from './AdressInputs.svelte';
+  import DatePicker from './DatePicker.svelte';
 
   const oninput = (event) => {
     if (event?.target?.files && event?.target?.files[0]) {
@@ -175,19 +176,12 @@
     <div class="don-form-row don-form-row--2">
       <div class="don-form-group">
         <label class="don-form-label" for="birthdate">Date de naissance *</label>
-        <input
-          id="birthdate"
-          type="date"
-          class="don-form-input"
+        <DatePicker
+          bind:value={DEFAULT_VALUES.birthdate}
           max={eighteenYearsAgo()}
           min="1901-01-01"
-          bind:value={DEFAULT_VALUES.birthdate}
-          use:validator={{
-            validateFunctions: [validateRequired, validateDate, validateDateMajor],
-            fieldName: 'Date de naissance'
-          }}
+          required
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
       {#if DEFAULT_VALUES.withTaxReduction}
         <div class="don-form-group">

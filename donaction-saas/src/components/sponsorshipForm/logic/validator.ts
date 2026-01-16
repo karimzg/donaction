@@ -114,13 +114,45 @@ function validator(
   }
 ) {
   isBeingFilled.set(true);
+  let isTouched = false;
 
-  function validate(correct?: true) {
-    let message: '';
+  // Get parent form-group for touched class
+  const formGroup = node.closest('.don-form-group') || node.closest('.inputField');
+
+  function markTouched() {
+    if (!isTouched) {
+      isTouched = true;
+      formGroup?.classList.add('touched');
+    }
+  }
+
+  function setValidationState(message: string) {
+    // Update parent class for CSS-driven styling
+    if (message) {
+      formGroup?.classList.add('invalid');
+      formGroup?.classList.remove('valid');
+    } else {
+      formGroup?.classList.remove('invalid');
+      formGroup?.classList.add('valid');
+    }
+
+    // Update error message element
+    const errorEl = node.type === 'checkbox'
+      ? node.nextElementSibling?.nextElementSibling
+      : node.nextElementSibling;
+
+    if (errorEl) {
+      errorEl.textContent = message;
+    }
+  }
+
+  function validate(onlyIfValid?: boolean) {
+    let message = '';
     for (const fn of validateFunctions) {
       message = fn(node.type === 'checkbox' ? node.checked : node.value, fieldName, regExp);
       if (message) break;
     }
+
     if (fieldName === 'E-mail' && !message) {
       eventBus.emit(`${EVENT_CONTEXT}emailUpdated`, node.value);
     }
@@ -132,36 +164,43 @@ function validator(
         });
       }
     }
-    if (!correct) {
-      node.style.border = message ? `1px red solid` : '';
-      if (node.type === 'checkbox' && node.nextElementSibling?.nextElementSibling) {
-        node.nextElementSibling.nextElementSibling.textContent = message;
-      } else if (node.nextElementSibling) {
-        node.nextElementSibling.textContent = message;
+
+    // On input: only clear errors if now valid (don't show new errors while typing)
+    if (onlyIfValid) {
+      if (!message) {
+        setValidationState('');
       }
-    } else if (!message) {
-      node.style.border = '';
-      if (node.type === 'checkbox' && node.nextElementSibling?.nextElementSibling) {
-        node.nextElementSibling.nextElementSibling.textContent = '';
-      } else if (node.nextElementSibling) {
-        node.nextElementSibling.textContent = '';
-      }
+    } else {
+      // On blur or form submit: show validation state
+      setValidationState(message);
     }
   }
 
-  node.addEventListener('blur', () => validate());
-  node.addEventListener('input', () => validate(true));
+  function handleBlur() {
+    markTouched();
+    validate();
+  }
 
-  triggerValidation.subscribe((_) => {
+  function handleInput() {
+    validate(true);
+  }
+
+  node.addEventListener('blur', handleBlur);
+  node.addEventListener('input', handleInput);
+
+  const unsubscribe = triggerValidation.subscribe((_) => {
     if (_ > 0) {
+      // Form submit: mark as touched and validate
+      markTouched();
       validate();
     }
   });
 
   return {
     destroy() {
-      node.removeEventListener('blur', () => validate());
-      node.removeEventListener('input', () => validate(true));
+      node.removeEventListener('blur', handleBlur);
+      node.removeEventListener('input', handleInput);
+      unsubscribe();
     }
   };
 }
