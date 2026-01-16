@@ -10,16 +10,9 @@
     eighteenYearsAgo
   } from '../../../../logic/validator';
   import { DEFAULT_VALUES, FORM_CONFIG } from '../../../../logic/useSponsorshipForm.svelte';
-  import camera from '../../../../../../assets/icons/camera.svg';
-  import pen from '../../../../../../assets/icons/pen.svg';
   import AdressInputs from './AdressInputs.svelte';
   import DatePicker from './DatePicker.svelte';
-
-  const oninput = (event) => {
-    if (event?.target?.files && event?.target?.files[0]) {
-      DEFAULT_VALUES.logo = URL.createObjectURL(event?.target?.files[0]);
-    }
-  };
+  import LogoUpload from './LogoUpload.svelte';
 </script>
 
 <div class="don-step2">
@@ -107,25 +100,13 @@
         </div>
       </div>
       <AdressInputs />
-      <div class="proLogoContainer don-form-group">
-        <label for="logo" class="flex flex-col gap-1">
-          <span>Logo de votre société (facultatif)</span>
-          <span class="picker flex items-center justify-center">
-            <img
-              width={DEFAULT_VALUES.logo ? 85 : 36}
-              height={DEFAULT_VALUES.logo ? 85 : 31}
-              class="invert {!!DEFAULT_VALUES.logo}"
-              src={DEFAULT_VALUES.logo || camera}
-              alt="logo pro"
-            />
-            {#if DEFAULT_VALUES.logo}
-              <span class="pen flex items-center justify-center">
-                <img src={pen} alt="edit" />
-              </span>
-            {/if}
-          </span>
-        </label>
-        <input {oninput} id="logo" type="file" accept="image/*" class="hidden" />
+      <div class="don-form-group">
+        <label class="don-form-label">Logo de votre société (facultatif)</label>
+        <LogoUpload
+          bind:value={DEFAULT_VALUES.logo}
+          maxSize={2 * 1024 * 1024}
+          accept={['image/png', 'image/jpeg', 'image/webp']}
+        />
       </div>
       <hr class="w-full" />
     {/if}

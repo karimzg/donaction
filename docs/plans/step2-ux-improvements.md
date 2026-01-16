@@ -61,15 +61,15 @@ Le Step 2 "Pourquoi saisir ces informations ?" collecte les données personnelle
 
 ---
 
-### Phase 3: Upload Logo Amélioré (High Priority)
+### Phase 3: Upload Logo Amélioré (High Priority) ✅
 **Fichiers**: `step2.svelte`, nouveau composant `LogoUpload.svelte`
 
-- [ ] 3.1 Créer composant `LogoUpload.svelte`
-- [ ] 3.2 Zone drag & drop avec feedback visuel
-- [ ] 3.3 Preview de l'image avec bouton suppression
-- [ ] 3.4 Validation taille (max 2MB) et format (PNG, JPG, WebP)
-- [ ] 3.5 État loading pendant upload
-- [ ] 3.6 Messages d'erreur inline
+- [x] 3.1 Créer composant `LogoUpload.svelte`
+- [x] 3.2 Zone drag & drop avec feedback visuel
+- [x] 3.3 Preview de l'image avec bouton suppression
+- [x] 3.4 Validation taille (max 2MB) et format (PNG, JPG, WebP)
+- [x] 3.5 État loading pendant upload
+- [x] 3.6 Messages d'erreur inline
 
 **Structure**:
 ```svelte
