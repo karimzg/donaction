@@ -40,27 +40,45 @@
       </button>
     {:else}
       {#if ![0, 4].includes(index) || (index === 0 && SUBSCRIPTION.allowProjectSelection)}
-        <button class="secondary-btn desktop" onclick={() => submitForm(-1)}
-          >Étape précédente</button
+        <button
+          class="secondary-btn desktop"
+          onclick={() => submitForm(-1)}
+          aria-label="Retour à l'étape précédente"
+        >Étape précédente</button>
+        <button
+          class="secondary-btn mobile"
+          onclick={() => submitForm(-1)}
+          aria-label="Retour à l'étape précédente"
         >
-        <button class="secondary-btn mobile" onclick={() => submitForm(-1)}>
-          <img class="previous" alt="précédent" src={previous} />
+          <img class="previous" alt="" src={previous} aria-hidden="true" />
         </button>
       {/if}
       {#if index < 3}
         <button
           disabled={$isLoading}
-          class={`primary-btn self-end ${$isLoading && 'disabled'}`}
-          onclick={() => submitForm(1) && isBeingFilled.set(true)}>Étape suivante</button
+          class={`primary-btn self-end ${$isLoading ? 'disabled loading' : ''}`}
+          onclick={() => submitForm(1) && isBeingFilled.set(true)}
+          aria-label="Passer à l'étape suivante"
+          aria-busy={$isLoading}
         >
+          {#if $isLoading}
+            <span class="don-spinner" aria-hidden="true"></span>
+          {/if}
+          <span class:don-btn-text--hidden={$isLoading}>Étape suivante</span>
+        </button>
       {/if}
       {#if index === 3}
         <button
           disabled={$isLoading}
-          class={`primary-btn self-end ${$isLoading && 'disabled'} mobile`}
+          class={`primary-btn self-end ${$isLoading ? 'disabled loading' : ''} mobile`}
           onclick={pay}
+          aria-label="Valider le paiement"
+          aria-busy={$isLoading}
         >
-          <span id="button-text">Valider</span>
+          {#if $isLoading}
+            <span class="don-spinner" aria-hidden="true"></span>
+          {/if}
+          <span id="button-text" class:don-btn-text--hidden={$isLoading}>Valider</span>
         </button>
       {/if}
     {/if}

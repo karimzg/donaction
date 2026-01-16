@@ -75,6 +75,18 @@ const defVals = {
 };
 const DEFAULT_VALUES = $state({ ...defVals });
 
+/**
+ * Navigate directly to a specific step (only allows going back to completed steps)
+ */
+function goToStep(targetStep: number) {
+  const currentStep = get(index);
+  // Only allow navigating to completed steps (going back)
+  if (targetStep < currentStep && targetStep >= 0) {
+    index.set(targetStep);
+    triggerValidation.set(0);
+  }
+}
+
 async function submitForm(acc: number) {
   if (acc > 0) {
     try {
@@ -145,6 +157,7 @@ isBeingFilled.subscribe((val) => {
 export {
   index,
   submitForm,
+  goToStep,
   defVals,
   triggerValidation,
   isBeingFilled,

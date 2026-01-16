@@ -120,11 +120,26 @@
       }
 
       .formX {
-        display: initial;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: fixed;
         top: .8rem;
         right: 1.5rem;
         cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: transparent;
+        transition: background-color var(--don-transition-fast, 0.15s ease);
+
+        &:hover {
+          background-color: var(--don-color-bg-subtle, rgba(0, 0, 0, 0.05));
+        }
+
+        &:active {
+          background-color: var(--don-color-bg-disabled, rgba(0, 0, 0, 0.1));
+        }
       }
 
     }

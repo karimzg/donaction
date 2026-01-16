@@ -18,6 +18,22 @@ export function calculateTaxReduction(amount: number, isOrganization: boolean): 
 }
 
 /**
+ * Calculate the tax savings for a donation
+ * @param amount - Donation amount in euros
+ * @param isOrganization - Whether the donor is an organization (60% reduction) or individual (66% reduction)
+ * @returns Formatted string of the savings amount
+ */
+export function calculateTaxSavings(amount: number, isOrganization: boolean): string {
+  const TAUX_DEDUCTION_FISCALE_PART = 0.66;
+  const TAUX_DEDUCTION_FISCALE_PRO = 0.6;
+
+  if (isNaN(amount) || amount <= 0) return '0';
+  return (amount * (isOrganization ? TAUX_DEDUCTION_FISCALE_PRO : TAUX_DEDUCTION_FISCALE_PART))
+    .toFixed(2)
+    .replace(/\.00$/, '');
+}
+
+/**
  * Calculate processing fees for a donation (platform commission only)
  * @param montant - Donation amount in euros
  * @param commissionPercentage - Platform commission percentage (e.g., 4 for 4%)

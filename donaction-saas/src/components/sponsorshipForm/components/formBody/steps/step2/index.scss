@@ -92,12 +92,14 @@
   background-color: var(--don-color-bg-input);
   color: var(--don-color-text-primary);
   outline: none;
-  transition: border-color var(--don-transition-fast);
+  transition: all var(--don-transition-fast);
   box-sizing: border-box;
   height: 44px;
 
   &:focus {
-    border-color: var(--don-color-accent);
+    border-color: var(--don-brand-primary, var(--don-color-accent));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
+    transform: translateY(-1px);
   }
 
   &::placeholder {
@@ -108,6 +110,11 @@
     background-color: var(--don-color-bg-subtle);
     color: var(--don-color-text-disabled);
     cursor: not-allowed;
+
+    &:focus {
+      transform: none;
+      box-shadow: none;
+    }
   }
 }
 
@@ -132,9 +139,36 @@
   }
 }
 
-// Error
+// Error message styling
 .don-error {
   font-size: var(--don-font-size-sm) !important;
-  color: red;
+  color: var(--don-color-error, #DC2626);
   min-height: 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--don-spacing-xs);
+
+  &:not(:empty)::before {
+    content: "⚠";
+    font-size: 10px;
+  }
+}
+
+// Input validation states
+.don-form-input,
+.don-form-select {
+  &:has(+ .don-error:not(:empty)) {
+    border-color: var(--don-color-error, #DC2626);
+    background-color: var(--don-color-error-light, #FEF2F2);
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-color-error, #DC2626) 15%, transparent);
+    }
+  }
+}
+
+// Valid input state (optional - shows green border when filled and valid)
+.don-form-input:not(:placeholder-shown):not(:focus):valid:not(:has(+ .don-error:not(:empty))),
+.don-form-select:not(:focus):valid:not(:has(+ .don-error:not(:empty))) {
+  border-color: var(--don-color-success, #059669);
 }

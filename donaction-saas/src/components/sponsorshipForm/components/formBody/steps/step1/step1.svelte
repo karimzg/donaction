@@ -14,7 +14,7 @@
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
   import { onDestroy, onMount } from 'svelte';
   import { populateForm } from '../../../../logic/initListeners';
-  import { calculateTaxReduction } from '../../../../logic/utils';
+  import { calculateTaxReduction, calculateTaxSavings } from '../../../../logic/utils';
   import { register } from 'swiper/element/bundle';
 
   let { slides }: { slides: Array<any> } = $props();
@@ -181,13 +181,15 @@
     <section class="don-section">
       <h2 class="don-section__label">Je souhaite aider le projet à hauteur de :</h2>
 
-      <div class="don-amount-grid">
+      <div class="don-amount-grid" role="group" aria-label="Sélection du montant">
         {#each amounts as amount}
           <button
             type="button"
             class="don-btn-amount"
             class:don-btn-amount--selected={DEFAULT_VALUES.montant === amount}
             onclick={() => (DEFAULT_VALUES.montant = amount) && isBeingFilled.set(true)}
+            aria-pressed={DEFAULT_VALUES.montant === amount}
+            aria-label="Faire un don de {amount} euros"
           >
             {amount} €
           </button>
@@ -195,21 +197,23 @@
       </div>
 
       <div class="don-custom-amount">
-        <label class="don-custom-amount__label">Montant libre</label>
+        <label class="don-custom-amount__label" for="don-montant-libre">Montant libre</label>
         <div class="don-custom-amount__input">
           <input
+            id="don-montant-libre"
             type="number"
             min="10"
             max="100000"
             placeholder="--,--"
-            class="don-form-input don-form-input--centered"
+            class="don-form-input don-form-input--with-addon"
             bind:value={DEFAULT_VALUES.montant}
+            aria-describedby="don-montant-error"
           />
-          <span class="don-custom-amount__currency">€</span>
+          <span class="don-custom-amount__currency" aria-hidden="true">€</span>
         </div>
       </div>
 
-      <small class="don-error">
+      <small class="don-error" id="don-montant-error" role="alert" aria-live="polite">
         {$triggerValidation > 0
           ? !DEFAULT_VALUES.montant
             ? 'Veuillez choisir un montant'
@@ -254,18 +258,20 @@
         Souhaitez-vous bénéficier d'une réduction d'impôt "mécénat" pour ce don ?
       </h2>
 
-      <div class="don-toggle-group">
+      <div class="don-toggle-group" role="group" aria-label="Réduction d'impôt">
         <button
           type="button"
           class="don-toggle-btn"
           class:don-toggle-btn--selected={!DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
+          aria-pressed={!DEFAULT_VALUES.withTaxReduction}
         >Non</button>
         <button
           type="button"
           class="don-toggle-btn"
           class:don-toggle-btn--selected={DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
+          aria-pressed={DEFAULT_VALUES.withTaxReduction}
         >Oui</button>
       </div>
 
@@ -273,18 +279,20 @@
         <div class="don-tax-options">
           <h3 class="don-section__sublabel">Je soutiens en tant que :</h3>
 
-          <div class="don-toggle-group">
+          <div class="don-toggle-group" role="group" aria-label="Type de donateur">
             <button
               type="button"
               class="don-toggle-btn"
               class:don-toggle-btn--selected={!DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
+              aria-pressed={!DEFAULT_VALUES.estOrganisme}
             >Particulier</button>
             <button
               type="button"
               class="don-toggle-btn"
               class:don-toggle-btn--selected={DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
+              aria-pressed={DEFAULT_VALUES.estOrganisme}
             >Entreprise</button>
           </div>
 
@@ -305,6 +313,9 @@
             </Tooltip>
             <div class="don-real-cost__value">
               {calculateTaxReduction(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €
+            </div>
+            <div class="don-real-cost__savings">
+              Vous économisez <strong>{calculateTaxSavings(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €</strong>
             </div>
             <div class="don-real-cost__detail">
               ({DEFAULT_VALUES.estOrganisme ? '60%' : '66%'} de réduction fiscale)

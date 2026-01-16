@@ -1,11 +1,20 @@
 <script lang="ts">
-  import { SUBSCRIPTION } from '../../logic/useSponsorshipForm.svelte';
+  import { SUBSCRIPTION, goToStep } from '../../logic/useSponsorshipForm.svelte';
 
   let { index, isBeingFilled }: { index: number; isBeingFilled: boolean } = $props();
 
   // Steps for progress indicator (excluding thank you page from dots)
   const steps = ['Don', 'Infos', 'Récap', 'Paiement'];
   const totalSteps = steps.length;
+
+  /**
+   * Handle dot click - only navigate to completed steps
+   */
+  function handleDotClick(stepIndex: number) {
+    if (stepIndex < index) {
+      goToStep(stepIndex);
+    }
+  }
 </script>
 
 <header class="don-header" class:don-header--modal={isBeingFilled}>
@@ -29,9 +38,11 @@
         class="don-header__dot"
         class:don-header__dot--active={i === index}
         class:don-header__dot--completed={i < index}
+        class:don-header__dot--clickable={i < index}
         aria-label="{step} - Étape {i + 1} sur {totalSteps}"
         aria-current={i === index ? 'step' : undefined}
-        disabled
+        onclick={() => handleDotClick(i)}
+        disabled={i >= index}
       >
         <span class="don-header__dot-inner"></span>
       </button>
@@ -125,10 +136,30 @@
     width: 12px;
     height: 12px;
     cursor: default;
+    border-radius: 50%;
+    transition: transform var(--don-transition-fast);
 
     @media screen and (min-width: 640px) {
       width: 14px;
       height: 14px;
+    }
+
+    &:focus-visible .don-header__dot-inner {
+      outline: 2px solid var(--don-brand-primary, var(--don-color-primary));
+      outline-offset: 2px;
+    }
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover .don-header__dot-inner {
+        transform: scale(1.3);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-primary)) 25%, transparent);
+      }
+
+      &:active .don-header__dot-inner {
+        transform: scale(0.9);
+      }
     }
   }
 
