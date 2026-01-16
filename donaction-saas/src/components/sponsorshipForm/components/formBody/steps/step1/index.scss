@@ -95,6 +95,12 @@
   margin-bottom: var(--don-spacing-2xl);
   box-shadow: var(--don-shadow-card);
   width: 100%;
+
+  @media screen and (max-width: 768px) {
+    padding: var(--don-spacing-xl);
+    border-radius: var(--don-radius-xl);
+    margin-bottom: var(--don-spacing-lg);
+  }
 }
 
 .don-section__label {
@@ -104,6 +110,11 @@
   text-align: center;
   margin: 0 0 var(--don-spacing-3xl) 0;
   line-height: var(--don-line-height-relaxed);
+
+  @media screen and (max-width: 768px) {
+    font-size: var(--don-font-size-base);
+    margin-bottom: var(--don-spacing-xl);
+  }
 }
 
 .don-section__sublabel {
@@ -171,12 +182,14 @@
   @media screen and (max-width: 768px) {
     font-size: var(--don-font-size-base);
     min-width: 60px;
+    min-height: 44px; // Touch target minimum
     padding: var(--don-spacing-lg) var(--don-spacing-xl);
   }
 
   // 2x2 grid on very small screens
   @media screen and (max-width: 400px) {
     min-width: calc(50% - var(--don-spacing-md));
+    min-height: 48px; // Larger touch target for small screens
     flex: 1 1 calc(50% - var(--don-spacing-md));
   }
 }
@@ -295,6 +308,7 @@
   color: var(--don-color-text-muted);
   cursor: pointer;
   transition: all var(--don-transition-fast);
+  min-height: 44px; // Touch target minimum
 
   &:hover:not(&--selected) {
     color: var(--don-color-text-secondary);
@@ -313,6 +327,11 @@
     background-color: var(--don-color-bg-card);
     color: var(--don-color-text-primary);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  @media screen and (max-width: 768px) {
+    padding: var(--don-spacing-lg) var(--don-spacing-xl);
+    min-height: 44px;
   }
 }
 
