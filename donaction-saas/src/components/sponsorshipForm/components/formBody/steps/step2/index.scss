@@ -92,9 +92,13 @@
   background-color: var(--don-color-bg-input);
   color: var(--don-color-text-primary);
   outline: none;
-  transition: all var(--don-transition-fast);
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease, transform 150ms ease;
   box-sizing: border-box;
   height: 44px;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--don-color-border-hover, #9CA3AF);
+  }
 
   &:focus {
     border-color: var(--don-brand-primary, var(--don-color-accent));
@@ -205,5 +209,49 @@
   .don-error,
   .error {
     transition: none;
+  }
+
+  .address-unlock {
+    animation: none !important;
+  }
+}
+
+// Address field styles
+.address-field {
+  position: relative;
+}
+
+.address-helper {
+  font-size: var(--don-font-size-xs, 11px);
+  color: var(--don-color-text-muted, #6B7280);
+  margin-top: var(--don-spacing-xs, 4px);
+  display: flex;
+  align-items: center;
+  gap: var(--don-spacing-xs, 4px);
+
+  &::before {
+    content: "ℹ";
+    font-size: 10px;
+    opacity: 0.7;
+  }
+}
+
+// Unlock animation for address fields when enabled
+.address-unlock {
+  animation: unlockPulse 400ms ease-out;
+}
+
+@keyframes unlockPulse {
+  0% {
+    background-color: var(--don-color-bg-subtle);
+    transform: scale(1);
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--don-brand-primary, #3B82F6) 10%, white);
+    transform: scale(1.01);
+  }
+  100% {
+    background-color: var(--don-color-bg-input);
+    transform: scale(1);
   }
 }

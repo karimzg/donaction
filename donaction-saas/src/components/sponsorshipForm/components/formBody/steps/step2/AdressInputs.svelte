@@ -12,6 +12,7 @@
   let inputElement;
 
   let isEditable = $state(false);
+  let justUnlocked = $state(false);
 
   const handlePlaceChange = async (selectedPlace) => {
     const gdKeys = [
@@ -29,8 +30,11 @@
     });
     DEFAULT_VALUES.place_id = selectedPlace?.place_id;
     isEditable = true;
+    justUnlocked = true;
     await tick();
     triggerValidation.update((_) => _ + 1);
+    // Reset animation flag after animation completes
+    setTimeout(() => { justUnlocked = false; }, 500);
   };
 
   onMount(async () => {
@@ -69,15 +73,16 @@
   // TODO: input disabled after first input
 </script>
 
-<div class="inputField flex flex-col">
+<div class="inputField flex flex-col address-field">
   <label for="place_id">Adresse complète *</label>
   <input
     type="text"
     bind:this={inputElement}
-    placeholder="Veuillez remplir votre adresse complète pour remplir les champs d'adresse ci-dessous."
+    placeholder="Commencez à taper votre adresse..."
     class="w-full"
     autocomplete="none"
   />
+  <small class="address-helper">Les champs ci-dessous se rempliront automatiquement</small>
   <small class="error" aria-live="polite"></small>
 </div>
 
@@ -89,6 +94,7 @@
       type="text"
       placeholder="08"
       class="w-full"
+      class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.streetNumber === DEFAULT_VALUES.streetNumber || !isEditable}
       bind:value={DEFAULT_VALUES.streetNumber}
       use:validator={{
@@ -105,6 +111,7 @@
       type="text"
       placeholder="rue Victor Hugo"
       class="w-full"
+      class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.streetName === DEFAULT_VALUES.streetName || !isEditable}
       bind:value={DEFAULT_VALUES.streetName}
       use:validator={{
@@ -123,6 +130,7 @@
       type="text"
       placeholder="59800"
       class="w-full"
+      class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.postalCode === DEFAULT_VALUES.postalCode || !isEditable}
       bind:value={DEFAULT_VALUES.postalCode}
       use:validator={{
@@ -139,6 +147,7 @@
       type="text"
       placeholder="Lille"
       class="w-full"
+      class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.city === DEFAULT_VALUES.city || !isEditable}
       bind:value={DEFAULT_VALUES.city}
       use:validator={{

@@ -82,29 +82,33 @@ Le Step 2 "Pourquoi saisir ces informations ?" collecte les données personnelle
 
 ---
 
-### Phase 4: États Hover/Focus & Micro-interactions (Medium Priority)
+### Phase 4: États Hover/Focus & Micro-interactions (Medium Priority) ✅
 **Fichiers**: `step2/index.scss`, `AdressInputs.svelte`
 
-- [ ] 4.1 Transitions hover/focus sur tous les inputs
-- [ ] 4.2 Focus ring accessible (3px shadow)
-- [ ] 4.3 Animation "unlock" quand adresse auto-remplie
-- [ ] 4.4 Placeholder adresse raccourci
-- [ ] 4.5 Helper text sous le champ adresse
+- [x] 4.1 Transitions hover/focus sur tous les inputs
+- [x] 4.2 Focus ring accessible (3px shadow)
+- [x] 4.3 Animation "unlock" quand adresse auto-remplie
+- [x] 4.4 Placeholder adresse raccourci
+- [x] 4.5 Helper text sous le champ adresse
 
-**CSS**:
+**CSS ajouté**:
 ```scss
 .don-form-input {
   transition: border-color 200ms ease, box-shadow 200ms ease;
 
   &:hover:not(:focus):not(:disabled) {
-    border-color: var(--gray-400);
+    border-color: var(--don-color-border-hover);
   }
+}
 
-  &:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    outline: none;
-  }
+.address-unlock {
+  animation: unlockPulse 400ms ease-out;
+}
+
+@keyframes unlockPulse {
+  0% { background-color: var(--don-color-bg-subtle); }
+  50% { background-color: color-mix(in srgb, var(--don-brand-primary) 10%, white); }
+  100% { background-color: var(--don-color-bg-input); }
 }
 ```
 
