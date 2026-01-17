@@ -52,6 +52,7 @@
 
     <!-- Company fields (conditional) -->
     {#if DEFAULT_VALUES.estOrganisme && DEFAULT_VALUES.withTaxReduction}
+      <div class="don-company-section don-section-animate">
       <div class="don-form-row don-form-row--3">
         <div class="don-form-group">
           <label class="don-form-label" for="socialReason">Raison sociale *</label>
@@ -109,6 +110,7 @@
         />
       </div>
       <hr class="w-full" />
+      </div>
     {/if}
 
     <!-- Civility, First name, Last name -->

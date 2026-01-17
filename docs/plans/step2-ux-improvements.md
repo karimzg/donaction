@@ -2,7 +2,7 @@
 
 > **Date**: 2025-01-16
 > **Scope**: `donaction-saas/src/components/sponsorshipForm/components/formBody/steps/step2/`
-> **Status**: En cours
+> **Status**: Terminé ✅
 
 ---
 
@@ -114,24 +114,27 @@ Le Step 2 "Pourquoi saisir ces informations ?" collecte les données personnelle
 
 ---
 
-### Phase 5: Animations de Transition (Medium Priority)
+### Phase 5: Animations de Transition (Medium Priority) ✅
 **Fichiers**: `step2.svelte`, `step2/index.scss`
 
-- [ ] 5.1 Animation fade-slide pour sections conditionnelles
-- [ ] 5.2 Bouton avec états hover/active/loading
-- [ ] 5.3 Respect `prefers-reduced-motion`
+- [x] 5.1 Animation fade-slide pour sections conditionnelles
+- [x] 5.2 Bouton avec états hover/active/loading (via global styles)
+- [x] 5.3 Respect `prefers-reduced-motion`
 
-**CSS**:
+**CSS ajouté**:
 ```scss
-@media (prefers-reduced-motion: no-preference) {
-  .don-form-row {
-    animation: fadeSlideIn 250ms ease-out;
-  }
+.don-section-animate {
+  animation: fadeSlideIn 250ms ease-out;
 }
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .don-section-animate, .address-unlock { animation: none !important; }
+  .don-form-input, .don-form-select, .don-error { transition: none !important; }
 }
 ```
 
@@ -152,11 +155,11 @@ Le Step 2 "Pourquoi saisir ces informations ?" collecte les données personnelle
 
 ## Critères de Validation
 
-- [ ] WCAG 2.1 AA respecté (focus visible, contraste)
-- [ ] `prefers-reduced-motion` respecté
+- [x] WCAG 2.1 AA respecté (focus visible, contraste)
+- [x] `prefers-reduced-motion` respecté
 - [ ] Tests manuels sur les 3 états du formulaire
 - [ ] Pas de régression fonctionnelle
-- [ ] Build sans erreur
+- [x] Build sans erreur
 
 ---
 

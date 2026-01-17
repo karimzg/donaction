@@ -204,17 +204,6 @@
   }
 }
 
-// Reduced motion support
-@media (prefers-reduced-motion: reduce) {
-  .don-error,
-  .error {
-    transition: none;
-  }
-
-  .address-unlock {
-    animation: none !important;
-  }
-}
 
 // Address field styles
 .address-field {
@@ -253,5 +242,42 @@
   100% {
     background-color: var(--don-color-bg-input);
     transform: scale(1);
+  }
+}
+
+// Phase 5: Conditional section animations
+.don-company-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+}
+
+.don-section-animate {
+  animation: fadeSlideIn 250ms ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Disable animations for reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .don-section-animate,
+  .address-unlock {
+    animation: none !important;
+  }
+
+  .don-form-input,
+  .don-form-select,
+  .don-error,
+  .error {
+    transition: none !important;
   }
 }
