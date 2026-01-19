@@ -7,7 +7,6 @@
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { validator, validatePostalCode, validateRequired } from '../../../../logic/validator';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
-  import alertIcon from '../../../../../../assets/icons/alertIcon.svg';
 
   let inputElement;
 
@@ -73,27 +72,27 @@
   // TODO: input disabled after first input
 </script>
 
-<div class="inputField flex flex-col address-field">
-  <label for="place_id">Adresse complète *</label>
+<div class="don-form-group address-field">
+  <label class="don-form-label" for="place_id">Adresse complète *</label>
   <input
     type="text"
     bind:this={inputElement}
     placeholder="Commencez à taper votre adresse..."
-    class="w-full"
+    class="don-form-input"
     autocomplete="none"
   />
   <small class="address-helper">Les champs ci-dessous se rempliront automatiquement</small>
-  <small class="error" aria-live="polite"></small>
+  <small class="don-error" aria-live="polite"></small>
 </div>
 
-<div class="grid-3">
-  <div class="inputField flex flex-col">
-    <label for="streetNumber">Numéro de rue *</label>
+<div class="don-form-row don-form-row--address">
+  <div class="don-form-group">
+    <label class="don-form-label" for="streetNumber">N° *</label>
     <input
       id="streetNumber"
       type="text"
       placeholder="08"
-      class="w-full"
+      class="don-form-input"
       class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.streetNumber === DEFAULT_VALUES.streetNumber || !isEditable}
       bind:value={DEFAULT_VALUES.streetNumber}
@@ -102,15 +101,15 @@
         fieldName: 'Numéro de rue'
       }}
     />
-    <small class="error" aria-live="polite"></small>
+    <small class="don-error" aria-live="polite"></small>
   </div>
-  <div class="inputField flex flex-col grid-item-2">
-    <label for="streetName">Nom de rue *</label>
+  <div class="don-form-group">
+    <label class="don-form-label" for="streetName">Nom de rue *</label>
     <input
       id="streetName"
       type="text"
       placeholder="rue Victor Hugo"
-      class="w-full"
+      class="don-form-input"
       class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.streetName === DEFAULT_VALUES.streetName || !isEditable}
       bind:value={DEFAULT_VALUES.streetName}
@@ -119,17 +118,17 @@
         fieldName: 'Nom de rue'
       }}
     />
-    <small class="error" aria-live="polite"></small>
+    <small class="don-error" aria-live="polite"></small>
   </div>
 </div>
-<div class="grid-3" style="align-items: end">
-  <div class="inputField flex flex-col">
-    <label for="postalCode">Code postal *</label>
+<div class="don-form-row don-form-row--3">
+  <div class="don-form-group">
+    <label class="don-form-label" for="postalCode">Code postal *</label>
     <input
       id="postalCode"
       type="text"
       placeholder="59800"
-      class="w-full"
+      class="don-form-input"
       class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.postalCode === DEFAULT_VALUES.postalCode || !isEditable}
       bind:value={DEFAULT_VALUES.postalCode}
@@ -138,15 +137,15 @@
         fieldName: 'Code postal'
       }}
     />
-    <small class="error" aria-live="polite"></small>
+    <small class="don-error" aria-live="polite"></small>
   </div>
-  <div class="inputField flex flex-col">
-    <label for="city">Ville *</label>
+  <div class="don-form-group">
+    <label class="don-form-label" for="city">Ville *</label>
     <input
       id="city"
       type="text"
       placeholder="Lille"
-      class="w-full"
+      class="don-form-input"
       class:address-unlock={justUnlocked}
       disabled={FORM_CONFIG.myLast?.city === DEFAULT_VALUES.city || !isEditable}
       bind:value={DEFAULT_VALUES.city}
@@ -155,33 +154,35 @@
         fieldName: 'Ville'
       }}
     />
-    <small class="error" aria-live="polite"></small>
+    <small class="don-error" aria-live="polite"></small>
   </div>
-  <div class="inputField flex flex-col">
-    <Tooltip position="md-left-14">
-      <div slot="trigger" class="flex gap-1-2 items-center">
-        <label for="country">Pays *</label>
-        <img width={25} height={25} src={alertIcon} alt={''} />
-      </div>
-      <div slot="tooltip">
-        <p>
-          Si vous faites un don en tant que non résidant français, vous ne pouvez bénéficier de la
-          réduction d'impôts. Veuillez retourner à l'étape précédente et sélectionner l'option
-          correspondante
-        </p>
-      </div>
-    </Tooltip>
+  <div class="don-form-group">
+    <div class="don-label-with-tooltip">
+      <label class="don-form-label" for="country">Pays *</label>
+      <Tooltip position="md-left-14">
+        <div slot="trigger">
+          <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
+        </div>
+        <div slot="tooltip">
+          <p>
+            Si vous faites un don en tant que non résidant français, vous ne pouvez bénéficier de la
+            réduction d'impôts. Veuillez retourner à l'étape précédente et sélectionner l'option
+            correspondante
+          </p>
+        </div>
+      </Tooltip>
+    </div>
     <input
       id="country"
       type="text"
       placeholder="France"
-      class="w-full"
+      class="don-form-input"
       value="France"
       readonly
       aria-readonly="true"
       disabled={true}
     />
-    <small class="error" aria-live="polite"></small>
+    <small class="don-error" aria-live="polite"></small>
   </div>
 </div>
 

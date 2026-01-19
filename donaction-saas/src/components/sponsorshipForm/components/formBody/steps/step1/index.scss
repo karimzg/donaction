@@ -408,15 +408,12 @@
   color: var(--don-color-text-placeholder);
 }
 
-// Info row
+// Info row - minimal elegant design
 .don-info-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--don-spacing-lg);
-  background-color: var(--don-color-bg-subtle);
-  border-radius: var(--don-radius-lg);
-  border-left: 3px solid var(--don-brand-primary, var(--don-color-primary));
+  padding: var(--don-spacing-md) 0;
 }
 
 .don-info-trigger {
@@ -432,6 +429,36 @@
 .don-info-text {
   font-size: var(--don-font-size-sm);
   color: var(--don-color-text-muted);
+}
+
+// Tooltip trigger - unified design
+.don-tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--don-color-bg-subtle, #F3F4F6);
+  border: 1.5px solid var(--don-color-border, #E5E7EB);
+  color: var(--don-color-text-muted, #6B7280);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+  transition: all 200ms ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--don-brand-primary, #3B82F6);
+    border-color: var(--don-brand-primary, #3B82F6);
+    color: white;
+    transform: scale(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--don-brand-primary, #3B82F6);
+    outline-offset: 2px;
+  }
 }
 
 // Error message styling

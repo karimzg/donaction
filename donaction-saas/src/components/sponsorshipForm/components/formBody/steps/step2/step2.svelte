@@ -9,13 +9,51 @@
     validatePostalCode,
     eighteenYearsAgo
   } from '../../../../logic/validator';
-  import { DEFAULT_VALUES, FORM_CONFIG } from '../../../../logic/useSponsorshipForm.svelte';
+  import { DEFAULT_VALUES, FORM_CONFIG, SUBSCRIPTION } from '../../../../logic/useSponsorshipForm.svelte';
   import AdressInputs from './AdressInputs.svelte';
   import DatePicker from './DatePicker.svelte';
   import LogoUpload from './LogoUpload.svelte';
+
+  // Calculate project progress
+  let projectProgress = $derived(() => {
+    if (!SUBSCRIPTION.project?.objectifFinancier || !SUBSCRIPTION.project?.montantRecolte) return 0;
+    return Math.min(100, Math.round((SUBSCRIPTION.project.montantRecolte / SUBSCRIPTION.project.objectifFinancier) * 100));
+  });
+
+  let hasSelectedProject = $derived(
+    SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+  );
 </script>
 
 <div class="don-step2">
+  <!-- Project Badge (if project selected) -->
+  {#if hasSelectedProject}
+    <div class="don-project-badge">
+      {#if SUBSCRIPTION.project?.couverture?.url}
+        <img
+          class="don-project-badge__image"
+          src={SUBSCRIPTION.project.couverture.url}
+          alt={SUBSCRIPTION.project.couverture.alternativeText || SUBSCRIPTION.project.titre}
+        />
+      {/if}
+      <div class="don-project-badge__content">
+        <span class="don-project-badge__label">Vous soutenez le projet</span>
+        <strong class="don-project-badge__title">{SUBSCRIPTION.project?.titre}</strong>
+        {#if SUBSCRIPTION.project?.objectifFinancier}
+          <div class="don-project-badge__progress-container">
+            <div class="don-project-badge__progress">
+              <div class="don-project-badge__progress-bar" style="width: {projectProgress()}%"></div>
+            </div>
+            <span class="don-project-badge__amount">
+              {SUBSCRIPTION.project?.montantRecolte?.toLocaleString('fr-FR') || 0} €
+              <span class="don-project-badge__goal">/ {SUBSCRIPTION.project?.objectifFinancier?.toLocaleString('fr-FR')} €</span>
+            </span>
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
+
   <!-- Header -->
   <header class="don-step2__header">
     <h1 class="don-step2__title">Pourquoi saisir ces informations ?</h1>

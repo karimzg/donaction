@@ -6,8 +6,7 @@
     isBeingFilled,
     FORM_CONFIG
   } from '../../../../logic/useSponsorshipForm.svelte';
-  import alertIcon from '../../../../../../assets/icons/alertIcon.svg';
-  import pagination from '../../../../../../assets/icons/pagination.svg';
+    import pagination from '../../../../../../assets/icons/pagination.svg';
   import email from '../../../../../../assets/icons/email.svg';
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
   import resendFiles from '../../../../../../assets/icons/resendFiles.svg';
@@ -230,19 +229,19 @@
           <div slot="trigger" class="don-info-trigger">
             <span class="don-info-icon">📄</span>
             <span class="don-info-text">Envoi immédiat des justificatifs</span>
-            <img width={25} height={25} src={alertIcon} alt={''} />
+            <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
           </div>
           <div slot="tooltip">
             <div class={'flex gap-1'}>
               <img src={email} alt={'email'} />
               <p>Réception immédiate de vos reçus et attestation par mail.</p>
             </div>
-            <hr class={'w-full'} style="border-color: #808182" />
+            <hr class={'w-full'} />
             <div class={'flex gap-1'}>
               <img src={userAvatar} alt={'email'} />
               <p>Retrouvez à tout instant vos justificatifs dans votre espace.</p>
             </div>
-            <hr class={'w-full'} style="border-color: #808182" />
+            <hr class={'w-full'} />
             <div class={'flex gap-1'}>
               <img src={resendFiles} alt={'email'} />
               <p>Envoi des justificatifs par mail pour rappel avant votre déclaration d'impôt.</p>
@@ -300,11 +299,11 @@
             <Tooltip>
               <div slot="trigger" class="don-real-cost__label-row">
                 <span class="don-real-cost__label">Coût après réduction d'impôts</span>
-                <img width={18} height={18} src={alertIcon} alt={''} />
+                <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
               </div>
               <div slot="tooltip" class="flex flex-col gap-1">
-                <h1 style="margin: unset;">Réduction d'impôts</h1>
-                <p style="font-weight: normal">
+                <h1>Réduction d'impôts</h1>
+                <p>
                   Le don à <b>{SUBSCRIPTION.klubr.denomination}</b> ouvre droit à une réduction d'impôts
                   car il remplit les conditions générales prévues aux articles 200 et 238 bis du code général
                   des impôts.
