@@ -22,6 +22,15 @@
   }
 }
 
+// Contribute label (above header)
+.project-highlight__contribute-label {
+  font-size: var(--don-font-size-sm, 14px);
+  color: var(--don-color-text-secondary, #6B7280);
+  text-align: center;
+  margin: 0 0 var(--don-spacing-xs, 4px) 0;
+  font-weight: var(--don-font-weight-normal, 400);
+}
+
 // Header with title and toggle
 .project-highlight__header {
   display: flex;

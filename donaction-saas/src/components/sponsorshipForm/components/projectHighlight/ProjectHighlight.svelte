@@ -13,11 +13,13 @@
   let {
     project,
     selectedAmount = 0,
-    variant = 'default'
+    variant = 'default',
+    showContributeLabel = false
   }: {
     project: ProjectData;
     selectedAmount?: number;
     variant?: 'default' | 'compact';
+    showContributeLabel?: boolean;
   } = $props();
 
   // Accordion state
@@ -79,6 +81,11 @@
   class:project-highlight--compact={variant === 'compact'}
   class:project-highlight--expanded={isExpanded}
 >
+  <!-- Contribute label (above header) -->
+  {#if showContributeLabel}
+    <p class="project-highlight__contribute-label">Contribuez au financement du projet</p>
+  {/if}
+
   <!-- Header with title and toggle -->
   <button
     type="button"

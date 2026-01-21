@@ -161,26 +161,20 @@
       </button>
     </div>
   {:else}
-    <!-- Header section -->
-    <header class="don-step1__header">
-      <p class="don-step1__subtitle">
-        {!!SUBSCRIPTION.project && SUBSCRIPTION.project?.uuid !== SUBSCRIPTION.klubr.uuid
-          ? 'Contribuez au financement du projet'
-          : 'Contribuez au développement de'}
-      </p>
-      <h1 class="don-step1__title">
-        {!!SUBSCRIPTION.project && SUBSCRIPTION.project?.uuid !== SUBSCRIPTION.klubr.uuid
-          ? SUBSCRIPTION?.project?.titre
-          : SUBSCRIPTION.klubr.denomination}
-      </h1>
-      <img
-        class="don-step1__logo"
-        width={(SUBSCRIPTION.klubr?.logo?.width / SUBSCRIPTION.klubr?.logo?.height) * 70}
-        height={70}
-        src={SUBSCRIPTION.klubr?.logo?.url}
-        alt="logo club"
-      />
-    </header>
+    <!-- Header section (only for club donations, not project donations) -->
+    {#if !isProjectDonation}
+      <header class="don-step1__header">
+        <p class="don-step1__subtitle">Contribuez au développement de</p>
+        <h1 class="don-step1__title">{SUBSCRIPTION.klubr.denomination}</h1>
+        <img
+          class="don-step1__logo"
+          width={(SUBSCRIPTION.klubr?.logo?.width / SUBSCRIPTION.klubr?.logo?.height) * 70}
+          height={70}
+          src={SUBSCRIPTION.klubr?.logo?.url}
+          alt="logo club"
+        />
+      </header>
+    {/if}
 
     <!-- Project highlight (only for project donations) -->
     {#if isProjectDonation && SUBSCRIPTION.project}
@@ -188,6 +182,7 @@
         project={SUBSCRIPTION.project}
         selectedAmount={DEFAULT_VALUES.montant}
         variant="default"
+        showContributeLabel={true}
       />
     {/if}
 
