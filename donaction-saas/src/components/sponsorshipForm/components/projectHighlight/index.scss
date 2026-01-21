@@ -136,6 +136,7 @@
   background: var(--don-brand-primary, #3B82F6);
   border-radius: var(--don-radius-full, 9999px);
   transition: width 300ms ease-out;
+  z-index: 2;
 }
 
 .project-highlight__progress-projected {
@@ -147,6 +148,9 @@
   border-radius: var(--don-radius-full, 9999px);
   transition: width 300ms ease-out, left 300ms ease-out;
   animation: pulse-projection 1.5s ease-in-out infinite;
+  z-index: 1;
+  padding-left: 10px;
+  margin-left: -10px;
 }
 
 @keyframes pulse-projection {
