@@ -237,7 +237,76 @@
   }
 }
 
-// Address row - small N° field (20%), larger street name (80%)
+// Street row - N° (100px max) + Nom de rue (fills remaining)
+.don-form-row--street {
+  display: flex;
+  gap: var(--don-spacing-xl);
+
+  .don-form-group--street-number {
+    flex: 0 0 100px;
+    max-width: 100px;
+  }
+
+  .don-form-group--street-name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media screen and (max-width: 480px) {
+    flex-direction: column;
+
+    .don-form-group--street-number {
+      flex: 0 0 auto;
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+}
+
+// Auto-fill section - visually distinct card for non-editable fields
+.don-autofill-section {
+  background: var(--don-color-bg-subtle, #F9FAFB);
+  border: 1px dashed var(--don-color-border, #E5E7EB);
+  border-radius: var(--don-radius-xl, 16px);
+  padding: var(--don-spacing-lg, 16px);
+  margin-top: var(--don-spacing-sm, 8px);
+  transition: border-color 200ms ease, background-color 200ms ease;
+
+  &--active {
+    border-style: solid;
+    border-color: var(--don-color-border-input, #D1D5DB);
+    background: var(--don-color-bg-card, #FFFFFF);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--don-spacing-sm, 8px);
+    margin-bottom: var(--don-spacing-lg, 16px);
+    padding-bottom: var(--don-spacing-md, 12px);
+    border-bottom: 1px solid var(--don-color-border, #E5E7EB);
+  }
+
+  &__icon {
+    color: var(--don-color-text-muted, #9CA3AF);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: var(--don-font-size-sm, 13px);
+    font-weight: var(--don-font-weight-medium, 500);
+    color: var(--don-color-text-muted, #6B7280);
+    letter-spacing: 0.01em;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--don-spacing-xl, 24px);
+  }
+}
+
+// Legacy address row (deprecated, kept for compatibility)
 .don-form-row--address {
   grid-template-columns: 1fr 4fr;
 
@@ -359,13 +428,14 @@
   position: relative;
 }
 
-// Address helper - subtle inline hint
+// Address helper - subtle inline hint (deprecated, now using section header)
 .address-helper {
   font-size: var(--don-font-size-xs, 11px);
   color: var(--don-color-text-placeholder, #9CA3AF);
   margin-top: var(--don-spacing-xs, 4px);
   font-style: italic;
   letter-spacing: 0.01em;
+  display: none; // Hidden, replaced by don-autofill-section__title
 }
 
 // Unlock animation for address fields when enabled
