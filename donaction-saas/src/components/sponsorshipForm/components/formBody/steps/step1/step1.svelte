@@ -178,17 +178,19 @@
 
     <!-- Project highlight (only for project donations) -->
     {#if isProjectDonation && SUBSCRIPTION.project}
-      <ProjectHighlight
-        project={SUBSCRIPTION.project}
-        selectedAmount={DEFAULT_VALUES.montant}
-        variant="default"
-        showContributeLabel={true}
-      />
+        <div class="don-step1__project-highlight">
+            <ProjectHighlight
+                    project={SUBSCRIPTION.project}
+                    selectedAmount={DEFAULT_VALUES.montant}
+                    variant="default"
+                    showContributeLabel={true}
+            />
+        </div>
     {/if}
 
     <!-- Amount section -->
     <section class="don-section">
-      <h2 class="don-section__label">Je souhaite aider le projet à hauteur de :</h2>
+      <h2 class="don-section__label">Je souhaite aider {#if isProjectDonation && SUBSCRIPTION.project}le projet {/if}à hauteur de :</h2>
 
       <div class="don-amount-grid" role="group" aria-label="Sélection du montant">
         {#each amounts as amount}

@@ -87,14 +87,22 @@
   margin: 0 auto;
 }
 
+.don-step1__project-highlight {
+  margin-top: var(--don-spacing-2xl);
+}
 // Section
 .don-section {
-  background-color: var(--don-color-bg-card);
-  border-radius: var(--don-radius-3xl);
-  padding: var(--don-spacing-3xl);
   margin-bottom: var(--don-spacing-2xl);
-  box-shadow: var(--don-shadow-card);
   width: 100%;
+  & +.don-section {
+    &:before {
+      content: '';
+      display: block;
+      position: relative;
+      top: calc(-1 * var(--don-spacing-2xl));
+      border-top: 1px solid var(--don-color-border);
+    }
+  }
 
   @media screen and (max-width: 768px) {
     padding: var(--don-spacing-xl);
