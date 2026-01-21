@@ -1,3 +1,39 @@
+// Project background image (desktop only)
+.project-background-image {
+  position: fixed;
+  inset: 0;
+  z-index: 998; // Below the blur overlay (999)
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(20px);
+  opacity: 0.25;
+  transform: scale(1.1); // Prevent blur edge artifacts
+  animation: bg-fade-in 0.5s ease-out;
+
+  // Hide on mobile
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+@keyframes bg-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(30px);
+  }
+  to {
+    opacity: 0.25;
+    filter: blur(20px);
+  }
+}
+
+// Respect reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .project-background-image {
+    animation: none;
+  }
+}
 
 .sponsorFormParent {
   padding: 0;

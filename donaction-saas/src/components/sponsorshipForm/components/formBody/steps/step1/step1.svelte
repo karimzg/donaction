@@ -15,8 +15,14 @@
   import { populateForm } from '../../../../logic/initListeners';
   import { calculateTaxReduction, calculateTaxSavings } from '../../../../logic/utils';
   import { register } from 'swiper/element/bundle';
+  import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
 
   let { slides }: { slides: Array<any> } = $props();
+
+  // Check if this is a project donation (not general club)
+  const isProjectDonation = $derived(
+    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+  );
 
   let amounts = $derived(DEFAULT_VALUES.estOrganisme ? [100, 200, 500, 1000] : [10, 50, 100, 200]);
 
@@ -175,6 +181,15 @@
         alt="logo club"
       />
     </header>
+
+    <!-- Project highlight (only for project donations) -->
+    {#if isProjectDonation && SUBSCRIPTION.project}
+      <ProjectHighlight
+        project={SUBSCRIPTION.project}
+        selectedAmount={DEFAULT_VALUES.montant}
+        variant="default"
+      />
+    {/if}
 
     <!-- Amount section -->
     <section class="don-section">

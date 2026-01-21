@@ -20,6 +20,7 @@
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
   import { calculateTaxReduction, formatCurrency } from '../../../../logic/utils';
   import { calculateFees, type FeeCalculationOutput } from '../../../../logic/fee-calculation-helper';
+  import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
 
   const cgu = $state({
     title: '',
@@ -116,10 +117,16 @@
       <div class="don-header-amount">{formatCurrency(DEFAULT_VALUES.montant)}</div>
       <div class="don-header-for">pour</div>
       <div class="don-header-association">{SUBSCRIPTION.klubr?.denomination}</div>
-      {#if SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid}
-        <div class="don-project-badge">🎯 {SUBSCRIPTION.project.titre}</div>
-      {/if}
     </header>
+
+    <!-- Project highlight (compact for recap) -->
+    {#if SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid}
+      <ProjectHighlight
+        project={SUBSCRIPTION.project}
+        selectedAmount={DEFAULT_VALUES.montant}
+        variant="compact"
+      />
+    {/if}
 
     <!-- Fee choice section -->
     {#if showFeeChoice}

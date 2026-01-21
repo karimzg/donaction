@@ -116,6 +116,14 @@
 
 {#if SCRIPT_LOADED === 'loaded'}
     <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
+        <!-- Project background image (desktop only, when form is active) -->
+        {#if $isBeingFilled && SUBSCRIPTION.project?.couverture?.url}
+            <div
+                class="project-background-image"
+                style="background-image: url({SUBSCRIPTION.project.couverture.url});"
+                aria-hidden="true"
+            ></div>
+        {/if}
         <div
             class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}
             style="--don-brand-primary: {SUBSCRIPTION.klubr?.klubr_house?.primary_color || '#3bacf7'}; --don-brand-secondary: {SUBSCRIPTION.klubr?.klubr_house?.secondary_color || '#050505'};"
