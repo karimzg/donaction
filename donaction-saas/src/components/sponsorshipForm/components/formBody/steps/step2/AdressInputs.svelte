@@ -160,9 +160,7 @@
     <div class="don-label-with-tooltip">
       <label class="don-form-label" for="country">Pays *</label>
       <Tooltip position="md-left-14">
-        <div slot="trigger">
-          <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
-        </div>
+        <span slot="trigger" class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
         <div slot="tooltip">
           <p>
             Si vous faites un don en tant que non résidant français, vous ne pouvez bénéficier de la

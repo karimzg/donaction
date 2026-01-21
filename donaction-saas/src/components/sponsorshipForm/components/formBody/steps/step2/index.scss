@@ -173,8 +173,6 @@
   font-size: var(--don-font-size-sm);
   font-weight: var(--don-font-weight-medium);
   color: var(--don-color-text-secondary);
-  line-height: 1.2;
-  display: block;
 }
 
 .don-form-input,
@@ -319,24 +317,8 @@
   }
 }
 
-// Label with tooltip inline - exact same height as standalone .don-form-label
-.don-label-with-tooltip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: calc(var(--don-font-size-sm, 14px) * 1.2);
-  overflow: visible;
-
-  .don-form-label {
-    margin: 0;
-    padding: 0;
-    display: inline;
-  }
-}
-
-// Tooltip trigger - unified design (matches step1)
-// Use :global() because the span is rendered inside the Tooltip component
-.don-label-with-tooltip :global(.don-tooltip-trigger) {
+// Tooltip trigger - new design
+.don-tooltip-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -363,6 +345,13 @@
     outline: 2px solid var(--don-brand-primary, #3B82F6);
     outline-offset: 2px;
   }
+}
+
+// Label with tooltip inline - baseline aligned
+.don-label-with-tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--don-spacing-sm, 6px);
 }
 
 // Address field styles
