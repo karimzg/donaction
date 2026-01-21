@@ -64,6 +64,8 @@
 
 .project-highlight__title {
   flex: 1;
+  // min-width: 0 is required for text-overflow to work in flex containers
+  min-width: 0;
   font-size: var(--don-font-size-base, 16px);
   font-weight: var(--don-font-weight-semibold, 600);
   color: var(--don-color-text-primary, #1F2937);

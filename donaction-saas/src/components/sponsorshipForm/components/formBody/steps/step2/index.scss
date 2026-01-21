@@ -123,10 +123,17 @@
   @media screen and (max-width: 480px) {
     flex-direction: column;
     text-align: center;
+    overflow: hidden;
+    color: red !important;
 
     &__image {
       width: 48px;
       height: 48px;
+    }
+
+    &__content {
+      width: 100%;
+      max-width: 100%;
     }
 
     &__progress-container {
