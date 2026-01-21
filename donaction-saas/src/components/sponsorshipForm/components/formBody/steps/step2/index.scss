@@ -421,6 +421,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--don-spacing-sm, 6px);
+  :global(.tooltip-container) {
+    max-height: var(--don-font-size-sm, 14px);
+  }
 }
 
 // Address field styles
