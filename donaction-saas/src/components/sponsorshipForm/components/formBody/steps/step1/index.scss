@@ -88,6 +88,7 @@
 }
 
 .don-step1__project-highlight {
+  max-width: 100%;
   margin-top: var(--don-spacing-2xl);
 }
 // Section
@@ -105,8 +106,6 @@
   }
 
   @media screen and (max-width: 768px) {
-    padding: var(--don-spacing-xl);
-    border-radius: var(--don-radius-xl);
     margin-bottom: var(--don-spacing-lg);
   }
 }
