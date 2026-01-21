@@ -9,7 +9,8 @@
   }
 
   // Tooltip trigger button style (when used inside tooltip-container)
-  .don-tooltip-trigger {
+  // Use :global() to apply styles to slotted content from child components
+  :global(.don-tooltip-trigger) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
