@@ -99,6 +99,25 @@
     swiperEl?.swiper[acc > 0 ? 'slideNext' : 'slidePrev']();
   };
 
+  // Scroll vers la section suivante après sélection du montant (utile mobile)
+  let taxSectionRef: HTMLElement;
+  let scrollTimeout: ReturnType<typeof setTimeout>;
+
+  const scrollToNextSection = () => {
+    setTimeout(() => {
+      taxSectionRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
+
+  const scheduleScroll = () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(scrollToNextSection, 2000);
+  };
+
+  const cancelScheduledScroll = () => {
+    clearTimeout(scrollTimeout);
+  };
+
   onDestroy(() => {
     populateForm();
   });
@@ -199,7 +218,7 @@
             type="button"
             class="don-btn-amount"
             class:don-btn-amount--selected={DEFAULT_VALUES.montant === amount}
-            onclick={() => (DEFAULT_VALUES.montant = amount) && isBeingFilled.set(true)}
+            onclick={() => { DEFAULT_VALUES.montant = amount; isBeingFilled.set(true); scrollToNextSection(); }}
             aria-pressed={DEFAULT_VALUES.montant === amount}
             aria-label="Faire un don de {amount} euros"
           >
@@ -224,6 +243,13 @@
                 e.target.value = e.target.value.slice(0, 6);
                 DEFAULT_VALUES.montant = Number(e.target.value);
               }
+              if (e.target.value.length >= 2) {
+                scheduleScroll();
+              }
+            }}
+            onblur={() => {
+              cancelScheduledScroll();
+              if (DEFAULT_VALUES.montant >= 10) scrollToNextSection();
             }}
             aria-describedby="don-montant-error"
           />
@@ -275,7 +301,7 @@
     </section>
 
     <!-- Tax reduction section -->
-    <section class="don-section">
+    <section class="don-section" bind:this={taxSectionRef}>
       <h2 class="don-section__label">
         Souhaitez-vous bénéficier d'une réduction d'impôt "mécénat" pour ce don ?
       </h2>
