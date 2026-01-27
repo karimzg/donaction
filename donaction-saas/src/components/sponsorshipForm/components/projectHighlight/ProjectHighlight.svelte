@@ -1,12 +1,9 @@
 <script lang="ts">
-  import RichTextBlock from '../../../../utils/richTextBlock/RichTextBlock.svelte';
-
   interface ProjectData {
     titre: string;
     montantAFinancer: number | null;
     montantTotalDonations?: number | null;
     dateLimiteFinancementProjet: string | null;
-    descriptionCourte?: Array<{ type: string; children: any[] }>;
     couverture?: { url: string; alternativeText?: string };
   }
 
@@ -14,16 +11,16 @@
     project,
     selectedAmount = 0,
     variant = 'default',
-    showContributeLabel = false
+    label = ''
   }: {
     project: ProjectData;
     selectedAmount?: number;
     variant?: 'default' | 'compact';
-    showContributeLabel?: boolean;
+    label?: string;
   } = $props();
 
-  // Accordion state
-  let isExpanded = $state(false);
+  // Determine if we should show the image layout
+  const hasImage = $derived(!!project.couverture?.url);
 
   // Computed values
   const currentAmount = $derived(project.montantTotalDonations ?? 0);
@@ -55,10 +52,6 @@
     return days !== null && days > 0 && days <= 7;
   });
 
-  const hasDescription = $derived(
-    project.descriptionCourte && project.descriptionCourte.length > 0
-  );
-
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -67,102 +60,69 @@
       maximumFractionDigits: 0
     }).format(amount) + ' €';
   };
-
-  // Toggle accordion
-  const toggleAccordion = () => {
-    if (hasDescription) {
-      isExpanded = !isExpanded;
-    }
-  };
 </script>
 
 <div
   class="project-highlight"
   class:project-highlight--compact={variant === 'compact'}
-  class:project-highlight--expanded={isExpanded}
+  class:project-highlight--with-image={hasImage}
 >
-  <!-- Contribute label (above header) -->
-  {#if showContributeLabel}
-    <p class="project-highlight__contribute-label">Contribuez au financement du projet</p>
+  <!-- Image (left side) -->
+  {#if hasImage}
+    <img
+      class="project-highlight__image"
+      src={project.couverture.url}
+      alt={project.couverture.alternativeText || project.titre}
+    />
   {/if}
 
-  <!-- Header with title and toggle -->
-  <button
-    type="button"
-    class="project-highlight__header"
-    onclick={toggleAccordion}
-    aria-expanded={isExpanded}
-    aria-controls="project-description"
-    disabled={!hasDescription}
-  >
-    <span class="project-highlight__icon">🎯</span>
-    <span class="project-highlight__title">{project.titre}</span>
-    {#if hasDescription}
-      <span class="project-highlight__toggle" aria-hidden="true">
-        {isExpanded ? '▲' : '▼'}
-      </span>
+  <!-- Content (right side) -->
+  <div class="project-highlight__content">
+    <!-- Label -->
+    {#if label}
+      <span class="project-highlight__label">{label}</span>
     {/if}
-  </button>
 
-  <!-- Accordion content: Description -->
-  {#if hasDescription}
-    <div
-      id="project-description"
-      class="project-highlight__description"
-      class:project-highlight__description--visible={isExpanded}
-    >
-      <div class="project-highlight__description-inner">
-        <RichTextBlock data={project.descriptionCourte} />
-      </div>
-    </div>
-  {/if}
+    <!-- Title -->
+    <strong class="project-highlight__title">{project.titre}</strong>
 
-  <!-- Progress bar -->
-  {#if hasGoal}
-    <div class="project-highlight__progress-section">
-      <div class="project-highlight__progress-bar">
-        <!-- Current progress -->
-        <div
-          class="project-highlight__progress-current"
-          style="width: {currentProgress}%"
-        ></div>
-        <!-- Projected progress (donation preview) -->
-        {#if selectedAmount > 0 && progressDelta > 0}
+    <!-- Progress bar -->
+    {#if hasGoal}
+      <div class="project-highlight__progress-section">
+        <div class="project-highlight__progress-bar">
           <div
-            class="project-highlight__progress-projected"
-            style="left: {currentProgress}%; width: {progressDelta}%"
+            class="project-highlight__progress-current"
+            style="width: {currentProgress}%"
           ></div>
-        {/if}
-      </div>
+          {#if selectedAmount > 0 && progressDelta > 0}
+            <div
+              class="project-highlight__progress-projected"
+              style="left: {currentProgress}%; width: {progressDelta}%"
+            ></div>
+          {/if}
+        </div>
 
-      <!-- Progress stats -->
-      <div class="project-highlight__stats">
-        {#if variant === 'compact'}
-          <!-- Compact: minimal stats -->
-          <span class="project-highlight__percentage">
-            {currentProgress}%{#if selectedAmount > 0 && progressDelta > 0}<span class="project-highlight__percentage-arrow">→{projectedProgress}%</span>{/if}
-          </span>
-        {:else}
-          <!-- Default: full stats -->
+        <!-- Progress stats -->
+        <div class="project-highlight__stats">
           <span class="project-highlight__amount-raised">
-            {formatCurrency(currentAmount)} récolté
+            {formatCurrency(currentAmount)} / {formatCurrency(goalAmount)}
           </span>
           {#if selectedAmount > 0}
             <span class="project-highlight__amount-preview">
               · +{formatCurrency(selectedAmount)} avec votre don
             </span>
           {/if}
-        {/if}
+        </div>
       </div>
-    </div>
-  {/if}
+    {/if}
 
-  <!-- Urgency badge -->
-  {#if showUrgencyBadge()}
-    <div class="project-highlight__urgency">
-      🔥 {#if variant === 'compact'}{daysRemaining()}j restants{:else}{daysRemaining()} jours restants{/if}
-    </div>
-  {/if}
+    <!-- Urgency badge -->
+    {#if showUrgencyBadge()}
+      <div class="project-highlight__urgency">
+        🔥 {#if variant === 'compact'}{daysRemaining()}j restants{:else}{daysRemaining()} jours restants{/if}
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style lang="scss">

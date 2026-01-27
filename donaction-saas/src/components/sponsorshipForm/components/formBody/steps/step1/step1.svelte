@@ -203,7 +203,7 @@
                     project={SUBSCRIPTION.project}
                     selectedAmount={DEFAULT_VALUES.montant}
                     variant="default"
-                    showContributeLabel={true}
+                    label="Contribuez au financement du projet"
             />
         </div>
     {/if}

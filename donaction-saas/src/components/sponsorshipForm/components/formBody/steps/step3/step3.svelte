@@ -126,6 +126,7 @@
         project={SUBSCRIPTION.project}
         selectedAmount={DEFAULT_VALUES.montant}
         variant="compact"
+        label="Vous soutenez le projet"
       />
     {/if}
 
