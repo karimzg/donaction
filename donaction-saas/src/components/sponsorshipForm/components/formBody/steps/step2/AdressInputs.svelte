@@ -15,6 +15,7 @@
   let justUnlocked = $state(false);
   let autofillHasError = $state(false);
   let autofillErrorMessage = $state('');
+  let addressFieldError = $state('');
 
   // Liste des champs auto-remplis à valider
   const autofillFields = ['streetNumber', 'streetName', 'postalCode', 'city'];
@@ -43,9 +44,18 @@
 
   // Subscribe au trigger de validation
   const unsubscribeValidation = triggerValidation.subscribe((val) => {
-    if (val > 0 && isEditable) {
-      autofillErrorMessage = validateAutofillFields();
-      autofillHasError = !!autofillErrorMessage;
+    if (val > 0) {
+      if (!isEditable) {
+        // Aucune adresse sélectionnée via Google Places
+        addressFieldError = 'Merci de saisir votre adresse pour remplir les champs en dessous';
+        autofillHasError = false;
+        autofillErrorMessage = '';
+      } else {
+        // Adresse sélectionnée, valider les champs auto-remplis
+        addressFieldError = '';
+        autofillErrorMessage = validateAutofillFields();
+        autofillHasError = !!autofillErrorMessage;
+      }
     }
   });
 
@@ -72,6 +82,7 @@
     justUnlocked = true;
     autofillHasError = false;
     autofillErrorMessage = '';
+    addressFieldError = '';
     await tick();
     triggerValidation.update((_) => _ + 1);
     // Reset animation flag after animation completes
@@ -114,7 +125,7 @@
   // TODO: input disabled after first input
 </script>
 
-<div class="don-form-group address-field">
+<div class="don-form-group address-field" class:touched={!!addressFieldError} class:invalid={!!addressFieldError}>
   <label class="don-form-label" for="place_id">Adresse complète *</label>
   <input
     type="text"
@@ -123,7 +134,7 @@
     class="don-form-input"
     autocomplete="none"
   />
-  <small class="don-error" aria-live="polite"></small>
+  <FormError message={addressFieldError} />
 </div>
 
 <!-- Auto-fill section: visually distinct, non-editable fields -->

@@ -219,6 +219,12 @@
             placeholder="--,--"
             class="don-form-input don-form-input--with-addon"
             bind:value={DEFAULT_VALUES.montant}
+            oninput={(e) => {
+              if (e.target.value.length > 6) {
+                e.target.value = e.target.value.slice(0, 6);
+                DEFAULT_VALUES.montant = Number(e.target.value);
+              }
+            }}
             aria-describedby="don-montant-error"
           />
           <span class="don-custom-amount__currency" aria-hidden="true">€</span>
