@@ -22,12 +22,13 @@
       }
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "aidd/supports/.claude/_/statusbar.sh",
-    "padding": 0
-  },
   "remote": {
     "defaultEnvironmentId": "env_01N9jrVQWUUy4nEDRyhBMnP5"
+  },
+  "outputStyle": "aidd-style",
+  "statusLine": {
+    "type": "command",
+    "command": ".claude/statusline.sh",
+    "padding": 0
   }
 }
