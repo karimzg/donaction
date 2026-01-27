@@ -390,21 +390,6 @@
       <div class="don-checkbox-row">
         <input
           type="checkbox"
-          id="acceptCondition1"
-          name="acceptCondition1"
-          bind:checked={DEFAULT_VALUES.acceptConditions1}
-          use:validator={{
-            validateFunctions: [validateTrue]
-          }}
-        />
-        <label for="acceptCondition1">
-          J'ai bien compris que Klubr est un fonds de dotation redistributeur.
-        </label>
-        <small class="don-error" aria-live="polite"></small>
-      </div>
-      <div class="don-checkbox-row">
-        <input
-          type="checkbox"
           id="acceptCondition2"
           name="acceptCondition2"
           bind:checked={DEFAULT_VALUES.acceptConditions2}

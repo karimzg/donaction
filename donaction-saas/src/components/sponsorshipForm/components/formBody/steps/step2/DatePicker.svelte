@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { triggerValidation } from '../../../../logic/useSponsorshipForm.svelte';
 
   interface Props {
     value?: string;
@@ -183,6 +184,18 @@
     isTouched = true;
     validateAndUpdate();
   }
+
+  // Subscribe to form validation trigger
+  const unsubscribe = triggerValidation.subscribe((_) => {
+    if (_ > 0) {
+      isTouched = true;
+      validateAndUpdate();
+    }
+  });
+
+  onDestroy(() => {
+    unsubscribe();
+  });
 </script>
 
 <div class="date-picker" class:touched={isTouched} class:invalid={isTouched && errorMessage} class:valid={isTouched && !errorMessage && value}>
@@ -232,7 +245,7 @@
       class="date-picker__field date-picker__field--year"
     />
   </div>
-  <small class="date-picker__error">{errorMessage}</small>
+  <small class="date-picker__error don-error">{errorMessage}</small>
 </div>
 
 <style lang="scss">

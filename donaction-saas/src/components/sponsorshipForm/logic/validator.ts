@@ -117,7 +117,7 @@ function validator(
   let isTouched = false;
 
   // Get parent form-group for touched class
-  const formGroup = node.closest('.don-form-group') || node.closest('.inputField');
+  const formGroup = node.closest('.don-form-group') || node.closest('.inputField') || node.closest('.don-checkbox-row');
 
   function markTouched() {
     if (!isTouched) {

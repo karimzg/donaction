@@ -598,9 +598,23 @@
 .don-error {
   grid-column: span 2;
   font-size: var(--don-font-size-sm) !important;
-  color: red;
-  min-height: 16px;
+  color: var(--don-color-error, red);
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
   margin-left: 33px;
+  transition: opacity 150ms ease-out, max-height 150ms ease-out;
+}
+
+// Show errors when checkbox row is touched and invalid
+// Using :global() because touched/invalid classes are added dynamically by JS
+:global(.don-checkbox-row.touched.invalid) {
+  :global(.don-error) {
+    opacity: 1;
+    max-height: 24px;
+    min-height: 16px;
+  }
 }
 
 .cursor-pointer {

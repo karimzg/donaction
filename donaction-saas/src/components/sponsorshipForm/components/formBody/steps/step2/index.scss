@@ -346,10 +346,11 @@
 }
 
 // Show errors only when form-group is touched AND invalid
-.don-form-group.touched.invalid,
-.inputField.touched.invalid {
-  .don-error,
-  .error {
+// Using :global() because touched/invalid classes are added dynamically by JS
+:global(.don-form-group.touched.invalid),
+:global(.inputField.touched.invalid) {
+  :global(.don-error),
+  :global(.error) {
     opacity: 1;
     transform: translateY(0);
     max-height: 24px;
@@ -358,8 +359,9 @@
 }
 
 // Input validation states - CSS-driven based on parent class
-.don-form-group.touched.invalid,
-.inputField.touched.invalid {
+// Using :global() because touched/invalid classes are added dynamically by JS
+:global(.don-form-group.touched.invalid),
+:global(.inputField.touched.invalid) {
   .don-form-input,
   .don-form-select,
   input:not([type="file"]) {
@@ -373,8 +375,9 @@
 }
 
 // Valid input state - subtle success indicator
-.don-form-group.touched.valid,
-.inputField.touched.valid {
+// Using :global() because touched/valid classes are added dynamically by JS
+:global(.don-form-group.touched.valid),
+:global(.inputField.touched.valid) {
   .don-form-input:not(:placeholder-shown),
   .don-form-select,
   input:not([type="file"]):not(:placeholder-shown) {

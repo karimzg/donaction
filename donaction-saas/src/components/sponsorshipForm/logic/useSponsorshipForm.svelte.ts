@@ -70,7 +70,6 @@ const defVals = {
   place_id: null,
   displayName: true,
   displayAmount: true,
-  acceptConditions1: false,
   acceptConditions2: false
 };
 const DEFAULT_VALUES = $state({ ...defVals });
