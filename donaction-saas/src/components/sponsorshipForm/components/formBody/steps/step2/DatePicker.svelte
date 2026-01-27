@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { triggerValidation } from '../../../../logic/useSponsorshipForm.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   interface Props {
     value?: string;
@@ -245,7 +246,9 @@
       class="date-picker__field date-picker__field--year"
     />
   </div>
-  <small class="date-picker__error don-error">{errorMessage}</small>
+  {#if isTouched && errorMessage}
+    <FormError message={errorMessage}/>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -307,26 +310,7 @@
     user-select: none;
   }
 
-  .date-picker__error {
-    font-size: var(--don-font-size-sm, 12px);
-    color: var(--don-color-error, #DC2626);
-    min-height: 0;
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: opacity 150ms ease-out, transform 150ms ease-out, max-height 150ms ease-out;
-    display: flex;
-    align-items: center;
-    gap: var(--don-spacing-xs, 4px);
-
-    &:not(:empty)::before {
-      content: "⚠";
-      font-size: 10px;
-    }
-  }
-
-  // Show error when touched and invalid
+  // Show error state when touched and invalid
   .date-picker.touched.invalid {
     .date-picker__inputs {
       border-color: var(--don-color-error, #DC2626);
@@ -335,13 +319,6 @@
       &:focus-within {
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
       }
-    }
-
-    .date-picker__error {
-      opacity: 1;
-      transform: translateY(0);
-      max-height: 24px;
-      min-height: 16px;
     }
   }
 

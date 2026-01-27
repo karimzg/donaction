@@ -13,6 +13,7 @@
   import AdressInputs from './AdressInputs.svelte';
   import DatePicker from './DatePicker.svelte';
   import LogoUpload from './LogoUpload.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   // Calculate project progress
   let projectProgress = $derived(() => {
@@ -85,7 +86,7 @@
           fieldName: 'E-mail'
         }}
       />
-      <small class="don-error" aria-live="polite"></small>
+      <FormError inputId="email" />
     </div>
 
     <!-- Company fields (conditional) -->
@@ -105,7 +106,7 @@
               fieldName: 'Raison sociale'
             }}
           />
-          <small class="don-error" aria-live="polite"></small>
+          <FormError inputId="socialReason" />
         </div>
         <div class="don-form-group">
           <label class="don-form-label" for="siren">Siren *</label>
@@ -120,7 +121,7 @@
               fieldName: 'Siren'
             }}
           />
-          <small class="don-error" aria-live="polite"></small>
+          <FormError inputId="siren" />
         </div>
         <div class="don-form-group">
           <label class="don-form-label" for="formeJuridique">Forme juridique *</label>
@@ -135,7 +136,7 @@
               fieldName: 'Forme juridique'
             }}
           />
-          <small class="don-error" aria-live="polite"></small>
+          <FormError inputId="formeJuridique" />
         </div>
       </div>
       <AdressInputs />
@@ -159,7 +160,7 @@
           <option value="Monsieur">Monsieur</option>
           <option value="Madame">Madame</option>
         </select>
-        <small class="don-error" aria-live="polite"></small>
+        <FormError inputId="civilite" />
       </div>
       <div class="don-form-group">
         <label class="don-form-label" for="prenom">Prénom *</label>
@@ -174,7 +175,7 @@
             fieldName: 'Prénom'
           }}
         />
-        <small class="don-error" aria-live="polite"></small>
+        <FormError inputId="prenom" />
       </div>
       <div class="don-form-group">
         <label class="don-form-label" for="nom">Nom *</label>
@@ -189,7 +190,7 @@
             fieldName: 'Nom'
           }}
         />
-        <small class="don-error" aria-live="polite"></small>
+        <FormError inputId="nom" />
       </div>
     </div>
 
@@ -214,7 +215,7 @@
             placeholder="+330700000000"
             bind:value={DEFAULT_VALUES.tel}
           />
-          <small class="don-error" aria-live="polite"></small>
+          <FormError inputId="phoneNumber" />
         </div>
       {/if}
     </div>

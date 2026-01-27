@@ -4,6 +4,7 @@ import {
   isBeingFilled,
   triggerValidation
 } from './useSponsorshipForm.svelte';
+import { setFieldError } from './fieldErrors.svelte';
 import eventBus from '../../../utils/eventBus';
 import { EVENT_CONTEXT } from './initListeners';
 
@@ -136,12 +137,18 @@ function validator(
       formGroup?.classList.add('valid');
     }
 
-    // Update error message element
+    // Update error store (for FormError components with inputId)
+    const inputId = node.id;
+    if (inputId) {
+      setFieldError(inputId, message);
+    }
+
+    // Fallback: update legacy <small> element if present (backward compatibility)
     const errorEl = node.type === 'checkbox'
       ? node.nextElementSibling?.nextElementSibling
       : node.nextElementSibling;
 
-    if (errorEl) {
+    if (errorEl && errorEl.tagName === 'SMALL') {
       errorEl.textContent = message;
     }
   }

@@ -468,24 +468,4 @@
   }
 }
 
-// Error message styling
-.don-error {
-  display: block;
-  font-size: var(--don-font-size-sm) !important;
-  color: var(--don-color-error, #DC2626);
-  text-align: center;
-  min-height: 18px;
-  padding: var(--don-spacing-xs) var(--don-spacing-md);
-  border-radius: var(--don-radius-md);
 
-  &:not(:empty) {
-    background-color: var(--don-color-error-light, #FEF2F2);
-    animation: shake 0.3s ease-out;
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}

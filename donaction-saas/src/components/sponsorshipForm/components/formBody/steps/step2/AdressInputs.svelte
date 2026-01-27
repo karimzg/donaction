@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, onDestroy } from 'svelte';
   import {
     DEFAULT_VALUES,
     FORM_CONFIG,
@@ -7,11 +7,51 @@
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { validator, validatePostalCode, validateRequired } from '../../../../logic/validator';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   let inputElement;
 
   let isEditable = $state(false);
   let justUnlocked = $state(false);
+  let autofillHasError = $state(false);
+  let autofillErrorMessage = $state('');
+
+  // Liste des champs auto-remplis à valider
+  const autofillFields = ['streetNumber', 'streetName', 'postalCode', 'city'];
+
+  // Valide les champs auto-remplis et retourne le message d'erreur global
+  function validateAutofillFields(): string {
+    if (!isEditable) return '';
+
+    const missingFields: string[] = [];
+    if (!DEFAULT_VALUES.streetNumber) missingFields.push('N°');
+    if (!DEFAULT_VALUES.streetName) missingFields.push('Nom de rue');
+    if (!DEFAULT_VALUES.postalCode) missingFields.push('Code postal');
+    if (!DEFAULT_VALUES.city) missingFields.push('Ville');
+
+    // Validation du code postal
+    if (DEFAULT_VALUES.postalCode && !/^\d{5}$/.test(DEFAULT_VALUES.postalCode)) {
+      return 'Code postal invalide (5 chiffres requis)';
+    }
+
+    if (missingFields.length > 0) {
+      return `Champs requis : ${missingFields.join(', ')}`;
+    }
+
+    return '';
+  }
+
+  // Subscribe au trigger de validation
+  const unsubscribeValidation = triggerValidation.subscribe((val) => {
+    if (val > 0 && isEditable) {
+      autofillErrorMessage = validateAutofillFields();
+      autofillHasError = !!autofillErrorMessage;
+    }
+  });
+
+  onDestroy(() => {
+    unsubscribeValidation();
+  });
 
   const handlePlaceChange = async (selectedPlace) => {
     const gdKeys = [
@@ -30,6 +70,8 @@
     DEFAULT_VALUES.place_id = selectedPlace?.place_id;
     isEditable = true;
     justUnlocked = true;
+    autofillHasError = false;
+    autofillErrorMessage = '';
     await tick();
     triggerValidation.update((_) => _ + 1);
     // Reset animation flag after animation completes
@@ -85,7 +127,7 @@
 </div>
 
 <!-- Auto-fill section: visually distinct, non-editable fields -->
-<div class="don-autofill-section" class:don-autofill-section--active={isEditable}>
+<div class="don-autofill-section" class:don-autofill-section--active={isEditable} class:don-autofill-section--error={autofillHasError}>
   <header class="don-autofill-section__header">
     <svg class="don-autofill-section__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -94,10 +136,17 @@
     <span class="don-autofill-section__title">Champs remplis automatiquement</span>
   </header>
 
+  <!-- Message d'erreur global pour les champs auto-remplis -->
+  {#if autofillHasError}
+    <div class="don-autofill-section__error">
+      <FormError message={autofillErrorMessage} />
+    </div>
+  {/if}
+
   <div class="don-autofill-section__content">
     <!-- N° + Nom de rue on same row (desktop) -->
     <div class="don-form-row don-form-row--street">
-      <div class="don-form-group don-form-group--street-number">
+      <div class="don-form-group don-form-group--street-number" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.streetNumber}>
         <label class="don-form-label" for="streetNumber">N° *</label>
         <input
           id="streetNumber"
@@ -107,14 +156,9 @@
           class:address-unlock={justUnlocked}
           disabled={FORM_CONFIG.myLast?.streetNumber === DEFAULT_VALUES.streetNumber || !isEditable}
           bind:value={DEFAULT_VALUES.streetNumber}
-          use:validator={{
-            validateFunctions: [validateRequired],
-            fieldName: 'Numéro de rue'
-          }}
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
-      <div class="don-form-group don-form-group--street-name">
+      <div class="don-form-group don-form-group--street-name" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.streetName}>
         <label class="don-form-label" for="streetName">Nom de rue *</label>
         <input
           id="streetName"
@@ -124,18 +168,13 @@
           class:address-unlock={justUnlocked}
           disabled={FORM_CONFIG.myLast?.streetName === DEFAULT_VALUES.streetName || !isEditable}
           bind:value={DEFAULT_VALUES.streetName}
-          use:validator={{
-            validateFunctions: [validateRequired],
-            fieldName: 'Nom de rue'
-          }}
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
     </div>
 
     <!-- Code postal, Ville, Pays -->
     <div class="don-form-row don-form-row--3">
-      <div class="don-form-group">
+      <div class="don-form-group" class:touched={autofillHasError} class:invalid={autofillHasError && (!DEFAULT_VALUES.postalCode || !/^\d{5}$/.test(DEFAULT_VALUES.postalCode))}>
         <label class="don-form-label" for="postalCode">Code postal *</label>
         <input
           id="postalCode"
@@ -145,14 +184,9 @@
           class:address-unlock={justUnlocked}
           disabled={FORM_CONFIG.myLast?.postalCode === DEFAULT_VALUES.postalCode || !isEditable}
           bind:value={DEFAULT_VALUES.postalCode}
-          use:validator={{
-            validateFunctions: [validateRequired, validatePostalCode],
-            fieldName: 'Code postal'
-          }}
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
-      <div class="don-form-group">
+      <div class="don-form-group" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.city}>
         <label class="don-form-label" for="city">Ville *</label>
         <input
           id="city"
@@ -162,12 +196,7 @@
           class:address-unlock={justUnlocked}
           disabled={FORM_CONFIG.myLast?.city === DEFAULT_VALUES.city || !isEditable}
           bind:value={DEFAULT_VALUES.city}
-          use:validator={{
-            validateFunctions: [validateRequired],
-            fieldName: 'Ville'
-          }}
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
       <div class="don-form-group">
         <div class="don-label-with-tooltip">
@@ -193,7 +222,6 @@
           aria-readonly="true"
           disabled={true}
         />
-        <small class="don-error" aria-live="polite"></small>
       </div>
     </div>
   </div>
@@ -215,6 +243,17 @@
       border-style: solid;
       border-color: var(--don-color-border-input, #D1D5DB);
       background: var(--don-color-bg-card, #FFFFFF);
+    }
+
+    &--error {
+      border-color: var(--don-color-error, #DC2626);
+      border-style: solid;
+    }
+
+    &__error {
+      margin-bottom: var(--don-spacing-lg, 16px);
+      padding-bottom: var(--don-spacing-md, 12px);
+      border-bottom: 1px solid var(--don-color-border, #E5E7EB);
     }
   }
 

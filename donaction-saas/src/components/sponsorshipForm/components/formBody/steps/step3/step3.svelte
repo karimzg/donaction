@@ -21,6 +21,7 @@
   import { calculateTaxReduction, formatCurrency } from '../../../../logic/utils';
   import { calculateFees, type FeeCalculationOutput } from '../../../../logic/fee-calculation-helper';
   import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   const cgu = $state({
     title: '',
@@ -371,7 +372,6 @@
         <label for="displayName">
           Je veux que mon nom apparaisse dans la liste des donateurs sur la page
         </label>
-        <small class="don-error" aria-live="polite"></small>
       </div>
       {#if DEFAULT_VALUES.displayName}
         <div class="don-checkbox-row">
@@ -384,12 +384,31 @@
           <label for="displayAmount">
             Je souhaite afficher le montant de mon don
           </label>
-          <small class="don-error" aria-live="polite"></small>
         </div>
       {/if}
+
+      {#if !isStripeConnect}
       <div class="don-checkbox-row">
         <input
           type="checkbox"
+          id="acceptCondition1"
+          name="acceptCondition1"
+          bind:checked={DEFAULT_VALUES.acceptConditions1}
+          use:validator={{
+            validateFunctions: [validateTrue]
+          }}
+        />
+          <label for="acceptCondition1">
+              J'ai bien compris que Klubr est un fonds de dotation redistributeur.
+          </label>
+          <div class="error-msg-wrapper">
+              <FormError msgType="glassCard" inputId="acceptCondition1" />
+          </div>
+      </div>
+      {/if}
+        <div class="don-checkbox-row">
+            <input
+                    type="checkbox"
           id="acceptCondition2"
           name="acceptCondition2"
           bind:checked={DEFAULT_VALUES.acceptConditions2}
@@ -400,7 +419,9 @@
         <label>
           J'accepte <b class="cursor-pointer" onclick={() => isCguShown.set(true)}>les Conditions Générales d'Utilisation.</b> *
         </label>
-        <small class="don-error" aria-live="polite"></small>
+        <div class="error-msg-wrapper">
+          <FormError msgType="glassCard" inputId="acceptCondition2" />
+        </div>
       </div>
     </div>
   </div>

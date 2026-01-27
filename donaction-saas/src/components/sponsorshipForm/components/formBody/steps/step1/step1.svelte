@@ -16,6 +16,7 @@
   import { calculateTaxReduction, calculateTaxSavings } from '../../../../logic/utils';
   import { register } from 'swiper/element/bundle';
   import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   let { slides }: { slides: Array<any> } = $props();
 
@@ -224,17 +225,21 @@
         </div>
       </div>
 
-      <small class="don-error" id="don-montant-error" role="alert" aria-live="polite">
-        {$triggerValidation > 0
-          ? !DEFAULT_VALUES.montant
-            ? 'Veuillez choisir un montant'
-            : DEFAULT_VALUES.montant < 10
-              ? 'Veuillez choisir un montant supérieure à 10 €'
-              : DEFAULT_VALUES.montant > 100000
-                ? 'Veuillez choisir un montant inférieure à 100.000 €'
-                : ''
-          : ''}
-      </small>
+      <!-- Message d'erreur avec le composant FormError -->
+        <div class="flex justify-center">
+            <FormError
+                    msgType="glassCard"
+                    message={$triggerValidation > 0
+                ? !DEFAULT_VALUES.montant
+                  ? 'Veuillez choisir un montant'
+                  : DEFAULT_VALUES.montant < 10
+                    ? 'Veuillez choisir un montant supérieure à 10 €'
+                    : DEFAULT_VALUES.montant > 100000
+                      ? 'Veuillez choisir un montant inférieure à 100.000 €'
+                      : ''
+                : ''}
+            />
+        </div>
 
       <div class="don-info-row">
         <Tooltip>
