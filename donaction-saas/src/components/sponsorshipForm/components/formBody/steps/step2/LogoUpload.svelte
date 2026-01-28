@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import camera from '../../../../../../assets/icons/camera.svg';
 
   interface Props {
@@ -126,6 +127,13 @@
       }
     }
   }
+
+  // Cleanup blob URL on component destroy to prevent memory leak
+  onDestroy(() => {
+    if (value && value.startsWith('blob:')) {
+      URL.revokeObjectURL(value);
+    }
+  });
 </script>
 
 <div class="logo-upload">
