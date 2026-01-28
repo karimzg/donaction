@@ -188,8 +188,11 @@ function validator(
     validate();
   }
 
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
   function handleInput() {
-    validate(true);
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => validate(true), 150);
   }
 
   node.addEventListener('blur', handleBlur);
@@ -205,6 +208,7 @@ function validator(
 
   return {
     destroy() {
+      clearTimeout(debounceTimer);
       node.removeEventListener('blur', handleBlur);
       node.removeEventListener('input', handleInput);
       unsubscribe();
