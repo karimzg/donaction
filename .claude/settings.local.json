@@ -22,13 +22,18 @@
       }
     ]
   },
-  "remote": {
-    "defaultEnvironmentId": "env_01N9jrVQWUUy4nEDRyhBMnP5"
-  },
-  "outputStyle": "aidd-style",
   "statusLine": {
     "type": "command",
     "command": ".claude/statusline.sh",
     "padding": 0
+  },
+  "outputStyle": "aidd-style",
+  "remote": {
+    "defaultEnvironmentId": "env_01N9jrVQWUUy4nEDRyhBMnP5"
+  },
+  "permissions": {
+    "allow": [
+      "mcp__chrome-devtools__list_pages"
+    ]
   }
 }
