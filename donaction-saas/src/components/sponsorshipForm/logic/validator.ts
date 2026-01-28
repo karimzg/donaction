@@ -8,6 +8,10 @@ import { setFieldError } from './fieldErrors.svelte';
 import eventBus from '../../../utils/eventBus';
 import { EVENT_CONTEXT } from './initListeners';
 
+const MIN_DONATION_AMOUNT = 10;
+const MIN_FIELD_LENGTH = 2;
+const MAX_AGE = 110;
+
 const stringRegExp = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
 const stringWithoutNumbersRegExp = /[^A-Za-z\s'-]/;
 const emailRegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,7 +23,7 @@ const sirenRegExp = /^\d{9}$/;
 const validateAmount = (value: number, fieldName: string) => {
   if (value === 0 || isNaN(value)) return 'Ce champ est obligatoire';
   if (isNaN(value) || String(value).includes('e')) return `${fieldName} non valide`;
-  if (value < 10) return `Le montant minimum est de 10 €`;
+  if (value < MIN_DONATION_AMOUNT) return `Le montant minimum est de ${MIN_DONATION_AMOUNT} €`;
   return '';
 };
 
@@ -46,7 +50,7 @@ const validateDateMajor = (value: string) => {
   if (age < 18) {
     return 'Vous devez être majeur(e)';
   }
-  if (age > 110) {
+  if (age > MAX_AGE) {
     return 'Date non valide';
   }
   return '';
@@ -75,7 +79,7 @@ function validatePostalCode(value: string) {
 }
 
 function validateRequired(value: string) {
-  if (value.trim().length < 2) return 'Ce champ est obligatoire';
+  if (value.trim().length < MIN_FIELD_LENGTH) return 'Ce champ est obligatoire';
   return '';
 }
 
