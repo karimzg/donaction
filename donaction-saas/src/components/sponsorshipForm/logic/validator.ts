@@ -153,7 +153,7 @@ function validator(
     }
   }
 
-  function validate(onlyIfValid?: boolean) {
+  function validate(isTyping: boolean = false) {
     let message = '';
     for (const fn of validateFunctions) {
       message = fn(node.type === 'checkbox' ? node.checked : node.value, fieldName, regExp);
@@ -172,13 +172,13 @@ function validator(
       }
     }
 
-    // On input: only clear errors if now valid (don't show new errors while typing)
-    if (onlyIfValid) {
+    // While typing: only clear errors when fixed (don't show new errors mid-keystroke)
+    if (isTyping) {
       if (!message) {
         setValidationState('');
       }
     } else {
-      // On blur or form submit: show validation state
+      // On blur or form submit: show full validation state
       setValidationState(message);
     }
   }
