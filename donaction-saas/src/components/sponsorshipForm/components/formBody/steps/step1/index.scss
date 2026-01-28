@@ -58,6 +58,8 @@
   align-items: center;
   gap: var(--don-spacing-xl);
   width: 100%;
+  justify-content: center;
+  flex: 1;
 }
 
 .don-step1__header {
