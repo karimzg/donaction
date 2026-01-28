@@ -19,8 +19,8 @@
   display: inline-flex;
   gap: var(--don-spacing-sm, 6px);
   padding: var(--don-spacing-md, 8px) var(--don-spacing-xl, 16px);
-  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
-  border: 1px solid var(--don-color-error-border, #FECACA);
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid var(--don-color-error-border, #fecaca);
   border-radius: var(--don-radius-full, 9999px);
   animation: errorPillAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -30,7 +30,7 @@
     justify-content: center;
     width: 18px;
     height: 18px;
-    background-color: var(--don-color-error, #DC2626);
+    background-color: var(--don-color-error, #dc2626);
     color: white;
     border-radius: 50%;
     font-size: 10px;
@@ -39,7 +39,7 @@
   }
 
   .don-form-error__text {
-    color: var(--don-color-error-dark, #991B1B);
+    color: var(--don-color-error-dark, #991b1b);
   }
 }
 
@@ -55,9 +55,15 @@
 }
 
 @keyframes iconPulse {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 // ──────────────────────────────────────────
@@ -73,13 +79,13 @@
   .don-form-error__bar {
     width: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--don-color-error, #DC2626) 0%, #F87171 100%);
+    background: linear-gradient(90deg, var(--don-color-error, #dc2626) 0%, #f87171 100%);
     border-radius: var(--don-radius-full, 9999px);
     animation: barExpand 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
   }
 
   .don-form-error__text {
-    color: var(--don-color-error, #DC2626);
+    color: var(--don-color-error, #dc2626);
     opacity: 0;
     transform: translateY(-4px);
     animation: textFadeUp 0.3s ease-out 0.2s forwards;
@@ -87,13 +93,21 @@
 }
 
 @keyframes errorV3Appear {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes barExpand {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes textFadeUp {
@@ -127,7 +141,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: linear-gradient(135deg, var(--don-color-error, #DC2626) 0%, #EF4444 100%);
+    background: linear-gradient(135deg, var(--don-color-error, #dc2626) 0%, #ef4444 100%);
     border-radius: var(--don-radius-md, 6px);
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
     animation: iconRotateIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -140,7 +154,7 @@
   }
 
   .don-form-error__text {
-    color: var(--don-color-error-dark, #991B1B);
+    color: var(--don-color-error-dark, #991b1b);
   }
 }
 
@@ -180,7 +194,7 @@
   .don-form-error__dot {
     width: 8px;
     height: 8px;
-    background-color: var(--don-color-error, #DC2626);
+    background-color: var(--don-color-error, #dc2626);
     border-radius: 50%;
     animation: dotPulse 1.5s ease-in-out infinite;
     box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
@@ -189,7 +203,7 @@
   }
 
   .don-form-error__text {
-    color: var(--don-color-error, #DC2626);
+    color: var(--don-color-error, #dc2626);
     letter-spacing: -0.01em;
   }
 }
@@ -206,7 +220,8 @@
 }
 
 @keyframes dotPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
   }
   50% {

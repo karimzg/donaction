@@ -12,7 +12,14 @@
     onchange?: (value: string) => void;
   }
 
-  let { value = $bindable(''), min = '1901-01-01', max, required = false, disabled = false, onchange }: Props = $props();
+  let {
+    value = $bindable(''),
+    min = '1901-01-01',
+    max,
+    required = false,
+    disabled = false,
+    onchange,
+  }: Props = $props();
 
   // Parse initial value if exists (format: YYYY-MM-DD)
   let day = $state('');
@@ -62,8 +69,18 @@
 
   // French month names
   const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
   ];
 
   // French day headers (Mon-Sun)
@@ -99,7 +116,9 @@
     if (typeof window !== 'undefined') {
       mediaQueryList = window.matchMedia('(pointer: coarse)');
       isMobile = mediaQueryList.matches;
-      handleMediaChange = (e: MediaQueryListEvent) => { isMobile = e.matches; };
+      handleMediaChange = (e: MediaQueryListEvent) => {
+        isMobile = e.matches;
+      };
       mediaQueryList.addEventListener('change', handleMediaChange);
     }
 
@@ -137,15 +156,35 @@
       return;
     }
 
-    if (isNaN(d) || d < 1 || d > daysInMonth) { errorMessage = 'Jour non valide'; value = ''; return; }
-    if (isNaN(m) || m < 1 || m > 12) { errorMessage = 'Mois non valide'; value = ''; return; }
-    if (isNaN(y) || y < minYear || y > maxYear) { errorMessage = `Année entre ${minYear} et ${maxYear}`; value = ''; return; }
+    if (isNaN(d) || d < 1 || d > daysInMonth) {
+      errorMessage = 'Jour non valide';
+      value = '';
+      return;
+    }
+    if (isNaN(m) || m < 1 || m > 12) {
+      errorMessage = 'Mois non valide';
+      value = '';
+      return;
+    }
+    if (isNaN(y) || y < minYear || y > maxYear) {
+      errorMessage = `Année entre ${minYear} et ${maxYear}`;
+      value = '';
+      return;
+    }
 
     const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const date = new Date(dateStr);
 
-    if (date < minDate) { errorMessage = 'Date trop ancienne'; value = ''; return; }
-    if (date > maxDate) { errorMessage = 'Vous devez être majeur(e)'; value = ''; return; }
+    if (date < minDate) {
+      errorMessage = 'Date trop ancienne';
+      value = '';
+      return;
+    }
+    if (date > maxDate) {
+      errorMessage = 'Vous devez être majeur(e)';
+      value = '';
+      return;
+    }
 
     value = dateStr;
     onchange?.(dateStr);
@@ -194,7 +233,10 @@
         if (field === 'year') monthInput?.focus();
       }
     }
-    if (e.key === 'ArrowRight' && (e.target as HTMLInputElement).selectionStart === (e.target as HTMLInputElement).value.length) {
+    if (
+      e.key === 'ArrowRight' &&
+      (e.target as HTMLInputElement).selectionStart === (e.target as HTMLInputElement).value.length
+    ) {
       if (field === 'day') monthInput?.focus();
       if (field === 'month') yearInput?.focus();
     }
@@ -232,7 +274,10 @@
         calendarYear = parseInt(year);
       }
     } else {
-      day = ''; month = ''; year = ''; value = '';
+      day = '';
+      month = '';
+      year = '';
+      value = '';
     }
     isTouched = true;
     validateAndUpdate();
@@ -249,13 +294,17 @@
   }
 
   function previousMonth() {
-    if (calendarMonth === 1) { calendarMonth = 12; calendarYear--; }
-    else calendarMonth--;
+    if (calendarMonth === 1) {
+      calendarMonth = 12;
+      calendarYear--;
+    } else calendarMonth--;
   }
 
   function nextMonth() {
-    if (calendarMonth === 12) { calendarMonth = 1; calendarYear++; }
-    else calendarMonth++;
+    if (calendarMonth === 12) {
+      calendarMonth = 1;
+      calendarYear++;
+    } else calendarMonth++;
   }
 
   function handleMonthSelect(e: Event) {
@@ -278,10 +327,11 @@
       const root = datePickerWrapper?.getRootNode() as ShadowRoot | Document;
       if (!root) return;
       const allFocusable = Array.from(
-        root.querySelectorAll('input:not([type="hidden"]), select, textarea') ?? []
+        root.querySelectorAll('input:not([type="hidden"]), select, textarea') ?? [],
       ) as HTMLElement[];
       const lastPickerIndex = allFocusable.reduce(
-        (last, el, i) => datePickerWrapper?.contains(el) ? i : last, -1
+        (last, el, i) => (datePickerWrapper?.contains(el) ? i : last),
+        -1,
       );
       if (lastPickerIndex >= 0 && lastPickerIndex < allFocusable.length - 1) {
         allFocusable[lastPickerIndex + 1]?.focus();
@@ -304,7 +354,11 @@
 
   function isDayToday(dayNum: number): boolean {
     const today = new Date();
-    return dayNum === today.getDate() && calendarMonth === today.getMonth() + 1 && calendarYear === today.getFullYear();
+    return (
+      dayNum === today.getDate() &&
+      calendarMonth === today.getMonth() + 1 &&
+      calendarYear === today.getFullYear()
+    );
   }
 
   function handleCalendarKeyDown(e: KeyboardEvent) {
@@ -320,19 +374,29 @@
   // ── Form validation subscription ───────────────────────────
 
   const unsubscribe = triggerValidation.subscribe((_) => {
-    if (_ > 0) { isTouched = true; validateAndUpdate(); }
+    if (_ > 0) {
+      isTouched = true;
+      validateAndUpdate();
+    }
   });
 
   onDestroy(() => {
     unsubscribe();
-    if (mediaQueryList && handleMediaChange) mediaQueryList.removeEventListener('change', handleMediaChange);
+    if (mediaQueryList && handleMediaChange)
+      mediaQueryList.removeEventListener('change', handleMediaChange);
     document.removeEventListener('mousedown', handleOutsideMousedown);
   });
 </script>
 
 <svelte:window onkeydown={handleCalendarKeyDown} />
 
-<div class="date-picker" class:touched={isTouched} class:invalid={isTouched && errorMessage} class:valid={isTouched && !errorMessage && value} bind:this={datePickerWrapper}>
+<div
+  class="date-picker"
+  class:touched={isTouched}
+  class:invalid={isTouched && errorMessage}
+  class:valid={isTouched && !errorMessage && value}
+  bind:this={datePickerWrapper}
+>
   {#if isMobile}
     <!-- Mobile: Native date input -->
     <input
@@ -340,12 +404,12 @@
       type="date"
       class="date-picker__native"
       class:empty={!value}
-      value={value}
+      {value}
       onchange={handleNativeDateChange}
       onblur={handleBlur}
-      min={min}
-      max={max}
-      disabled={disabled}
+      {min}
+      {max}
+      {disabled}
       aria-label="Date"
     />
   {:else}
@@ -360,7 +424,7 @@
         oninput={handleDayInput}
         onblur={handleBlur}
         onkeydown={(e) => handleKeyDown(e, 'day')}
-        disabled={disabled}
+        {disabled}
         maxlength="2"
         aria-label="Jour"
         class="date-picker__field date-picker__field--day"
@@ -375,7 +439,7 @@
         oninput={handleMonthInput}
         onblur={handleBlur}
         onkeydown={(e) => handleKeyDown(e, 'month')}
-        disabled={disabled}
+        {disabled}
         maxlength="2"
         aria-label="Mois"
         class="date-picker__field date-picker__field--month"
@@ -390,7 +454,7 @@
         oninput={handleYearInput}
         onblur={handleBlur}
         onkeydown={(e) => handleKeyDown(e, 'year')}
-        disabled={disabled}
+        {disabled}
         maxlength="4"
         aria-label="Année"
         class="date-picker__field date-picker__field--year"
@@ -401,10 +465,19 @@
         type="button"
         class="date-picker__calendar-toggle"
         onclick={toggleCalendar}
-        disabled={disabled}
+        {disabled}
         aria-label="Ouvrir le calendrier"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
           <line x1="16" y1="2" x2="16" y2="6"></line>
           <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -417,8 +490,22 @@
         <div class="date-picker__calendar" role="dialog" aria-label="Sélectionnez une date">
           <!-- Calendar header with dropdowns -->
           <div class="date-picker__calendar-header">
-            <button type="button" class="date-picker__calendar-nav" onclick={previousMonth} aria-label="Mois précédent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              type="button"
+              class="date-picker__calendar-nav"
+              onclick={previousMonth}
+              aria-label="Mois précédent"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
@@ -447,8 +534,22 @@
               </select>
             </div>
 
-            <button type="button" class="date-picker__calendar-nav" onclick={nextMonth} aria-label="Mois suivant">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              type="button"
+              class="date-picker__calendar-nav"
+              onclick={nextMonth}
+              aria-label="Mois suivant"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
@@ -487,7 +588,7 @@
   {/if}
 
   {#if isTouched && errorMessage}
-    <FormError message={errorMessage}/>
+    <FormError message={errorMessage} />
   {/if}
 </div>
 
@@ -505,38 +606,40 @@
     width: 100%;
     height: 44px;
     box-sizing: border-box;
-    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #E5E7EB);
+    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #e5e7eb);
     border-radius: var(--don-radius-lg, 8px);
     background-color: var(--don-color-bg-input, #fff);
     padding: var(--don-spacing-lg, 12px) var(--don-spacing-xl, 16px);
     font-size: var(--don-font-size-base, 14px);
     font-family: inherit;
-    color: var(--don-color-text-primary, #1F2937);
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+    color: var(--don-color-text-primary, #1f2937);
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease;
 
     &::-webkit-datetime-edit-text,
     &::-webkit-datetime-edit-month-field,
     &::-webkit-datetime-edit-day-field,
     &::-webkit-datetime-edit-year-field {
-      color: var(--don-color-text-primary, #1F2937);
+      color: var(--don-color-text-primary, #1f2937);
     }
 
     &.empty::-webkit-datetime-edit-text,
     &.empty::-webkit-datetime-edit-month-field,
     &.empty::-webkit-datetime-edit-day-field,
     &.empty::-webkit-datetime-edit-year-field {
-      color: var(--don-color-text-placeholder, #9CA3AF);
+      color: var(--don-color-text-placeholder, #9ca3af);
     }
 
     &:focus {
       outline: none;
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
     &:disabled {
-      color: var(--don-color-text-disabled, #9CA3AF);
-      background-color: var(--don-color-bg-disabled, #F3F4F6);
+      color: var(--don-color-text-disabled, #9ca3af);
+      background-color: var(--don-color-bg-disabled, #f3f4f6);
       cursor: not-allowed;
     }
   }
@@ -547,17 +650,19 @@
     display: flex;
     align-items: center;
     gap: 0;
-    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #E5E7EB);
+    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #e5e7eb);
     border-radius: var(--don-radius-lg, 8px);
     background-color: var(--don-color-bg-input, #fff);
     padding: 0 var(--don-spacing-lg, 12px);
     height: 44px;
     position: relative;
     cursor: text;
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease;
 
     &:focus-within {
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
   }
@@ -567,13 +672,13 @@
     background: transparent;
     font-size: var(--don-font-size-base, 14px);
     font-family: inherit;
-    color: var(--don-color-text-primary, #1F2937);
+    color: var(--don-color-text-primary, #1f2937);
     text-align: center;
     padding: var(--don-spacing-sm, 4px) 0;
     outline: none;
 
     &::placeholder {
-      color: var(--don-color-text-placeholder, #9CA3AF);
+      color: var(--don-color-text-placeholder, #9ca3af);
       opacity: 1;
     }
 
@@ -587,13 +692,13 @@
     }
 
     &:disabled {
-      color: var(--don-color-text-disabled, #9CA3AF);
+      color: var(--don-color-text-disabled, #9ca3af);
       cursor: not-allowed;
     }
   }
 
   .date-picker__separator {
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     font-size: var(--don-font-size-base, 14px);
     user-select: none;
   }
@@ -603,7 +708,7 @@
   .date-picker__calendar-toggle {
     border: none;
     background: transparent;
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     cursor: pointer;
     padding: 4px 8px;
     display: flex;
@@ -614,11 +719,11 @@
     margin-left: auto;
 
     &:hover:not(:disabled) {
-      color: var(--don-brand-primary, #3B82F6);
+      color: var(--don-brand-primary, #3b82f6);
     }
 
     &:disabled {
-      color: var(--don-color-text-disabled, #9CA3AF);
+      color: var(--don-color-text-disabled, #9ca3af);
       cursor: not-allowed;
     }
   }
@@ -632,9 +737,11 @@
     z-index: 10;
     margin-top: 4px;
     background-color: white;
-    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #E5E7EB);
+    border: var(--don-border-width, 1px) solid var(--don-color-border-input, #e5e7eb);
     border-radius: var(--don-radius-lg, 8px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     padding: 12px;
     width: 308px;
     animation: calendarOpen 200ms ease;
@@ -646,8 +753,14 @@
   }
 
   @keyframes calendarOpen {
-    from { opacity: 0; transform: scaleY(0.95); }
-    to { opacity: 1; transform: scaleY(1); }
+    from {
+      opacity: 0;
+      transform: scaleY(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
   }
 
   // ── Calendar header ─────────────────────────────────────────
@@ -658,25 +771,27 @@
     justify-content: space-between;
     margin-bottom: 8px;
     padding-bottom: 8px;
-    border-bottom: var(--don-border-width, 1px) solid var(--don-color-border-input, #E5E7EB);
+    border-bottom: var(--don-border-width, 1px) solid var(--don-color-border-input, #e5e7eb);
   }
 
   .date-picker__calendar-nav {
     border: none;
     background: transparent;
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     cursor: pointer;
     padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--don-radius-md, 4px);
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
     flex-shrink: 0;
 
     &:hover {
-      background-color: var(--don-color-bg-secondary, #F3F4F6);
-      color: var(--don-color-text-primary, #1F2937);
+      background-color: var(--don-color-bg-secondary, #f3f4f6);
+      color: var(--don-color-text-primary, #1f2937);
     }
   }
 
@@ -692,13 +807,15 @@
     border: 1px solid transparent;
     border-radius: var(--don-radius-md, 4px);
     background: transparent;
-    color: var(--don-color-text-primary, #1F2937);
+    color: var(--don-color-text-primary, #1f2937);
     font-size: 13px;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     padding: 4px 20px 4px 8px;
-    transition: border-color 150ms ease, background-color 150ms ease;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease;
 
     // Custom dropdown arrow
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -706,13 +823,13 @@
     background-position: right 6px center;
 
     &:hover {
-      border-color: var(--don-color-border-input, #E5E7EB);
-      background-color: var(--don-color-bg-secondary, #F3F4F6);
+      border-color: var(--don-color-border-input, #e5e7eb);
+      background-color: var(--don-color-bg-secondary, #f3f4f6);
     }
 
     &:focus {
       outline: none;
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
     }
 
     &--year {
@@ -732,7 +849,7 @@
     text-align: center;
     font-size: 11px;
     font-weight: 600;
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     padding: 4px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -757,22 +874,25 @@
     border: none;
     border-radius: 50%;
     background: transparent;
-    color: var(--don-color-text-primary, #1F2937);
+    color: var(--don-color-text-primary, #1f2937);
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
-    transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
     display: flex;
     align-items: center;
     justify-content: center;
 
     &:hover:not(:disabled):not(.selected) {
       background-color: var(--don-color-accent-light, rgba(59, 130, 246, 0.08));
-      color: var(--don-brand-primary, #3B82F6);
+      color: var(--don-brand-primary, #3b82f6);
     }
 
     &.selected {
-      background-color: var(--don-brand-primary, #3B82F6);
+      background-color: var(--don-brand-primary, #3b82f6);
       color: white;
       font-weight: 600;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -780,11 +900,11 @@
 
     &.today:not(.selected) {
       font-weight: 700;
-      box-shadow: inset 0 0 0 1.5px var(--don-brand-primary, #3B82F6);
+      box-shadow: inset 0 0 0 1.5px var(--don-brand-primary, #3b82f6);
     }
 
     &:disabled {
-      color: var(--don-color-text-disabled, #9CA3AF);
+      color: var(--don-color-text-disabled, #9ca3af);
       cursor: not-allowed;
       opacity: 0.4;
     }
@@ -795,8 +915,8 @@
   .date-picker.touched.invalid {
     .date-picker__inputs,
     .date-picker__native {
-      border-color: var(--don-color-error, #DC2626);
-      background-color: var(--don-color-error-light, #FEF2F2);
+      border-color: var(--don-color-error, #dc2626);
+      background-color: var(--don-color-error-light, #fef2f2);
 
       &:focus-within,
       &:focus {
@@ -815,7 +935,9 @@
   // ── Reduced motion ──────────────────────────────────────────
 
   @media (prefers-reduced-motion: reduce) {
-    .date-picker__calendar { animation: none; }
+    .date-picker__calendar {
+      animation: none;
+    }
 
     .date-picker__calendar-day,
     .date-picker__calendar-toggle,

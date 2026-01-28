@@ -26,40 +26,28 @@
     show?: boolean;
   }
 
-  let {
-    message = '',
-    inputId,
-    msgType = 'minimalDot',
-    show = undefined
-  }: Props = $props();
+  let { message = '', inputId, msgType = 'minimalDot', show = undefined }: Props = $props();
 
   // Derive message from store if inputId is provided, otherwise use prop
-  let displayMessage = $derived(inputId ? (fieldErrors[inputId] || '') : message);
+  let displayMessage = $derived(inputId ? fieldErrors[inputId] || '' : message);
 
   // Si show n'est pas défini, on l'infère du message
   let isVisible = $derived(show !== undefined ? show : !!displayMessage);
 </script>
 
 {#if isVisible && displayMessage}
-  <div
-    class="don-form-error don-form-error--{msgType}"
-    role="alert"
-    aria-live="polite"
-  >
+  <div class="don-form-error don-form-error--{msgType}" role="alert" aria-live="polite">
     {#if msgType === 'pillBadge'}
       <!-- Proposition 1: Pill Badge Moderne -->
       <span class="don-form-error__icon don-form-error__icon--pill">✕</span>
-
     {:else if msgType === 'ligneAccent'}
       <!-- Proposition 3: Ligne Accent Subtil -->
       <span class="don-form-error__bar"></span>
-
     {:else if msgType === 'glassCard'}
       <!-- Proposition 4: Glass Card -->
       <div class="don-form-error__icon-wrap">
         <span class="don-form-error__icon">!</span>
       </div>
-
     {:else if msgType === 'minimalDot'}
       <!-- Proposition 5: Minimal Dot -->
       <span class="don-form-error__dot"></span>

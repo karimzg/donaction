@@ -3,7 +3,7 @@
   import {
     DEFAULT_VALUES,
     FORM_CONFIG,
-    triggerValidation
+    triggerValidation,
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { validator, validatePostalCode, validateRequired } from '../../../../logic/validator';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
@@ -69,11 +69,11 @@
       { gKey: 'route', dKey: 'streetName' },
       { gKey: 'locality', dKey: 'city' },
       { gKey: 'country', dKey: 'country' },
-      { gKey: 'postal_code', dKey: 'postalCode' }
+      { gKey: 'postal_code', dKey: 'postalCode' },
     ];
     gdKeys.forEach((key) => {
       const adressItem = selectedPlace?.address_components?.find((_) =>
-        _?.types?.includes(key.gKey)
+        _?.types?.includes(key.gKey),
       );
       DEFAULT_VALUES[key.dKey] = adressItem?.long_name || '';
     });
@@ -86,13 +86,15 @@
     await tick();
     triggerValidation.update((_) => _ + 1);
     // Reset animation flag after animation completes
-    setTimeout(() => { justUnlocked = false; }, 500);
+    setTimeout(() => {
+      justUnlocked = false;
+    }, 500);
   };
 
   onMount(async () => {
     const autocomplete = new google.maps.places.Autocomplete(inputElement, {
       types: ['address'],
-      componentRestrictions: { country: 'fr' }
+      componentRestrictions: { country: 'fr' },
     });
 
     autocomplete.addListener('place_changed', () => {
@@ -125,7 +127,11 @@
   // TODO: input disabled after first input
 </script>
 
-<div class="don-form-group address-field" class:touched={!!addressFieldError} class:invalid={!!addressFieldError}>
+<div
+  class="don-form-group address-field"
+  class:touched={!!addressFieldError}
+  class:invalid={!!addressFieldError}
+>
   <label class="don-form-label" for="place_id">Adresse complète *</label>
   <input
     type="text"
@@ -138,11 +144,25 @@
 </div>
 
 <!-- Auto-fill section: visually distinct, non-editable fields -->
-<div class="don-autofill-section" class:don-autofill-section--active={isEditable} class:don-autofill-section--error={autofillHasError}>
+<div
+  class="don-autofill-section"
+  class:don-autofill-section--active={isEditable}
+  class:don-autofill-section--error={autofillHasError}
+>
   <header class="don-autofill-section__header">
-    <svg class="don-autofill-section__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <polyline points="9 12 12 15 16 10"/>
+    <svg
+      class="don-autofill-section__icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 12 15 16 10" />
     </svg>
     <span class="don-autofill-section__title">Champs remplis automatiquement</span>
   </header>
@@ -157,7 +177,11 @@
   <div class="don-autofill-section__content">
     <!-- N° + Nom de rue on same row (desktop) -->
     <div class="don-form-row don-form-row--street">
-      <div class="don-form-group don-form-group--street-number" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.streetNumber}>
+      <div
+        class="don-form-group don-form-group--street-number"
+        class:touched={autofillHasError}
+        class:invalid={autofillHasError && !DEFAULT_VALUES.streetNumber}
+      >
         <label class="don-form-label" for="streetNumber">N° *</label>
         <input
           id="streetNumber"
@@ -169,7 +193,11 @@
           bind:value={DEFAULT_VALUES.streetNumber}
         />
       </div>
-      <div class="don-form-group don-form-group--street-name" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.streetName}>
+      <div
+        class="don-form-group don-form-group--street-name"
+        class:touched={autofillHasError}
+        class:invalid={autofillHasError && !DEFAULT_VALUES.streetName}
+      >
         <label class="don-form-label" for="streetName">Nom de rue *</label>
         <input
           id="streetName"
@@ -185,7 +213,12 @@
 
     <!-- Code postal, Ville, Pays -->
     <div class="don-form-row don-form-row--3">
-      <div class="don-form-group" class:touched={autofillHasError} class:invalid={autofillHasError && (!DEFAULT_VALUES.postalCode || !/^\d{5}$/.test(DEFAULT_VALUES.postalCode))}>
+      <div
+        class="don-form-group"
+        class:touched={autofillHasError}
+        class:invalid={autofillHasError &&
+          (!DEFAULT_VALUES.postalCode || !/^\d{5}$/.test(DEFAULT_VALUES.postalCode))}
+      >
         <label class="don-form-label" for="postalCode">Code postal *</label>
         <input
           id="postalCode"
@@ -197,7 +230,11 @@
           bind:value={DEFAULT_VALUES.postalCode}
         />
       </div>
-      <div class="don-form-group" class:touched={autofillHasError} class:invalid={autofillHasError && !DEFAULT_VALUES.city}>
+      <div
+        class="don-form-group"
+        class:touched={autofillHasError}
+        class:invalid={autofillHasError && !DEFAULT_VALUES.city}
+      >
         <label class="don-form-label" for="city">Ville *</label>
         <input
           id="city"
@@ -213,12 +250,14 @@
         <div class="don-label-with-tooltip">
           <label class="don-form-label" for="country">Pays *</label>
           <Tooltip position="md-left-14">
-            <span slot="trigger" class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
+            <span slot="trigger" class="don-tooltip-trigger" aria-label="Plus d'informations"
+              >?</span
+            >
             <div slot="tooltip">
               <p>
-                Si vous faites un don en tant que non résidant français, vous ne pouvez bénéficier de la
-                réduction d'impôts. Veuillez retourner à l'étape précédente et sélectionner l'option
-                correspondante
+                Si vous faites un don en tant que non résidant français, vous ne pouvez bénéficier
+                de la réduction d'impôts. Veuillez retourner à l'étape précédente et sélectionner
+                l'option correspondante
               </p>
             </div>
           </Tooltip>
@@ -243,28 +282,30 @@
 
   // Auto-fill section - visually distinct card for non-editable fields
   .don-autofill-section {
-    background: var(--don-color-bg-subtle, #F9FAFB);
-    border: 1px dashed var(--don-color-border, #E5E7EB);
+    background: var(--don-color-bg-subtle, #f9fafb);
+    border: 1px dashed var(--don-color-border, #e5e7eb);
     border-radius: var(--don-radius-xl, 16px);
     padding: var(--don-spacing-lg, 16px);
     margin-top: var(--don-spacing-sm, 8px);
-    transition: border-color 200ms ease, background-color 200ms ease;
+    transition:
+      border-color 200ms ease,
+      background-color 200ms ease;
 
     &--active {
       border-style: solid;
-      border-color: var(--don-color-border-input, #D1D5DB);
-      background: var(--don-color-bg-card, #FFFFFF);
+      border-color: var(--don-color-border-input, #d1d5db);
+      background: var(--don-color-bg-card, #ffffff);
     }
 
     &--error {
-      border-color: var(--don-color-error, #DC2626);
+      border-color: var(--don-color-error, #dc2626);
       border-style: solid;
     }
 
     &__error {
       margin-bottom: var(--don-spacing-lg, 16px);
       padding-bottom: var(--don-spacing-md, 12px);
-      border-bottom: 1px solid var(--don-color-border, #E5E7EB);
+      border-bottom: 1px solid var(--don-color-border, #e5e7eb);
     }
   }
 
@@ -274,18 +315,18 @@
     gap: var(--don-spacing-sm, 8px);
     margin-bottom: var(--don-spacing-lg, 16px);
     padding-bottom: var(--don-spacing-md, 12px);
-    border-bottom: 1px solid var(--don-color-border, #E5E7EB);
+    border-bottom: 1px solid var(--don-color-border, #e5e7eb);
   }
 
   .don-autofill-section__icon {
-    color: var(--don-color-text-muted, #9CA3AF);
+    color: var(--don-color-text-muted, #9ca3af);
     flex-shrink: 0;
   }
 
   .don-autofill-section__title {
     font-size: var(--don-font-size-sm, 13px);
     font-weight: var(--don-font-weight-medium, 500);
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     letter-spacing: 0.01em;
   }
 

@@ -24,7 +24,7 @@ const SUBSCRIPTION: {
   klubr: null,
   project: null,
   allowKlubrContribution: false,
-  allowProjectSelection: false
+  allowProjectSelection: false,
 });
 const FORM_CONFIG: {
   donatorUuid: string | null;
@@ -43,7 +43,7 @@ const FORM_CONFIG: {
   myLasts: null,
   myLast: null,
   authEmail: null,
-  dirty: false
+  dirty: false,
 });
 
 const defVals = {
@@ -70,7 +70,7 @@ const defVals = {
   place_id: null,
   displayName: true,
   displayAmount: true,
-  acceptConditions2: false
+  acceptConditions2: false,
 };
 const DEFAULT_VALUES = $state({ ...defVals });
 
@@ -94,7 +94,7 @@ async function submitForm(acc: number) {
       const err = Array.from(
         document
           .querySelector('klubr-sponsorship-form')
-          ?.shadowRoot?.querySelectorAll(`.don-form-error`)
+          ?.shadowRoot?.querySelectorAll(`.don-form-error`),
       ).find((_) => _?.innerText?.length > 0);
 
       if (!err) {
@@ -112,7 +112,7 @@ async function submitForm(acc: number) {
         err?.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
-          inline: 'nearest'
+          inline: 'nearest',
         });
       }
     } catch (e) {
@@ -134,7 +134,7 @@ index.subscribe((val) => {
     sendGaEvent({
       category: 'donation',
       label: `Navigating to step ${val + 1}`,
-      step: val + 1
+      step: val + 1,
     });
   } else {
     mounted = true;
@@ -145,7 +145,7 @@ isBeingFilled.subscribe((val) => {
   if (mounted) {
     sendGaEvent({
       category: 'donation',
-      label: `${val ? 'Opening' : 'Closing'} form, step: ${get(index) + 1}`
+      label: `${val ? 'Opening' : 'Closing'} form, step: ${get(index) + 1}`,
     });
     document.body.style.overflow = val ? 'hidden' : 'auto';
   } else {
@@ -165,5 +165,5 @@ export {
   DEFAULT_VALUES,
   isLoading,
   FORM_CONFIG,
-  SUBSCRIPTION
+  SUBSCRIPTION,
 };

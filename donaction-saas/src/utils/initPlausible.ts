@@ -1,5 +1,5 @@
 export enum WC_COMPONENTS {
-  'klubrSponsorshipForm' = 'klubr-sponsorship-form'
+  'klubrSponsorshipForm' = 'klubr-sponsorship-form',
 }
 
 export function initPlausible() {

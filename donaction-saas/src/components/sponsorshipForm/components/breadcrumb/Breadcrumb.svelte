@@ -154,7 +154,8 @@
 
       &:hover .don-header__dot-inner {
         transform: scale(1.3);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-primary)) 25%, transparent);
+        box-shadow: 0 0 0 3px
+          color-mix(in srgb, var(--don-brand-primary, var(--don-color-primary)) 25%, transparent);
       }
 
       &:active .don-header__dot-inner {
@@ -179,7 +180,8 @@
   .don-header__dot--active .don-header__dot-inner {
     background-color: var(--don-brand-primary, var(--don-color-primary));
     transform: scale(1.2);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-primary)) 20%, transparent);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--don-brand-primary, var(--don-color-primary)) 20%, transparent);
   }
 
   .don-header__dot--completed .don-header__dot-inner {

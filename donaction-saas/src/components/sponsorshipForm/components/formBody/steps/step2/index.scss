@@ -68,7 +68,6 @@
   margin: 0 auto;
 }
 
-
 .project-highlight {
   width: 100%;
   margin-top: var(--don-spacing-2xl);
@@ -104,17 +103,22 @@
   background-color: var(--don-color-bg-input);
   color: var(--don-color-text-primary);
   outline: none;
-  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease, transform 150ms ease;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background-color 200ms ease,
+    transform 150ms ease;
   box-sizing: border-box;
   height: 44px;
 
   &:hover:not(:focus):not(:disabled) {
-    border-color: var(--don-color-border-hover, #9CA3AF);
+    border-color: var(--don-color-border-hover, #9ca3af);
   }
 
   &:focus {
     border-color: var(--don-brand-primary, var(--don-color-accent));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
     transform: translateY(-1px);
   }
 
@@ -183,17 +187,19 @@
 
 // Auto-fill section - visually distinct card for non-editable fields
 .don-autofill-section {
-  background: var(--don-color-bg-subtle, #F9FAFB);
-  border: 1px dashed var(--don-color-border, #E5E7EB);
+  background: var(--don-color-bg-subtle, #f9fafb);
+  border: 1px dashed var(--don-color-border, #e5e7eb);
   border-radius: var(--don-radius-xl, 16px);
   padding: var(--don-spacing-lg, 16px);
   margin-top: var(--don-spacing-sm, 8px);
-  transition: border-color 200ms ease, background-color 200ms ease;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
 
   &--active {
     border-style: solid;
-    border-color: var(--don-color-border-input, #D1D5DB);
-    background: var(--don-color-bg-card, #FFFFFF);
+    border-color: var(--don-color-border-input, #d1d5db);
+    background: var(--don-color-bg-card, #ffffff);
   }
 
   &__header {
@@ -202,18 +208,18 @@
     gap: var(--don-spacing-sm, 8px);
     margin-bottom: var(--don-spacing-lg, 16px);
     padding-bottom: var(--don-spacing-md, 12px);
-    border-bottom: 1px solid var(--don-color-border, #E5E7EB);
+    border-bottom: 1px solid var(--don-color-border, #e5e7eb);
   }
 
   &__icon {
-    color: var(--don-color-text-muted, #9CA3AF);
+    color: var(--don-color-text-muted, #9ca3af);
     flex-shrink: 0;
   }
 
   &__title {
     font-size: var(--don-font-size-sm, 13px);
     font-weight: var(--don-font-weight-medium, 500);
-    color: var(--don-color-text-muted, #6B7280);
+    color: var(--don-color-text-muted, #6b7280);
     letter-spacing: 0.01em;
   }
 
@@ -235,13 +241,21 @@
 
 // Keyframes for ligneAccent style
 @keyframes errorV3Appear {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes barExpand {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 // Input validation states - CSS-driven based on parent class
@@ -250,12 +264,12 @@
 :global(.inputField.touched.invalid) {
   .don-form-input,
   .don-form-select,
-  input:not([type="file"]) {
-    border-color: var(--don-color-error, #DC2626) !important;
-    background-color: var(--don-color-error-light, #FEF2F2);
+  input:not([type='file']) {
+    border-color: var(--don-color-error, #dc2626) !important;
+    background-color: var(--don-color-error-light, #fef2f2);
 
     &:focus {
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-color-error, #DC2626) 15%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-color-error, #dc2626) 15%, transparent);
     }
   }
 }
@@ -266,11 +280,10 @@
 :global(.inputField.touched.valid) {
   .don-form-input:not(:placeholder-shown),
   .don-form-select,
-  input:not([type="file"]):not(:placeholder-shown) {
+  input:not([type='file']):not(:placeholder-shown) {
     border-color: var(--don-color-success, #059669);
   }
 }
-
 
 // Span 2 columns for grid
 .don-form-group--span-2 {
@@ -289,9 +302,9 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--don-color-bg-subtle, #F3F4F6);
-  border: 1.5px solid var(--don-color-border, #E5E7EB);
-  color: var(--don-color-text-muted, #6B7280);
+  background: var(--don-color-bg-subtle, #f3f4f6);
+  border: 1.5px solid var(--don-color-border, #e5e7eb);
+  color: var(--don-color-text-muted, #6b7280);
   font-size: 11px;
   font-weight: 700;
   cursor: help;
@@ -299,14 +312,14 @@
   flex-shrink: 0;
 
   &:hover {
-    background: var(--don-brand-primary, #3B82F6);
-    border-color: var(--don-brand-primary, #3B82F6);
+    background: var(--don-brand-primary, #3b82f6);
+    border-color: var(--don-brand-primary, #3b82f6);
     color: white;
     transform: scale(1.15);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--don-brand-primary, #3B82F6);
+    outline: 2px solid var(--don-brand-primary, #3b82f6);
     outline-offset: 2px;
   }
 }
@@ -329,7 +342,7 @@
 // Address helper - subtle inline hint (deprecated, now using section header)
 .address-helper {
   font-size: var(--don-font-size-xs, 11px);
-  color: var(--don-color-text-placeholder, #9CA3AF);
+  color: var(--don-color-text-placeholder, #9ca3af);
   margin-top: var(--don-spacing-xs, 4px);
   font-style: italic;
   letter-spacing: 0.01em;
@@ -347,7 +360,7 @@
     transform: scale(1);
   }
   50% {
-    background-color: color-mix(in srgb, var(--don-brand-primary, #3B82F6) 10%, white);
+    background-color: color-mix(in srgb, var(--don-brand-primary, #3b82f6) 10%, white);
     transform: scale(1.01);
   }
   100% {

@@ -13,7 +13,7 @@
     value = $bindable(''),
     maxSize = 2 * 1024 * 1024, // 2MB default
     accept = ['image/png', 'image/jpeg', 'image/webp'],
-    onchange
+    onchange,
   }: Props = $props();
 
   let isDragging = $state(false);
@@ -31,7 +31,7 @@
 
   // Format accepted types for display
   const acceptDisplay = $derived(() => {
-    return accept.map(type => type.split('/')[1].toUpperCase()).join(', ');
+    return accept.map((type) => type.split('/')[1].toUpperCase()).join(', ');
   });
 
   function validateFile(file: File): string | null {
@@ -150,7 +150,7 @@
     ondragleave={handleDragLeave}
     role="button"
     tabindex="0"
-    aria-label={value ? "Changer le logo" : "Ajouter un logo"}
+    aria-label={value ? 'Changer le logo' : 'Ajouter un logo'}
   >
     {#if isLoading}
       <div class="logo-upload__loader">
@@ -165,7 +165,14 @@
           onclick={handleRemove}
           aria-label="Supprimer le logo"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -208,9 +215,9 @@
   .logo-upload__zone {
     width: 100px;
     height: 100px;
-    border: 2px dashed var(--don-color-border-input, #E5E7EB);
+    border: 2px dashed var(--don-color-border-input, #e5e7eb);
     border-radius: var(--don-radius-lg, 12px);
-    background-color: var(--don-color-bg-subtle, #F9FAFB);
+    background-color: var(--don-color-bg-subtle, #f9fafb);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -223,35 +230,35 @@
     overflow: hidden;
 
     &:hover {
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
       background-color: var(--don-color-bg-input, #fff);
     }
 
     &:focus-visible {
       outline: none;
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
     &.dragging {
-      border-color: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3b82f6);
       background-color: rgba(59, 130, 246, 0.05);
       transform: scale(1.02);
     }
 
     &.has-preview {
       border-style: solid;
-      border-color: var(--don-color-border-input, #E5E7EB);
+      border-color: var(--don-color-border-input, #e5e7eb);
       background-color: transparent;
 
       &:hover {
-        border-color: var(--don-brand-primary, #3B82F6);
+        border-color: var(--don-brand-primary, #3b82f6);
       }
     }
 
     &.has-error {
-      border-color: var(--don-color-error, #DC2626);
-      background-color: var(--don-color-error-light, #FEF2F2);
+      border-color: var(--don-color-error, #dc2626);
+      background-color: var(--don-color-error-light, #fef2f2);
     }
 
     &.loading {
@@ -281,12 +288,12 @@
   .logo-upload__text {
     font-size: var(--don-font-size-xs, 11px);
     font-weight: var(--don-font-weight-medium, 500);
-    color: var(--don-color-text-secondary, #6B7280);
+    color: var(--don-color-text-secondary, #6b7280);
   }
 
   .logo-upload__hint {
     font-size: 9px;
-    color: var(--don-color-text-muted, #9CA3AF);
+    color: var(--don-color-text-muted, #9ca3af);
   }
 
   .logo-upload__preview {
@@ -317,7 +324,9 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 150ms ease, background-color 150ms ease;
+    transition:
+      opacity 150ms ease,
+      background-color 150ms ease;
 
     .logo-upload__zone:hover &,
     .logo-upload__zone:focus-visible & {
@@ -325,7 +334,7 @@
     }
 
     &:hover {
-      background-color: var(--don-color-error, #DC2626);
+      background-color: var(--don-color-error, #dc2626);
     }
 
     &:focus-visible {
@@ -343,8 +352,8 @@
   .logo-upload__spinner {
     width: 24px;
     height: 24px;
-    border: 2px solid var(--don-color-border-input, #E5E7EB);
-    border-top-color: var(--don-brand-primary, #3B82F6);
+    border: 2px solid var(--don-color-border-input, #e5e7eb);
+    border-top-color: var(--don-brand-primary, #3b82f6);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -369,14 +378,14 @@
 
   .logo-upload__error {
     font-size: var(--don-font-size-sm, 12px);
-    color: var(--don-color-error, #DC2626);
+    color: var(--don-color-error, #dc2626);
     display: flex;
     align-items: center;
     gap: var(--don-spacing-xs, 4px);
     animation: fadeIn 150ms ease-out;
 
     &::before {
-      content: "⚠";
+      content: '⚠';
       font-size: 10px;
     }
   }

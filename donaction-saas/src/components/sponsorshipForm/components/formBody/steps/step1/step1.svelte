@@ -4,9 +4,9 @@
     DEFAULT_VALUES,
     SUBSCRIPTION,
     isBeingFilled,
-    FORM_CONFIG
+    FORM_CONFIG,
   } from '../../../../logic/useSponsorshipForm.svelte';
-    import pagination from '../../../../../../assets/icons/pagination.svg';
+  import pagination from '../../../../../../assets/icons/pagination.svg';
   import email from '../../../../../../assets/icons/email.svg';
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
   import resendFiles from '../../../../../../assets/icons/resendFiles.svg';
@@ -22,7 +22,7 @@
 
   // Check if this is a project donation (not general club)
   const isProjectDonation = $derived(
-    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid,
   );
 
   let amounts = $derived(DEFAULT_VALUES.estOrganisme ? [100, 200, 500, 1000] : [10, 50, 100, 200]);
@@ -51,7 +51,7 @@
   let swiperEl = null;
   let paginateState = $state({
     left: false,
-    right: false
+    right: false,
   });
   const swiperInstaller = (node: any) => {
     register();
@@ -198,19 +198,22 @@
 
     <!-- Project highlight (only for project donations) -->
     {#if isProjectDonation && SUBSCRIPTION.project}
-        <div class="don-step1__project-highlight">
-            <ProjectHighlight
-                    project={SUBSCRIPTION.project}
-                    selectedAmount={DEFAULT_VALUES.montant}
-                    variant="default"
-                    label="Contribuez au financement du projet"
-            />
-        </div>
+      <div class="don-step1__project-highlight">
+        <ProjectHighlight
+          project={SUBSCRIPTION.project}
+          selectedAmount={DEFAULT_VALUES.montant}
+          variant="default"
+          label="Contribuez au financement du projet"
+        />
+      </div>
     {/if}
 
     <!-- Amount section -->
     <section class="don-section">
-      <h2 class="don-section__label">Je souhaite aider {#if isProjectDonation && SUBSCRIPTION.project}le projet {/if}à hauteur de :</h2>
+      <h2 class="don-section__label">
+        Je souhaite aider {#if isProjectDonation && SUBSCRIPTION.project}le projet
+        {/if}à hauteur de :
+      </h2>
 
       <div class="don-amount-grid" role="group" aria-label="Sélection du montant">
         {#each amounts as amount}
@@ -218,7 +221,11 @@
             type="button"
             class="don-btn-amount"
             class:don-btn-amount--selected={DEFAULT_VALUES.montant === amount}
-            onclick={() => { DEFAULT_VALUES.montant = amount; isBeingFilled.set(true); scrollToNextSection(); }}
+            onclick={() => {
+              DEFAULT_VALUES.montant = amount;
+              isBeingFilled.set(true);
+              scrollToNextSection();
+            }}
             aria-pressed={DEFAULT_VALUES.montant === amount}
             aria-label="Faire un don de {amount} euros"
           >
@@ -258,20 +265,20 @@
       </div>
 
       <!-- Message d'erreur avec le composant FormError -->
-        <div class="flex justify-center">
-            <FormError
-                    msgType="glassCard"
-                    message={$triggerValidation > 0
-                ? !DEFAULT_VALUES.montant
-                  ? 'Veuillez choisir un montant'
-                  : DEFAULT_VALUES.montant < 10
-                    ? 'Veuillez choisir un montant supérieure à 10 €'
-                    : DEFAULT_VALUES.montant > 100000
-                      ? 'Veuillez choisir un montant inférieure à 100.000 €'
-                      : ''
-                : ''}
-            />
-        </div>
+      <div class="flex justify-center">
+        <FormError
+          msgType="glassCard"
+          message={$triggerValidation > 0
+            ? !DEFAULT_VALUES.montant
+              ? 'Veuillez choisir un montant'
+              : DEFAULT_VALUES.montant < 10
+                ? 'Veuillez choisir un montant supérieure à 10 €'
+                : DEFAULT_VALUES.montant > 100000
+                  ? 'Veuillez choisir un montant inférieure à 100.000 €'
+                  : ''
+            : ''}
+        />
+      </div>
 
       <div class="don-info-row">
         <Tooltip>
@@ -312,15 +319,15 @@
           class="don-toggle-btn"
           class:don-toggle-btn--selected={!DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
-          aria-pressed={!DEFAULT_VALUES.withTaxReduction}
-        >Non</button>
+          aria-pressed={!DEFAULT_VALUES.withTaxReduction}>Non</button
+        >
         <button
           type="button"
           class="don-toggle-btn"
           class:don-toggle-btn--selected={DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
-          aria-pressed={DEFAULT_VALUES.withTaxReduction}
-        >Oui</button>
+          aria-pressed={DEFAULT_VALUES.withTaxReduction}>Oui</button
+        >
       </div>
 
       {#if DEFAULT_VALUES.withTaxReduction}
@@ -333,15 +340,15 @@
               class="don-toggle-btn"
               class:don-toggle-btn--selected={!DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
-              aria-pressed={!DEFAULT_VALUES.estOrganisme}
-            >Particulier</button>
+              aria-pressed={!DEFAULT_VALUES.estOrganisme}>Particulier</button
+            >
             <button
               type="button"
               class="don-toggle-btn"
               class:don-toggle-btn--selected={DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
-              aria-pressed={DEFAULT_VALUES.estOrganisme}
-            >Entreprise</button>
+              aria-pressed={DEFAULT_VALUES.estOrganisme}>Entreprise</button
+            >
           </div>
 
           <div class="don-real-cost don-real-cost--vertical">
@@ -354,8 +361,8 @@
                 <h1>Réduction d'impôts</h1>
                 <p>
                   Le don à <b>{SUBSCRIPTION.klubr.denomination}</b> ouvre droit à une réduction d'impôts
-                  car il remplit les conditions générales prévues aux articles 200 et 238 bis du code général
-                  des impôts.
+                  car il remplit les conditions générales prévues aux articles 200 et 238 bis du code
+                  général des impôts.
                 </p>
               </div>
             </Tooltip>
@@ -363,7 +370,9 @@
               {calculateTaxReduction(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €
             </div>
             <div class="don-real-cost__savings">
-              Vous économisez <strong>{calculateTaxSavings(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €</strong>
+              Vous économisez <strong
+                >{calculateTaxSavings(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €</strong
+              >
             </div>
             <div class="don-real-cost__detail">
               ({DEFAULT_VALUES.estOrganisme ? '60%' : '66%'} de réduction fiscale)

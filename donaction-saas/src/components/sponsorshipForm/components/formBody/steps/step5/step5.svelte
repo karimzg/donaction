@@ -3,7 +3,7 @@
     FORM_CONFIG,
     isLoading,
     SUBSCRIPTION,
-    triggerValidation
+    triggerValidation,
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { onMount } from 'svelte';
   import Share from '../../../../../../utils/share/Share.svelte';
@@ -15,7 +15,7 @@
     sendGaEvent({
       step: 5,
       category: 'donation',
-      label: `Donation payed, don uuid: ${FORM_CONFIG.donUuid}`
+      label: `Donation payed, don uuid: ${FORM_CONFIG.donUuid}`,
     });
     // eventBus.events.clear();
     // Object.keys(defVals).forEach((_) => {

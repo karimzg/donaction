@@ -11,7 +11,7 @@
     project,
     selectedAmount = 0,
     variant = 'default',
-    label = ''
+    label = '',
   }: {
     project: ProjectData;
     selectedAmount?: number;
@@ -29,11 +29,11 @@
 
   // Progress calculations
   const currentProgress = $derived(
-    hasGoal ? Math.min(100, Math.round((currentAmount / goalAmount) * 100)) : 0
+    hasGoal ? Math.min(100, Math.round((currentAmount / goalAmount) * 100)) : 0,
   );
   const projectedAmount = $derived(currentAmount + selectedAmount);
   const projectedProgress = $derived(
-    hasGoal ? Math.min(100, Math.round((projectedAmount / goalAmount) * 100)) : 0
+    hasGoal ? Math.min(100, Math.round((projectedAmount / goalAmount) * 100)) : 0,
   );
   const progressDelta = $derived(projectedProgress - currentProgress);
 
@@ -54,11 +54,13 @@
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount) + ' €';
+    return (
+      new Intl.NumberFormat('fr-FR', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount) + ' €'
+    );
   };
 </script>
 
@@ -90,10 +92,7 @@
     {#if hasGoal}
       <div class="project-highlight__progress-section">
         <div class="project-highlight__progress-bar">
-          <div
-            class="project-highlight__progress-current"
-            style="width: {currentProgress}%"
-          ></div>
+          <div class="project-highlight__progress-current" style="width: {currentProgress}%"></div>
           {#if selectedAmount > 0 && progressDelta > 0}
             <div
               class="project-highlight__progress-projected"

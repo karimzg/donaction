@@ -175,8 +175,8 @@
   display: inline-block;
   font-size: var(--don-font-size-xs);
   font-weight: var(--don-font-weight-semibold);
-  color: #D97706;
-  background-color: #FEF3C7;
+  color: #d97706;
+  background-color: #fef3c7;
   padding: 3px var(--don-spacing-md);
   border-radius: var(--don-radius-sm);
   text-transform: uppercase;
@@ -396,7 +396,7 @@
 
 .don-support-row__edit {
   padding: var(--don-spacing-xs) var(--don-spacing-lg);
-  background-color: #FEF3C7;
+  background-color: #fef3c7;
   border: var(--don-border-width) solid var(--don-color-warning-border);
   border-radius: var(--don-radius-md);
   font-size: var(--don-font-size-sm);
@@ -406,7 +406,7 @@
   font-family: inherit;
 
   &:hover {
-    background-color: #FDE68A;
+    background-color: #fde68a;
   }
 }
 
@@ -498,7 +498,7 @@
 }
 
 .don-tax-arrow {
-  color: #86EFAC;
+  color: #86efac;
   font-size: var(--don-font-size-xl);
   font-weight: 300;
 
@@ -508,7 +508,7 @@
 }
 
 .don-tax-item--final {
-  background-color: #DCFCE7;
+  background-color: #dcfce7;
   padding: var(--don-spacing-md) var(--don-spacing-xl);
   border-radius: var(--don-radius-lg);
 }
@@ -598,7 +598,7 @@
   align-items: start;
   gap: var(--don-spacing-sm);
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     margin-top: 2px;
   }
 
@@ -618,13 +618,21 @@
 
 // Keyframes for ligneAccent style
 @keyframes errorV3Appear {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes barExpand {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .cursor-pointer {

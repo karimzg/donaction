@@ -17,9 +17,9 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--don-color-bg-subtle, #F3F4F6);
-    border: 1.5px solid var(--don-color-border, #E5E7EB);
-    color: var(--don-color-text-muted, #6B7280);
+    background: var(--don-color-bg-subtle, #f3f4f6);
+    border: 1.5px solid var(--don-color-border, #e5e7eb);
+    color: var(--don-color-text-muted, #6b7280);
     font-size: 11px;
     font-weight: 700;
     cursor: help;
@@ -27,14 +27,14 @@
     flex-shrink: 0;
 
     &:hover {
-      background: var(--don-brand-primary, #3B82F6);
-      border-color: var(--don-brand-primary, #3B82F6);
+      background: var(--don-brand-primary, #3b82f6);
+      border-color: var(--don-brand-primary, #3b82f6);
       color: white;
       transform: scale(1.15);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--don-brand-primary, #3B82F6);
+      outline: 2px solid var(--don-brand-primary, #3b82f6);
       outline-offset: 2px;
     }
   }
@@ -43,7 +43,7 @@
     position: absolute;
     z-index: 999999999;
     background-color: white;
-    color: var(--don-color-text-primary, #1F2937);
+    color: var(--don-color-text-primary, #1f2937);
     padding: var(--don-spacing-lg, 16px);
     border-radius: var(--don-radius-lg, 12px);
     font-size: var(--don-font-size-sm, 14px);
@@ -54,7 +54,9 @@
     width: max-content;
     transform: translateX(-50%);
     pointer-events: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
     animation: tooltipFadeIn 200ms ease-out;
 
     // Arrow
@@ -72,29 +74,30 @@
 
     p {
       margin: 0;
-      color: var(--don-color-text-secondary, #4B5563);
+      color: var(--don-color-text-secondary, #4b5563);
     }
 
     img {
-      color: var(--don-brand-primary, #3B82F6);
+      color: var(--don-brand-primary, #3b82f6);
       flex-shrink: 0;
     }
 
-    strong, b {
-      color: var(--don-color-text-primary, #1F2937);
+    strong,
+    b {
+      color: var(--don-color-text-primary, #1f2937);
       font-weight: 600;
     }
 
     h1 {
       font-size: var(--don-font-size-base, 16px);
       font-weight: 600;
-      color: var(--don-color-text-primary, #1F2937);
+      color: var(--don-color-text-primary, #1f2937);
       margin: 0 0 var(--don-spacing-sm, 8px) 0;
     }
 
     hr {
       border: none;
-      border-top: 1px solid var(--don-color-border, #E5E7EB);
+      border-top: 1px solid var(--don-color-border, #e5e7eb);
       margin: var(--don-spacing-md, 12px) 0;
     }
 
@@ -151,4 +154,3 @@
     animation: none;
   }
 }
-

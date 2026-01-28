@@ -46,7 +46,7 @@
     display: flex;
     flex-direction: column;
 
-    input[type="range"] {
+    input[type='range'] {
       -webkit-appearance: none;
       width: 100%;
       height: 30px;
@@ -55,7 +55,7 @@
     }
 
     /* Slider track */
-    input[type="range"]::-webkit-slider-runnable-track {
+    input[type='range']::-webkit-slider-runnable-track {
       border-radius: var(--don-radius-md);
       height: 4px;
       background: linear-gradient(
@@ -68,7 +68,7 @@
     }
 
     /* Slider thumb */
-    input[type="range"]::-webkit-slider-thumb {
+    input[type='range']::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
       width: 14px;
@@ -81,7 +81,7 @@
     }
 
     /* Active track styling (on hover) */
-    input[type="range"]:hover::-webkit-slider-thumb {
+    input[type='range']:hover::-webkit-slider-thumb {
       background: var(--don-color-warning);
     }
 

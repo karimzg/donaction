@@ -6,7 +6,7 @@
 /** Stripe fees for European cards (France) */
 export const STRIPE_FEES = {
   PERCENTAGE: 0.015, // 1.5% for European cards
-  FIXED: 0.25 // 0.25€ per transaction
+  FIXED: 0.25, // 0.25€ per transaction
 } as const;
 
 export interface FeeCalculationInput {
@@ -45,7 +45,7 @@ export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput 
       applicationFee: 0,
       commissionDonaction: 0,
       fraisStripeEstimes: 0,
-      montantRecuFiscal: 0
+      montantRecuFiscal: 0,
     };
   }
 
@@ -67,7 +67,7 @@ export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput 
 function calculateScenarioA(
   montantDon: number,
   contribution: number,
-  commissionDonaction: number
+  commissionDonaction: number,
 ): FeeCalculationOutput {
   // Subtotal before Stripe fees
   const subtotal = montantDon + commissionDonaction + contribution;
@@ -84,10 +84,10 @@ function calculateScenarioA(
   return {
     totalDonateur,
     netAssociation: montantDon, // Association receives 100%
-    applicationFee, 
+    applicationFee,
     commissionDonaction,
     fraisStripeEstimes,
-    montantRecuFiscal: montantDon // Tax receipt = full donation amount
+    montantRecuFiscal: montantDon, // Tax receipt = full donation amount
   };
 }
 
@@ -101,7 +101,7 @@ function calculateScenarioA(
 function calculateScenarioB(
   montantDon: number,
   contribution: number,
-  commissionDonaction: number
+  commissionDonaction: number,
 ): FeeCalculationOutput {
   // Total charged to donor (no visible fees)
   const totalDonateur = roundToCents(montantDon + contribution);
@@ -121,7 +121,7 @@ function calculateScenarioB(
     applicationFee,
     commissionDonaction,
     fraisStripeEstimes,
-    montantRecuFiscal: netAssociation // Tax receipt = actual amount received
+    montantRecuFiscal: netAssociation, // Tax receipt = actual amount received
   };
 }
 

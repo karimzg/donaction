@@ -4,7 +4,7 @@
     isBeingFilled,
     isContributionShown,
     isLoading,
-    SUBSCRIPTION
+    SUBSCRIPTION,
   } from '../../logic/useSponsorshipForm.svelte';
 
   let { index, submitForm }: { index: number; submitForm: (acc: number) => void } = $props();
@@ -16,7 +16,7 @@
     sendGaEvent({
       category: 'contribution',
       label: `closed contribution`,
-      value: DEFAULT_VALUES.contributionAKlubr
+      value: DEFAULT_VALUES.contributionAKlubr,
     });
   };
 
@@ -43,8 +43,8 @@
         <button
           class="secondary-btn desktop"
           onclick={() => submitForm(-1)}
-          aria-label="Retour à l'étape précédente"
-        >Étape précédente</button>
+          aria-label="Retour à l'étape précédente">Étape précédente</button
+        >
         <button
           class="secondary-btn mobile"
           onclick={() => submitForm(-1)}

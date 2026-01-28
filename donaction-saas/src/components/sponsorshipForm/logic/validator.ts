@@ -2,7 +2,7 @@ import {
   DEFAULT_VALUES,
   FORM_CONFIG,
   isBeingFilled,
-  triggerValidation
+  triggerValidation,
 } from './useSponsorshipForm.svelte';
 import { setFieldError } from './fieldErrors.svelte';
 import eventBus from '../../../utils/eventBus';
@@ -103,7 +103,7 @@ const dirtyKeys = [
   'Nom',
   'Ville',
   'Date de naissance',
-  'Code postal'
+  'Code postal',
 ];
 
 function validator(
@@ -111,18 +111,21 @@ function validator(
   {
     validateFunctions,
     fieldName,
-    regExp
+    regExp,
   }: {
-    validateFunctions: [Function];
+    validateFunctions: [(...args: unknown[]) => unknown];
     fieldName: string;
     regExp?: RegExp;
-  }
+  },
 ) {
   isBeingFilled.set(true);
   let isTouched = false;
 
   // Get parent form-group for touched class
-  const formGroup = node.closest('.don-form-group') || node.closest('.inputField') || node.closest('.don-checkbox-row');
+  const formGroup =
+    node.closest('.don-form-group') ||
+    node.closest('.inputField') ||
+    node.closest('.don-checkbox-row');
 
   function markTouched() {
     if (!isTouched) {
@@ -148,9 +151,10 @@ function validator(
     }
 
     // Fallback: update legacy <small> element if present (backward compatibility)
-    const errorEl = node.type === 'checkbox'
-      ? node.nextElementSibling?.nextElementSibling
-      : node.nextElementSibling;
+    const errorEl =
+      node.type === 'checkbox'
+        ? node.nextElementSibling?.nextElementSibling
+        : node.nextElementSibling;
 
     if (errorEl && errorEl.tagName === 'SMALL') {
       errorEl.textContent = message;
@@ -216,7 +220,7 @@ function validator(
       node.removeEventListener('blur', handleBlur);
       node.removeEventListener('input', handleInput);
       unsubscribe();
-    }
+    },
   };
 }
 
@@ -234,5 +238,5 @@ export {
   eighteenYearsAgo,
   validateDateMajor,
   validatePostalCode,
-  stringWithoutNumbersRegExp
+  stringWithoutNumbersRegExp,
 };

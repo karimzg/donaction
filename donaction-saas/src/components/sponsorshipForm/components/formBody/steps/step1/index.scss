@@ -19,7 +19,7 @@
       .content {
         padding: 10px;
         border-radius: 10px;
-        transform: scale(.9);
+        transform: scale(0.9);
         margin: unset !important;
         display: flex;
         flex-direction: column;
@@ -97,7 +97,7 @@
 .don-section {
   margin-bottom: var(--don-spacing-2xl);
   width: 100%;
-  & +.don-section {
+  & + .don-section {
     &:before {
       content: '';
       display: block;
@@ -255,7 +255,8 @@
 
   &:focus {
     border-color: var(--don-brand-primary, var(--don-color-accent));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
     transform: translateY(-1px);
   }
 
@@ -289,8 +290,8 @@
 }
 
 // Hide number input spinners
-.don-form-input[type="number"]::-webkit-outer-spin-button,
-.don-form-input[type="number"]::-webkit-inner-spin-button {
+.don-form-input[type='number']::-webkit-outer-spin-button,
+.don-form-input[type='number']::-webkit-inner-spin-button {
   display: none;
 }
 
@@ -394,9 +395,15 @@
 }
 
 @keyframes pulse-value {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .don-real-cost__savings {
@@ -448,9 +455,9 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--don-color-bg-subtle, #F3F4F6);
-  border: 1.5px solid var(--don-color-border, #E5E7EB);
-  color: var(--don-color-text-muted, #6B7280);
+  background: var(--don-color-bg-subtle, #f3f4f6);
+  border: 1.5px solid var(--don-color-border, #e5e7eb);
+  color: var(--don-color-text-muted, #6b7280);
   font-size: 11px;
   font-weight: 700;
   cursor: help;
@@ -458,16 +465,14 @@
   flex-shrink: 0;
 
   &:hover {
-    background: var(--don-brand-primary, #3B82F6);
-    border-color: var(--don-brand-primary, #3B82F6);
+    background: var(--don-brand-primary, #3b82f6);
+    border-color: var(--don-brand-primary, #3b82f6);
     color: white;
     transform: scale(1.15);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--don-brand-primary, #3B82F6);
+    outline: 2px solid var(--don-brand-primary, #3b82f6);
     outline-offset: 2px;
   }
 }
-
-

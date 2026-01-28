@@ -7,9 +7,13 @@
     validateDate,
     validateDateMajor,
     validatePostalCode,
-    eighteenYearsAgo
+    eighteenYearsAgo,
   } from '../../../../logic/validator';
-  import { DEFAULT_VALUES, FORM_CONFIG, SUBSCRIPTION } from '../../../../logic/useSponsorshipForm.svelte';
+  import {
+    DEFAULT_VALUES,
+    FORM_CONFIG,
+    SUBSCRIPTION,
+  } from '../../../../logic/useSponsorshipForm.svelte';
   import AdressInputs from './AdressInputs.svelte';
   import DatePicker from './DatePicker.svelte';
   import LogoUpload from './LogoUpload.svelte';
@@ -17,7 +21,7 @@
   import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
 
   let hasSelectedProject = $derived(
-    SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+    SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid,
   );
 </script>
 
@@ -37,9 +41,13 @@
     <h1 class="don-step2__title">Pourquoi saisir ces informations ?</h1>
     <p class="don-step2__subtitle">
       {#if DEFAULT_VALUES.withTaxReduction}
-        Ces informations sont indispensables pour l'édition de votre <strong>reçu fiscal</strong>, impératif pour récupérer <strong>votre crédit d'impôt</strong>. Votre adresse email nous permettra de vous transmettre le reçu.
+        Ces informations sont indispensables pour l'édition de votre <strong>reçu fiscal</strong>,
+        impératif pour récupérer <strong>votre crédit d'impôt</strong>. Votre adresse email nous
+        permettra de vous transmettre le reçu.
       {:else}
-        Ces informations sont indispensables pour l'édition de votre <strong>attestation de paiement</strong>.
+        Ces informations sont indispensables pour l'édition de votre <strong
+          >attestation de paiement</strong
+        >.
       {/if}
     </p>
   </header>
@@ -60,7 +68,7 @@
         bind:value={DEFAULT_VALUES.email}
         use:validator={{
           validateFunctions: [validateRequired, validateEmail],
-          fieldName: 'E-mail'
+          fieldName: 'E-mail',
         }}
       />
       <FormError inputId="email" />
@@ -69,63 +77,63 @@
     <!-- Company fields (conditional) -->
     {#if DEFAULT_VALUES.estOrganisme && DEFAULT_VALUES.withTaxReduction}
       <div class="don-company-section don-section-animate">
-      <div class="don-form-row don-form-row--3">
-        <div class="don-form-group">
-          <label class="don-form-label" for="socialReason">Raison sociale *</label>
-          <input
-            id="socialReason"
-            type="text"
-            class="don-form-input"
-            placeholder="KLUBR"
-            bind:value={DEFAULT_VALUES.socialReason}
-            use:validator={{
-              validateFunctions: [validateRequired],
-              fieldName: 'Raison sociale'
-            }}
-          />
-          <FormError inputId="socialReason" />
+        <div class="don-form-row don-form-row--3">
+          <div class="don-form-group">
+            <label class="don-form-label" for="socialReason">Raison sociale *</label>
+            <input
+              id="socialReason"
+              type="text"
+              class="don-form-input"
+              placeholder="KLUBR"
+              bind:value={DEFAULT_VALUES.socialReason}
+              use:validator={{
+                validateFunctions: [validateRequired],
+                fieldName: 'Raison sociale',
+              }}
+            />
+            <FormError inputId="socialReason" />
+          </div>
+          <div class="don-form-group">
+            <label class="don-form-label" for="siren">Siren *</label>
+            <input
+              id="siren"
+              type="text"
+              class="don-form-input"
+              placeholder="123 456 789"
+              bind:value={DEFAULT_VALUES.siren}
+              use:validator={{
+                validateFunctions: [validateRequired, validateSiren],
+                fieldName: 'Siren',
+              }}
+            />
+            <FormError inputId="siren" />
+          </div>
+          <div class="don-form-group">
+            <label class="don-form-label" for="formeJuridique">Forme juridique *</label>
+            <input
+              id="formeJuridique"
+              type="text"
+              class="don-form-input"
+              placeholder="SARL"
+              bind:value={DEFAULT_VALUES.legalForm}
+              use:validator={{
+                validateFunctions: [validateRequired],
+                fieldName: 'Forme juridique',
+              }}
+            />
+            <FormError inputId="formeJuridique" />
+          </div>
         </div>
+        <AdressInputs />
         <div class="don-form-group">
-          <label class="don-form-label" for="siren">Siren *</label>
-          <input
-            id="siren"
-            type="text"
-            class="don-form-input"
-            placeholder="123 456 789"
-            bind:value={DEFAULT_VALUES.siren}
-            use:validator={{
-              validateFunctions: [validateRequired, validateSiren],
-              fieldName: 'Siren'
-            }}
+          <label class="don-form-label">Logo de votre société (facultatif)</label>
+          <LogoUpload
+            bind:value={DEFAULT_VALUES.logo}
+            maxSize={2 * 1024 * 1024}
+            accept={['image/png', 'image/jpeg', 'image/webp']}
           />
-          <FormError inputId="siren" />
         </div>
-        <div class="don-form-group">
-          <label class="don-form-label" for="formeJuridique">Forme juridique *</label>
-          <input
-            id="formeJuridique"
-            type="text"
-            class="don-form-input"
-            placeholder="SARL"
-            bind:value={DEFAULT_VALUES.legalForm}
-            use:validator={{
-              validateFunctions: [validateRequired],
-              fieldName: 'Forme juridique'
-            }}
-          />
-          <FormError inputId="formeJuridique" />
-        </div>
-      </div>
-      <AdressInputs />
-      <div class="don-form-group">
-        <label class="don-form-label">Logo de votre société (facultatif)</label>
-        <LogoUpload
-          bind:value={DEFAULT_VALUES.logo}
-          maxSize={2 * 1024 * 1024}
-          accept={['image/png', 'image/jpeg', 'image/webp']}
-        />
-      </div>
-      <hr class="w-full" />
+        <hr class="w-full" />
       </div>
     {/if}
 
@@ -133,7 +141,12 @@
     <div class="don-form-row don-form-row--3">
       <div class="don-form-group">
         <label class="don-form-label" for="civilite">Civilité *</label>
-        <select class="don-form-select" bind:value={DEFAULT_VALUES.civility} id="civilite" name="civilite">
+        <select
+          class="don-form-select"
+          bind:value={DEFAULT_VALUES.civility}
+          id="civilite"
+          name="civilite"
+        >
           <option value="Monsieur">Monsieur</option>
           <option value="Madame">Madame</option>
         </select>
@@ -149,7 +162,7 @@
           bind:value={DEFAULT_VALUES.firstName}
           use:validator={{
             validateFunctions: [validateRequired],
-            fieldName: 'Prénom'
+            fieldName: 'Prénom',
           }}
         />
         <FormError inputId="prenom" />
@@ -164,7 +177,7 @@
           bind:value={DEFAULT_VALUES.lastName}
           use:validator={{
             validateFunctions: [validateRequired],
-            fieldName: 'Nom'
+            fieldName: 'Nom',
           }}
         />
         <FormError inputId="nom" />

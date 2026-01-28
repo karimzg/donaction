@@ -97,7 +97,9 @@ describe('initComponent', () => {
 
   it('should extract apiToken from script src query params', async () => {
     document.querySelectorAll = vi.fn().mockReturnValue([
-      { src: 'https://cdn.example.com/widget/KlubrSponsorshipForm.es.js?apiToken=customToken123&other=param' },
+      {
+        src: 'https://cdn.example.com/widget/KlubrSponsorshipForm.es.js?apiToken=customToken123&other=param',
+      },
     ]) as any;
 
     await initComponent();
@@ -105,7 +107,7 @@ describe('initComponent', () => {
     expect(Fetch).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ apiToken: 'customToken123' }),
-      })
+      }),
     );
     expect(SUBSCRIPTION.token).toBe('customToken123');
   });

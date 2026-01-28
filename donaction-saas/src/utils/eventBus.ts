@@ -17,7 +17,7 @@ const eventBus = {
   emit(event, data) {
     if (!this.events.has(event)) return;
     this.events.get(event).forEach((listener) => listener(data));
-  }
+  },
 };
 
 export default eventBus;

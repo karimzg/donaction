@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 import { DEFAULT_VALUES, index, FORM_CONFIG } from './useSponsorshipForm.svelte';
 import { createReCaptchaToken, putPostDon, putPostDonator, uploadCompanyLogo } from './api';
 import { sendGaEvent } from '../../../utils/sendGaEvent';
@@ -26,14 +27,14 @@ export async function handleSubmitStepTwo() {
 
       sendGaEvent({
         category: 'donation',
-        label: `Submit step 2`
+        label: `Submit step 2`,
       });
 
       const createDonationRes = await createDonation(temp);
       const createDonatorRes = await createDonator(temp);
       resolve({
         createDonationRes,
-        createDonatorRes
+        createDonatorRes,
       });
     } catch (e) {
       reject(e);
@@ -44,7 +45,7 @@ export async function handleSubmitStepTwo() {
 async function createDonation(temp) {
   return new Promise(async (resolve, reject) => {
     const formToken = await createReCaptchaToken(
-      FORM_CONFIG.donUuid ? 'UPDATE_DONATION' : 'CREATE_DONATION'
+      FORM_CONFIG.donUuid ? 'UPDATE_DONATION' : 'CREATE_DONATION',
     )
       .then((res) => res)
       .catch((err) => {
@@ -65,14 +66,14 @@ async function createDonation(temp) {
         klubDonateur: undefined,
         klub_projet:
           FORM_CONFIG.projectUuid === FORM_CONFIG.clubUuid ? null : FORM_CONFIG.projectUuid || null,
-        formToken
+        formToken,
       };
 
       putPostDon(reqBody, FORM_CONFIG.donUuid)
         .then((res) => {
           sendGaEvent({
             category: 'donation',
-            label: `Update/create Klub Don (uuid: ${res?.uuid})`
+            label: `Update/create Klub Don (uuid: ${res?.uuid})`,
           });
           FORM_CONFIG.donUuid = res.uuid;
           resolve(res);
@@ -80,7 +81,7 @@ async function createDonation(temp) {
         .catch((err) => {
           sendGaEvent({
             category: 'donation_error',
-            label: `Update/create Klub Don (uuid: ${FORM_CONFIG.donUuid})`
+            label: `Update/create Klub Don (uuid: ${FORM_CONFIG.donUuid})`,
           });
           reject(err);
         });
@@ -99,7 +100,7 @@ async function createDonator(temp) {
       'pays',
       'SIREN',
       'raisonSocial',
-      'formeJuridique'
+      'formeJuridique',
     ];
     const reqBody = {
       donateurType: temp.estOrganisme ? 'Organisme' : 'Particulier',
@@ -121,7 +122,7 @@ async function createDonator(temp) {
       klubDon: FORM_CONFIG.donUuid,
       optInAffMontant: temp?.displayAmount,
       optInAffNom: temp?.displayName,
-      uuid: FORM_CONFIG.donatorUuid
+      uuid: FORM_CONFIG.donatorUuid,
     };
 
     if (!temp.withTaxReduction) {
@@ -134,7 +135,7 @@ async function createDonator(temp) {
       .then(async (res) => {
         sendGaEvent({
           category: 'donation',
-          label: `Update/create KlubDonateur (uuid: ${res.uuid})`
+          label: `Update/create KlubDonateur (uuid: ${res.uuid})`,
         });
         FORM_CONFIG.donatorUuid = res.uuid;
         await uploadProLogo(temp);
@@ -143,7 +144,7 @@ async function createDonator(temp) {
       .catch((err) => {
         sendGaEvent({
           category: 'donation_error',
-          label: `Update/create KlubDonateur (uuid: ${FORM_CONFIG.donatorUuid})`
+          label: `Update/create KlubDonateur (uuid: ${FORM_CONFIG.donatorUuid})`,
         });
         reject(err);
       });
@@ -167,14 +168,14 @@ const uploadProLogo = async (temp) => {
         });
       sendGaEvent({
         category: 'donation',
-        label: `Upload company logo (uuid: ${resLogo.logo.uuid})`
+        label: `Upload company logo (uuid: ${resLogo.logo.uuid})`,
       });
       DEFAULT_VALUES.logo = resLogo.logo.url;
       resolve(true);
     } else {
       sendGaEvent({
         category: 'donation',
-        label: `Upload company logo (uuid donator: ${FORM_CONFIG.donatorUuid})`
+        label: `Upload company logo (uuid donator: ${FORM_CONFIG.donatorUuid})`,
       });
       resolve(true);
     }
@@ -185,34 +186,34 @@ type StatusPayment = 'notDone' | 'pending' | 'success' | 'error';
 export async function updateKlubrDonStatus(
   status: StatusPayment,
   paymentDate = new Date(),
-  uuid: string
+  uuid: string,
 ) {
   try {
     const formToken = await createReCaptchaToken('UPDATE_DONATION');
     const data: Record<string, any> = {
       formToken,
       statusPaiment: status,
-      ...(status !== 'pending' && { datePaiment: paymentDate.toISOString() })
+      ...(status !== 'pending' && { datePaiment: paymentDate.toISOString() }),
     };
     return await putPostDon(data, uuid)
       .then((res) => {
         sendGaEvent({
           category: 'donation',
-          label: `Update Klub Don status (uuid: ${res?.uuid} || status: ${status})`
+          label: `Update Klub Don status (uuid: ${res?.uuid} || status: ${status})`,
         });
         return res;
       })
       .catch((error) => {
         sendGaEvent({
           category: 'donation_error',
-          label: `Update Klub Don status (uuid: ${uuid} || status: ${status})`
+          label: `Update Klub Don status (uuid: ${uuid} || status: ${status})`,
         });
         console.error('Error updating KlubDon data:', error);
       });
   } catch (error) {
     sendGaEvent({
       category: 'donation_error',
-      label: `Update Klub Don status (uuid: ${uuid} || status: ${status})`
+      label: `Update Klub Don status (uuid: ${uuid} || status: ${status})`,
     });
     console.error('Error updating Klubr Don status:', error);
   }

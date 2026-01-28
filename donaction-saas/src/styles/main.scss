@@ -1,5 +1,5 @@
 @use './_design-tokens';
-@use "../assets/fonts/index";
+@use '../assets/fonts/index';
 
 * {
   font-family: var(--don-font-family, 'Inter', sans-serif);
@@ -44,19 +44,19 @@
 }
 
 .gap-1-2 {
-  gap: .5rem
+  gap: 0.5rem;
 }
 .gap-1 {
-  gap: 1rem
+  gap: 1rem;
 }
 .gap-2 {
-  gap: 2rem
+  gap: 2rem;
 }
 .gap-3 {
-  gap: 3rem
+  gap: 3rem;
 }
 .gap-4 {
-  gap: 4rem
+  gap: 4rem;
 }
 
 .font-bold {
@@ -91,7 +91,6 @@
 //  color: white !important;
 //}
 
-
 .grid-item-2 {
   grid-column: span 2;
 
@@ -100,7 +99,8 @@
   }
 }
 
-.primary-btn, .secondary-btn {
+.primary-btn,
+.secondary-btn {
   white-space: nowrap;
   cursor: pointer;
   font-size: 15px;
@@ -110,11 +110,17 @@
   font-weight: bold;
   background-color: var(--don-brand-primary, #000);
   color: white;
-  transition: all var(--don-transition-normal, .2s ease);
+  transition: all var(--don-transition-normal, 0.2s ease);
 
   &:hover {
-    background-color: var(--don-color-primary-hover, color-mix(in srgb, var(--don-brand-primary, #000) 85%, black));
-    border-color: var(--don-color-primary-hover, color-mix(in srgb, var(--don-brand-primary, #000) 85%, black));
+    background-color: var(
+      --don-color-primary-hover,
+      color-mix(in srgb, var(--don-brand-primary, #000) 85%, black)
+    );
+    border-color: var(
+      --don-color-primary-hover,
+      color-mix(in srgb, var(--don-brand-primary, #000) 85%, black)
+    );
     transform: translateY(-1px);
     box-shadow: var(--don-shadow-md);
   }
@@ -151,7 +157,7 @@
   &.secondary-btn {
     background-color: white;
     color: var(--don-brand-primary, black);
-    border-color: var(--don-color-border, #E5E7EB);
+    border-color: var(--don-color-border, #e5e7eb);
 
     &:hover {
       background-color: var(--don-brand-primary, black);
@@ -185,4 +191,3 @@ p {
     display: none;
   }
 }
-
