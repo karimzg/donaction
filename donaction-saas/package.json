@@ -12,26 +12,46 @@
     "test:coverage2": "vitest run --coverage --coverage-provider=v8",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage",
-    "build": "BUILD_MODE=INDIVIDUAL vite build"
+    "build": "BUILD_MODE=INDIVIDUAL vite build",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write 'src/**/*.{ts,svelte,scss,json}'",
+    "format:check": "prettier --check 'src/**/*.{ts,svelte,scss,json}'"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/google.maps": "^3.58.1",
     "@types/grecaptcha": "^3.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.14.0",
+    "globals": "^17.2.0",
     "jsdom": "^27.4.0",
     "prettier": "^3.3.3",
     "prettier-plugin-svelte": "^3.2.7",
     "sass": "^1.80.4",
     "svelte": "^5.0.3",
     "svelte-check": "^4.0.5",
+    "svelte-eslint-parser": "^1.4.1",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.0",
     "typescript": "^5.6.2",
     "vite": "^5.4.9",
     "vitest": "^4.0.18"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,svelte}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.{scss,json}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@stripe/stripe-js": "^4.9.0",
