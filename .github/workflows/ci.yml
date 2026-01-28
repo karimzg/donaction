@@ -80,7 +80,7 @@ jobs:
           - app: saas
             node-version: 20
             working-directory: donaction-saas
-            # TODO: Add npm run lint
+            lint-command: npm run lint
             test-command: npm test -- --coverage
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.saas }}
@@ -105,6 +105,11 @@ jobs:
         if: matrix.changed == 'true'
         working-directory: ${{ matrix.working-directory }}
         run: npm ci
+
+      - name: Run linter
+        if: matrix.changed == 'true' && matrix.lint-command
+        working-directory: ${{ matrix.working-directory }}
+        run: ${{ matrix.lint-command }}
 
       - name: Run tests
         if: matrix.changed == 'true' && matrix.test-command
