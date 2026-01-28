@@ -1,4 +1,4 @@
-// Global DOM mocks for tests
-globalThis.document = {
-  body: { style: {} },
-} as any;
+// Vitest setup file
+// JSDOM environment is now used, so no manual document mocks needed
+
+// Add any global test utilities here
