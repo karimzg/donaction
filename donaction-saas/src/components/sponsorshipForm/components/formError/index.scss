@@ -1,0 +1,242 @@
+// ============================================
+// FormError Component Styles
+// ============================================
+
+.don-form-error {
+  display: flex;
+  align-items: center;
+  font-size: var(--don-font-size-sm, 12px);
+
+  &__text {
+    font-weight: var(--don-font-weight-medium, 500);
+  }
+}
+
+// ──────────────────────────────────────────
+// PILL BADGE - Pilule compacte avec icône
+// ──────────────────────────────────────────
+.don-form-error--pillBadge {
+  display: inline-flex;
+  gap: var(--don-spacing-sm, 6px);
+  padding: var(--don-spacing-md, 8px) var(--don-spacing-xl, 16px);
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  border: 1px solid var(--don-color-error-border, #FECACA);
+  border-radius: var(--don-radius-full, 9999px);
+  animation: errorPillAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .don-form-error__icon--pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background-color: var(--don-color-error, #DC2626);
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    animation: iconPulse 0.4s ease-out;
+  }
+
+  .don-form-error__text {
+    color: var(--don-color-error-dark, #991B1B);
+  }
+}
+
+@keyframes errorPillAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes iconPulse {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+// ──────────────────────────────────────────
+// LIGNE ACCENT - Minimaliste avec barre
+// ──────────────────────────────────────────
+.don-form-error--ligneAccent {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--don-spacing-xs, 4px);
+  padding-top: var(--don-spacing-sm, 6px);
+  animation: errorV3Appear 0.25s ease-out;
+
+  .don-form-error__bar {
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--don-color-error, #DC2626) 0%, #F87171 100%);
+    border-radius: var(--don-radius-full, 9999px);
+    animation: barExpand 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+  }
+
+  .don-form-error__text {
+    color: var(--don-color-error, #DC2626);
+    opacity: 0;
+    transform: translateY(-4px);
+    animation: textFadeUp 0.3s ease-out 0.2s forwards;
+  }
+}
+
+@keyframes errorV3Appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes barExpand {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes textFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ──────────────────────────────────────────
+// GLASS CARD - Glassmorphism moderne
+// ──────────────────────────────────────────
+.don-form-error--glassCard {
+  gap: var(--don-spacing-lg, 12px);
+  padding: var(--don-spacing-lg, 12px) var(--don-spacing-xl, 16px);
+  background: rgba(254, 226, 226, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--don-radius-xl, 10px);
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1);
+  animation: glassAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .don-form-error__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--don-color-error, #DC2626) 0%, #EF4444 100%);
+    border-radius: var(--don-radius-md, 6px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    animation: iconRotateIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .don-form-error__icon {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .don-form-error__text {
+    color: var(--don-color-error-dark, #991B1B);
+  }
+}
+
+@keyframes glassAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+    backdrop-filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes iconRotateIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+// ──────────────────────────────────────────
+// MINIMAL DOT - Ultra-minimaliste
+// ──────────────────────────────────────────
+.don-form-error--minimalDot {
+  display: inline-flex;
+  gap: var(--don-spacing-md, 8px);
+  padding: var(--don-spacing-sm, 6px) 0;
+  animation: minimalAppear 0.25s ease-out;
+
+  .don-form-error__dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--don-color-error, #DC2626);
+    border-radius: 50%;
+    animation: dotPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .don-form-error__text {
+    color: var(--don-color-error, #DC2626);
+    letter-spacing: -0.01em;
+  }
+}
+
+@keyframes minimalAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+}
+
+// ──────────────────────────────────────────
+// REDUCED MOTION - Accessibilité
+// ──────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .don-form-error--pillBadge,
+  .don-form-error--ligneAccent,
+  .don-form-error--glassCard,
+  .don-form-error--minimalDot,
+  .don-form-error__icon--pill,
+  .don-form-error__icon-wrap,
+  .don-form-error__bar,
+  .don-form-error__dot {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .don-form-error--ligneAccent .don-form-error__bar {
+    width: 100% !important;
+  }
+
+  .don-form-error--ligneAccent .don-form-error__text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,129 @@
+// DONACTION Design Tokens
+// CSS custom properties for the design system
+// Using :host for Shadow DOM (web components) compatibility
+// Note: Inter font is loaded via JS in index.svelte (Shadow DOM requirement)
+
+:host {
+  // Association brand colors (dynamically injected via inline styles)
+  // These serve as fallbacks when no association colors are provided
+  --don-brand-primary: #3bacf7;
+  --don-brand-secondary: #050505;
+  --don-brand-primary-rgb: 59, 172, 247;
+
+  // System colors (use brand colors for interactive elements)
+  --don-color-primary: var(--don-brand-primary);
+  --don-color-primary-hover: color-mix(in srgb, var(--don-brand-primary) 85%, black);
+  --don-color-accent: var(--don-brand-primary);
+  --don-color-accent-light: color-mix(in srgb, var(--don-brand-primary) 10%, white);
+  --don-color-accent-border: var(--don-brand-primary);
+
+  // Semantic colors
+  --don-color-success: #059669;
+  --don-color-success-light: #F0FDF4;
+  --don-color-success-dark: #15803D;
+
+  --don-color-error: #DC2626;
+  --don-color-error-light: #FEF2F2;
+  --don-color-error-dark: #991B1B;
+  --don-color-error-border: #FECACA;
+
+  --don-color-warning: #F59E0B;
+  --don-color-warning-light: #FFFBEB;
+  --don-color-warning-dark: #92400E;
+  --don-color-warning-border: #FCD34D;
+
+  // Neutrals
+  --don-color-bg-page: #FAFBFC;
+  --don-color-bg-card: #FFFFFF;
+  --don-color-bg-subtle: #F9FAFB;
+  --don-color-bg-input: #FFFFFF;
+  --don-color-bg-disabled: #F3F4F6;
+
+  --don-color-border: #E5E7EB;
+  --don-color-border-light: #F3F4F6;
+  --don-color-border-input: #D1D5DB;
+
+  --don-color-text-primary: #111827;
+  --don-color-text-secondary: #374151;
+  --don-color-text-muted: #6B7280;
+  --don-color-text-placeholder: #9CA3AF;
+  --don-color-text-disabled: #9CA3AF;
+  --don-color-text-inverse: #FFFFFF;
+
+  // Typography
+  --don-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --don-font-size-xs: 10px;
+  --don-font-size-sm: 12px;
+  --don-font-size-base: 14px;
+  --don-font-size-md: 15px;
+  --don-font-size-lg: 16px;
+  --don-font-size-xl: 18px;
+  --don-font-size-2xl: 20px;
+  --don-font-size-3xl: 24px;
+  --don-font-size-4xl: 28px;
+  --don-font-size-5xl: 42px;
+
+  --don-font-weight-normal: 400;
+  --don-font-weight-medium: 500;
+  --don-font-weight-semibold: 600;
+  --don-font-weight-bold: 700;
+
+  --don-line-height-tight: 1;
+  --don-line-height-snug: 1.25;
+  --don-line-height-normal: 1.4;
+  --don-line-height-relaxed: 1.6;
+
+  // Spacing
+  --don-spacing-xs: 4px;
+  --don-spacing-sm: 6px;
+  --don-spacing-md: 8px;
+  --don-spacing-lg: 12px;
+  --don-spacing-xl: 16px;
+  --don-spacing-2xl: 20px;
+  --don-spacing-3xl: 24px;
+  --don-spacing-4xl: 28px;
+  --don-spacing-5xl: 32px;
+
+  // Borders
+  --don-radius-sm: 4px;
+  --don-radius-md: 6px;
+  --don-radius-lg: 8px;
+  --don-radius-xl: 10px;
+  --don-radius-2xl: 12px;
+  --don-radius-3xl: 16px;
+  --don-radius-full: 9999px;
+
+  --don-border-width: 1px;
+  --don-border-width-thick: 2px;
+
+  // Shadows
+  --don-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --don-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --don-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --don-shadow-lg: 0 4px 12px rgba(59, 130, 246, 0.12);
+  --don-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  // Transitions
+  --don-transition-fast: 0.15s ease;
+  --don-transition-normal: 0.2s ease;
+  --don-transition-slow: 0.3s ease;
+}
+
+// Reduced motion support (WCAG 2.1 AA)
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    --don-transition-fast: 0.01ms !important;
+    --don-transition-normal: 0.01ms !important;
+    --don-transition-slow: 0.01ms !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

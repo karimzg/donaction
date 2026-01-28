@@ -1,51 +1,154 @@
 .tooltip-container {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 
   .trigger {
     cursor: pointer;
   }
 
+  // Tooltip trigger button style (when used inside tooltip-container)
+  // Use :global() to apply styles to slotted content from child components
+  :global(.don-tooltip-trigger) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--don-color-bg-subtle, #F3F4F6);
+    border: 1.5px solid var(--don-color-border, #E5E7EB);
+    color: var(--don-color-text-muted, #6B7280);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    transition: all 200ms ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--don-brand-primary, #3B82F6);
+      border-color: var(--don-brand-primary, #3B82F6);
+      color: white;
+      transform: scale(1.15);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--don-brand-primary, #3B82F6);
+      outline-offset: 2px;
+    }
+  }
+
   .tooltip {
     position: absolute;
     z-index: 999999999;
-    background-color: rgba(1, 1, 1, .86);
-    color: white;
-    padding: 1rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    bottom: 100%;
+    background-color: white;
+    color: var(--don-color-text-primary, #1F2937);
+    padding: var(--don-spacing-lg, 16px);
+    border-radius: var(--don-radius-lg, 12px);
+    font-size: var(--don-font-size-sm, 14px);
+    line-height: var(--don-line-height-relaxed, 1.6);
+    bottom: calc(100% + 8px);
     left: 50%;
-    right: 50%;
-    max-width: 500px;
+    max-width: 320px;
     width: max-content;
     transform: translateX(-50%);
-    display: initial;
     pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: tooltipFadeIn 200ms ease-out;
+
+    // Arrow
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 12px;
+      height: 12px;
+      background: white;
+      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    p {
+      margin: 0;
+      color: var(--don-color-text-secondary, #4B5563);
+    }
+
+    img {
+      color: var(--don-brand-primary, #3B82F6);
+      flex-shrink: 0;
+    }
+
+    strong, b {
+      color: var(--don-color-text-primary, #1F2937);
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: var(--don-font-size-base, 16px);
+      font-weight: 600;
+      color: var(--don-color-text-primary, #1F2937);
+      margin: 0 0 var(--don-spacing-sm, 8px) 0;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--don-color-border, #E5E7EB);
+      margin: var(--don-spacing-md, 12px) 0;
+    }
 
     &.md-left-14 {
-      left: -14%;
-      right: unset;
+      left: 0;
+      transform: translateX(-10%);
+
+      &::after {
+        left: 20%;
+      }
     }
 
     &.left {
       left: 0;
-      right: unset;
       transform: none;
+
+      &::after {
+        left: 20px;
+      }
     }
 
     @media screen and (max-width: 768px) {
-      max-width: 80dvw;
-      &.md-left-14 {
-        left: 50%;
-        right: 50%;
-      }
+      max-width: calc(100vw - 48px);
+      left: 50%;
+      transform: translateX(-50%);
+
+      &.md-left-14,
       &.left {
-        left: 0;
-        transform: none;
+        left: 50%;
+        transform: translateX(-50%);
+
+        &::after {
+          left: 50%;
+        }
       }
     }
+  }
+}
 
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// Respect reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-container .tooltip {
+    animation: none;
   }
 }
 

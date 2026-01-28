@@ -1,70 +1,392 @@
 @use '../../../../../../styles/main';
 
-.step2 {
-  width: 100%;
+// Pro logo container - PRESERVED
+.proLogoContainer {
+  label {
+    width: fit-content;
+    position: relative;
 
-  small {
-    font-size: small;
+    .picker {
+      cursor: pointer;
+      width: 85px;
+      height: 85px;
+      background-color: black;
+      border-radius: 100%;
 
-    &.description {
-      margin: 0 1rem;
-    }
-  }
-
-  form {
-    .inputField {
-      gap: .3rem;
-
-      * {
-        font-size: 14px;
+      .pen {
+        position: absolute;
+        width: 39px;
+        height: 39px;
+        border-radius: 100%;
+        background: #e4e4e5;
+        bottom: -10%;
+        right: 50%;
       }
 
-      input, select {
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 1px solid;
-        height: 36px;
-      }
-
-      input:disabled {
-        background-color: #f0f0f0;
-        color: #a0a0a0;
-        cursor: not-allowed;
-      }
-
-      &.proLogoContainer {
-        label {
-          width: fit-content;
-          position: relative;
-
-          .picker {
-            cursor: pointer;
-            width: 85px;
-            height: 85px;
-            background-color: black;
-            border-radius: 100%;
-
-            .pen {
-              position: absolute;
-              width: 39px;
-              height: 39px;
-              border-radius: 100%;
-              background: #e4e4e5;
-              bottom: -10%;
-              right: 50%;
-            }
-
-            img {
-              &.true {
-                border-radius: 100%;
-                object-fit: cover;
-                filter: invert(0%);
-              }
-            }
-          }
+      img {
+        &.true {
+          border-radius: 100%;
+          object-fit: cover;
+          filter: invert(0%);
         }
       }
     }
   }
+}
 
+// New design system styles
+.don-step2 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+  justify-content: center;
+  flex: 1;
+
+  @media screen and (max-width: 768px) {
+    padding-bottom: var(--don-spacing-2xl);
+  }
+}
+
+.don-step2__header {
+  text-align: center;
+  margin-bottom: var(--don-spacing-lg);
+}
+
+.don-step2__title {
+  font-size: var(--don-font-size-xl);
+  font-weight: var(--don-font-weight-bold);
+  color: var(--don-color-text-primary);
+  margin: 0 0 var(--don-spacing-lg) 0;
+}
+
+.don-step2__subtitle {
+  font-size: var(--don-font-size-base);
+  color: var(--don-color-text-muted);
+  line-height: var(--don-line-height-relaxed);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+
+.project-highlight {
+  width: 100%;
+  margin-top: var(--don-spacing-2xl);
+}
+
+// Form
+.don-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+}
+
+.don-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-sm);
+}
+
+.don-form-label {
+  font-size: var(--don-font-size-sm);
+  font-weight: var(--don-font-weight-medium);
+  color: var(--don-color-text-secondary);
+}
+
+.don-form-input,
+.don-form-select {
+  width: 100%;
+  padding: var(--don-spacing-lg) var(--don-spacing-xl);
+  font-size: var(--don-font-size-base);
+  font-family: inherit;
+  border: var(--don-border-width) solid var(--don-color-border-input);
+  border-radius: var(--don-radius-lg);
+  background-color: var(--don-color-bg-input);
+  color: var(--don-color-text-primary);
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease, transform 150ms ease;
+  box-sizing: border-box;
+  height: 44px;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--don-color-border-hover, #9CA3AF);
+  }
+
+  &:focus {
+    border-color: var(--don-brand-primary, var(--don-color-accent));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-brand-primary, var(--don-color-accent)) 15%, transparent);
+    transform: translateY(-1px);
+  }
+
+  &::placeholder {
+    color: var(--don-color-text-placeholder);
+  }
+
+  &:disabled {
+    background-color: var(--don-color-bg-subtle);
+    color: var(--don-color-text-disabled);
+    cursor: not-allowed;
+
+    &:focus {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.don-form-row {
+  display: grid;
+  gap: var(--don-spacing-xl);
+}
+
+.don-form-row--2 {
+  grid-template-columns: 1fr 1fr;
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.don-form-row--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Street row - N° (100px max) + Nom de rue (fills remaining)
+.don-form-row--street {
+  display: flex;
+  gap: var(--don-spacing-xl);
+
+  .don-form-group--street-number {
+    flex: 0 0 100px;
+    max-width: 100px;
+  }
+
+  .don-form-group--street-name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media screen and (max-width: 480px) {
+    flex-direction: column;
+
+    .don-form-group--street-number {
+      flex: 0 0 auto;
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+}
+
+// Auto-fill section - visually distinct card for non-editable fields
+.don-autofill-section {
+  background: var(--don-color-bg-subtle, #F9FAFB);
+  border: 1px dashed var(--don-color-border, #E5E7EB);
+  border-radius: var(--don-radius-xl, 16px);
+  padding: var(--don-spacing-lg, 16px);
+  margin-top: var(--don-spacing-sm, 8px);
+  transition: border-color 200ms ease, background-color 200ms ease;
+
+  &--active {
+    border-style: solid;
+    border-color: var(--don-color-border-input, #D1D5DB);
+    background: var(--don-color-bg-card, #FFFFFF);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--don-spacing-sm, 8px);
+    margin-bottom: var(--don-spacing-lg, 16px);
+    padding-bottom: var(--don-spacing-md, 12px);
+    border-bottom: 1px solid var(--don-color-border, #E5E7EB);
+  }
+
+  &__icon {
+    color: var(--don-color-text-muted, #9CA3AF);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: var(--don-font-size-sm, 13px);
+    font-weight: var(--don-font-weight-medium, 500);
+    color: var(--don-color-text-muted, #6B7280);
+    letter-spacing: 0.01em;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--don-spacing-xl, 24px);
+  }
+}
+
+// Legacy address row (deprecated, kept for compatibility)
+.don-form-row--address {
+  grid-template-columns: 1fr 4fr;
+
+  @media screen and (max-width: 480px) {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+// Keyframes for ligneAccent style
+@keyframes errorV3Appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes barExpand {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+// Input validation states - CSS-driven based on parent class
+// Using :global() because touched/invalid classes are added dynamically by JS
+:global(.don-form-group.touched.invalid),
+:global(.inputField.touched.invalid) {
+  .don-form-input,
+  .don-form-select,
+  input:not([type="file"]) {
+    border-color: var(--don-color-error, #DC2626) !important;
+    background-color: var(--don-color-error-light, #FEF2F2);
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--don-color-error, #DC2626) 15%, transparent);
+    }
+  }
+}
+
+// Valid input state - subtle success indicator
+// Using :global() because touched/valid classes are added dynamically by JS
+:global(.don-form-group.touched.valid),
+:global(.inputField.touched.valid) {
+  .don-form-input:not(:placeholder-shown),
+  .don-form-select,
+  input:not([type="file"]):not(:placeholder-shown) {
+    border-color: var(--don-color-success, #059669);
+  }
+}
+
+
+// Span 2 columns for grid
+.don-form-group--span-2 {
+  grid-column: span 2;
+
+  @media screen and (max-width: 768px) {
+    grid-column: span 1;
+  }
+}
+
+// Tooltip trigger - new design
+.don-tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--don-color-bg-subtle, #F3F4F6);
+  border: 1.5px solid var(--don-color-border, #E5E7EB);
+  color: var(--don-color-text-muted, #6B7280);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+  transition: all 200ms ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--don-brand-primary, #3B82F6);
+    border-color: var(--don-brand-primary, #3B82F6);
+    color: white;
+    transform: scale(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--don-brand-primary, #3B82F6);
+    outline-offset: 2px;
+  }
+}
+
+// Label with tooltip inline - baseline aligned
+.don-label-with-tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--don-spacing-sm, 6px);
+  :global(.tooltip-container) {
+    max-height: var(--don-font-size-sm, 14px);
+  }
+}
+
+// Address field styles
+.address-field {
+  position: relative;
+}
+
+// Address helper - subtle inline hint (deprecated, now using section header)
+.address-helper {
+  font-size: var(--don-font-size-xs, 11px);
+  color: var(--don-color-text-placeholder, #9CA3AF);
+  margin-top: var(--don-spacing-xs, 4px);
+  font-style: italic;
+  letter-spacing: 0.01em;
+  display: none; // Hidden, replaced by don-autofill-section__title
+}
+
+// Unlock animation for address fields when enabled
+.address-unlock {
+  animation: unlockPulse 400ms ease-out;
+}
+
+@keyframes unlockPulse {
+  0% {
+    background-color: var(--don-color-bg-subtle);
+    transform: scale(1);
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--don-brand-primary, #3B82F6) 10%, white);
+    transform: scale(1.01);
+  }
+  100% {
+    background-color: var(--don-color-bg-input);
+    transform: scale(1);
+  }
+}
+
+// Phase 5: Conditional section animations
+.don-company-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--don-spacing-xl);
+}
+
+.don-section-animate {
+  animation: fadeSlideIn 250ms ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Disable animations for reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .don-section-animate,
+  .address-unlock {
+    animation: none !important;
+  }
+
+  .don-form-input,
+  .don-form-select {
+    transition: none !important;
+  }
 }

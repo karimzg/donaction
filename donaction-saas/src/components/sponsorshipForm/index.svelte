@@ -41,6 +41,17 @@
         initPlausible();
     }
 
+    // Inject Google Font (Inter) into document head for Shadow DOM compatibility
+    const loadGoogleFont = () => {
+        if (!document.querySelector('link[href*="fonts.googleapis.com/css2?family=Inter"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+            document.head.appendChild(link);
+        }
+    };
+    loadGoogleFont();
+
     $effect(async () => {
         window.KLUBR_EVENT_BUS = eventBus;
         initListeners();
@@ -105,7 +116,18 @@
 
 {#if SCRIPT_LOADED === 'loaded'}
     <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
-        <div class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}>
+        <!-- Project background image (desktop only, when form is active) -->
+        {#if $isBeingFilled && SUBSCRIPTION.project?.couverture?.url}
+            <div
+                class="project-background-image"
+                style="background-image: url({SUBSCRIPTION.project.couverture.url});"
+                aria-hidden="true"
+            ></div>
+        {/if}
+        <div
+            class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}
+            style="--don-brand-primary: {SUBSCRIPTION.klubr?.klubr_house?.primary_color || '#3bacf7'}; --don-brand-secondary: {SUBSCRIPTION.klubr?.klubr_house?.secondary_color || '#050505'};"
+        >
             {#if !$isCguShown}
                 <Breadcrumb index={$index} isBeingFilled={$isBeingFilled}/>
                 <img src={x} class="formX" onclick={() => isBeingFilled.set(false)}/>
@@ -131,13 +153,7 @@
             {#if !$isCguShown}
                 <FormNavigation index={$index} {submitForm}/>
             {/if}
-            <FormBanners
-                    bg1={SUBSCRIPTION.klubr?.klubr_house?.primary_color || '#FFFFFF'}
-                    bg2={SUBSCRIPTION.klubr?.klubr_house?.secondary_color || '#000000'}
-                    isBeingFilled={$isBeingFilled}
-                    isCguShown={$isCguShown}
-                    index={$index}
-            />
+            <!-- Brand colors injected via CSS variables on mainContainer -->
         </div>
         <script
                 defer

@@ -81,6 +81,7 @@ jobs:
             node-version: 20
             working-directory: donaction-saas
             # TODO: Add npm run lint
+            test-command: npm test -- --coverage
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.saas }}
     steps:
@@ -104,6 +105,19 @@ jobs:
         if: matrix.changed == 'true'
         working-directory: ${{ matrix.working-directory }}
         run: npm ci
+
+      - name: Run tests
+        if: matrix.changed == 'true' && matrix.test-command
+        working-directory: ${{ matrix.working-directory }}
+        run: ${{ matrix.test-command }}
+
+      - name: Upload coverage report
+        if: matrix.changed == 'true' && matrix.test-command
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-coverage-report
+          path: ${{ matrix.working-directory }}/coverage
+          retention-days: 7
 
       - name: Run ${{ matrix.command }}
         if: matrix.changed == 'true'

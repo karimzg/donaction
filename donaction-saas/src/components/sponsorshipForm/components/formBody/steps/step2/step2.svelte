@@ -9,38 +9,51 @@
     validatePostalCode,
     eighteenYearsAgo
   } from '../../../../logic/validator';
-  import { DEFAULT_VALUES, FORM_CONFIG } from '../../../../logic/useSponsorshipForm.svelte';
-  import camera from '../../../../../../assets/icons/camera.svg';
-  import pen from '../../../../../../assets/icons/pen.svg';
+  import { DEFAULT_VALUES, FORM_CONFIG, SUBSCRIPTION } from '../../../../logic/useSponsorshipForm.svelte';
   import AdressInputs from './AdressInputs.svelte';
+  import DatePicker from './DatePicker.svelte';
+  import LogoUpload from './LogoUpload.svelte';
+  import FormError from '../../../formError/FormError.svelte';
+  import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
 
-  const oninput = (event) => {
-    if (event?.target?.files && event?.target?.files[0]) {
-      DEFAULT_VALUES.logo = URL.createObjectURL(event?.target?.files[0]);
-    }
-  };
+  let hasSelectedProject = $derived(
+    SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid
+  );
 </script>
 
-<div class="step2 flex flex-col gap-1 items-center">
-  <p class="title text-center font-bold">Pourquoi saisir ces informations?</p>
-  {#if !!DEFAULT_VALUES.withTaxReduction}
-    <small class="text-center description">
-      Ces informations sont indispensables pour l'édition de votre reçu fiscal, impératif pour
-      récupérer <b><small>votre crédit d'impôt</small></b>
-      Votre adresse email nous permettra de vous transmettre le reçu.
-    </small>
-  {:else}
-    <small class="text-center description">
-      Ces informations sont indispensables pour l'édition de votre attestation de paiement.
-    </small>
+<div class="don-step2">
+  <!-- Project highlight (if project selected) -->
+  {#if hasSelectedProject}
+    <ProjectHighlight
+      project={SUBSCRIPTION.project}
+      selectedAmount={DEFAULT_VALUES.montant}
+      variant="default"
+      label="Vous soutenez le projet"
+    />
   {/if}
-  <form class="w-full flex flex-col">
-    <div class="inputField flex flex-col">
-      <label>Email *</label>
+
+  <!-- Header -->
+  <header class="don-step2__header">
+    <h1 class="don-step2__title">Pourquoi saisir ces informations ?</h1>
+    <p class="don-step2__subtitle">
+      {#if DEFAULT_VALUES.withTaxReduction}
+        Ces informations sont indispensables pour l'édition de votre <strong>reçu fiscal</strong>, impératif pour récupérer <strong>votre crédit d'impôt</strong>. Votre adresse email nous permettra de vous transmettre le reçu.
+      {:else}
+        Ces informations sont indispensables pour l'édition de votre <strong>attestation de paiement</strong>.
+      {/if}
+    </p>
+  </header>
+
+  <!-- Form -->
+  <form class="don-form">
+    <!-- Email -->
+    <div class="don-form-group">
+      <label class="don-form-label" for="email">Email *</label>
       <input
+        id="email"
         type="email"
+        class="don-form-input"
         placeholder="jean.lefebvre@email.fr"
-        class="w-full"
         disabled={FORM_CONFIG.authEmail ||
           (FORM_CONFIG.myLast && FORM_CONFIG.myLast.email) ||
           FORM_CONFIG.donatorUuid}
@@ -50,154 +63,142 @@
           fieldName: 'E-mail'
         }}
       />
-      <small class="error" aria-live="polite"></small>
+      <FormError inputId="email" />
     </div>
 
+    <!-- Company fields (conditional) -->
     {#if DEFAULT_VALUES.estOrganisme && DEFAULT_VALUES.withTaxReduction}
-      <div class="grid-3">
-        <div class="inputField flex flex-col">
-          <label for="socialReason">Raison sociale *</label>
+      <div class="don-company-section don-section-animate">
+      <div class="don-form-row don-form-row--3">
+        <div class="don-form-group">
+          <label class="don-form-label" for="socialReason">Raison sociale *</label>
           <input
             id="socialReason"
             type="text"
+            class="don-form-input"
             placeholder="KLUBR"
-            class="w-full"
             bind:value={DEFAULT_VALUES.socialReason}
             use:validator={{
               validateFunctions: [validateRequired],
               fieldName: 'Raison sociale'
             }}
           />
-          <small class="error" aria-live="polite"></small>
+          <FormError inputId="socialReason" />
         </div>
-        <div class="inputField flex flex-col">
-          <label for="siren">Siren *</label>
+        <div class="don-form-group">
+          <label class="don-form-label" for="siren">Siren *</label>
           <input
             id="siren"
             type="text"
+            class="don-form-input"
             placeholder="123 456 789"
-            class="w-full"
             bind:value={DEFAULT_VALUES.siren}
             use:validator={{
               validateFunctions: [validateRequired, validateSiren],
               fieldName: 'Siren'
             }}
           />
-          <small class="error" aria-live="polite"></small>
+          <FormError inputId="siren" />
         </div>
-        <div class="inputField flex flex-col">
-          <label for="formeJuridique">Forme juridique *</label>
+        <div class="don-form-group">
+          <label class="don-form-label" for="formeJuridique">Forme juridique *</label>
           <input
             id="formeJuridique"
             type="text"
+            class="don-form-input"
             placeholder="SARL"
-            class="w-full"
             bind:value={DEFAULT_VALUES.legalForm}
             use:validator={{
               validateFunctions: [validateRequired],
               fieldName: 'Forme juridique'
             }}
           />
-          <small class="error" aria-live="polite"></small>
+          <FormError inputId="formeJuridique" />
         </div>
       </div>
       <AdressInputs />
-      <div class="proLogoContainer inputField flex flex-col">
-        <label for="logo" class="flex flex-col gap-1">
-          <span>Logo de votre société (facultatif)</span>
-          <span class="picker flex items-center justify-center">
-            <img
-              width={DEFAULT_VALUES.logo ? 85 : 36}
-              height={DEFAULT_VALUES.logo ? 85 : 31}
-              class="invert {!!DEFAULT_VALUES.logo}"
-              src={DEFAULT_VALUES.logo || camera}
-              alt="logo pro"
-            />
-            {#if DEFAULT_VALUES.logo}
-              <span class="pen flex items-center justify-center">
-                <img src={pen} alt="edit" />
-              </span>
-            {/if}
-          </span>
-        </label>
-        <input {oninput} id="logo" type="file" accept="image/*" class="hidden" />
+      <div class="don-form-group">
+        <label class="don-form-label">Logo de votre société (facultatif)</label>
+        <LogoUpload
+          bind:value={DEFAULT_VALUES.logo}
+          maxSize={2 * 1024 * 1024}
+          accept={['image/png', 'image/jpeg', 'image/webp']}
+        />
       </div>
       <hr class="w-full" />
+      </div>
     {/if}
 
-    <div class="grid-3">
-      <div class="inputField flex flex-col">
-        <label for="civilite">Civilité *</label>
-        <select bind:value={DEFAULT_VALUES.civility} id="civilite" name="civilite">
+    <!-- Civility, First name, Last name -->
+    <div class="don-form-row don-form-row--3">
+      <div class="don-form-group">
+        <label class="don-form-label" for="civilite">Civilité *</label>
+        <select class="don-form-select" bind:value={DEFAULT_VALUES.civility} id="civilite" name="civilite">
           <option value="Monsieur">Monsieur</option>
           <option value="Madame">Madame</option>
         </select>
-        <small class="error" aria-live="polite"></small>
+        <FormError inputId="civilite" />
       </div>
-      <div class="inputField flex flex-col">
-        <label for="prenom">Prénom *</label>
+      <div class="don-form-group">
+        <label class="don-form-label" for="prenom">Prénom *</label>
         <input
           id="prenom"
           type="text"
+          class="don-form-input"
           placeholder="Jean"
-          class="w-full"
           bind:value={DEFAULT_VALUES.firstName}
           use:validator={{
             validateFunctions: [validateRequired],
             fieldName: 'Prénom'
           }}
         />
-        <small class="error" aria-live="polite"></small>
+        <FormError inputId="prenom" />
       </div>
-      <div class="inputField flex flex-col">
-        <label for="nom">Nom *</label>
+      <div class="don-form-group">
+        <label class="don-form-label" for="nom">Nom *</label>
         <input
           id="nom"
           type="text"
+          class="don-form-input"
           placeholder="LEFEBVRE"
-          class="w-full"
           bind:value={DEFAULT_VALUES.lastName}
           use:validator={{
             validateFunctions: [validateRequired],
             fieldName: 'Nom'
           }}
         />
-        <small class="error" aria-live="polite"></small>
+        <FormError inputId="nom" />
       </div>
     </div>
-    <div class="grid-3">
-      <div class="inputField flex flex-col">
-        <label for="birthdate">Date de naissance *</label>
-        <input
-          id="birthdate"
-          type="date"
-          class="w-full"
+
+    <!-- Birthdate + Phone -->
+    <div class="don-form-row don-form-row--2">
+      <div class="don-form-group">
+        <label class="don-form-label" for="birthdate">Date de naissance *</label>
+        <DatePicker
+          bind:value={DEFAULT_VALUES.birthdate}
           max={eighteenYearsAgo()}
           min="1901-01-01"
-          bind:value={DEFAULT_VALUES.birthdate}
-          use:validator={{
-            validateFunctions: [validateRequired, validateDate, validateDateMajor],
-            fieldName: 'Date de naissance'
-          }}
+          required
         />
-        <small class="error" aria-live="polite"></small>
       </div>
       {#if DEFAULT_VALUES.withTaxReduction}
-        <div class="inputField flex flex-col">
-          <label for="phoneNumber">Numéro de téléphone *</label>
+        <div class="don-form-group">
+          <label class="don-form-label" for="phoneNumber">Numéro de téléphone</label>
           <input
-            bind:value={DEFAULT_VALUES.tel}
             id="phoneNumber"
             type="tel"
+            class="don-form-input"
             placeholder="+330700000000"
-            class="w-full"
+            bind:value={DEFAULT_VALUES.tel}
           />
-          <small class="error" aria-live="polite"></small>
+          <FormError inputId="phoneNumber" />
         </div>
       {/if}
     </div>
 
-    {#if !DEFAULT_VALUES.estOrganisme && !!DEFAULT_VALUES.withTaxReduction}
+    <!-- Address (if tax reduction and not company) -->
+    {#if !DEFAULT_VALUES.estOrganisme && DEFAULT_VALUES.withTaxReduction}
       <AdressInputs />
     {/if}
   </form>

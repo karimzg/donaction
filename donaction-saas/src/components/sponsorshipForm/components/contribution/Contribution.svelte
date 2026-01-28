@@ -27,6 +27,9 @@
     cap: 1
   });
 
+  const tradePolicy = $derived(SUBSCRIPTION.klubr?.trade_policy);
+  const isStripeConnect = $derived(tradePolicy?.stripe_connect === true);
+
   const calc = (node: HTMLInputElement) => {
     const value = (node.value / node.max) * 100;
     switch (true) {
@@ -155,6 +158,7 @@
       <p class="font-semibold">0€</p>
       <p class="font-semibold">{Math.min(DEFAULT_VALUES.montant, 25)}€</p>
     </div>
+    {#if !isStripeConnect}
     {#if DEFAULT_VALUES.withTaxReduction}
       <div class="afterTax flex flex-col items-center gap-1-2 font-semibold" style="margin: 20px 0">
         <Tooltip>
@@ -162,6 +166,7 @@
             <p class="text-center">Coût après réduction d'impôts</p>
             <img width={25} height={25} src={alertIcon} alt={''} />
           </div>
+
           <div slot="tooltip" class="flex flex-col gap-1">
             <h1 style="margin: unset;">Réduction d'impôts</h1>
             <p style="font-weight: normal">
@@ -177,6 +182,7 @@
           )}&nbsp;€</span
         >
       </div>
+    {/if}
     {/if}
     {#if !rejectedContribution && DEFAULT_VALUES.contributionAKlubr > 0}
       <p class="rejectContributionLabel" onclick={rejectContribution}>

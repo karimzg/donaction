@@ -70,10 +70,21 @@ const defVals = {
   place_id: null,
   displayName: true,
   displayAmount: true,
-  acceptConditions1: false,
   acceptConditions2: false
 };
 const DEFAULT_VALUES = $state({ ...defVals });
+
+/**
+ * Navigate directly to a specific step (only allows going back to completed steps)
+ */
+function goToStep(targetStep: number) {
+  const currentStep = get(index);
+  // Only allow navigating to completed steps (going back)
+  if (targetStep < currentStep && targetStep >= 0) {
+    index.set(targetStep);
+    triggerValidation.set(0);
+  }
+}
 
 async function submitForm(acc: number) {
   if (acc > 0) {
@@ -83,7 +94,7 @@ async function submitForm(acc: number) {
       const err = Array.from(
         document
           .querySelector('klubr-sponsorship-form')
-          ?.shadowRoot?.querySelectorAll(`small.error`)
+          ?.shadowRoot?.querySelectorAll(`.don-form-error`)
       ).find((_) => _?.innerText?.length > 0);
 
       if (!err) {
@@ -145,6 +156,7 @@ isBeingFilled.subscribe((val) => {
 export {
   index,
   submitForm,
+  goToStep,
   defVals,
   triggerValidation,
   isBeingFilled,

@@ -1,7 +1,8 @@
+@use './_design-tokens';
 @use "../assets/fonts/index";
 
 * {
-  font-family: 'Maven-Pro-Regular', sans-serif;
+  font-family: var(--don-font-family, 'Inter', sans-serif);
   font-size: 16px;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -59,11 +60,11 @@
 }
 
 .font-bold {
-  font-family: Maven-Pro-Bold, sans-serif;
-  font-weight: 600;
+  font-family: var(--don-font-family, 'Inter', sans-serif);
+  font-weight: 700;
 }
 .font-semibold {
-  font-family: Maven-Pro-semibold, sans-serif;
+  font-family: var(--don-font-family, 'Inter', sans-serif);
   font-weight: 600;
 }
 
@@ -104,16 +105,43 @@
   cursor: pointer;
   font-size: 15px;
   padding: 13px 28px;
-  border: 1px solid black;
+  border: 1px solid var(--don-brand-primary, #000);
   border-radius: 6px;
   font-weight: bold;
-  background-color: black;
+  background-color: var(--don-brand-primary, #000);
   color: white;
-  transition: background-color .3s ease-in-out;
+  transition: all var(--don-transition-normal, .2s ease);
+
+  &:hover {
+    background-color: var(--don-color-primary-hover, color-mix(in srgb, var(--don-brand-primary, #000) 85%, black));
+    border-color: var(--don-color-primary-hover, color-mix(in srgb, var(--don-brand-primary, #000) 85%, black));
+    transform: translateY(-1px);
+    box-shadow: var(--don-shadow-md);
+  }
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--don-brand-primary, #000);
+    outline-offset: 2px;
+  }
 
   &.disabled {
-    background-color: gray;
-    border: unset;
+    background-color: var(--don-color-bg-disabled, gray);
+    border-color: var(--don-color-bg-disabled, gray);
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    &:active {
+      transform: none;
+    }
   }
 
   @media screen and (max-width: 768px) {
@@ -122,10 +150,12 @@
 
   &.secondary-btn {
     background-color: white;
-    color: black;
+    color: var(--don-brand-primary, black);
+    border-color: var(--don-color-border, #E5E7EB);
 
     &:hover {
-      background-color: black;
+      background-color: var(--don-brand-primary, black);
+      border-color: var(--don-brand-primary, black);
       color: white;
     }
   }
@@ -156,9 +186,3 @@ p {
   }
 }
 
-small {
-  &.error {
-    font-size: 12px !important;
-    color: red;
-  }
-}
