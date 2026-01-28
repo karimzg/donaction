@@ -286,6 +286,12 @@
   // ── Calendar logic ──────────────────────────────────────────
 
   function toggleCalendar() {
+    if (!calendarOpen) {
+      const m = parseInt(month);
+      const y = parseInt(year);
+      if (!isNaN(m) && m >= 1 && m <= 12) calendarMonth = m;
+      if (!isNaN(y) && y >= minYear && y <= maxYear) calendarYear = y;
+    }
     calendarOpen = !calendarOpen;
   }
 
