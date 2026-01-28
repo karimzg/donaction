@@ -94,7 +94,7 @@ async function submitForm(acc: number) {
       const err = Array.from(
         document
           .querySelector('klubr-sponsorship-form')
-          ?.shadowRoot?.querySelectorAll(`.don-form-error, small.don-error`)
+          ?.shadowRoot?.querySelectorAll(`.don-form-error`)
       ).find((_) => _?.innerText?.length > 0);
 
       if (!err) {
