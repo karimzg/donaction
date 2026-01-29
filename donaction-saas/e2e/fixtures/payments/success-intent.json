@@ -1,0 +1,9 @@
+{
+  "data": {
+    "intent": "pi_test_secret_1_exR4a7X9R0z6oN8vQ2p5M3k1J9l0C7w4B5t8u2s9v6x3y1z4a8b5c2d0e",
+    "reused": false,
+    "clientSecret": "pi_test_secret_1_exR4a7X9R0z6oN8vQ2p5M3k1J9l0C7w4B5t8u2s9v6x3y1z4a8b5c2d0e_secret_0p2k8N5q1r9s7v3w2x8y1z",
+    "status": "requires_payment_method"
+  },
+  "meta": {}
+}

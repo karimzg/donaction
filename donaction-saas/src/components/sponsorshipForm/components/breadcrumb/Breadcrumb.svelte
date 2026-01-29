@@ -39,6 +39,7 @@
         class:don-header__dot--active={i === index}
         class:don-header__dot--completed={i < index}
         class:don-header__dot--clickable={i < index}
+        data-testid="breadcrumb-step-{i}"
         aria-label="{step} - Étape {i + 1} sur {totalSteps}"
         aria-current={i === index ? 'step' : undefined}
         onclick={() => handleDotClick(i)}

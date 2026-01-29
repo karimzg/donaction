@@ -1,0 +1,41 @@
+{
+  "klubr": {
+    "id": 2,
+    "documentId": "club_stripe_choice_002",
+    "uuid": "550e8400-e29b-41d4-a716-446655440002",
+    "denomination": "Club Test E2E",
+    "slug": "club-test-e2e",
+    "acronyme": "CTE",
+    "logo": {
+      "id": 2,
+      "url": "/uploads/logo_test_e2e_002.png",
+      "width": 200,
+      "height": 200,
+      "alternativeText": "Club Test E2E Logo"
+    },
+    "klubr_house": {
+      "id": 2,
+      "primary_color": "#FF6B35",
+      "secondary_color": "#004E89",
+      "title": "Le Klub"
+    },
+    "trade_policy": {
+      "id": 2,
+      "uuid": "550e8400-e29b-41d4-a716-446655440102",
+      "stripe_connect": true,
+      "allow_donor_fee_choice": true,
+      "donor_pays_fee_club": false,
+      "donor_pays_fee_project": true,
+      "donor_pays_fee": false,
+      "commissionPercentage": 4,
+      "allowKlubrContribution": true,
+      "fee_model": "percentage_only",
+      "fixed_amount": 0,
+      "VATPercentage": 20,
+      "perDonationCost": 0
+    }
+  },
+  "project": null,
+  "allowProjectSelection": true,
+  "allowKlubrContribution": true
+}

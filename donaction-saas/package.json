@@ -16,9 +16,15 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write 'src/**/*.{ts,svelte,scss,json}'",
-    "format:check": "prettier --check 'src/**/*.{ts,svelte,scss,json}'"
+    "format:check": "prettier --check 'src/**/*.{ts,svelte,scss,json}'",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ci": "playwright test --reporter=junit"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
+    "@playwright/test": "^1.58.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/google.maps": "^3.58.1",

@@ -123,10 +123,13 @@
   });
 </script>
 
-<form class="don-step1">
+<form class="don-step1" data-testid="step1">
   {#if !SUBSCRIPTION.project && SUBSCRIPTION.allowProjectSelection}
     <!-- Project selection with Swiper - PRESERVED -->
-    <div class="projectSelectionContainer flex flex-col items-center gap-1">
+    <div
+      class="projectSelectionContainer flex flex-col items-center gap-1"
+      data-testid="project-selection"
+    >
       <p class="text-center font-semibold">Quel projet souhaitez-vous soutenir ?</p>
       <div class="swiperContainer">
         {#if paginateState.left}
@@ -176,7 +179,7 @@
         Je ne souhaite pas soutenir un projet en particulier et préfère affecter mon don au
         financement des activités d'intérêt général du Klub
       </p>
-      <button onclick={saveSelection} class="primary-btn">
+      <button onclick={saveSelection} class="primary-btn" data-testid="btn-select-project">
         {FORM_CONFIG.projectUuid === SUBSCRIPTION.klubr.uuid ? 'Valider' : 'Selectionner ce projet'}
       </button>
     </div>
@@ -228,6 +231,7 @@
             }}
             aria-pressed={DEFAULT_VALUES.montant === amount}
             aria-label="Faire un don de {amount} euros"
+            data-testid="amount-{amount}"
           >
             {amount} €
           </button>
@@ -245,6 +249,7 @@
             placeholder="--,--"
             class="don-form-input don-form-input--with-addon"
             bind:value={DEFAULT_VALUES.montant}
+            data-testid="amount-free"
             oninput={(e) => {
               if (e.target.value.length > 6) {
                 e.target.value = e.target.value.slice(0, 6);
@@ -319,14 +324,16 @@
           class="don-toggle-btn"
           class:don-toggle-btn--selected={!DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
-          aria-pressed={!DEFAULT_VALUES.withTaxReduction}>Non</button
+          aria-pressed={!DEFAULT_VALUES.withTaxReduction}
+          data-testid="tax-no">Non</button
         >
         <button
           type="button"
           class="don-toggle-btn"
           class:don-toggle-btn--selected={DEFAULT_VALUES.withTaxReduction}
           onclick={checkWithTaxReduction}
-          aria-pressed={DEFAULT_VALUES.withTaxReduction}>Oui</button
+          aria-pressed={DEFAULT_VALUES.withTaxReduction}
+          data-testid="tax-yes">Oui</button
         >
       </div>
 
@@ -340,14 +347,16 @@
               class="don-toggle-btn"
               class:don-toggle-btn--selected={!DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
-              aria-pressed={!DEFAULT_VALUES.estOrganisme}>Particulier</button
+              aria-pressed={!DEFAULT_VALUES.estOrganisme}
+              data-testid="donor-type-particulier">Particulier</button
             >
             <button
               type="button"
               class="don-toggle-btn"
               class:don-toggle-btn--selected={DEFAULT_VALUES.estOrganisme}
               onclick={checkIsOrganization}
-              aria-pressed={DEFAULT_VALUES.estOrganisme}>Entreprise</button
+              aria-pressed={DEFAULT_VALUES.estOrganisme}
+              data-testid="donor-type-entreprise">Entreprise</button
             >
           </div>
 
@@ -366,15 +375,15 @@
                 </p>
               </div>
             </Tooltip>
-            <div class="don-real-cost__value">
+            <div class="don-real-cost__value" data-testid="tax-reduction-value">
               {calculateTaxReduction(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €
             </div>
-            <div class="don-real-cost__savings">
+            <div class="don-real-cost__savings" data-testid="tax-savings">
               Vous économisez <strong
                 >{calculateTaxSavings(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €</strong
               >
             </div>
-            <div class="don-real-cost__detail">
+            <div class="don-real-cost__detail" data-testid="tax-detail">
               ({DEFAULT_VALUES.estOrganisme ? '60%' : '66%'} de réduction fiscale)
             </div>
           </div>

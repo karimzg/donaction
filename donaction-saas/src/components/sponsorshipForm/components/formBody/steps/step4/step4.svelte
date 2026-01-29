@@ -189,11 +189,11 @@
 </script>
 
 {#if stripeLoading === 'loading'}
-  <div class="animation">
+  <div class="animation" data-testid="payment-loading">
     <LottieAnimation animation={loader} />
   </div>
 {:else if stripeLoading === 'error'}
-  <div class="animation">
+  <div class="animation" data-testid="payment-error">
     <LottieAnimation animation={error} />
     {#if stripeErrorMessage}
       <p class="error-message">{stripeErrorMessage}</p>
@@ -203,6 +203,7 @@
   <form
     class="flex flex-col items-center gap-1"
     id="klubr-sponsorship-form-payment-form"
+    data-testid="payment-form"
     {onsubmit}
   >
     <slot name="stripe-payment-form"></slot>
@@ -210,6 +211,7 @@
       id="klubr-sponsorship-form-payment-for"
       style="width: 290px;"
       disabled={$isLoading}
+      data-testid="btn-pay"
       class={`primary-btn ${$isLoading && 'disabled'} desktop`}
     >
       <span id="button-text">Valider</span>

@@ -120,7 +120,10 @@
 </script>
 
 {#if SCRIPT_LOADED === 'loaded'}
-  <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
+  <div
+    class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}
+    data-testid="sponsorship-form"
+  >
     <!-- Project background image (desktop only, when form is active) -->
     {#if $isBeingFilled && SUBSCRIPTION.project?.couverture?.url}
       <div
@@ -179,7 +182,7 @@
 {#if SCRIPT_LOADED === 'loading'}
   <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
     <div class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}>
-      <div class="animation">
+      <div class="animation" data-testid="form-loading">
         <LottieAnimation animation={loader}></LottieAnimation>
       </div>
     </div>
@@ -188,7 +191,7 @@
 {#if SCRIPT_LOADED === 'error'}
   <div class={`sponsorFormParent ${$isBeingFilled && 'isBeingFilled'}`}>
     <div class={`mainContainer ${$isBeingFilled && 'isBeingFilled'} boxBoxShadow`}>
-      <div class="animation">
+      <div class="animation" data-testid="form-error">
         <LottieAnimation animation={error}></LottieAnimation>
       </div>
     </div>

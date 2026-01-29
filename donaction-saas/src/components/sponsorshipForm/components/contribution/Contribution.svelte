@@ -108,7 +108,7 @@
   // };
 </script>
 
-<div class="contributionToKlubr">
+<div class="contributionToKlubr" data-testid="contribution-modal">
   <div
     class="backToRecap flex items-center gap-1"
     onclick={close}
@@ -142,7 +142,7 @@
   <div class="sliderContainer">
     <div class="flex items-center justify-between">
       <p class="font-semibold">Votre précieux soutien :</p>
-      <span class="font-semibold" style="color: #F79707"
+      <span class="font-semibold" style="color: #F79707" data-testid="contribution-value"
         >{DEFAULT_VALUES.contributionAKlubr || 0}€</span
       >
     </div>
@@ -152,6 +152,7 @@
       min={0}
       step="1"
       type="range"
+      data-testid="contribution-range"
       use:range
     />
     <div class="flex items-center justify-between" style="margin-top: -8px">
@@ -188,7 +189,11 @@
       {/if}
     {/if}
     {#if !rejectedContribution && DEFAULT_VALUES.contributionAKlubr > 0}
-      <p class="rejectContributionLabel" onclick={rejectContribution}>
+      <p
+        class="rejectContributionLabel"
+        data-testid="btn-reject-contribution"
+        onclick={rejectContribution}
+      >
         Je ne souhaite pas donner de soutien à Klubr
       </p>
     {/if}

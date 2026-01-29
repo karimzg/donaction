@@ -195,6 +195,7 @@
     accept={accept.join(',')}
     onchange={handleFileSelect}
     class="logo-upload__input"
+    data-testid="input-logo-upload"
     aria-hidden="true"
     tabindex="-1"
   />

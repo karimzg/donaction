@@ -25,7 +25,7 @@
   );
 </script>
 
-<div class="don-step2">
+<div class="don-step2" data-testid="step2">
   <!-- Project highlight (if project selected) -->
   {#if hasSelectedProject}
     <ProjectHighlight
@@ -62,6 +62,7 @@
         type="email"
         class="don-form-input"
         placeholder="jean.lefebvre@email.fr"
+        data-testid="input-email"
         disabled={FORM_CONFIG.authEmail ||
           (FORM_CONFIG.myLast && FORM_CONFIG.myLast.email) ||
           FORM_CONFIG.donatorUuid}
@@ -85,6 +86,7 @@
               type="text"
               class="don-form-input"
               placeholder="KLUBR"
+              data-testid="input-social-reason"
               bind:value={DEFAULT_VALUES.socialReason}
               use:validator={{
                 validateFunctions: [validateRequired],
@@ -100,6 +102,7 @@
               type="text"
               class="don-form-input"
               placeholder="123 456 789"
+              data-testid="input-siren"
               bind:value={DEFAULT_VALUES.siren}
               use:validator={{
                 validateFunctions: [validateRequired, validateSiren],
@@ -115,6 +118,7 @@
               type="text"
               class="don-form-input"
               placeholder="SARL"
+              data-testid="input-legal-form"
               bind:value={DEFAULT_VALUES.legalForm}
               use:validator={{
                 validateFunctions: [validateRequired],
@@ -146,6 +150,7 @@
           bind:value={DEFAULT_VALUES.civility}
           id="civilite"
           name="civilite"
+          data-testid="select-civility"
         >
           <option value="Monsieur">Monsieur</option>
           <option value="Madame">Madame</option>
@@ -159,6 +164,7 @@
           type="text"
           class="don-form-input"
           placeholder="Jean"
+          data-testid="input-firstname"
           bind:value={DEFAULT_VALUES.firstName}
           use:validator={{
             validateFunctions: [validateRequired],
@@ -174,6 +180,7 @@
           type="text"
           class="don-form-input"
           placeholder="LEFEBVRE"
+          data-testid="input-lastname"
           bind:value={DEFAULT_VALUES.lastName}
           use:validator={{
             validateFunctions: [validateRequired],

@@ -411,6 +411,7 @@
       class="date-picker__native"
       class:empty={!value}
       {value}
+      data-testid="input-birthdate"
       onchange={handleNativeDateChange}
       onblur={handleBlur}
       {min}
@@ -427,6 +428,7 @@
         inputmode="numeric"
         placeholder="JJ"
         value={day}
+        data-testid="input-birthdate"
         oninput={handleDayInput}
         onblur={handleBlur}
         onkeydown={(e) => handleKeyDown(e, 'day')}

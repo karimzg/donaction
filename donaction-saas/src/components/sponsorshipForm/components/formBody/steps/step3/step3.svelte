@@ -112,15 +112,19 @@
 {:else if $isContributionShown && SUBSCRIPTION.allowKlubrContribution}
   <Contribution />
 {:else}
-  <div class="don-step3">
+  <div class="don-step3" data-testid="step3">
     <!-- Header with amount -->
     <header class="don-step3__header">
       <div class="don-header-badge">
         <span>🎁</span> Votre don
       </div>
-      <div class="don-header-amount">{formatCurrency(DEFAULT_VALUES.montant)}</div>
+      <div class="don-header-amount" data-testid="recap-amount">
+        {formatCurrency(DEFAULT_VALUES.montant)}
+      </div>
       <div class="don-header-for">pour</div>
-      <div class="don-header-association">{SUBSCRIPTION.klubr?.denomination}</div>
+      <div class="don-header-association" data-testid="recap-association">
+        {SUBSCRIPTION.klubr?.denomination}
+      </div>
     </header>
 
     <!-- Project highlight (compact for recap) -->
@@ -146,6 +150,7 @@
           <label
             class="don-option-card"
             class:don-option-card--selected={DEFAULT_VALUES.donorPaysFee === true}
+            data-testid="fee-donor-pays"
           >
             <input
               type="radio"
@@ -191,6 +196,7 @@
           <label
             class="don-option-card"
             class:don-option-card--selected={DEFAULT_VALUES.donorPaysFee === false}
+            data-testid="fee-included"
           >
             <input
               type="radio"
@@ -303,6 +309,7 @@
                 <button
                   type="button"
                   class="don-support-row__edit"
+                  data-testid="btn-modify-contribution"
                   onclick={() => isContributionShown.set(true)}
                 >
                   Modifier
@@ -316,7 +323,9 @@
           <!-- Total -->
           <div class="don-summary-line don-summary-line--total">
             <span>Total à payer</span>
-            <span class="don-summary-line__total">{formatCurrency(fees.totalDonateur)}</span>
+            <span class="don-summary-line__total" data-testid="recap-total"
+              >{formatCurrency(fees.totalDonateur)}</span
+            >
           </div>
         </div>
 
@@ -402,6 +411,7 @@
           type="checkbox"
           id="displayName"
           name="displayName"
+          data-testid="checkbox-display-name"
           bind:checked={DEFAULT_VALUES.displayName}
         />
         <label for="displayName">
@@ -414,6 +424,7 @@
             type="checkbox"
             id="displayAmount"
             name="displayAmount"
+            data-testid="checkbox-display-amount"
             bind:checked={DEFAULT_VALUES.displayAmount}
           />
           <label for="displayAmount"> Je souhaite afficher le montant de mon don </label>
@@ -426,6 +437,7 @@
             type="checkbox"
             id="acceptCondition1"
             name="acceptCondition1"
+            data-testid="checkbox-accept-condition1"
             bind:checked={DEFAULT_VALUES.acceptConditions1}
             use:validator={{
               validateFunctions: [validateTrue],
@@ -444,6 +456,7 @@
           type="checkbox"
           id="acceptCondition2"
           name="acceptCondition2"
+          data-testid="checkbox-cgu"
           bind:checked={DEFAULT_VALUES.acceptConditions2}
           use:validator={{
             validateFunctions: [validateTrue],
