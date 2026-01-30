@@ -51,6 +51,9 @@ export async function mockGoogleMaps(
 ): Promise<void> {
   const place = { ...DEFAULT_MOCK_PLACE, ...(customPlace || {}) };
 
+  // Block real Google Maps API so the mock is not overwritten
+  await page.route('**/maps.googleapis.com/**', (route) => route.abort());
+
   await page.addInitScript((mockPlace: MockPlaceDetails) => {
     // Store the place handler for manual triggering in tests
     (window as any).__gmapsPlaceHandler = null;

@@ -53,6 +53,7 @@
         >
         <button
           class="secondary-btn mobile"
+          data-testid="btn-previous-mobile"
           onclick={() => submitForm(-1)}
           aria-label="Retour à l'étape précédente"
         >

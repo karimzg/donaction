@@ -67,7 +67,7 @@ export class Step2Page extends BasePage {
     // Wait for Google Maps Autocomplete to be initialized
     await this.page.waitForFunction(
       () => typeof (window as any).__gmapsPlaceHandler === 'function',
-      { timeout: 5_000 }
+      { timeout: 5_000 },
     );
     await this.addressInput.click();
     await triggerPlaceSelection(this.page);
@@ -104,7 +104,7 @@ export class Step2Page extends BasePage {
     // Wait for Google Maps Autocomplete to be initialized
     await this.page.waitForFunction(
       () => typeof (window as any).__gmapsPlaceHandler === 'function',
-      { timeout: 5_000 }
+      { timeout: 5_000 },
     );
     await this.addressInput.click();
     await triggerPlaceSelection(this.page);

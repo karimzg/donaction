@@ -28,7 +28,7 @@ export class BasePage {
     this.apiMocker = new ApiMocker(page);
     this.formComponent = page.locator('klubr-sponsorship-form');
     this.btnNext = page.locator('[data-testid="btn-next"]');
-    this.btnPrevious = page.locator('[data-testid="btn-previous"]');
+    this.btnPrevious = page.locator('[data-testid="btn-previous"], [data-testid="btn-previous-mobile"]');
     this.loadingSpinner = page.locator('.don-spinner');
   }
 
@@ -75,9 +75,15 @@ export class BasePage {
     await this.btnNext.click();
   }
 
-  /** Click the "Étape précédente" button */
+  /** Click the "Étape précédente" button (desktop or mobile variant) */
   async clickPrevious() {
-    await this.btnPrevious.click();
+    const desktop = this.page.locator('[data-testid="btn-previous"]');
+    const mobile = this.page.locator('[data-testid="btn-previous-mobile"]');
+    if (await desktop.isVisible().catch(() => false)) {
+      await desktop.click();
+    } else {
+      await mobile.click();
+    }
   }
 
   /** Get current step index by checking which step element is visible */
