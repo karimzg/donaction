@@ -191,7 +191,9 @@
         <h1 class="don-step1__title">{SUBSCRIPTION.klubr.denomination}</h1>
         <img
           class="don-step1__logo"
-          width={(SUBSCRIPTION.klubr?.logo?.width / SUBSCRIPTION.klubr?.logo?.height) * 70}
+          width={SUBSCRIPTION.klubr?.logo?.width && SUBSCRIPTION.klubr?.logo?.height
+            ? (SUBSCRIPTION.klubr.logo.width / SUBSCRIPTION.klubr.logo.height) * 70
+            : 70}
           height={70}
           src={SUBSCRIPTION.klubr?.logo?.url}
           alt="logo club"

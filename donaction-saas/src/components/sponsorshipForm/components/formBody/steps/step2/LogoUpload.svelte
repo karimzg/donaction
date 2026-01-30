@@ -106,12 +106,13 @@
 
   function handleRemove(event: MouseEvent) {
     event.stopPropagation();
+    clearPreview();
+  }
 
-    // Revoke old URL to prevent memory leak
+  function clearPreview() {
     if (value) {
       URL.revokeObjectURL(value);
     }
-
     value = '';
     errorMessage = '';
     onchange?.(null, null);
@@ -121,7 +122,7 @@
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       if (value) {
-        handleRemove(event as unknown as MouseEvent);
+        clearPreview();
       } else {
         handleClick();
       }

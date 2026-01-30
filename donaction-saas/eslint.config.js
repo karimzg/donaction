@@ -131,6 +131,6 @@ export default [
 
   // Global ignores
   {
-    ignores: ['node_modules/', 'dist/', 'build/', 'coverage/', '*.config.*']
+    ignores: ['node_modules/', 'dist/', 'build/', 'coverage/', 'vite.config.*.ts', 'playwright.config.ts']
   }
 ];

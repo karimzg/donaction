@@ -36,7 +36,12 @@
 </script>
 
 {#if isVisible && displayMessage}
-  <div class="don-form-error don-form-error--{msgType}" role="alert" aria-live="polite">
+  <div
+    class="don-form-error don-form-error--{msgType}"
+    id={inputId ? `${inputId}-error` : undefined}
+    role="alert"
+    aria-live="polite"
+  >
     {#if msgType === 'pillBadge'}
       <!-- Proposition 1: Pill Badge Moderne -->
       <span class="don-form-error__icon don-form-error__icon--pill">✕</span>

@@ -81,7 +81,7 @@ jobs:
             node-version: 20
             working-directory: donaction-saas
             lint-command: npm run lint
-            test-command: npm test -- --coverage
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.saas }}
     steps:

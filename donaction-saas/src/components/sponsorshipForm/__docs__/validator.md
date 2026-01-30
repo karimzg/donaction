@@ -78,27 +78,34 @@ This module provides validation functions and utilities for managing form inputs
 #### Parameters
 - `node` (*HTMLInputElement*): The input element.
 - `config` (*object*):
-    - `validateFunctions` (*Function[]*): Array of validation functions to apply.
+    - `validateFunctions` (*ValidateFn[]*): Array of typed validation functions `(value, fieldName, regExp?) => string`.
     - `fieldName` (*string*): The name of the field.
     - `regExp` (*RegExp*, optional): Optional regex for additional validation.
 
 #### Lifecycle
 - **`blur` event:** Validates the input when the user leaves the field.
-- **`input` event:** Validates the input in real-time.
-- **`triggerValidation` subscription:** Triggers validation when the observable changes.
+- **`input` event:** Debounced (150ms) — clears errors while typing, does not show new errors mid-keystroke.
+- **`triggerValidation` subscription:** Triggers full validation on form submit.
+- **`destroy`:** Clears debounce timer, removes listeners, unsubscribes.
 
 #### Returns
 - A `destroy` method to remove event listeners when the directive is removed.
 
 ## Regular Expressions
-- `stringRegExp`: Matches strings that contain invalid characters.
-- `stringWithoutNumbersRegExp`: Matches strings that contain numbers.
-- `emailRegExp`: Validates an email format.
-- `sirenRegExp`: Validates a SIREN number (9 digits).
+- `STRING_REGEXP`: Negative lookahead — matches strings containing chars outside `[\w\s,.\-/éàçèë]`. When it matches, the string is **invalid**.
+- `STRING_WITHOUT_NUMBERS_REGEXP`: Matches any char that is not a letter, space, apostrophe, or hyphen. Used to reject names with numbers/specials.
+- `EMAIL_REGEXP`: Validates email format. Requires `local@domain.tld` with TLD ≥ 2 chars.
+- `SIREN_REGEXP`: Validates a SIREN number (exactly 9 digits).
+- `POSTAL_CODE_REGEXP`: French metropolitan postal codes (01000–95999). DOM-TOM handled server-side.
+- `PHONE_REGEXP`: French phone — metropolitan + international (+33/0033) + DOM-TOM territories.
+
+## Utilities
+- `sanitizeInput(value: string)`: Escapes HTML entities (`<`, `>`, `"`, `'`) for XSS defense-in-depth.
 
 ## Exports
-- Validators: `validateAmount`, `validateDate`, `validateDateMajor`, `validateSiren`, `validateTrue`, `validateEmail`, `validateString`, `validateRequired`
-- Regular Expressions: `stringRegExp`, `emailRegExp`, `stringWithoutNumbersRegExp`
+- Validators: `validateAmount`, `validateDate`, `validateDateMajor`, `validateSiren`, `validateTrue`, `validateEmail`, `validatePhone`, `formatPhone`, `validateString`, `validateRequired`, `validatePostalCode`, `eighteenYearsAgo`
+- Regular Expressions: `STRING_REGEXP`, `EMAIL_REGEXP`, `STRING_WITHOUT_NUMBERS_REGEXP`
+- Utilities: `sanitizeInput`
 - `validator` action.
 
 ## Notes
@@ -107,7 +114,7 @@ This module provides validation functions and utilities for managing form inputs
 
 ---
 **Author:** _Klubr_
-**Last Updated:** _02_January_2025_
+**Last Updated:** _30_January_2026_
 
 **Related Files:**
 - `./useSponsorshipForm.svelte`

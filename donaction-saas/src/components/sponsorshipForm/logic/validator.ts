@@ -8,19 +8,44 @@ import { setFieldError } from './fieldErrors.svelte';
 import eventBus from '../../../utils/eventBus';
 import { EVENT_CONTEXT } from './initListeners';
 
+// ─── Constants ───────────────────────────────────────────────────────────────
 const MIN_DONATION_AMOUNT = 10;
 const MIN_FIELD_LENGTH = 2;
+const MIN_AGE = 18;
 const MAX_AGE = 110;
+const DEBOUNCE_DELAY = 150;
 
-const stringRegExp = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
-const stringWithoutNumbersRegExp = /[^A-Za-z\s'-]/;
-const emailRegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// ─── Regex Patterns ──────────────────────────────────────────────────────────
 
-const postalCodeRegExp = /^(([0-8][0-9])|(9[0-5]))[0-9]{3}$/;
+/**
+ * Matches strings containing characters outside the allowed set.
+ * Allowed: word chars (\w), spaces, commas, dots, hyphens, slashes, accented letters (éàçèë).
+ * Uses a negative lookahead: if the entire string is ONLY allowed chars, it won't match.
+ * When this regex matches → the string is INVALID (contains forbidden chars).
+ */
+const STRING_REGEXP = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
 
-const sirenRegExp = /^\d{9}$/;
+/** Matches any character that is NOT a letter, space, apostrophe, or hyphen (rejects numbers & specials). */
+const STRING_WITHOUT_NUMBERS_REGEXP = /[^A-Za-z\s'-]/;
 
-const phoneRegExp =
+/**
+ * Email validation regex.
+ * Requires: local-part@domain.tld
+ * - No spaces allowed
+ * - Domain must have at least one dot
+ * - TLD must be at least 2 characters
+ * Note: French postal codes only (01-95). DOM-TOM codes are handled separately by the backend.
+ */
+const EMAIL_REGEXP = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** French metropolitan postal code: 01000-95999. */
+const POSTAL_CODE_REGEXP = /^(([0-8][0-9])|(9[0-5]))[0-9]{3}$/;
+
+/** SIREN: exactly 9 digits. */
+const SIREN_REGEXP = /^\d{9}$/;
+
+/** French phone: metropolitan (0X) + international (+33/0033) + DOM-TOM territories. */
+const PHONE_REGEXP =
   /^(?:(?:\+|00)33[1-9]\d{8}|0[1-9]\d{8}|(?:\+|00)(?:590|596|594|262|269)\d{9}|(?:\+|00)(?:687|689|681|508)\d{6})$/;
 
 const validateAmount = (value: number, fieldName: string) => {
@@ -32,7 +57,7 @@ const validateAmount = (value: number, fieldName: string) => {
 
 const validateSiren = (value: number) => {
   if (isNaN(value) || String(value).includes('e')) return `Siren non valide`;
-  if (!sirenRegExp.test(value.toString()))
+  if (!SIREN_REGEXP.test(value.toString()))
     return `Le numéro Siren doit contenir exactement 9 chiffres`;
   return '';
 };
@@ -50,7 +75,7 @@ const validateDateMajor = (value: string) => {
   if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
     age--;
   }
-  if (age < 18) {
+  if (age < MIN_AGE) {
     return 'Vous devez être majeur(e)';
   }
   if (age > MAX_AGE) {
@@ -72,14 +97,14 @@ function validateString(value: string, fieldName: string, regExp: RegExp) {
 }
 
 function validateEmail(value: string) {
-  if (!emailRegExp?.test(value.trim())) return `E-mail non valide`;
+  if (!EMAIL_REGEXP.test(value.trim())) return `E-mail non valide`;
   return '';
 }
 
 function validatePhone(value: string) {
   if (!value || value.trim().length === 0) return '';
   const cleaned = value.replace(/[\s.\-()]/g, '');
-  if (!phoneRegExp.test(cleaned)) return 'Numéro de téléphone non valide';
+  if (!PHONE_REGEXP.test(cleaned)) return 'Numéro de téléphone non valide';
   return '';
 }
 
@@ -103,7 +128,7 @@ function formatPhone(value: string): string {
 }
 
 function validatePostalCode(value: string) {
-  if (!postalCodeRegExp?.test(value.trim())) return `Code postal non valide`;
+  if (!POSTAL_CODE_REGEXP.test(value.trim())) return `Code postal non valide`;
   return '';
 }
 
@@ -121,7 +146,7 @@ function eighteenYearsAgo() {
   return `${year}-${month}-${day}`;
 }
 
-const dirtyKeys = [
+const DIRTY_KEYS = [
   'E-mail',
   'Numéro de rue',
   'Nom de rue',
@@ -133,7 +158,22 @@ const dirtyKeys = [
   'Ville',
   'Date de naissance',
   'Code postal',
-];
+] as const;
+
+/** Type for validation functions used by the validator action. */
+type ValidateFn = (value: string | boolean | number, fieldName: string, regExp?: RegExp) => string;
+
+/**
+ * Sanitize user input to prevent XSS when storing in state.
+ * Svelte auto-escapes in templates, but this adds defense-in-depth.
+ */
+function sanitizeInput(value: string): string {
+  return value
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
 
 function validator(
   node: HTMLInputElement,
@@ -142,7 +182,7 @@ function validator(
     fieldName,
     regExp,
   }: {
-    validateFunctions: [(...args: unknown[]) => unknown];
+    validateFunctions: ValidateFn[];
     fieldName: string;
     regExp?: RegExp;
   },
@@ -178,22 +218,16 @@ function validator(
     if (inputId) {
       setFieldError(inputId, message);
     }
-
-    // Fallback: update legacy <small> element if present (backward compatibility)
-    const errorEl =
-      node.type === 'checkbox'
-        ? node.nextElementSibling?.nextElementSibling
-        : node.nextElementSibling;
-
-    if (errorEl && errorEl.tagName === 'SMALL') {
-      errorEl.textContent = message;
-    }
   }
 
   function validate(isTyping: boolean = false) {
+    // Sanitize text input before validation (C3: XSS defense-in-depth)
+    const rawValue = node.type === 'checkbox' ? node.checked : node.value;
+    const sanitizedValue = typeof rawValue === 'string' ? sanitizeInput(rawValue) : rawValue;
+
     let message = '';
     for (const fn of validateFunctions) {
-      message = fn(node.type === 'checkbox' ? node.checked : node.value, fieldName, regExp);
+      message = fn(sanitizedValue, fieldName, regExp);
       if (message) break;
     }
 
@@ -201,7 +235,7 @@ function validator(
       eventBus.emit(`${EVENT_CONTEXT}emailUpdated`, node.value);
     }
 
-    if (dirtyKeys.includes(fieldName)) {
+    if (DIRTY_KEYS.includes(fieldName as (typeof DIRTY_KEYS)[number])) {
       if (FORM_CONFIG.myLast && !FORM_CONFIG.dirty) {
         FORM_CONFIG.dirty = Object.keys(FORM_CONFIG.myLast).some((_) => {
           return FORM_CONFIG.myLast[_] !== DEFAULT_VALUES[_];
@@ -229,7 +263,7 @@ function validator(
 
   function handleInput() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => validate(true), 150);
+    debounceTimer = setTimeout(() => validate(true), DEBOUNCE_DELAY);
   }
 
   node.addEventListener('blur', handleBlur);
@@ -255,8 +289,8 @@ function validator(
 
 export {
   validator,
-  emailRegExp,
-  stringRegExp,
+  EMAIL_REGEXP,
+  STRING_REGEXP,
   validateDate,
   validateTrue,
   validateEmail,
@@ -269,5 +303,6 @@ export {
   eighteenYearsAgo,
   validateDateMajor,
   validatePostalCode,
-  stringWithoutNumbersRegExp,
+  STRING_WITHOUT_NUMBERS_REGEXP,
+  sanitizeInput,
 };
