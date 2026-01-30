@@ -63,9 +63,6 @@
     }),
   );
 
-  // Legacy calculations for backward compatibility in option cards
-  const baseTotal = $derived(DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0));
-
   onMount(() => {
     if (isNaN(DEFAULT_VALUES.contributionAKlubr)) {
       DEFAULT_VALUES.contributionAKlubr = SUBSCRIPTION.allowKlubrContribution
@@ -176,10 +173,7 @@
                 <span>Vous payez</span>
                 <span
                   >{formatCurrency(
-                    DEFAULT_VALUES.montant +
-                      fees.commissionDonaction +
-                      fees.fraisStripeEstimes +
-                      (DEFAULT_VALUES.contributionAKlubr || 0),
+                    DEFAULT_VALUES.montant + fees.commissionDonaction + fees.fraisStripeEstimes,
                   )}</span
                 >
               </div>
@@ -217,7 +211,7 @@
               </div>
               <div class="don-option-card__metric">
                 <span>Vous payez</span>
-                <span>{formatCurrency(baseTotal)}</span>
+                <span>{formatCurrency(DEFAULT_VALUES.montant)}</span>
               </div>
               {#if DEFAULT_VALUES.withTaxReduction}
                 <div class="don-option-card__metric">
