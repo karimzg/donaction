@@ -117,7 +117,8 @@ export default [
     files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     languageOptions: {
       globals: {
-        ...globals.browser
+        ...globals.browser,
+        ...globals.node
       }
     },
     rules: {
