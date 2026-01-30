@@ -60,19 +60,23 @@ export class Step2Page extends BasePage {
     await this.inputFirstname.fill(d.firstName);
     await this.inputLastname.fill(d.lastName);
     await this.fillBirthdate(d.birthdate);
-    if (d.tel) {
+
+    // Phone and address are only rendered when withTaxReduction is true
+    const phoneVisible = await this.inputPhone.isVisible().catch(() => false);
+    if (d.tel && phoneVisible) {
       await this.inputPhone.fill(d.tel);
     }
-    // Trigger Google Places address selection
-    // Wait for Google Maps Autocomplete to be initialized
-    await this.page.waitForFunction(
-      () => typeof (window as any).__gmapsPlaceHandler === 'function',
-      { timeout: 5_000 },
-    );
-    await this.addressInput.click();
-    await triggerPlaceSelection(this.page);
-    // Wait for autofill section to become active (isEditable = true)
-    await this.shadow('.don-autofill-section--active').waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+
+    const addressVisible = await this.addressInput.isVisible().catch(() => false);
+    if (addressVisible) {
+      await this.page.waitForFunction(
+        () => typeof (window as any).__gmapsPlaceHandler === 'function',
+        { timeout: 5_000 },
+      );
+      await this.addressInput.click();
+      await triggerPlaceSelection(this.page);
+      await this.shadow('.don-autofill-section--active').waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+    }
   }
 
   /** Fill company donor form */

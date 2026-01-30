@@ -135,7 +135,10 @@ test.describe('Step 3 — Trade Policy Configurations', () => {
     const step3 = new Step3Page(page);
 
     // Verify fee options are visible for project donation
-    await expect(step3.feeDonorPays.or(step3.feeIncluded)).toBeVisible();
+    const hasFeeOption =
+      (await step3.feeDonorPays.isVisible().catch(() => false)) ||
+      (await step3.feeIncluded.isVisible().catch(() => false));
+    expect(hasFeeOption).toBeTruthy();
 
     // Recap amount should match
     await expect(step3.recapAmount).toContainText('100');

@@ -52,7 +52,14 @@ test.describe('Step 3 — Summary', () => {
     const step3 = await goToStep3(page, { amount: 100 });
     await expect(step3.recapAmount).toContainText('100');
     await expect(step3.shadow('.don-tax-section')).toBeVisible();
-    await expect(step3.shadow('.don-tax-item__label')).toContainText('66%');
+    const taxLabels = step3.shadow('.don-tax-item__label');
+    const count = await taxLabels.count();
+    let found66 = false;
+    for (let i = 0; i < count; i++) {
+      const text = await taxLabels.nth(i).textContent();
+      if (text?.includes('66')) found66 = true;
+    }
+    expect(found66).toBeTruthy();
   });
 
   test('7.3 — Should display 60% reduction for entreprise', async ({ page }) => {

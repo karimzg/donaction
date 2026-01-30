@@ -142,7 +142,7 @@ export class ApiMocker {
       },
     };
 
-    await this.page.route('**/api/klub-dons', async (route: Route) => {
+    await this.page.route('**/api/klub-dons/', async (route: Route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 201,
@@ -204,7 +204,7 @@ export class ApiMocker {
       },
     };
 
-    await this.page.route('**/api/klubr-donateurs', async (route: Route) => {
+    await this.page.route('**/api/klubr-donateurs/', async (route: Route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 201,

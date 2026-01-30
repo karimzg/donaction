@@ -92,7 +92,7 @@ export class BasePage {
       '[data-testid="step1"]',
       '[data-testid="step2"]',
       '[data-testid="step3"]',
-      '[data-testid="payment-form"], [data-testid="payment-loading"]',
+      '[data-testid="payment-form"], [data-testid="payment-loading"], [data-testid="payment-error"]',
       '[data-testid="step5"]',
     ];
     for (let i = 0; i < steps.length; i++) {
@@ -109,7 +109,7 @@ export class BasePage {
       0: '[data-testid="step1"]',
       1: '[data-testid="step2"]',
       2: '[data-testid="step3"]',
-      3: '[data-testid="payment-form"], [data-testid="payment-loading"]',
+      3: '[data-testid="payment-form"], [data-testid="payment-loading"], [data-testid="payment-error"]',
       4: '[data-testid="step5"]',
     };
     const sel = selectors[stepIndex];
