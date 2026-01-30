@@ -136,7 +136,7 @@
 
     <!-- Fee choice section -->
     {#if showFeeChoice}
-      <section class="don-section">
+      <section class="don-section" data-testid="fee-choice-section">
         <h2 class="don-section__title">
           <span class="don-section__icon">💡</span>
           Comment maximiser votre impact ?
@@ -159,7 +159,9 @@
             {#if DEFAULT_VALUES.donorPaysFee === true}
               <div class="don-option-card__check">✓</div>
             {/if}
-            <div class="don-option-card__badge">✨ Recommandé</div>
+            <div class="don-option-card__badge" data-testid="fee-badge-recommended">
+              ✨ Recommandé
+            </div>
             <h3 class="don-option-card__title">Je couvre les frais</h3>
             <p class="don-option-card__desc">
               L'association reçoit <strong>100%</strong> de votre don
@@ -227,6 +229,7 @@
         <button
           type="button"
           class="don-details-toggle"
+          data-testid="fee-details-toggle"
           onclick={() => (showFeeDetails = !showFeeDetails)}
         >
           <span>{showFeeDetails ? '−' : '+'}</span>
@@ -234,7 +237,7 @@
         </button>
 
         {#if showFeeDetails}
-          <div class="don-fee-details">
+          <div class="don-fee-details" data-testid="fee-details-panel">
             <p class="don-fee-details__title">
               Détail des frais ({formatCurrency(fees.applicationFee)}) :
             </p>
@@ -275,7 +278,7 @@
 
           <!-- Fees (if donor pays) -->
           {#if isStripeConnect && DEFAULT_VALUES.donorPaysFee}
-            <div class="don-summary-line don-summary-line--fees">
+            <div class="don-summary-line don-summary-line--fees" data-testid="recap-fees-line">
               <div class="don-summary-line__left">
                 <span class="don-summary-line__icon">💳</span>
                 <span>Frais de traitement</span>
@@ -324,12 +327,16 @@
         </div>
 
         <!-- Impact card -->
-        <div class="don-impact-card">
+        <div class="don-impact-card" data-testid="impact-card">
           <div class="don-impact-card__icon">🏆</div>
           <div class="don-impact-card__label">L'association recevra</div>
-          <div class="don-impact-card__value">{formatCurrency(fees.netAssociation)}</div>
+          <div class="don-impact-card__value" data-testid="impact-card-value">
+            {formatCurrency(fees.netAssociation)}
+          </div>
           {#if DEFAULT_VALUES.donorPaysFee}
-            <div class="don-impact-card__badge">100% de votre don !</div>
+            <div class="don-impact-card__badge" data-testid="impact-card-badge-100">
+              100% de votre don !
+            </div>
           {/if}
         </div>
       </div>
@@ -457,7 +464,7 @@
           }}
         />
         <label>
-          J'accepte <b class="cursor-pointer" onclick={() => isCguShown.set(true)}
+          J'accepte <b class="don-cgu-link cursor-pointer" onclick={() => isCguShown.set(true)}
             >les Conditions Générales d'Utilisation.</b
           > *
         </label>

@@ -131,3 +131,49 @@ jobs:
         env:
           # Dummy values for build-time validation (not used at runtime)
           NEXT_PUBLIC_STRAPI_API_TOKEN: ${{ matrix.app == 'frontend' && 'build-placeholder' || '' }}
+
+  e2e-saas:
+    name: E2E Tests - SaaS
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.saas == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: donaction-saas/package-lock.json
+
+      - name: Install dependencies
+        working-directory: donaction-saas
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: donaction-saas
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: donaction-saas
+        run: npx playwright test --project=chromium
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: saas-playwright-report
+          path: donaction-saas/playwright-report
+          retention-days: 7
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: saas-e2e-results
+          path: donaction-saas/test-results
+          retention-days: 7

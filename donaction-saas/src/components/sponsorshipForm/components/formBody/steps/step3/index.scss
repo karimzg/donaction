@@ -86,24 +86,21 @@
   font-weight: var(--don-font-weight-medium);
 }
 
-// Section
+// Section — flat style, title-driven hierarchy (aligned with step 2)
 .don-section {
-  background-color: var(--don-color-bg-card);
-  border-radius: var(--don-radius-3xl);
-  padding: var(--don-spacing-3xl);
-  box-shadow: var(--don-shadow-card);
-
-  @media screen and (max-width: 768px) {
-    padding: var(--don-spacing-xl);
-    border-radius: var(--don-radius-2xl);
-  }
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .don-section__title {
   font-size: var(--don-font-size-lg);
   font-weight: var(--don-font-weight-semibold);
   color: var(--don-color-text-primary);
-  margin: 0 0 var(--don-spacing-2xl) 0;
+  margin: 0 0 var(--don-spacing-xl) 0;
+  padding-bottom: var(--don-spacing-md);
+  border-bottom: 1px solid var(--don-color-border);
   display: flex;
   align-items: center;
   gap: var(--don-spacing-md);
@@ -637,4 +634,8 @@
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.don-cgu-link {
+  font-size: 14px;
 }
