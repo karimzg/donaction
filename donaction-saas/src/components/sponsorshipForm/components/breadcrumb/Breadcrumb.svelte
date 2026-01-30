@@ -1,7 +1,15 @@
 <script lang="ts">
-  import { SUBSCRIPTION, goToStep } from '../../logic/useSponsorshipForm.svelte';
+  import {
+    SUBSCRIPTION,
+    goToStep,
+    isBeingFilled as isBeingFilledStore,
+  } from '../../logic/useSponsorshipForm.svelte';
 
   let { index, isBeingFilled }: { index: number; isBeingFilled: boolean } = $props();
+
+  function closeForm() {
+    isBeingFilledStore.set(false);
+  }
 
   // Steps for progress indicator (excluding thank you page from dots)
   const steps = ['Don', 'Infos', 'Récap', 'Paiement'];
@@ -49,6 +57,33 @@
       </button>
     {/each}
   </nav>
+
+  <!-- Close button (visible only when modal is open) -->
+  {#if isBeingFilled}
+    <button
+      type="button"
+      class="don-header__close"
+      aria-label="Fermer le formulaire"
+      data-testid="form-close-button"
+      onclick={closeForm}
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M12.5 3.5L3.5 12.5M3.5 3.5L12.5 12.5"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  {/if}
 </header>
 
 <style lang="scss">
@@ -58,6 +93,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
     width: 100%;
     padding: var(--don-spacing-lg) var(--don-spacing-xl);
     background-color: var(--don-color-bg-card);
@@ -123,6 +159,9 @@
     align-items: center;
     gap: var(--don-spacing-md);
     flex-shrink: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 
     @media screen and (min-width: 640px) {
       gap: var(--don-spacing-lg);
@@ -187,5 +226,38 @@
 
   .don-header__dot--completed .don-header__dot-inner {
     background-color: var(--don-brand-primary, var(--don-color-primary));
+  }
+
+  .don-header__close {
+    all: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: var(--don-color-text-secondary, #6b7280);
+    background-color: var(--don-color-bg-subtle, rgba(0, 0, 0, 0.06));
+    transition:
+      background-color var(--don-transition-fast, 0.15s ease),
+      color var(--don-transition-fast, 0.15s ease),
+      transform var(--don-transition-fast, 0.15s ease);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+      color: var(--don-color-text-primary, #111827);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      background-color: rgba(0, 0, 0, 0.14);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--don-brand-primary, var(--don-color-primary));
+      outline-offset: 2px;
+    }
   }
 </style>

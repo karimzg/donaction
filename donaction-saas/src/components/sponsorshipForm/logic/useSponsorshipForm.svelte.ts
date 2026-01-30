@@ -147,7 +147,8 @@ isBeingFilled.subscribe((val) => {
       category: 'donation',
       label: `${val ? 'Opening' : 'Closing'} form, step: ${get(index) + 1}`,
     });
-    document.body.style.overflow = val ? 'hidden' : 'auto';
+    document.body.style.overflow = val ? 'hidden' : '';
+    document.documentElement.style.overflow = val ? 'hidden' : '';
   } else {
     mounted = true;
   }

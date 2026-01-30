@@ -8,7 +8,6 @@
   import { onDestroy } from 'svelte';
   import FormBanners from './components/formBanner/FormBanners.svelte';
   import Breadcrumb from './components/breadcrumb/Breadcrumb.svelte';
-  import x from '../../assets/icons/x.svg';
   import FormBody from './components/formBody/FormBody.svelte';
   import FormNavigation from './components/formNavigation/FormNavigation.svelte';
   import {
@@ -95,7 +94,8 @@
 
   onDestroy(() => {
     console.log('HERE: ON DESTROY');
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
     Object.keys(DEFAULT_VALUES).forEach((_) => {
       DEFAULT_VALUES[_] = defVals[_];
     });
@@ -140,7 +140,6 @@
     >
       {#if !$isCguShown}
         <Breadcrumb index={$index} isBeingFilled={$isBeingFilled} />
-        <img src={x} class="formX" onclick={() => isBeingFilled.set(false)} />
       {/if}
 
       {#if !!$$slots['c-g-u']}
