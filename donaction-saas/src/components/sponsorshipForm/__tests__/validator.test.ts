@@ -7,6 +7,8 @@ import {
   validateDate,
   validateString,
   validateEmail,
+  validatePhone,
+  formatPhone,
   validatePostalCode,
   validateRequired,
   eighteenYearsAgo,
@@ -550,6 +552,112 @@ describe('validator suite tests', () => {
       const result = validateDateMajor(dateString);
       // Should return empty string (valid) or be at boundary
       expect(['', 'Vous devez être majeur(e)', 'Date non valide']).toContain(result);
+    });
+  });
+
+  // ============================================================================
+  // validatePhone(value: string)
+  // ============================================================================
+  describe('validatePhone', () => {
+    it('should return empty string for empty value (optional field)', () => {
+      expect(validatePhone('')).toBe('');
+    });
+
+    it('should return empty string for whitespace only (optional field)', () => {
+      expect(validatePhone('   ')).toBe('');
+    });
+
+    it('should return empty string for valid metropolitan number', () => {
+      expect(validatePhone('0612345678')).toBe('');
+    });
+
+    it('should return empty string for valid +33 international format', () => {
+      expect(validatePhone('+33612345678')).toBe('');
+    });
+
+    it('should return empty string for valid 0033 prefix format', () => {
+      expect(validatePhone('0033612345678')).toBe('');
+    });
+
+    it('should return empty string for number with spaces', () => {
+      expect(validatePhone('06 12 34 56 78')).toBe('');
+    });
+
+    it('should return empty string for number with dots', () => {
+      expect(validatePhone('06.12.34.56.78')).toBe('');
+    });
+
+    it('should return empty string for number with dashes', () => {
+      expect(validatePhone('06-12-34-56-78')).toBe('');
+    });
+
+    it('should return empty string for Guadeloupe number', () => {
+      expect(validatePhone('+590690123456')).toBe('');
+    });
+
+    it('should return empty string for Martinique number', () => {
+      expect(validatePhone('+596696123456')).toBe('');
+    });
+
+    it('should return empty string for Réunion number', () => {
+      expect(validatePhone('+262692123456')).toBe('');
+    });
+
+    it('should return empty string for Guyane number', () => {
+      expect(validatePhone('+594694123456')).toBe('');
+    });
+
+    it('should return error for too short number', () => {
+      expect(validatePhone('123')).toBe('Numéro de téléphone non valide');
+    });
+
+    it('should return error for letters', () => {
+      expect(validatePhone('abcdefghij')).toBe('Numéro de téléphone non valide');
+    });
+
+    it('should return error for UK number (not FR)', () => {
+      expect(validatePhone('+44612345678')).toBe('Numéro de téléphone non valide');
+    });
+
+    it('should return error for invalid 00 prefix', () => {
+      expect(validatePhone('0012345678')).toBe('Numéro de téléphone non valide');
+    });
+  });
+
+  // ============================================================================
+  // formatPhone(value: string)
+  // ============================================================================
+  describe('formatPhone', () => {
+    it('should format metropolitan number with spaces', () => {
+      expect(formatPhone('0612345678')).toBe('06 12 34 56 78');
+    });
+
+    it('should format +33 international number', () => {
+      expect(formatPhone('+33612345678')).toBe('+33 6 12 34 56 78');
+    });
+
+    it('should handle partial metropolitan number', () => {
+      expect(formatPhone('06123')).toBe('06 12 3');
+    });
+
+    it('should return empty string for empty input', () => {
+      expect(formatPhone('')).toBe('');
+    });
+
+    it('should handle already partially formatted input', () => {
+      expect(formatPhone('06 12')).toBe('06 12');
+    });
+
+    it('should not format DOM-TOM international numbers', () => {
+      expect(formatPhone('+590690123456')).toBe('+590690123456');
+    });
+
+    it('should not format 00 prefix numbers', () => {
+      expect(formatPhone('0033612345678')).toBe('0033612345678');
+    });
+
+    it('should strip non-digit characters except +', () => {
+      expect(formatPhone('06.12.34.56.78')).toBe('06 12 34 56 78');
     });
   });
 

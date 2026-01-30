@@ -20,6 +20,9 @@ const postalCodeRegExp = /^(([0-8][0-9])|(9[0-5]))[0-9]{3}$/;
 
 const sirenRegExp = /^\d{9}$/;
 
+const phoneRegExp =
+  /^(?:(?:\+|00)33[1-9]\d{8}|0[1-9]\d{8}|(?:\+|00)(?:590|596|594|262|269)\d{9}|(?:\+|00)(?:687|689|681|508)\d{6})$/;
+
 const validateAmount = (value: number, fieldName: string) => {
   if (value === 0 || isNaN(value)) return 'Ce champ est obligatoire';
   if (isNaN(value) || String(value).includes('e')) return `${fieldName} non valide`;
@@ -71,6 +74,32 @@ function validateString(value: string, fieldName: string, regExp: RegExp) {
 function validateEmail(value: string) {
   if (!emailRegExp?.test(value.trim())) return `E-mail non valide`;
   return '';
+}
+
+function validatePhone(value: string) {
+  if (!value || value.trim().length === 0) return '';
+  const cleaned = value.replace(/[\s.\-()]/g, '');
+  if (!phoneRegExp.test(cleaned)) return 'Numéro de téléphone non valide';
+  return '';
+}
+
+function formatPhone(value: string): string {
+  const digits = value.replace(/[^\d+]/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('+33') && digits.length > 3) {
+    const rest = digits.slice(3);
+    const first = rest.slice(0, 1);
+    const remaining = rest.slice(1).match(/.{1,2}/g) || [];
+    return ('+33 ' + first + (remaining.length ? ' ' + remaining.join(' ') : '')).trim();
+  }
+  if (digits.startsWith('+') || digits.startsWith('00')) {
+    return digits;
+  }
+  if (digits.startsWith('0') && digits.length > 1) {
+    const parts = digits.match(/.{1,2}/g) || [];
+    return parts.join(' ');
+  }
+  return value;
 }
 
 function validatePostalCode(value: string) {
@@ -231,6 +260,8 @@ export {
   validateDate,
   validateTrue,
   validateEmail,
+  validatePhone,
+  formatPhone,
   validateSiren,
   validateString,
   validateAmount,

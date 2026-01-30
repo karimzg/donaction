@@ -7,6 +7,8 @@
     validateDate,
     validateDateMajor,
     validatePostalCode,
+    validatePhone,
+    formatPhone,
     eighteenYearsAgo,
   } from '../../../../logic/validator';
   import {
@@ -209,8 +211,16 @@
             id="phoneNumber"
             type="tel"
             class="don-form-input"
-            placeholder="+330700000000"
+            placeholder="06 12 34 56 78"
+            maxlength={18}
             bind:value={DEFAULT_VALUES.tel}
+            use:validator={{
+              validateFunctions: [validatePhone],
+              fieldName: 'Numéro de téléphone',
+            }}
+            oninput={(e) => {
+              DEFAULT_VALUES.tel = formatPhone(e.currentTarget.value);
+            }}
           />
           <FormError inputId="phoneNumber" />
         </div>
