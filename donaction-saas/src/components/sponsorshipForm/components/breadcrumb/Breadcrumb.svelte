@@ -88,9 +88,9 @@
   }
 
   .don-header__logo-img {
-    height: 24px;
+    height: 48px;
     width: auto;
-    max-width: 80px;
+    max-width: 160px;
     object-fit: contain;
 
     @media screen and (min-width: 640px) {
