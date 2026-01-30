@@ -18,6 +18,20 @@ export class Step3Page extends BasePage {
   readonly btnRejectContribution: Locator;
   readonly btnValidateContribution: Locator;
 
+  // Fee choice section
+  readonly feeChoiceSection: Locator;
+  readonly feeBadgeRecommended: Locator;
+  readonly feeDetailsToggle: Locator;
+  readonly feeDetailsPanel: Locator;
+
+  // Impact card
+  readonly impactCard: Locator;
+  readonly impactCardValue: Locator;
+  readonly impactCardBadge100: Locator;
+
+  // Recap fees line
+  readonly recapFeesLine: Locator;
+
   constructor(page: Page) {
     super(page);
     this.recapAmount = this.shadow('[data-testid="recap-amount"]');
@@ -35,6 +49,20 @@ export class Step3Page extends BasePage {
     this.contributionValue = this.shadow('[data-testid="contribution-value"]');
     this.btnRejectContribution = this.shadow('[data-testid="btn-reject-contribution"]');
     this.btnValidateContribution = this.shadow('[data-testid="btn-validate-contribution"]');
+
+    // Fee choice section
+    this.feeChoiceSection = this.shadow('[data-testid="fee-choice-section"]');
+    this.feeBadgeRecommended = this.shadow('[data-testid="fee-badge-recommended"]');
+    this.feeDetailsToggle = this.shadow('[data-testid="fee-details-toggle"]');
+    this.feeDetailsPanel = this.shadow('[data-testid="fee-details-panel"]');
+
+    // Impact card
+    this.impactCard = this.shadow('[data-testid="impact-card"]');
+    this.impactCardValue = this.shadow('[data-testid="impact-card-value"]');
+    this.impactCardBadge100 = this.shadow('[data-testid="impact-card-badge-100"]');
+
+    // Recap fees line
+    this.recapFeesLine = this.shadow('[data-testid="recap-fees-line"]');
   }
 
   /** Accept CGU + conditions to proceed */
@@ -84,6 +112,28 @@ export class Step3Page extends BasePage {
   /** Get displayed donation amount text */
   async getDonationAmount(): Promise<string> {
     return (await this.recapAmount.textContent()) ?? '';
+  }
+
+  /** Get impact card value text */
+  async getImpactCardValue(): Promise<string> {
+    return (await this.impactCardValue.textContent()) ?? '';
+  }
+
+  /** Toggle fee details panel open/close */
+  async toggleFeeDetails() {
+    await this.feeDetailsToggle.click();
+  }
+
+  /** Get all metric values from a fee option card */
+  async getCardMetrics(card: Locator): Promise<string[]> {
+    const metrics = card.locator('.don-option-card__metric');
+    const count = await metrics.count();
+    const values: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const text = await metrics.nth(i).textContent();
+      if (text) values.push(text.trim());
+    }
+    return values;
   }
 
   /** Uncheck display name */
