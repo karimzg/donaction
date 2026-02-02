@@ -7,7 +7,6 @@
   import arrowCircleLeft from '../../../../assets/icons/arrowCircleLeft.svg';
   import smiley from '../../../../assets/animations/Smiles.json';
   import LottieAnimation from '../../../../utils/lottie/LottieAnimation.svelte';
-  import VideoPlayer from '../videoPlayer/VideoPlayer.svelte';
   import alertIcon from '../../../../assets/icons/alertIcon.svg';
   import Tooltip from '../../../../utils/tooltip/Tooltip.svelte';
   import { calculateTaxReduction } from '../../logic/utils';
@@ -92,20 +91,6 @@
     DEFAULT_VALUES.contributionAKlubr = initialValue;
     isContributionShown.set(false);
   };
-
-  // const calculateTaxReduction = () => {
-  //   const TAUX_DEDUCTION_FISCALE_PART = 0.66;
-  //   const TAUX_DEDUCTION_FISCALE_PRO = 0.6;
-  //   const montant = Number(DEFAULT_VALUES.contributionAKlubr);
-  //   if (isNaN(montant) || montant < +0) return '0';
-  //   return (
-  //     montant -
-  //     montant *
-  //       (DEFAULT_VALUES.estOrganisme ? TAUX_DEDUCTION_FISCALE_PRO : TAUX_DEDUCTION_FISCALE_PART)
-  //   )
-  //     .toFixed(2)
-  //     .replace(/\.00$/, '');
-  // };
 </script>
 
 <div class="contributionToKlubr" data-testid="contribution-modal">
@@ -117,20 +102,11 @@
     <img alt="back to recap" src={arrowCircleLeft} />
     <p class="font-semibold">Modifier le soutien</p>
   </div>
-  <!--{#if rejectedContribution || DEFAULT_VALUES.contributionAKlubr === 0}-->
-  <!--  <div class="videoPlayerContainer">-->
-  <!--    <VideoPlayer-->
-  <!--      src="https://ik.imagekit.io/donaction/Klubs/klubr/House/klubr_house_d2307f7ea5_c8xlQ7qIN.mp4"-->
-  <!--    />-->
-  <!--  </div>-->
-  <!--{/if}-->
-  <!--{#if !rejectedContribution && DEFAULT_VALUES.contributionAKlubr > 0}-->
   <p class="messageHint font-semibold">
     Votre soutien permet de financer Klubr, une plateforme qui offre gratuitement ses technologies
     et services aux clubs et associations. Chaque contribution compte pour soutenir le sport et ceux
     qui le font vivre. Merci pour votre engagement !
   </p>
-  <!--{/if}-->
   <div class="smiley">
     <LottieAnimation
       animation={smiley}

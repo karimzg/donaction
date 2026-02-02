@@ -9,12 +9,12 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['list'], ['junit', { outputFile: 'test-results/junit.xml' }]]
     : 'html',
-  timeout: 30_000,
+  timeout: 20_000,
   expect: {
     timeout: 5_000,
   },
   use: {
-    baseURL: 'http://localhost:3101',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:3101',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -34,7 +34,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev:serve',
-    url: 'http://localhost:3101',
+    url: process.env.E2E_BASE_URL || 'http://localhost:3101',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },
