@@ -1,13 +1,16 @@
 import { Fetch } from '../../../utils/fetch';
 import { FORM_CONFIG, SUBSCRIPTION } from './useSponsorshipForm.svelte';
 
+/** Script patterns to detect the component entry point */
+const SCRIPT_PATTERNS = [
+  '/KlubrSponsorshipForm.es.js', // Production (pre-built)
+  '/src/main.ts', // E2E/Dev mode (Vite transforms source)
+  '/donaction-web-components/components/KlubrSponsorshipForm.es.js', // External integration
+];
+
 export async function initComponent(klubrUuid?: string, projectUuid?: string) {
-  const script = Array.from(document.querySelectorAll('script')).find((script) =>
-    script.src.includes(
-      // TODO: @Med make this conditional
-      '/KlubrSponsorshipForm.es.js', // For local tests
-      // '/donaction-web-components/components/KlubrSponsorshipForm.es.js' // For integration with other sites
-    ),
+  const script = Array.from(document.querySelectorAll('script')).find((s) =>
+    SCRIPT_PATTERNS.some((pattern) => s.src.includes(pattern)),
   );
 
   const url = new URL(script?.src || '');

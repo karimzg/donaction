@@ -7,6 +7,7 @@
     "dev:build": "vite build --config vite.config.development.ts",
     "dev:watch": "vite build --config vite.config.development.ts --watch",
     "dev:serve": "vite --port 3101",
+    "dev:e2e": "vite --config vite.config.e2e.ts --port 3101",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage2": "vitest run --coverage --coverage-provider=v8",
