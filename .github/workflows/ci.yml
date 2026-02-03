@@ -159,7 +159,8 @@ jobs:
       - name: Run E2E tests
         working-directory: donaction-saas
         # TODO: Re-enable step4 and smoke tests when Stripe payment is implemented
-        run: npx playwright test --project=chromium --ignore-snapshots --ignore="**/step4/**" --ignore="**/smoke/**"
+        # Use --grep-invert to exclude step4 and smoke tests (Playwright doesn't have --ignore flag)
+        run: npx playwright test --project=chromium --grep-invert="Step 4|Smoke"
         env:
           CI: true
           # Stripe test key (safe to expose - pk_test keys are public)
