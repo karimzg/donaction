@@ -45,6 +45,11 @@ export const checkKlubDonPayment = (clientSecret: string) =>
 type IReCaptchaFormAction = 'UPDATE_DONATION' | 'CREATE_DONATION' | 'CREATE_DONATION_PAYMENT';
 export const createReCaptchaToken = (action: IReCaptchaFormAction): Promise<string> => {
   return new Promise((resolve, reject) => {
+    // M3: Check grecaptcha exists (may be blocked by ad blockers)
+    if (typeof grecaptcha === 'undefined' || !grecaptcha?.enterprise) {
+      reject(new Error('reCAPTCHA is not available. Please disable ad blockers and reload.'));
+      return;
+    }
     try {
       grecaptcha.enterprise.ready(async () => {
         const formToken = await grecaptcha.enterprise.execute(

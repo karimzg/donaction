@@ -160,7 +160,11 @@ const DIRTY_KEYS = [
   'Code postal',
 ] as const;
 
-/** Type for validation functions used by the validator action. */
+/**
+ * Type for validation functions used by the validator action.
+ * NOTE (C3): fieldName is always a hardcoded string constant from developers,
+ * never from user input, so it's safe to interpolate in error messages.
+ */
 type ValidateFn = (value: string | boolean | number, fieldName: string, regExp?: RegExp) => string;
 
 /**
@@ -169,10 +173,12 @@ type ValidateFn = (value: string | boolean | number, fieldName: string, regExp?:
  */
 function sanitizeInput(value: string): string {
   return value
+    .replace(/&/g, '&amp;') // Must be first to avoid double-encoding
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/'/g, '&#x27;')
+    .replace(/`/g, '&#x60;'); // Prevent template literal injection
 }
 
 function validator(
@@ -255,6 +261,8 @@ function validator(
   }
 
   function handleBlur() {
+    // Clear any pending debounced validation to prevent race condition (M2)
+    clearTimeout(debounceTimer);
     markTouched();
     validate();
   }
