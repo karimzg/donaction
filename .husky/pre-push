@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Run vitest unit tests only if donaction-saas files were modified
+SAAS_CHANGED=$(git diff --name-only HEAD @{u} 2>/dev/null | grep -c '^donaction-saas/' || true)
+
+if [ "$SAAS_CHANGED" -gt 0 ]; then
+  echo "donaction-saas changes detected - running unit tests..."
+  cd donaction-saas && npx vitest run
+fi

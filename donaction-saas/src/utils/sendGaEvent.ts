@@ -24,9 +24,9 @@ export const sendGaEvent = (data: {
         project_slug: SUBSCRIPTION.project?.slug,
         // project_uuid: SUBSCRIPTION.project?.uuid,
         revenue: data?.revenue,
-        from_sponsorship_form: true
+        from_sponsorship_form: true,
         // page_path: window.location.href
-      }
+      },
     });
   }
 };

@@ -4,7 +4,7 @@
     checkKlubDonPayment,
     createKlubDonPayment,
     createPaymentIntent,
-    createReCaptchaToken
+    createReCaptchaToken,
   } from '../../../../logic/api';
   import { getStripe } from '../../../../logic/stripe';
   import type { Stripe, StripeElements } from '@stripe/stripe-js';
@@ -13,7 +13,7 @@
     index,
     isLoading,
     FORM_CONFIG,
-    SUBSCRIPTION
+    SUBSCRIPTION,
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { updateKlubrDonStatus } from '../../../../logic/submit';
   import { dispatchToast } from '../../../../logic/toaster';
@@ -40,7 +40,7 @@
     try {
       sendGaEvent({
         category: 'donation',
-        label: `Create payment intent for don: ${FORM_CONFIG.donUuid} price: ${DEFAULT_VALUES.montant})`
+        label: `Create payment intent for don: ${FORM_CONFIG.donUuid} price: ${DEFAULT_VALUES.montant})`,
       });
 
       // Generate idempotency key for this payment session
@@ -55,7 +55,8 @@
           ? calculateFeeAmount(DEFAULT_VALUES.montant, commissionPercentage)
           : 0;
 
-      const totalAmount = DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0) + feeAmount;
+      const totalAmount =
+        DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0) + feeAmount;
       // Only send donorPaysFee for Stripe Connect mode (guard condition per US-FORM-003)
       const donorPaysFeeParam = isStripeConnect ? DEFAULT_VALUES.donorPaysFee : undefined;
       const response = await createPaymentIntent(totalAmount, idempotencyKey, donorPaysFeeParam);
@@ -69,15 +70,15 @@
       stripe = await getStripe();
 
       const appearance = {
-        theme: 'stripe'
+        theme: 'stripe',
       };
       elements = stripe.elements({
         appearance,
-        clientSecret
+        clientSecret,
       });
 
       const paymentElementOptions = {
-        layout: 'tabs'
+        layout: 'tabs',
       };
 
       const paymentElement = elements.create('payment', paymentElementOptions);
@@ -89,7 +90,7 @@
     } catch (e: any) {
       sendGaEvent({
         category: 'donation_error',
-        label: `Create payment intent (prices: ${DEFAULT_VALUES.montant})`
+        label: `Create payment intent (prices: ${DEFAULT_VALUES.montant})`,
       });
       console.error('Erreur création payment intent:', e);
 
@@ -97,7 +98,7 @@
       const errorMessage =
         e?.error?.message ||
         e?.message ||
-        'Une erreur est survenue lors de l\'initialisation du paiement';
+        "Une erreur est survenue lors de l'initialisation du paiement";
 
       stripeErrorMessage = errorMessage;
       stripeLoading = 'error';
@@ -118,7 +119,7 @@
       const result = await stripe.confirmPayment({
         elements,
         confirmParams: {},
-        redirect: 'if_required'
+        redirect: 'if_required',
       });
       const error = result?.error;
       if (error) {
@@ -129,7 +130,7 @@
         }
         sendGaEvent({
           category: 'donation',
-          label: `Create klub don payment for don: ${FORM_CONFIG.donUuid}, price: ${DEFAULT_VALUES.montant} ==> ERROR`
+          label: `Create klub don payment for don: ${FORM_CONFIG.donUuid}, price: ${DEFAULT_VALUES.montant} ==> ERROR`,
         });
       } else {
         if (result.paymentIntent?.client_secret) {
@@ -139,14 +140,14 @@
               try {
                 sendGaEvent({
                   category: 'donation',
-                  label: `Create klub don payment for don: ${FORM_CONFIG.donUuid}, price: ${DEFAULT_VALUES.montant} ==> SUCCESS`
+                  label: `Create klub don payment for don: ${FORM_CONFIG.donUuid}, price: ${DEFAULT_VALUES.montant} ==> SUCCESS`,
                 });
                 sendGaEvent({
                   category: 'donation',
                   revenue: {
                     currency: 'EUR',
-                    amount: DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0)
-                  }
+                    amount: DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0),
+                  },
                 });
                 switch (paymentIntent?.status) {
                   case 'succeeded':
@@ -188,11 +189,11 @@
 </script>
 
 {#if stripeLoading === 'loading'}
-  <div class="animation">
+  <div class="animation" data-testid="payment-loading">
     <LottieAnimation animation={loader} />
   </div>
 {:else if stripeLoading === 'error'}
-  <div class="animation">
+  <div class="animation" data-testid="payment-error">
     <LottieAnimation animation={error} />
     {#if stripeErrorMessage}
       <p class="error-message">{stripeErrorMessage}</p>
@@ -202,6 +203,7 @@
   <form
     class="flex flex-col items-center gap-1"
     id="klubr-sponsorship-form-payment-form"
+    data-testid="payment-form"
     {onsubmit}
   >
     <slot name="stripe-payment-form"></slot>
@@ -209,6 +211,7 @@
       id="klubr-sponsorship-form-payment-for"
       style="width: 290px;"
       disabled={$isLoading}
+      data-testid="btn-pay"
       class={`primary-btn ${$isLoading && 'disabled'} desktop`}
     >
       <span id="button-text">Valider</span>

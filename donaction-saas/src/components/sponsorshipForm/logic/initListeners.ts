@@ -6,7 +6,7 @@ import {
   FORM_CONFIG,
   index,
   isBeingFilled,
-  SUBSCRIPTION
+  SUBSCRIPTION,
 } from './useSponsorshipForm.svelte';
 import { sendGaEvent } from '../../../utils/sendGaEvent';
 import { get } from 'svelte/store';
@@ -28,7 +28,7 @@ export default function initListeners() {
   eventBus.on(`${EVENT_CONTEXT}populateForm`, (data: typeof DEFAULT_VALUES_TYPE) => {
     sendGaEvent({
       category: 'donation',
-      label: `Populate data from parent event`
+      label: `Populate data from parent event`,
     });
     Object.keys(data).forEach((_) => {
       DEFAULT_VALUES[_] = data[_];
@@ -37,7 +37,7 @@ export default function initListeners() {
   eventBus.on(`${EVENT_CONTEXT}myLast`, (data: Array<any>) => {
     sendGaEvent({
       category: 'donation',
-      label: `Populate data from parent event myLast`
+      label: `Populate data from parent event myLast`,
     });
     FORM_CONFIG.myLasts = data;
     populateForm();
@@ -51,7 +51,7 @@ export default function initListeners() {
     (data: { donatorUuid: string | null; projectUuid: string | null; donUuid: string | null }) => {
       sendGaEvent({
         category: 'donation',
-        label: `Editing existing donation (uuid: ${data.donUuid})`
+        label: `Editing existing donation (uuid: ${data.donUuid})`,
       });
       FORM_CONFIG.donatorUuid = data.donatorUuid;
       FORM_CONFIG.donUuid = data.donUuid;
@@ -61,18 +61,18 @@ export default function initListeners() {
           uuid: SUBSCRIPTION.klubr.uuid,
           couverture: {
             alternativeText: SUBSCRIPTION.klubr?.logo?.alternativeText,
-            url: SUBSCRIPTION.klubr?.logo?.url
+            url: SUBSCRIPTION.klubr?.logo?.url,
           },
           titre: 'Fonctionnement général du klub ',
-          fit: 'object-fit: contain;'
+          fit: 'object-fit: contain;',
         };
       }
-    }
+    },
   );
   eventBus.on(`${EVENT_CONTEXT}controlForm`, (data: boolean) => {
     sendGaEvent({
       category: 'donation',
-      label: `Control form from parent (state: ${data ? 'open' : 'close'})`
+      label: `Control form from parent (state: ${data ? 'open' : 'close'})`,
     });
     isBeingFilled.set(data);
   });

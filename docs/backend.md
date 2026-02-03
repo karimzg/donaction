@@ -1,3 +1,208 @@
+### Backend API - Donaction
+
+> **Version**: 2.0.0 | **Last Updated**: 2025-12-18
+
+#### Context
+Strapi 5 headless CMS providing REST API for all frontend applications. Handles clubs, donations, members, projects, invoices, and integrations with Stripe, ImageKit, and Brevo.
+
+#### Stack
+- **Framework**: Strapi 5
+- **Language**: TypeScript 5
+- **Database**: PostgreSQL (prod), SQLite (dev)
+- **Payments**: Stripe 17
+- **Media**: ImageKit
+- **Email**: Brevo (Sendinblue)
+
+#### Commands
+| Command | Description |
+|---------|-------------|
+| `npm run develop` | Dev server on port 1437 |
+| `npm run build` | Production build |
+| `npm run gen:types` | Generate TypeScript types |
+| `npm run export-db` | Export database |
+| `npm run import-db` | Import database |
+
+#### Folder Structure
+```
+src/
+├── api/                    # Content-type modules
+│   └── {entity}/
+│       ├── content-types/{entity}/
+│       │   ├── schema.json     # Schema definition
+│       │   └── lifecycles.ts   # Lifecycle hooks
+│       ├── controllers/        # Request handlers
+│       ├── services/           # Business logic
+│       ├── routes/             # Route definitions
+│       └── middlewares/        # Route middlewares
+├── components/             # Reusable Strapi components
+├── helpers/                # Utilities (emails, PDF, GCC)
+├── middlewares/            # Global middlewares
+└── index.ts                # Bootstrap + global lifecycles
+```
+
+#### Rules
+
+##### Naming Conventions
+See `@docs/rules/backend/naming-conventions.md` for file, function, variable, constant, and type naming standards.
+
+##### Critical: documentId vs id
+- [CRITICAL] Use `documentId` for ALL document operations, NOT `id`
+- [CRITICAL] `documentId` is 24-char alphanumeric string
+```typescript
+// ✅ Correct
+const doc = await strapi.documents('api::klubr.klubr').findOne({ documentId });
+await strapi.documents('api::klubr.klubr').update({ documentId, data });
+
+// ❌ Wrong - will fail in Strapi 5
+const doc = await strapi.documents('api::klubr.klubr').findOne({ id });
+```
+
+##### Controllers
+- [CTRL] Use factory pattern: `factories.createCoreController()`
+- [CTRL] ALWAYS validate & sanitize in this order:
+```typescript
+async find(ctx) {
+  // 1. Validate
+  await this.validateQuery(ctx);
+  // 2. Sanitize query
+  const sanitizedQuery = await this.sanitizeQuery(ctx);
+  // 3. Process
+  const entities = await strapi.documents('api::klubr.klubr').findMany(sanitizedQuery);
+  // 4. Sanitize output
+  return this.sanitizeOutput(entities, ctx);
+}
+```
+- [CTRL] Core actions: `find`, `findOne`, `create`, `update`, `delete`
+
+##### Services
+- [SVC] Use factory pattern: `factories.createCoreService()`
+- [SVC] Pure business logic only - NO request/response handling
+- [SVC] NO auth checks in services (do in controllers/middlewares)
+- [SVC] Extract helpers outside factory at module level
+
+##### Document Service API
+- [DOC] Primary methods: `findMany()`, `findOne()`, `create()`, `update()`, `delete()`, `count()`
+- [DOC] Draft & Publish: `publish()`, `unpublish()`, `discardDraft()`
+- [DOC] Default returns draft versions in default locale
+- [DOC] Published versions are immutable
+```typescript
+// Find with filters
+const docs = await strapi.documents('api::klubr.klubr').findMany({
+  filters: { status: 'active' },
+  populate: ['logo', 'membres'],
+  sort: ['createdAt:desc'],
+  pagination: { page: 1, pageSize: 25 }
+});
+```
+
+##### Middlewares (Preferred for Business Logic)
+- [MW] Use middlewares instead of lifecycle hooks for business logic
+- [MW] Pattern: return async function with `ctx` and `next`
+```typescript
+export default (config, { strapi }) => {
+  return async (ctx, next) => {
+    // Before: permission checks
+    if (!ctx.state.user) {
+      return ctx.unauthorized('Not authenticated');
+    }
+    await next();
+    // After: response modification
+  };
+};
+```
+
+##### Lifecycle Hooks (Limited Use)
+- [LIFE] NOT recommended for business logic → use middlewares
+- [LIFE] Use ONLY for: database-level ops, users-permissions, file uploads
+- [LIFE] Warning: triggers multiple times in v5 (draft + published)
+```typescript
+// Only when necessary
+export default {
+  beforeCreate(event) {
+    event.params.data.slug = slugify(event.params.data.name);
+  }
+};
+```
+
+##### Error Handling
+- [ERR] Use Koa context methods:
+  - `ctx.badRequest(msg)` - 400 validation
+  - `ctx.unauthorized(msg)` - 401 auth
+  - `ctx.forbidden(msg)` - 403 permission
+  - `ctx.notFound(msg)` - 404 missing
+  - `ctx.internalServerError(msg)` - 500 server
+- [ERR] Always log before returning error
+- [ERR] Include descriptive messages (French)
+
+##### Security
+- [SEC] Verify `ctx.state.user` in controllers
+- [SEC] Create reusable permission middlewares
+- [SEC] Sanitize all outputs with `sanitizeOutput()`
+- [SEC] Remove internal fields: `removeId()`, `removeCodes()`
+
+##### Query Engine (Complex Queries)
+- [QE] Use `strapi.db.query()` for direct database access
+- [QE] Operators: `$eq`, `$ne`, `$gt`, `$lt`, `$in`, `$contains`, `$null`, `$and`, `$or`
+```typescript
+const results = await strapi.db.query('api::klubr.klubr').findMany({
+  where: {
+    $and: [
+      { status: 'active' },
+      { membres: { $gt: 0 } }
+    ]
+  }
+});
+```
+
+##### Typing
+- [TS] Define types in `src/_types.ts`
+- [TS] Use `Data.ContentType<'api::entity.entity'>`
+- [TS] Use `@ts-ignore` sparingly with comments
+
+#### Anti-Patterns
+| ❌ Don't | ✅ Do | Why |
+|----------|-------|-----|
+| Use `id` for documents | Use `documentId` | Strapi 5 breaking change |
+| Skip sanitization | Always sanitize query + output | Security |
+| Business logic in lifecycles | Use middlewares/services | Maintainability |
+| Auth checks in services | Check in controllers/middlewares | Separation |
+| Generic errors | Use `ctx.badRequest()` etc. | Proper HTTP codes |
+
+#### Key Files
+| Path | Purpose |
+|------|---------|
+| `config/database.ts` | Database connection |
+| `config/plugins.ts` | Plugin config (upload, email, uuid) |
+| `config/middlewares.ts` | Global middleware config |
+| `src/index.ts` | Bootstrap + global lifecycles |
+| `src/_types.ts` | Global TypeScript types |
+| `src/helpers/emails/` | Email sending utilities |
+
+#### Reference Files
+| File | When to consult |
+|------|-----------------|
+| `API_DOCS.md` | Endpoint list, middlewares, rate limits |
+| `DATABASE.md` | Entity relationships, schema, migrations |
+
+#### Critical Strapi v5 Documentation
+| File | Purpose |
+|------|---------|
+| `@docs/rules/backend/strapi-v5/strapi-v5-coding-rules.md` | Comprehensive patterns, breaking changes, best practices |
+| `@docs/rules/backend/strapi-v5/quick-reference.md` | Fast lookup for controllers, services, Document Service API, common filters |
+| `@docs/rules/backend/strapi-v5/README.md` | Overview, decision trees, version history |
+
+**⚠️ When in doubt**: Always consult Strapi v5 rules first before implementing controllers, services, or middlewares. The comprehensive rules are the source of truth for all backend patterns.
+
+#### Skills
+Detailed patterns in `@aidd/skills/backend/`:
+- `controllers.md` - Controller patterns
+- `services.md` - Service patterns
+- `custom-middleware.md` - Permission middlewares
+- `document-service-api.md` - CRUD with documentId
+- `jwt-token.md` - Authentication flow
+- `stripe-payment.md` - Payment integration
+
+
 ---
 name: api-docs
 description: API endpoint reference and external integrations
@@ -49,6 +254,9 @@ argument-hint: N/A
 
 ##### Donations
 - `POST /klub-don-payments/create-payment-intent` - Create Stripe payment intent
+  - Body: `{ price, idempotencyKey?, donorPaysFee?, metadata: { donUuid, klubUuid, projectUuid?, donorUuid? } }`
+  - Response: `{ intent: string, reused: boolean }`
+  - Dual path: Stripe Connect (if klubr has connected account) or Classic Stripe
 - `POST /klub-don-payments/stripe-web-hooks` - Stripe webhook handler (no auth)
 - `GET /klub-don-payments/check` - Check payment status
 
@@ -80,8 +288,14 @@ argument-hint: N/A
 
 ##### Stripe
 - Payment processing via Stripe SDK
-- Webhook endpoint: `/klub-don-payments/stripe-web-hooks`
-- Secret key: `process.env.STRIPE_SECRET_KEY`
+- Dual payment paths:
+  - **Stripe Connect**: For klubrs with connected accounts (on_behalf_of, transfer_data, application_fee)
+  - **Classic Stripe**: For klubrs without connected accounts (direct payment to platform)
+- Path selection: Based on `klubr.trade_policy.stripe_connect` boolean (default: true)
+- Webhook endpoints:
+  - `/klub-don-payments/stripe-web-hooks` - Payment intents
+  - `/stripe-connect/webhooks` - Account events
+- Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`
 
 ##### Brevo (Email)
 - Email provider: Brevo SMTP relay
@@ -96,202 +310,6 @@ argument-hint: N/A
 ##### Google Cloud
 - Authentication library for Google APIs
 - Used for club assessments and place data
-
-
-### Architecture
-
-- [Language/Framework](#languageframework)
-  - [Backend](#backend)
-    - [Database](#database)
-- [Full project structure](#full-project-structure)
-- [Services communication](#services-communication)
-  - [External Services](#external-services)
-    - [ImageKit](#imagekit)
-    - [Brevo (Sendinblue)](#brevo-sendinblue)
-    - [Stripe](#stripe)
-
-#### Language/Framework
-
-##### Backend
-
-- **Language/Framework**: Node.js with TypeScript / Strapi v5 → @donaction-api/package.json
-- **API Style**: REST - Strapi auto-generated endpoints with custom routes
-- **Architecture**: Strapi CMS with content-types, services, controllers, and lifecycles
-- **ORM**: Strapi Query Engine (built-in) - database abstraction layer
-- **Schema path**: `src/api/*/content-types/*/schema.json` - JSON schema definitions for content types
-- **Endpoints**: `src/api/*/routes/*.ts` - custom routes + Strapi default CRUD
-- **Caching**: No explicit caching layer
-- **Testing**: No test framework configured
-
-###### Database
-
-- **Type**: PostgreSQL (production) / SQLite (development)
-- **ORM/Driver**: `pg` v8 driver with Strapi Query Engine
-- **Connection**: Configured via environment variables → @donaction-api/config/database.ts
-- **Migration**: Strapi built-in migrations (automatic on schema changes)
-- **Seeding**: `strapi import` command with encrypted exports → @donaction-api/data/
-- **Mock**: No mock database configured
-
-#### Full project structure
-
-```text
-donaction-api/
-├── config/                     # Strapi configuration
-│   ├── admin.ts               # Admin panel config
-│   ├── api.ts                 # API config
-│   ├── database.ts            # Database connection config
-│   ├── middlewares.ts         # Global middleware config
-│   ├── plugins.ts             # Plugin configuration (users-permissions, email, upload, uuid)
-│   ├── server.ts              # Server config
-│   ├── cronTasks.ts           # Scheduled tasks (project status updates, etc)
-│   └── logger.ts              # Logging config
-├── src/
-│   ├── index.ts               # Bootstrap entry point with lifecycle hooks
-│   ├── constants.ts           # Global constants
-│   ├── _types.ts              # Global TypeScript types
-│   ├── api/                   # Content-type modules (30+ entities)
-│   │   ├── klubr/             # Main club entity
-│   │   │   ├── content-types/klubr/
-│   │   │   │   ├── schema.json          # Content type definition
-│   │   │   │   └── lifecycles.ts        # Before/after hooks
-│   │   │   ├── controllers/klubr.ts     # Request handlers
-│   │   │   ├── services/klubr.ts        # Business logic
-│   │   │   ├── routes/
-│   │   │   │   ├── klubr.ts             # Default CRUD routes
-│   │   │   │   └── klubr-custom.ts      # Custom endpoints
-│   │   │   └── middlewares/             # Route-specific middleware
-│   │   │       ├── klubr.ts
-│   │   │       ├── owner-or-admin.ts
-│   │   │       ├── admin-editor-or-admin.ts
-│   │   │       └── remove-unauthorized-fields.ts
-│   │   ├── [entity]/          # Other entities follow same pattern
-│   │   │   ├── content-types/
-│   │   │   ├── controllers/
-│   │   │   ├── services/
-│   │   │   ├── routes/
-│   │   │   └── middlewares/
-│   │   └── ...                # blog, invoice, klub-don, etc
-│   ├── components/            # Reusable Strapi components
-│   │   ├── club-header/
-│   │   ├── club-chiffres/
-│   │   ├── club-presentation/
-│   │   └── ...
-│   ├── helpers/               # Utility functions
-│   │   ├── emails/            # Email sending utilities
-│   │   ├── klubrPDF/          # PDF generation (pdf-lib, qrcode)
-│   │   ├── gcc/               # Google Cloud Console integration
-│   │   ├── users-extensions/  # User auth extensions (register, reset password, etc)
-│   │   ├── permissions.ts
-│   │   ├── medias.ts
-│   │   └── ...
-│   ├── extensions/            # Strapi core extensions
-│   ├── middlewares/           # Global middleware
-│   │   └── request-logger.ts
-│   └── plugins/               # Custom plugins
-│       └── custom-upload/
-├── types/                     # Generated TypeScript types
-├── data/                      # Database exports/imports (encrypted)
-└── private-pdf/               # PDF template storage
-```
-
-#### Services communication
-
-##### Strapi Request Flow
-
-```mermaid
-graph LR
-    A[Client Request] --> B[Strapi Router]
-    B --> C{Route Type}
-    C -->|Default CRUD| D[Strapi Controller]
-    C -->|Custom| E[Custom Controller]
-    D --> F[Global Middlewares]
-    E --> F
-    F --> G[Route Middlewares]
-    G --> H[Service Layer]
-    H --> I{Lifecycle Hooks}
-    I -->|beforeCreate/Update| J[Service Logic]
-    J --> K[Query Engine]
-    K --> L[(Database)]
-    L --> K
-    K --> M[afterCreate/Update]
-    M --> N[Response]
-```
-
-##### External Services
-
-###### ImageKit
-
-- **Purpose**: CDN and image storage provider
-- **Integration**: Custom Strapi upload provider `strapi-provider-upload-imagekit`
-- **Config**: @donaction-api/config/plugins.ts
-- **Usage**: Handles all media uploads with environment-based tagging (production/staging)
-- **Lifecycle**: File metadata updated on `beforeCreate` hook → @donaction-api/src/index.ts
-
-```mermaid
-graph LR
-    A[File Upload] --> B[Upload Plugin]
-    B --> C[ImageKit Provider]
-    C --> D[ImageKit API]
-    D --> E[CDN Storage]
-    B --> F[beforeCreate Hook]
-    F --> G{Environment Match?}
-    G -->|No| H[Update Metadata]
-    H --> D
-    G -->|Yes| I[Save to DB]
-```
-
-###### Brevo (Sendinblue)
-
-- **Purpose**: Transactional email service (invitations, newsletters)
-- **Integration**: `@strapi/provider-email-nodemailer` with Brevo SMTP + `sib-api-v3-sdk` API client
-- **Config**: @donaction-api/config/plugins.ts email provider
-- **Usage**: `sendBrevoTransacEmail()` helper for templated emails → @donaction-api/src/helpers/emails/
-- **Templates**: Predefined template IDs for member invitations, password resets, etc
-
-###### Stripe
-
-- **Purpose**: Payment processing for donations and subscriptions
-- **Integration**: `stripe` v17 SDK
-- **Config**: API keys via environment variables
-- **Usage**: Invoice generation, payment handling → @donaction-api/src/api/invoice/
-
-
----
-name: coding-assertions
-description: Code quality verification checklist
-argument-hint: N/A
----
-
-### Coding Guidelines
-
-> **These rules must be minimal - checked after EVERY CODE GENERATION.**
-
-#### Feature Completion Requirements
-
-**A feature is ONLY complete when ALL checks pass.**
-
-#### Quality Verification
-
-Use the **backend-quality-verification** skill to run automated checks:
-
-1. ✅ Check for code duplication
-2. ✅ Ensure code is reused (no duplicate logic)
-3. ✅ Run `npm run gen:types` (generate TypeScript types)
-4. ✅ Verify TypeScript compilation (no type errors)
-5. ✅ Run `npm run build` (Strapi builds successfully)
-
-**Trigger**: Ask Claude to "verify backend quality" or "run backend quality checks"
-
-#### Coding Patterns
-
-**All detailed coding rules are in**: @docs/rules/strapi-v5/strapi-v5-coding-rules.md
-
-**Quick Reference**:
-- Use `factories.createCoreController()` and `factories.createCoreService()`
-- Always validate & sanitize: `validateQuery()`, `sanitizeQuery()`, `sanitizeOutput()`
-- Use `strapi.documents()` for CRUD, `strapi.db.query()` for complex queries
-- Extract business logic to services, keep controllers thin
-- Security: check permissions, sanitize inputs/outputs, remove sensitive fields
 
 
 ### Database
@@ -380,30 +398,3 @@ Strapi import/export commands:
 - `npm run export-db`: Export DB to `data/strapi-export`
 - `npm run import-db`: Import DB from `data/strapi-export.tar.gz.enc`
 - Both use encryption key for security
-
-
----
-name: testing
-description: Testing strategy and guidelines
-argument-hint: N/A
----
-
-### Testing Guidelines
-
-#### Tools and Frameworks
-
-**Currently not configured** - No testing framework is set up in donaction-api.
-
-#### Testing Strategy
-
-- No formal testing strategy implemented
-- Manual testing via Strapi admin panel
-- API testing through Strapi development mode endpoints
-
-#### Test Execution Process
-
-No test scripts available in @donaction-api/package.json
-
-#### Mocking and Stubbing
-
-Not applicable - no testing framework configured

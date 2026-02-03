@@ -3,7 +3,7 @@
     FORM_CONFIG,
     isLoading,
     SUBSCRIPTION,
-    triggerValidation
+    triggerValidation,
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { onMount } from 'svelte';
   import Share from '../../../../../../utils/share/Share.svelte';
@@ -15,7 +15,7 @@
     sendGaEvent({
       step: 5,
       category: 'donation',
-      label: `Donation payed, don uuid: ${FORM_CONFIG.donUuid}`
+      label: `Donation payed, don uuid: ${FORM_CONFIG.donUuid}`,
     });
     // eventBus.events.clear();
     // Object.keys(defVals).forEach((_) => {
@@ -34,10 +34,10 @@
   });
 </script>
 
-<div class="step5 flex w-full flex-col items-center gap-3">
+<div class="step5 flex w-full flex-col items-center gap-3" data-testid="step5">
   <div class="flex flex-col items-center gap-1">
     <p>Votre soutien a bien été pris en compte</p>
-    <p class="merci">MERCI</p>
+    <p class="merci" data-testid="thank-you-text">MERCI</p>
   </div>
   <div class="flex flex-col items-center gap-1">
     <img
@@ -54,6 +54,7 @@
   <a
     style="text-decoration: none; max-width: 80vw;"
     class="primary-btn text-center"
+    data-testid="link-my-donations"
     href={`${import.meta.env.VITE_NEXT_URL}/mes-dons`}>Retrouver mes dons</a
   >
 

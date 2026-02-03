@@ -1,0 +1,66 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "documentId": "proj_soccer_001",
+      "uuid": "650e8400-e29b-41d4-a716-446655440101",
+      "titre": "Nouveau équipement de football",
+      "slug": "nouveau-equipement-football",
+      "status": "published",
+      "montantAFinancer": 5000,
+      "montantTotalDonations": 3500,
+      "nbDons": 15,
+      "couverture": {
+        "id": 1,
+        "url": "/uploads/project_soccer.jpg",
+        "width": 800,
+        "height": 600,
+        "alternativeText": "Football equipment project"
+      }
+    },
+    {
+      "id": 2,
+      "documentId": "proj_training_002",
+      "uuid": "650e8400-e29b-41d4-a716-446655440102",
+      "titre": "Programme d'entraînement été 2026",
+      "slug": "programme-entrainement-ete-2026",
+      "status": "published",
+      "montantAFinancer": 8000,
+      "montantTotalDonations": 6200,
+      "nbDons": 32,
+      "couverture": {
+        "id": 2,
+        "url": "/uploads/project_training.jpg",
+        "width": 800,
+        "height": 600,
+        "alternativeText": "Summer training program"
+      }
+    },
+    {
+      "id": 3,
+      "documentId": "proj_youth_003",
+      "uuid": "650e8400-e29b-41d4-a716-446655440103",
+      "titre": "Développement jeune talent U15",
+      "slug": "developpement-jeune-talent-u15",
+      "status": "published",
+      "montantAFinancer": 10000,
+      "montantTotalDonations": 2500,
+      "nbDons": 8,
+      "couverture": {
+        "id": 3,
+        "url": "/uploads/project_youth.jpg",
+        "width": 800,
+        "height": 600,
+        "alternativeText": "Youth development project"
+      }
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "pageSize": 20,
+      "pageCount": 1,
+      "total": 3
+    }
+  }
+}

@@ -280,6 +280,7 @@ export default factories.createCoreController(
                         where: { uuid: ctx.request.body?.projectUuid },
                         populate: {
                             klubr: klubrPopulate,
+                            couverture: true,
                         },
                     });
                 if (!project) {

@@ -1,5 +1,3 @@
-
-
 .outerBanner {
   position: absolute;
   display: flex;
@@ -12,7 +10,8 @@
     }
   }
 
-  &, .innerBanner {
+  &,
+  .innerBanner {
     &.topRight {
       top: 0;
       right: 0;
