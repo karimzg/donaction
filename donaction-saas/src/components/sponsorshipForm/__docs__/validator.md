@@ -92,7 +92,7 @@ This module provides validation functions and utilities for managing form inputs
 - A `destroy` method to remove event listeners when the directive is removed.
 
 ## Regular Expressions
-- `STRING_REGEXP`: Negative lookahead — matches strings containing chars outside `[\w\s,.\-/éàçèë]`. When it matches, the string is **invalid**.
+- `INVALID_CHARS_REGEXP`: Negative lookahead — matches strings containing chars outside `[\w\s,.\-/éàçèë]`. When it matches, the string is **invalid**.
 - `STRING_WITHOUT_NUMBERS_REGEXP`: Matches any char that is not a letter, space, apostrophe, or hyphen. Used to reject names with numbers/specials.
 - `EMAIL_REGEXP`: Validates email format. Requires `local@domain.tld` with TLD ≥ 2 chars.
 - `SIREN_REGEXP`: Validates a SIREN number (exactly 9 digits).
@@ -104,7 +104,7 @@ This module provides validation functions and utilities for managing form inputs
 
 ## Exports
 - Validators: `validateAmount`, `validateDate`, `validateDateMajor`, `validateSiren`, `validateTrue`, `validateEmail`, `validatePhone`, `formatPhone`, `validateString`, `validateRequired`, `validatePostalCode`, `eighteenYearsAgo`
-- Regular Expressions: `STRING_REGEXP`, `EMAIL_REGEXP`, `STRING_WITHOUT_NUMBERS_REGEXP`
+- Regular Expressions: `INVALID_CHARS_REGEXP`, `EMAIL_REGEXP`, `STRING_WITHOUT_NUMBERS_REGEXP`
 - Utilities: `sanitizeInput`
 - `validator` action.
 

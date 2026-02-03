@@ -12,7 +12,7 @@ import {
   validatePostalCode,
   validateRequired,
   eighteenYearsAgo,
-  STRING_REGEXP,
+  INVALID_CHARS_REGEXP,
   STRING_WITHOUT_NUMBERS_REGEXP,
   sanitizeInput,
 } from '../logic/validator';
@@ -665,40 +665,40 @@ describe('validator suite tests', () => {
   // ============================================================================
   // Regex Pattern Tests
   // ============================================================================
-  describe('STRING_REGEXP', () => {
+  describe('INVALID_CHARS_REGEXP', () => {
     // This regex matches strings that DO NOT consist only of: word chars, spaces, commas, dots, hyphens, slashes, accented letters
     // In other words: it matches strings that have at least one "invalid" character
 
     it('should match strings with special characters (@, #, etc)', () => {
-      expect(STRING_REGEXP.test('Test@123')).toBe(true);
+      expect(INVALID_CHARS_REGEXP.test('Test@123')).toBe(true);
     });
 
     it('should match strings with exclamation mark', () => {
-      expect(STRING_REGEXP.test('Test!')).toBe(true);
+      expect(INVALID_CHARS_REGEXP.test('Test!')).toBe(true);
     });
 
     it('should not match pure alphanumeric strings (only word chars allowed)', () => {
-      expect(STRING_REGEXP.test('TestName')).toBe(false);
+      expect(INVALID_CHARS_REGEXP.test('TestName')).toBe(false);
     });
 
     it('should not match strings with only spaces and letters', () => {
-      expect(STRING_REGEXP.test('Test Name')).toBe(false);
+      expect(INVALID_CHARS_REGEXP.test('Test Name')).toBe(false);
     });
 
     it('should not match strings with hyphens and spaces only', () => {
-      expect(STRING_REGEXP.test('Test-Name')).toBe(false);
-      expect(STRING_REGEXP.test('Test, Name')).toBe(false);
+      expect(INVALID_CHARS_REGEXP.test('Test-Name')).toBe(false);
+      expect(INVALID_CHARS_REGEXP.test('Test, Name')).toBe(false);
     });
 
     it('should match strings with numbers (numbers are word chars, but combined with other rules)', () => {
       // Numbers are \w, but this is testing the negative lookahead
       // \w includes [A-Za-z0-9_] plus unicode letter chars
       // So 'Test123' should NOT match because it's only word chars
-      expect(STRING_REGEXP.test('Test123')).toBe(false);
+      expect(INVALID_CHARS_REGEXP.test('Test123')).toBe(false);
     });
 
     it('should match strings with prohibited characters like parentheses', () => {
-      expect(STRING_REGEXP.test('Test(Name)')).toBe(true);
+      expect(INVALID_CHARS_REGEXP.test('Test(Name)')).toBe(true);
     });
   });
 

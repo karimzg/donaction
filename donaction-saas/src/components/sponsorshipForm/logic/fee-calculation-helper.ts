@@ -35,12 +35,15 @@ export interface FeeCalculationOutput {
  * @returns Full fee breakdown
  */
 export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput {
-  const { montantDon, contribution, donorPaysFee, commissionPercentage } = input;
+  const { montantDon, donorPaysFee, commissionPercentage } = input;
 
-  // Handle invalid inputs
+  // Validate and sanitize contribution (C4: validate contribution)
+  const contribution = isNaN(input.contribution) || input.contribution < 0 ? 0 : input.contribution;
+
+  // Handle invalid donation amount
   if (isNaN(montantDon) || montantDon <= 0) {
     return {
-      totalDonateur: contribution || 0,
+      totalDonateur: contribution,
       netAssociation: 0,
       applicationFee: 0,
       commissionDonaction: 0,

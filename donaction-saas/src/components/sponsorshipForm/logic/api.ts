@@ -53,14 +53,72 @@ export const createReCaptchaToken = (action: IReCaptchaFormAction): Promise<stri
         );
         resolve(formToken);
       });
-    } catch (e) {
-      console.log(e);
-      reject(null);
+    } catch (error) {
+      // Pass error through for proper error handling (C7: error context)
+      reject(error instanceof Error ? error : new Error(`reCAPTCHA failed for action: ${action}`));
     }
   });
 };
+/** Donation payload for create/update API */
+export interface DonPayload {
+  montant?: number;
+  estOrganisme?: boolean;
+  withTaxReduction?: boolean;
+  statusPaiment?: string;
+  contributionAKlubr?: number;
+  donorPaysFee?: boolean;
+  datePaiment?: string;
+  klubr?: string | null;
+  klubDonateur?: string;
+  klub_projet?: string | null;
+  formToken?: string;
+}
+
+/** Donator payload for create/update API */
+export interface DonatorPayload {
+  donateurType?: 'Organisme' | 'Particulier';
+  civilite?: string;
+  nom?: string;
+  prenom?: string;
+  email?: string;
+  place_id?: string;
+  adresse?: string;
+  adresse2?: string;
+  tel?: string;
+  cp?: string;
+  ville?: string;
+  pays?: string;
+  dateNaissance?: string;
+  raisonSocial?: string | null;
+  SIREN?: string | null;
+  formeJuridique?: string | null;
+  klubDon?: string | null;
+  optInAffMontant?: boolean;
+  optInAffNom?: boolean;
+  uuid?: string | null;
+}
+
+/** Donation response from API */
+export interface DonResponse {
+  attestationNumber?: string;
+  contributionAKlubr?: number;
+  datePaiment: string;
+  deductionFiscale: number;
+  estOrganisme: boolean;
+  withTaxReduction: boolean;
+  montant: number;
+  statusPaiment: string;
+  uuid: string;
+}
+
+/** Donator response from API */
+export interface DonatorResponse {
+  uuid: string;
+  logo?: { uuid: string; url: string };
+}
+
 export const putPostDon = (
-  payload: Record<string, any>,
+  payload: DonPayload,
   uuid: string | null,
 ): Promise<{
   attestationNumber?: string;
@@ -81,7 +139,10 @@ export const putPostDon = (
     },
   });
 
-export const putPostDonator = (payload: Record<string, any>, uuid: string | null): Promise<any> =>
+export const putPostDonator = (
+  payload: DonatorPayload,
+  uuid: string | null,
+): Promise<DonatorResponse> =>
   Fetch({
     endpoint: PUT_POST_KLUBR_DONATOR(uuid),
     method: uuid ? 'PUT' : 'POST',
@@ -110,7 +171,15 @@ export const getProjectsList = () =>
     method: 'GET',
   });
 
-export const createKlubDonPayment = (data: Record<string, any>) =>
+/** Payment creation payload */
+export interface PaymentPayload {
+  klubDon: string;
+  montant: number;
+  stripePaymentIntentId: string;
+  status: string;
+}
+
+export const createKlubDonPayment = (data: PaymentPayload) =>
   Fetch({
     endpoint: CREATE_KLUB_DON_PAYMENT,
     method: 'POST',

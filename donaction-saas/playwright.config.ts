@@ -11,7 +11,8 @@ export default defineConfig({
     : 'html',
   timeout: 20_000,
   expect: {
-    timeout: 5_000,
+    // Increase timeout in CI (slower runners)
+    timeout: process.env.CI ? 10_000 : 5_000,
   },
   use: {
     baseURL: process.env.E2E_BASE_URL || 'http://localhost:3101',

@@ -243,7 +243,7 @@ describe('api', () => {
       );
     });
 
-    it('rejects when grecaptcha throws', async () => {
+    it('rejects with error when grecaptcha throws', async () => {
       (globalThis as any).grecaptcha = {
         enterprise: {
           ready: () => {
@@ -252,7 +252,9 @@ describe('api', () => {
         },
       };
 
-      await expect(api.createReCaptchaToken('CREATE_DONATION')).rejects.toBe(null);
+      await expect(api.createReCaptchaToken('CREATE_DONATION')).rejects.toThrow(
+        'reCAPTCHA not available',
+      );
     });
   });
 });

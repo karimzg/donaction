@@ -18,12 +18,12 @@ const DEBOUNCE_DELAY = 150;
 // ─── Regex Patterns ──────────────────────────────────────────────────────────
 
 /**
- * Matches strings containing characters outside the allowed set.
+ * Matches strings containing INVALID characters (outside the allowed set).
  * Allowed: word chars (\w), spaces, commas, dots, hyphens, slashes, accented letters (éàçèë).
  * Uses a negative lookahead: if the entire string is ONLY allowed chars, it won't match.
- * When this regex matches → the string is INVALID (contains forbidden chars).
+ * When this regex matches → the string contains forbidden chars and is INVALID.
  */
-const STRING_REGEXP = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
+const INVALID_CHARS_REGEXP = /^(?![\w\s,.\-/éàçèë]+$)[\s\S]+$/;
 
 /** Matches any character that is NOT a letter, space, apostrophe, or hyphen (rejects numbers & specials). */
 const STRING_WITHOUT_NUMBERS_REGEXP = /[^A-Za-z\s'-]/;
@@ -290,7 +290,7 @@ function validator(
 export {
   validator,
   EMAIL_REGEXP,
-  STRING_REGEXP,
+  INVALID_CHARS_REGEXP,
   validateDate,
   validateTrue,
   validateEmail,

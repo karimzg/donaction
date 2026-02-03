@@ -156,10 +156,12 @@ describe('submit', () => {
       );
     });
 
-    it('sends GA error event on putPostDon failure', async () => {
+    it('sends GA error event on putPostDon failure and re-throws', async () => {
       mockPutPostDon.mockRejectedValueOnce(new Error('API failure'));
 
-      await updateKlubrDonStatus('success', new Date(), 'don-uuid-1');
+      await expect(updateKlubrDonStatus('success', new Date(), 'don-uuid-1')).rejects.toThrow(
+        'API failure',
+      );
 
       expect(mockSendGaEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -169,10 +171,12 @@ describe('submit', () => {
       );
     });
 
-    it('handles reCAPTCHA failure gracefully', async () => {
+    it('handles reCAPTCHA failure and re-throws', async () => {
       mockCreateReCaptchaToken.mockRejectedValueOnce(new Error('reCAPTCHA failed'));
 
-      await updateKlubrDonStatus('success', new Date(), 'don-uuid-1');
+      await expect(updateKlubrDonStatus('success', new Date(), 'don-uuid-1')).rejects.toThrow(
+        'reCAPTCHA failed',
+      );
 
       expect(mockSendGaEvent).toHaveBeenCalledWith(
         expect.objectContaining({
