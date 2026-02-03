@@ -161,6 +161,8 @@ jobs:
         run: npx playwright test --project=chromium
         env:
           CI: true
+          # Stripe test key (safe to expose - pk_test keys are public)
+          VITE_STRIPE_PUBLISHABLE_KEY: pk_test_51ORwXyFpTHuA1nWDdmLwlsei6DGppyL7mrXt1hcMp55vz9M3DX3MMw78THy9UnZzUVfVOhQrsoHY67HHDLmzPvz700EeWeN9c9
 
       - name: Upload Playwright report
         if: always()
