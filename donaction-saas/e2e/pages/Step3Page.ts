@@ -32,6 +32,13 @@ export class Step3Page extends BasePage {
   // Recap fees line
   readonly recapFeesLine: Locator;
 
+  // Tax reduction summary component (TaxReductionSummary.svelte)
+  readonly taxReductionSummary: Locator;
+  readonly taxReceiptValue: Locator;
+  readonly taxSavingsValue: Locator;
+  readonly taxRealCostValue: Locator;
+  readonly taxContributionNote: Locator;
+
   constructor(page: Page) {
     super(page);
     this.recapAmount = this.shadow('[data-testid="recap-amount"]');
@@ -63,6 +70,13 @@ export class Step3Page extends BasePage {
 
     // Recap fees line
     this.recapFeesLine = this.shadow('[data-testid="recap-fees-line"]');
+
+    // Tax reduction summary component (TaxReductionSummary.svelte)
+    this.taxReductionSummary = this.shadow('[data-testid="tax-reduction-summary"]');
+    this.taxReceiptValue = this.shadow('[data-testid="tax-receipt-value"]');
+    this.taxSavingsValue = this.shadow('[data-testid="tax-savings-value"]');
+    this.taxRealCostValue = this.shadow('[data-testid="real-cost-value"]');
+    this.taxContributionNote = this.shadow('[data-testid="contribution-note"]');
   }
 
   /** Accept CGU + conditions to proceed */

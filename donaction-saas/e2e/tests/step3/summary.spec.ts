@@ -44,37 +44,55 @@ test.describe('Step 3 — Summary', () => {
 
     const step3 = new Step3Page(page);
     await expect(step3.recapAmount).toContainText('100');
-    // Tax section should not be visible
-    await expect(step3.shadow('.don-tax-section')).not.toBeVisible();
+    // Tax reduction summary should not be visible
+    await expect(step3.taxReductionSummary).not.toBeVisible();
   });
 
   test('7.2 — Should display 66% reduction for particulier', async ({ page }) => {
-    const step3 = await goToStep3(page, { amount: 100 });
+    const step1 = new Step1Page(page);
+    // Use Stripe Connect config to enable tax reduction summary
+    await step1.navigate({ klubrConfig: 'stripe-connect-choice-enabled' });
+    await step1.waitForStep(0);
+    await step1.selectAmount(100);
+    await step1.clickNext();
+    await step1.waitForStep(1);
+
+    const step2 = new Step2Page(page);
+    await step2.fillParticulier();
+    await step2.clickNext();
+    await step2.waitForStep(2);
+
+    const step3 = new Step3Page(page);
     await expect(step3.recapAmount).toContainText('100');
-    await expect(step3.shadow('.don-tax-section')).toBeVisible();
-    const taxLabels = step3.shadow('.don-tax-item__label');
-    const count = await taxLabels.count();
-    let found66 = false;
-    for (let i = 0; i < count; i++) {
-      const text = await taxLabels.nth(i).textContent();
-      if (text?.includes('66')) found66 = true;
-    }
-    expect(found66).toBeTruthy();
+    // Tax reduction summary component uses new data-testid
+    await expect(step3.taxReductionSummary).toBeVisible();
+    // Check for 66% rate in the tax reduction label
+    const reductionItem = step3.shadow('[data-testid="tax-reduction-item"]');
+    await expect(reductionItem).toContainText('66%');
   });
 
   test('7.3 — Should display 60% reduction for entreprise', async ({ page }) => {
-    const step3 = await goToStep3(page, { amount: 200, entreprise: true });
+    const step1 = new Step1Page(page);
+    // Use Stripe Connect config to enable tax reduction summary
+    await step1.navigate({ klubrConfig: 'stripe-connect-choice-enabled' });
+    await step1.waitForStep(0);
+    await step1.selectAmount(200);
+    await step1.selectEntreprise();
+    await step1.clickNext();
+    await step1.waitForStep(1);
+
+    const step2 = new Step2Page(page);
+    await step2.fillEntreprise();
+    await step2.clickNext();
+    await step2.waitForStep(2);
+
+    const step3 = new Step3Page(page);
     await expect(step3.recapAmount).toContainText('200');
-    await expect(step3.shadow('.don-tax-section')).toBeVisible();
+    // Tax reduction summary should be visible
+    await expect(step3.taxReductionSummary).toBeVisible();
     // The reduction label should mention 60%
-    const taxLabels = step3.shadow('.don-tax-item__label');
-    const count = await taxLabels.count();
-    let found60 = false;
-    for (let i = 0; i < count; i++) {
-      const text = await taxLabels.nth(i).textContent();
-      if (text?.includes('60')) found60 = true;
-    }
-    expect(found60).toBeTruthy();
+    const reductionItem = step3.shadow('[data-testid="tax-reduction-item"]');
+    await expect(reductionItem).toContainText('60%');
   });
 
   test('7.4 — Should toggle fee options (donor pays vs included)', async ({ page }) => {

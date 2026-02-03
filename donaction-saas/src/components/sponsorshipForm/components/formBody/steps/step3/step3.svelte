@@ -18,13 +18,14 @@
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
   import resendFiles from '../../../../../../assets/icons/resendFiles.svg';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
-  import { calculateTaxReduction, formatCurrency } from '../../../../logic/utils';
+  import { formatCurrency } from '../../../../logic/utils';
   import {
     calculateFees,
     type FeeCalculationOutput,
   } from '../../../../logic/fee-calculation-helper';
   import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
   import FormError from '../../../formError/FormError.svelte';
+  import TaxReductionSummary from '../../../taxReductionSummary/TaxReductionSummary.svelte';
 
   const cgu = $state({
     title: '',
@@ -341,41 +342,15 @@
         </div>
       </div>
 
-      <!-- Tax section -->
-      {#if DEFAULT_VALUES.withTaxReduction}
+      <!-- Tax section - guard: stripe_connect + withTaxReduction -->
+      {#if DEFAULT_VALUES.withTaxReduction && isStripeConnect}
         <div class="don-tax-section">
-          <div class="don-tax-flow">
-            <div class="don-tax-item">
-              <span class="don-tax-item__icon">📄</span>
-              <span class="don-tax-item__label">Reçu fiscal</span>
-              <span class="don-tax-item__value">{formatCurrency(fees.montantRecuFiscal)}</span>
-            </div>
-            <span class="don-tax-arrow">→</span>
-            <div class="don-tax-item">
-              <span class="don-tax-item__icon">💰</span>
-              <span class="don-tax-item__label"
-                >Réduction ({DEFAULT_VALUES.estOrganisme ? '60' : '66'}%)</span
-              >
-              <span class="don-tax-item__value"
-                >{formatCurrency(
-                  fees.montantRecuFiscal * (DEFAULT_VALUES.estOrganisme ? 0.6 : 0.66),
-                )}</span
-              >
-            </div>
-            <span class="don-tax-arrow">→</span>
-            <div class="don-tax-item don-tax-item--final">
-              <span class="don-tax-item__label">Coût réel</span>
-              <span class="don-tax-item__value--final">
-                {calculateTaxReduction(fees.montantRecuFiscal, DEFAULT_VALUES.estOrganisme)} €
-              </span>
-            </div>
-          </div>
-          {#if SUBSCRIPTION.allowKlubrContribution && DEFAULT_VALUES.contributionAKlubr > 0}
-            <p class="don-tax-note">
-              * Le soutien à la plateforme ({formatCurrency(DEFAULT_VALUES.contributionAKlubr)})
-              n'est pas déductible
-            </p>
-          {/if}
+          <TaxReductionSummary
+            taxReceiptAmount={fees.montantRecuFiscal}
+            isOrganization={DEFAULT_VALUES.estOrganisme}
+            platformContribution={DEFAULT_VALUES.contributionAKlubr}
+            showContributionNote={SUBSCRIPTION.allowKlubrContribution}
+          />
         </div>
       {/if}
     </section>

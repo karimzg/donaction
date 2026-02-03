@@ -1,0 +1,88 @@
+// TaxReductionSummary Component Styles
+// Displays tax receipt amount, reduction percentage, and real cost
+// Extracted from step3/index.scss for reusability
+
+@use '../../../../styles/main';
+
+.tax-reduction {
+  padding: var(--don-spacing-xl);
+  background-color: var(--don-color-success-light);
+  border-radius: var(--don-radius-xl);
+}
+
+.tax-reduction__flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--don-spacing-lg);
+
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.tax-reduction__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.tax-reduction__item-icon {
+  font-size: var(--don-font-size-xl);
+  margin-bottom: 2px;
+}
+
+.tax-reduction__item-label {
+  font-size: var(--don-font-size-xs);
+  color: var(--don-color-success-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tax-reduction__item-value {
+  font-size: var(--don-font-size-lg);
+  font-weight: var(--don-font-weight-semibold);
+  color: var(--don-color-success-dark);
+}
+
+.tax-reduction__arrow {
+  color: #86efac;
+  font-size: var(--don-font-size-xl);
+  font-weight: 300;
+
+  @media screen and (max-width: 768px) {
+    transform: rotate(90deg);
+  }
+}
+
+.tax-reduction__item--final {
+  background-color: #dcfce7;
+  padding: var(--don-spacing-md) var(--don-spacing-xl);
+  border-radius: var(--don-radius-lg);
+}
+
+.tax-reduction__item-value--final {
+  font-size: var(--don-font-size-2xl);
+  font-weight: var(--don-font-weight-bold);
+  color: var(--don-color-success);
+}
+
+.tax-reduction__note {
+  margin: var(--don-spacing-lg) 0 0 0;
+  font-size: 11px;
+  color: var(--don-color-text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+// Respect reduced motion preference (WCAG 2.1 AA)
+@media (prefers-reduced-motion: reduce) {
+  .tax-reduction,
+  .tax-reduction__item,
+  .tax-reduction__arrow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
