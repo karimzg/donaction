@@ -12,4 +12,4 @@ COPY ./donaction-admin .
 
 EXPOSE 4200
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:docker:proxy"]

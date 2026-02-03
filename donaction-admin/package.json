@@ -6,6 +6,7 @@
     "start": "ng serve --port 4300",
     "dev": "ng serve --port 4300",
     "start:proxy": "ng serve --port 4300 --proxy-config proxy.conf.json",
+    "start:docker:proxy": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.docker.json",
     "start:proxy:prod": "ng serve --port 4300 --configuration=production --proxy-config proxy.conf.json",
     "build": "ng build",
     "build:local": "ng build --configuration=development",
