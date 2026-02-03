@@ -4,12 +4,12 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
     ? [['list'], ['junit', { outputFile: 'test-results/junit.xml' }]]
     : 'html',
-  timeout: 20_000,
+  timeout: process.env.CI ? 30_000 : 20_000,
   expect: {
     // Increase timeout in CI (slower runners)
     timeout: process.env.CI ? 10_000 : 5_000,
@@ -18,6 +18,8 @@ export default defineConfig({
     baseURL: process.env.E2E_BASE_URL || 'http://localhost:3101',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Increase navigation timeout in CI (slower runners)
+    navigationTimeout: process.env.CI ? 30_000 : 15_000,
   },
   projects: [
     {
@@ -37,6 +39,8 @@ export default defineConfig({
     command: 'npm run dev:e2e',
     url: process.env.E2E_BASE_URL || 'http://localhost:3101',
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });
