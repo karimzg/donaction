@@ -118,7 +118,7 @@ jobs:
         run: ${{ matrix.test-command }}
 
       - name: Upload coverage report
-        if: matrix.changed == 'true' && matrix.test-command
+        if: matrix.changed == 'true' && matrix.test-command && success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app }}-coverage-report

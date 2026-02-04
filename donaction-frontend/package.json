@@ -17,12 +17,15 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "test:watch": "vitest --watch",
     "test:ci": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "format": "prettier -w ./src",
     "copytypes": "node scripts/copyTypesFromStrapi.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
