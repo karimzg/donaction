@@ -1,0 +1,191 @@
+// Color variables
+$color-black: #000;
+$color-white: #fff;
+$color-gray-50: #f9fafb;
+$color-gray-100: #f3f4f6;
+$color-gray-200: #e5e7eb;
+$color-gray-400: #9ca3af;
+$color-gray-600: #4b5563;
+$color-secondary: #73cfa8;
+$color-secondary-light: rgba(115, 207, 168, 0.1);
+
+.new-hp-widget-demo {
+	background: $color-gray-50;
+
+	&__benefits {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	&__benefit {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 1rem;
+		color: $color-gray-600;
+	}
+
+	&__benefit-icon {
+		font-size: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	&__widget {
+		background: $color-white;
+		border-radius: 1.5rem;
+		padding: 2rem;
+		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		max-width: 400px;
+		margin: 0 auto;
+
+		@media (min-width: 1024px) {
+			margin: 0 0 0 auto;
+		}
+	}
+
+	&__widget-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		text-align: center;
+		margin-bottom: 1.5rem;
+		color: $color-black;
+	}
+
+	&__amounts {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+
+	&__amount-btn {
+		padding: 0.75rem 1rem;
+		border: 2px solid $color-gray-200;
+		border-radius: 0.75rem;
+		background: $color-white;
+		font-size: 1rem;
+		font-weight: 600;
+		color: $color-black;
+		cursor: pointer;
+		transition: all 0.2s ease;
+
+		&:hover {
+			border-color: $color-secondary;
+		}
+
+		&.active,
+		&[aria-pressed='true'] {
+			border-color: $color-secondary;
+			background: $color-secondary-light;
+			color: $color-black;
+		}
+	}
+
+	&__custom-wrapper {
+		grid-column: span 3;
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	&__custom-input {
+		width: 100%;
+		padding: 0.75rem 2.5rem 0.75rem 1rem;
+		border: 2px solid $color-gray-200;
+		border-radius: 0.75rem;
+		font-size: 1rem;
+		font-weight: 600;
+		color: $color-black;
+		outline: none;
+		transition: all 0.2s ease;
+
+		&::placeholder {
+			color: $color-gray-400;
+			font-weight: 400;
+		}
+
+		&:focus,
+		&.active {
+			border-color: $color-secondary;
+		}
+
+		&.active:not(:placeholder-shown) {
+			background: $color-secondary-light;
+		}
+	}
+
+	&__custom-suffix {
+		position: absolute;
+		right: 1rem;
+		font-size: 1rem;
+		font-weight: 600;
+		color: $color-gray-400;
+		pointer-events: none;
+	}
+
+	&__fiscal {
+		background: $color-gray-50;
+		border-radius: 1rem;
+		padding: 1.25rem;
+		margin-bottom: 1.5rem;
+	}
+
+	&__fiscal-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0;
+		font-size: 0.9375rem;
+
+		&--highlight {
+			color: $color-secondary;
+		}
+
+		&--total {
+			padding-top: 0.75rem;
+		}
+	}
+
+	&__fiscal-divider {
+		height: 1px;
+		background: $color-gray-200;
+		margin: 0.5rem 0;
+	}
+
+	&__cta {
+		width: 100%;
+		padding: 1rem 1.5rem;
+		border: none;
+		border-radius: 0.75rem;
+		background: $color-black;
+		color: $color-white;
+		font-size: 1.125rem;
+		font-weight: 600;
+		cursor: not-allowed;
+		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		transition: all 0.2s ease;
+	}
+
+	&__cta-badge {
+		background: rgba(255, 255, 255, 0.2);
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	&__disclaimer {
+		text-align: center;
+		font-size: 0.8125rem;
+		color: $color-gray-400;
+		margin-top: 1rem;
+	}
+}
