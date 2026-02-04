@@ -29,16 +29,10 @@
     transform-origin: center;
   }
 
-  // Scroll indicator
+  // Scroll indicator (decorative, no interaction)
   &__scroll-indicator {
     color: #9ca3af;
-    transition: color 0.3s ease;
-    cursor: pointer;
     animation: fade-in 1s ease-out 0.5s both;
-
-    &:hover {
-      color: #374151;
-    }
   }
 
   &__scroll-dot {

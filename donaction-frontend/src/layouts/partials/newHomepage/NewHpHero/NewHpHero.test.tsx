@@ -97,4 +97,12 @@ describe('NewHpHero', () => {
     const buttonContainer = container.querySelector('.flex-col.sm\\:flex-row');
     expect(buttonContainer).toBeInTheDocument();
   });
+
+  it('renders all three trust indicators', () => {
+    render(<NewHpHero />);
+
+    expect(screen.getByText(/100% Gratuit/i)).toBeInTheDocument();
+    expect(screen.getByText(/Reçu fiscal/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sécurisé/i)).toBeInTheDocument();
+  });
 });
