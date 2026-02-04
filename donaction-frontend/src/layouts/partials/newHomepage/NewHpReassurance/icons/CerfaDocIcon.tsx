@@ -1,4 +1,8 @@
+import { useId } from 'react';
+
 export default function CerfaDocIcon({ className = '' }: { className?: string }) {
+  const gradientId = useId();
+
   return (
     <svg
       className={className}
@@ -7,11 +11,12 @@ export default function CerfaDocIcon({ className = '' }: { className?: string })
       viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
     >
       {/* Document background */}
       <path
         d="M12 6C12 4.89543 12.8954 4 14 4H28L38 14V42C38 43.1046 37.1046 44 36 44H14C12.8954 44 12 43.1046 12 42V6Z"
-        fill="url(#docGradient)"
+        fill={`url(#${gradientId})`}
         opacity="0.15"
       />
       {/* Document outline */}
@@ -54,7 +59,7 @@ export default function CerfaDocIcon({ className = '' }: { className?: string })
       />
 
       <defs>
-        <linearGradient id="docGradient" x1="25" y1="4" x2="25" y2="44" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradientId} x1="25" y1="4" x2="25" y2="44" gradientUnits="userSpaceOnUse">
           <stop stopColor="#73cfa8" />
           <stop offset="1" stopColor="#5bb892" />
         </linearGradient>

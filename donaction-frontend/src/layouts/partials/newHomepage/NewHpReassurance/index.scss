@@ -1,3 +1,11 @@
+// Animation timing variables
+$entrance-duration: 0.6s;
+$entrance-delay-base: 0.2s;
+$entrance-delay-step: 0.1s;
+$hover-duration: 0.3s;
+$shield-pulse-duration: 3s;
+$clock-tick-duration: 2s;
+
 .new-hp-reassurance {
   background: linear-gradient(180deg, #f3f4f6 0%, #f9fafb 50%, #ffffff 100%);
   position: relative;
@@ -25,8 +33,8 @@
 
   &__badge {
     opacity: 0;
-    animation: badge-entrance 0.6s ease-out forwards;
-    animation-delay: calc(var(--badge-index) * 0.1s + 0.2s);
+    animation: badge-entrance $entrance-duration ease-out forwards;
+    animation-delay: calc(var(--badge-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
   }
 
   &__badge-content {
@@ -34,7 +42,11 @@
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(229, 231, 235, 0.8);
-    transition: all 0.3s ease;
+    transition:
+      transform $hover-duration ease,
+      background $hover-duration ease,
+      border-color $hover-duration ease,
+      box-shadow $hover-duration ease;
 
     &:hover {
       transform: translateY(-4px);
@@ -64,7 +76,7 @@
         transparent 70%
       );
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity $hover-duration ease;
     }
   }
 
@@ -75,7 +87,7 @@
   &__icon {
     width: 48px;
     height: 48px;
-    transition: transform 0.3s ease;
+    transition: transform $hover-duration ease;
   }
 
   &__badge-content:hover &__icon {
@@ -84,13 +96,13 @@
 
   // Shield pulse animation for security badge
   &__badge:first-child &__icon .shield-outline {
-    animation: shield-pulse 3s ease-in-out infinite;
+    animation: shield-pulse $shield-pulse-duration ease-in-out infinite;
   }
 
   // Clock hand tick animation for speed badge
   &__badge:last-child &__icon .clock-hand {
     transform-origin: 24px 26px;
-    animation: clock-tick 2s ease-in-out infinite;
+    animation: clock-tick $clock-tick-duration ease-in-out infinite;
   }
 }
 

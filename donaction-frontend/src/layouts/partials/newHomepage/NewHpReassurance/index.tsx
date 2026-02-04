@@ -4,6 +4,8 @@ import RgpdShieldIcon from './icons/RgpdShieldIcon';
 import SpeedIcon from './icons/SpeedIcon';
 import './index.scss';
 
+type BadgeStyle = React.CSSProperties & { '--badge-index': number };
+
 const TRUST_BADGES = [
   {
     id: 'secure-payment',
@@ -44,7 +46,7 @@ export default function NewHpReassurance() {
             <li
               key={badge.id}
               className="new-hp-reassurance__badge"
-              style={{ '--badge-index': index } as React.CSSProperties}
+              style={{ '--badge-index': index } as BadgeStyle}
             >
               <div className="new-hp-reassurance__badge-content flex flex-col items-center text-center gap-3">
                 <div className="new-hp-reassurance__icon-wrapper">

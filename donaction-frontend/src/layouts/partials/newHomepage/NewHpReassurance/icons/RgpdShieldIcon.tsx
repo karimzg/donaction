@@ -1,4 +1,8 @@
+import { useId } from 'react';
+
 export default function RgpdShieldIcon({ className = '' }: { className?: string }) {
+  const gradientId = useId();
+
   return (
     <svg
       className={className}
@@ -7,6 +11,7 @@ export default function RgpdShieldIcon({ className = '' }: { className?: string 
       viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
     >
       {/* Shield shape */}
       <path
@@ -20,7 +25,7 @@ export default function RgpdShieldIcon({ className = '' }: { className?: string 
       {/* Shield fill */}
       <path
         d="M24 6L8 13V22C8 32.02 14.94 41.22 24 43.82C33.06 41.22 40 32.02 40 22V13L24 6Z"
-        fill="url(#rgpdGradient)"
+        fill={`url(#${gradientId})`}
         opacity="0.15"
       />
       {/* EU-inspired star circle */}
@@ -60,7 +65,7 @@ export default function RgpdShieldIcon({ className = '' }: { className?: string 
       />
 
       <defs>
-        <linearGradient id="rgpdGradient" x1="24" y1="6" x2="24" y2="44" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradientId} x1="24" y1="6" x2="24" y2="44" gradientUnits="userSpaceOnUse">
           <stop stopColor="#73cfa8" />
           <stop offset="1" stopColor="#5bb892" />
         </linearGradient>

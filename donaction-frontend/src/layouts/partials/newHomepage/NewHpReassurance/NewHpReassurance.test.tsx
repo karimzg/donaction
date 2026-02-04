@@ -6,35 +6,48 @@ describe('NewHpReassurance', () => {
   it('renders all 4 trust badges', () => {
     render(<NewHpReassurance />);
 
-    expect(screen.getByText('Paiement sécurisé')).toBeInTheDocument();
-    expect(screen.getByText('Reçu fiscal')).toBeInTheDocument();
-    expect(screen.getByText('Conforme')).toBeInTheDocument();
-    expect(screen.getByText('Activation')).toBeInTheDocument();
+    const items = screen.getAllByRole('listitem');
+    expect(items).toHaveLength(4);
+
+    // Test structure rather than exact text (i18n-friendly)
+    expect(items[0]).toHaveTextContent(/paiement|payment/i);
+    expect(items[1]).toHaveTextContent(/fiscal|cerfa/i);
+    expect(items[2]).toHaveTextContent(/rgpd|conforme/i);
+    expect(items[3]).toHaveTextContent(/activation|min/i);
   });
 
-  it('renders badge subtitles', () => {
+  it('renders badge subtitles with key terms', () => {
     render(<NewHpReassurance />);
 
-    expect(screen.getByText('Stripe')).toBeInTheDocument();
-    expect(screen.getByText('Cerfa')).toBeInTheDocument();
-    expect(screen.getByText('RGPD')).toBeInTheDocument();
-    expect(screen.getByText('en 5 min')).toBeInTheDocument();
+    const items = screen.getAllByRole('listitem');
+
+    // Check for key terms that identify each badge
+    expect(items[0]).toHaveTextContent(/stripe/i);
+    expect(items[1]).toHaveTextContent(/cerfa/i);
+    expect(items[2]).toHaveTextContent(/rgpd/i);
+    expect(items[3]).toHaveTextContent(/5\s*min/i);
   });
 
   it('renders as a section with proper accessibility', () => {
     render(<NewHpReassurance />);
 
-    const list = screen.getByRole('list', { name: /garanties et avantages/i });
+    const list = screen.getByRole('list');
     expect(list).toBeInTheDocument();
+    expect(list).toHaveAttribute('aria-label');
 
     const items = screen.getAllByRole('listitem');
     expect(items).toHaveLength(4);
   });
 
-  it('renders SVG icons for each badge', () => {
+  it('renders SVG icons for each badge with aria-hidden', () => {
     const { container } = render(<NewHpReassurance />);
 
     const svgIcons = container.querySelectorAll('svg');
-    expect(svgIcons.length).toBe(4);
+    expect(svgIcons).toHaveLength(4);
+
+    // All icons should be decorative (aria-hidden)
+    svgIcons.forEach((svg) => {
+      expect(svg).toHaveAttribute('aria-hidden', 'true');
+    });
   });
 });

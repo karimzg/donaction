@@ -1,4 +1,8 @@
+import { useId } from 'react';
+
 export default function SpeedIcon({ className = '' }: { className?: string }) {
+  const gradientId = useId();
+
   return (
     <svg
       className={className}
@@ -7,6 +11,7 @@ export default function SpeedIcon({ className = '' }: { className?: string }) {
       viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
     >
       {/* Stopwatch body */}
       <circle
@@ -22,7 +27,7 @@ export default function SpeedIcon({ className = '' }: { className?: string }) {
         cx="24"
         cy="26"
         r="15"
-        fill="url(#speedGradient)"
+        fill={`url(#${gradientId})`}
         opacity="0.15"
       />
       {/* Top button */}
@@ -70,7 +75,7 @@ export default function SpeedIcon({ className = '' }: { className?: string }) {
       />
 
       <defs>
-        <linearGradient id="speedGradient" x1="24" y1="10" x2="24" y2="42" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradientId} x1="24" y1="10" x2="24" y2="42" gradientUnits="userSpaceOnUse">
           <stop stopColor="#73cfa8" />
           <stop offset="1" stopColor="#5bb892" />
         </linearGradient>
