@@ -1,0 +1,44 @@
+// Layout variables
+$hero-min-height: 80vh;
+$hero-text-width: 60%;
+$hero-illustration-width: 40%;
+
+// Scroll indicator variables
+$scroll-indicator-size: 24px;
+$scroll-indicator-border: 3px;
+
+.new-hp-hero {
+	--hero-min-height: #{$hero-min-height};
+	--hero-text-width: #{$hero-text-width};
+	--hero-illustration-width: #{$hero-illustration-width};
+
+	&__scroll-indicator {
+		transform: translateX(-50%);
+		animation: bounce 2s infinite;
+		will-change: transform;
+
+		.scroll-indicator-arrow {
+			width: $scroll-indicator-size;
+			height: $scroll-indicator-size;
+			border-right: $scroll-indicator-border solid theme('colors.black');
+			border-bottom: $scroll-indicator-border solid theme('colors.black');
+			transform: rotate(45deg);
+		}
+	}
+}
+
+@keyframes bounce {
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateX(-50%) translateY(0);
+	}
+	40% {
+		transform: translateX(-50%) translateY(-10px);
+	}
+	60% {
+		transform: translateX(-50%) translateY(-5px);
+	}
+}
