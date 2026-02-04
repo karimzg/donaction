@@ -94,13 +94,11 @@ expect(heading).toBeInTheDocument();
 expect(heading.textContent).toBeTruthy();
 ```
 
-## Coverage Thresholds
+## Coverage
 
-Configured in `vitest.config.ts`:
-- Lines: 80%
-- Functions: 80%
-- Branches: 80%
-- Statements: 80%
+Run `npm run test:coverage` to generate reports.
+
+**Target**: 80% (thresholds to be enabled when coverage is meaningful)
 
 ## CI Integration
 
