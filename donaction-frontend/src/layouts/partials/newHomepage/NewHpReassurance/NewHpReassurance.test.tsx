@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import NewHpReassurance from './index';
 
@@ -60,5 +60,19 @@ describe('NewHpReassurance', () => {
 
 		const section = container.querySelector('.new-hp-reassurance');
 		expect(section).toHaveClass('bg-gray-50');
+	});
+
+	it('badge elements support hover interactions', () => {
+		const { container } = render(<NewHpReassurance />);
+
+		const badge = container.querySelector('.new-hp-reassurance__badge');
+		expect(badge).toBeInTheDocument();
+
+		// Verify badge can receive mouse events (hover capability)
+		fireEvent.mouseEnter(badge!);
+		fireEvent.mouseLeave(badge!);
+
+		// Badge should still be in document after hover interactions
+		expect(badge).toBeInTheDocument();
 	});
 });

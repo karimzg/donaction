@@ -1,6 +1,12 @@
 // Layout variables
 $badge-gap: 1.5rem;
 $icon-size: 2.5rem;
+$title-font-size: 0.9375rem;
+$subtitle-font-size: 0.8125rem;
+
+// Color variables (avoiding theme() for SCSS compatibility)
+$color-black: #000;
+$color-gray-600: #4b5563;
 
 .new-hp-reassurance {
 	&__grid {
@@ -52,12 +58,12 @@ $icon-size: 2.5rem;
 
 	&__title {
 		font-weight: 600;
-		font-size: 0.9375rem;
-		color: theme('colors.black');
+		font-size: $title-font-size;
+		color: $color-black;
 	}
 
 	&__subtitle {
-		font-size: 0.8125rem;
-		color: theme('colors.gray.600');
+		font-size: $subtitle-font-size;
+		color: $color-gray-600;
 	}
 }
