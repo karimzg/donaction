@@ -1,7 +1,6 @@
 .new-hp-hero {
-	position: relative;
-
 	&__scroll-indicator {
+		transform: translateX(-50%);
 		animation: bounce 2s infinite;
 
 		.scroll-indicator-arrow {

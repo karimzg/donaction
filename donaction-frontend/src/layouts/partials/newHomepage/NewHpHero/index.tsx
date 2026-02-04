@@ -3,7 +3,7 @@ import './index.scss';
 
 export default function NewHpHero() {
 	return (
-		<section className="new-hp-hero w-full min-h-[80vh] flex items-center py-16 px-6 md:px-0">
+		<section className="new-hp-hero w-full min-h-[80vh] relative flex items-center py-16 px-6 md:px-0">
 			<div className="flex flex-col lg:flex-row items-center justify-between gap-12 w-full max-w-screen-xl mx-auto">
 				{/* Text content - 60% */}
 				<div className="lg:w-[60%] w-full flex flex-col gap-6">
@@ -36,7 +36,11 @@ export default function NewHpHero() {
 			</div>
 
 			{/* Scroll indicator */}
-			<div className="new-hp-hero__scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2">
+			<div
+				className="new-hp-hero__scroll-indicator absolute bottom-8 left-1/2"
+				role="img"
+				aria-label="Défiler vers le bas"
+			>
 				<div className="scroll-indicator-arrow"></div>
 			</div>
 		</section>
