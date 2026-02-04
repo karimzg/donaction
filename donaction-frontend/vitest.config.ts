@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
     css: true,
     include: ['src/**/*.test.{ts,tsx}'],
+    typecheck: {
+      tsconfig: './tsconfig.test.json',
+    },
   },
   resolve: {
     alias: {
