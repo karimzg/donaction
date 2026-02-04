@@ -19,7 +19,7 @@ const ADVANTAGES = [
     id: 'no-subscription',
     Icon: NoSubscriptionIcon,
     title: 'Zéro abonnement',
-    subtitle: 'Paiement uniquement à l\'usage',
+    subtitle: "Paiement uniquement à l'usage",
   },
   {
     id: 'quick-setup',
