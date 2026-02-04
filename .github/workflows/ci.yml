@@ -69,6 +69,7 @@ jobs:
             node-version: 18
             working-directory: donaction-frontend
             # TODO: Add npm run lint
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.frontend }}
           - app: api

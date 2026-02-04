@@ -16,6 +16,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
+    "test:ci": "vitest run",
     "format": "prettier -w ./src",
     "copytypes": "node scripts/copyTypesFromStrapi.js"
   },
@@ -54,18 +56,25 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/google.maps": "^3.55.9",
     "@types/node": "20.4.0",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
+    "jsdom": "^28.0.0",
     "postcss": "^8.4.38",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "sass": "^1.63.6",
     "tailwindcss": "^3.3.2",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
   }
 }
