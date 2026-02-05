@@ -39,7 +39,7 @@ export default function TaxCalculationDisplay({
       </div>
 
       <div className="flex items-baseline gap-3 mb-3">
-        <span className="text-4xl font-bold text-donaction-primary" aria-live="polite">
+        <span className="text-4xl font-bold text-donaction-primary" aria-live="polite" aria-atomic="true">
           {result.costAfterTax.toFixed(2)} €
         </span>
         <span className="text-gray-400 line-through text-lg" aria-label={`Prix original: ${result.originalAmount.toFixed(2)} euros`}>

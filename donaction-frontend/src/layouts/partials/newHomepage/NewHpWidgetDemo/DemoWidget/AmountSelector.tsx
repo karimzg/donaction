@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { AmountSelectorProps } from '../types';
 import {
   SUGGESTED_AMOUNTS_INDIVIDUAL,
@@ -13,24 +14,45 @@ export default function AmountSelector({
   onChange,
   isOrganization,
 }: AmountSelectorProps) {
-  const amounts = isOrganization
-    ? SUGGESTED_AMOUNTS_ORGANIZATION
-    : SUGGESTED_AMOUNTS_INDIVIDUAL;
+  // Memoize amounts array to avoid recreation on every render
+  const amounts = useMemo(
+    () =>
+      isOrganization ? SUGGESTED_AMOUNTS_ORGANIZATION : SUGGESTED_AMOUNTS_INDIVIDUAL,
+    [isOrganization]
+  );
+
+  // Local state for input display (allows empty while typing)
+  const [inputValue, setInputValue] = useState<string>(value.toString());
+
+  // Sync inputValue when value changes externally (button clicks)
+  useMemo(() => {
+    setInputValue(value.toString());
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
 
-    // Handle empty string - reset to minimum
+    // Allow empty string while typing
+    setInputValue(rawValue);
+
     if (rawValue === '') {
-      onChange(MIN_DONATION_AMOUNT);
-      return;
+      return; // Don't update parent yet, wait for blur
     }
 
+    // Only whole euros allowed (parseInt ignores decimals)
     const newValue = parseInt(rawValue, 10);
 
-    // Validate: must be a number >= MIN_DONATION_AMOUNT
     if (!isNaN(newValue) && newValue >= MIN_DONATION_AMOUNT) {
       onChange(Math.min(newValue, MAX_DONATION_AMOUNT));
+    }
+  };
+
+  const handleBlur = () => {
+    // On blur, ensure valid value
+    const numValue = parseInt(inputValue, 10);
+    if (isNaN(numValue) || numValue < MIN_DONATION_AMOUNT) {
+      onChange(MIN_DONATION_AMOUNT);
+      setInputValue(MIN_DONATION_AMOUNT.toString());
     }
   };
 
@@ -66,11 +88,12 @@ export default function AmountSelector({
         <div className="relative">
           <input
             id="custom-amount"
-            type="number"
-            min={MIN_DONATION_AMOUNT}
-            max={MAX_DONATION_AMOUNT}
-            value={value}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={inputValue}
             onChange={handleInputChange}
+            onBlur={handleBlur}
             aria-label="Montant libre en euros"
             aria-describedby="amount-hint"
             className="w-28 text-center border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-donaction-primary focus:outline-none transition-colors"

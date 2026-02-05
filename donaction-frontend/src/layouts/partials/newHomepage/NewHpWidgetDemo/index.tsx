@@ -16,7 +16,7 @@ const SECTION_CONTENT = {
 function CheckIcon() {
   return (
     <svg
-      className="w-5 h-5 text-[#73cfa8] flex-shrink-0"
+      className="w-5 h-5 text-donaction-primary flex-shrink-0"
       fill="currentColor"
       viewBox="0 0 20 20"
     >
@@ -36,7 +36,7 @@ export default function NewHpWidgetDemo() {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
           {/* Text Content - Left side */}
           <div className="new-hp-widget-demo__content lg:w-[45%] text-center lg:text-left">
-            <span className="inline-block bg-[#73cfa8]/10 text-[#3b9b75] px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+            <span className="inline-block bg-donaction-primary/10 text-donaction-primary-dark px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
               Démo interactive
             </span>
 

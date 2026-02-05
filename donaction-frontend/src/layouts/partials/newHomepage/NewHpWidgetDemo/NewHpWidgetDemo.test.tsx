@@ -121,7 +121,9 @@ describe('NewHpWidgetDemo', () => {
     render(<NewHpWidgetDemo />);
     const input = screen.getByLabelText(/montant libre/i);
     expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute('type', 'number');
+    // Using type="text" with inputMode="numeric" for better mobile UX
+    expect(input).toHaveAttribute('type', 'text');
+    expect(input).toHaveAttribute('inputMode', 'numeric');
   });
 
   it('updates calculation when custom amount is entered', () => {
@@ -135,13 +137,17 @@ describe('NewHpWidgetDemo', () => {
 
   // Edge case tests for input validation
   describe('input validation edge cases', () => {
-    it('resets to minimum when empty string is entered', () => {
+    it('allows empty input while typing, resets on blur', () => {
       render(<NewHpWidgetDemo />);
       const input = screen.getByLabelText(/montant libre/i);
-      fireEvent.change(input, { target: { value: '' } });
 
-      // Should reset to 1€ (MIN_DONATION_AMOUNT)
-      expect(input).toHaveValue(1);
+      // Empty while typing is allowed
+      fireEvent.change(input, { target: { value: '' } });
+      expect(input).toHaveValue('');
+
+      // On blur, resets to minimum
+      fireEvent.blur(input);
+      expect(input).toHaveValue('1');
     });
 
     it('caps amounts at maximum (100000)', () => {
@@ -153,13 +159,14 @@ describe('NewHpWidgetDemo', () => {
       expect(screen.getByText('34000.00 €')).toBeInTheDocument();
     });
 
-    it('prevents amounts below minimum', () => {
+    it('validates minimum on blur', () => {
       render(<NewHpWidgetDemo />);
       const input = screen.getByLabelText(/montant libre/i);
       fireEvent.change(input, { target: { value: '0' } });
+      fireEvent.blur(input);
 
-      // Should not update (stays at default 50)
-      expect(input).toHaveValue(50);
+      // Should reset to minimum on blur
+      expect(input).toHaveValue('1');
     });
   });
 
@@ -198,6 +205,18 @@ describe('NewHpWidgetDemo', () => {
       render(<NewHpWidgetDemo />);
       const radiogroup = screen.getByRole('radiogroup', { name: /type de donateur/i });
       expect(radiogroup).toBeInTheDocument();
+    });
+
+    it('closes modal when clicking backdrop', () => {
+      render(<NewHpWidgetDemo />);
+      const continueBtn = screen.getByRole('button', { name: /continuer/i });
+      fireEvent.click(continueBtn);
+
+      // Click the backdrop (dialog element itself, not inner content)
+      const dialog = screen.getByRole('dialog');
+      fireEvent.click(dialog);
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
 });

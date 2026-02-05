@@ -1,16 +1,11 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import AmountSelector from './AmountSelector';
 import DonorTypeToggle from './DonorTypeToggle';
 import TaxCalculationDisplay from './TaxCalculationDisplay';
 import DemoBlocker from './DemoBlocker';
-import {
-  calculateDemoTaxReduction,
-  DEFAULT_DONATION_AMOUNT,
-  MIN_DONATION_AMOUNT,
-} from '../utils';
-import { TaxCalculationResult } from '../types';
+import { calculateDemoTaxReduction, DEFAULT_DONATION_AMOUNT } from '../utils';
 import './index.scss';
 
 export default function DemoWidget() {
@@ -18,27 +13,11 @@ export default function DemoWidget() {
   const [isOrganization, setIsOrganization] = useState<boolean>(false);
   const [showBlocker, setShowBlocker] = useState<boolean>(false);
 
-  // Error boundary: safe tax calculation with fallback
-  const taxResult = useMemo((): TaxCalculationResult => {
-    try {
-      return calculateDemoTaxReduction(amount, isOrganization);
-    } catch (error) {
-      console.error('Tax calculation error:', error);
-      // Fallback to safe defaults
-      return {
-        originalAmount: MIN_DONATION_AMOUNT,
-        taxReduction: 0,
-        costAfterTax: MIN_DONATION_AMOUNT,
-        taxRate: 0,
-        donorType: isOrganization ? 'entreprise' : 'particulier',
-      };
-    }
-  }, [amount, isOrganization]);
-
-  // Debounced amount setter for performance
-  const handleAmountChange = useCallback((newAmount: number) => {
-    setAmount(newAmount);
-  }, []);
+  // Tax calculation with built-in validation (see calculateDemoTaxReduction)
+  const taxResult = useMemo(
+    () => calculateDemoTaxReduction(amount, isOrganization),
+    [amount, isOrganization]
+  );
 
   const handleContinue = () => {
     setShowBlocker(true);
@@ -75,7 +54,7 @@ export default function DemoWidget() {
           <div className="mb-6">
             <AmountSelector
               value={amount}
-              onChange={handleAmountChange}
+              onChange={setAmount}
               isOrganization={isOrganization}
             />
           </div>
