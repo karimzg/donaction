@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { AmountSelectorProps } from '../types';
 import {
   SUGGESTED_AMOUNTS_INDIVIDUAL,
@@ -25,7 +25,7 @@ export default function AmountSelector({
   const [inputValue, setInputValue] = useState<string>(value.toString());
 
   // Sync inputValue when value changes externally (button clicks)
-  useMemo(() => {
+  useEffect(() => {
     setInputValue(value.toString());
   }, [value]);
 
@@ -86,6 +86,13 @@ export default function AmountSelector({
           Montant libre :
         </label>
         <div className="relative">
+          {/*
+            Using type="text" with inputMode="numeric" instead of type="number" because:
+            1. Avoids browser spinner arrows (better UX)
+            2. Better control over validation behavior
+            3. Prevents scientific notation (1e2) issues
+            4. Better mobile keyboard support with pattern="[0-9]*"
+          */}
           <input
             id="custom-amount"
             type="text"
@@ -96,6 +103,7 @@ export default function AmountSelector({
             onBlur={handleBlur}
             aria-label="Montant libre en euros"
             aria-describedby="amount-hint"
+            aria-live="polite"
             className="w-28 text-center border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-donaction-primary focus:outline-none transition-colors"
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">

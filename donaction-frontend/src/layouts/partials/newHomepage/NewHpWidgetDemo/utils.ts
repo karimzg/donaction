@@ -12,22 +12,12 @@ export function calculateDemoTaxReduction(
   amount: number,
   isOrganization: boolean
 ): TaxCalculationResult {
-  // Type safety: validate amount is a finite positive number
-  if (!Number.isFinite(amount) || amount < MIN_DONATION_AMOUNT) {
-    const safeAmount = MIN_DONATION_AMOUNT;
-    const taxRate = isOrganization
-      ? TAUX_DEDUCTION_FISCALE_PRO
-      : TAUX_DEDUCTION_FISCALE_PART;
-    return {
-      originalAmount: safeAmount,
-      taxReduction: Math.round(safeAmount * taxRate * 100) / 100,
-      costAfterTax: Math.round(safeAmount * (1 - taxRate) * 100) / 100,
-      taxRate,
-      donorType: isOrganization ? 'entreprise' : 'particulier',
-    };
-  }
+  // Clamp amount to valid range, defaulting to MIN if invalid
+  const clampedAmount =
+    Number.isFinite(amount) && amount >= MIN_DONATION_AMOUNT
+      ? Math.min(amount, MAX_DONATION_AMOUNT)
+      : MIN_DONATION_AMOUNT;
 
-  const clampedAmount = Math.min(amount, MAX_DONATION_AMOUNT);
   const taxRate = isOrganization
     ? TAUX_DEDUCTION_FISCALE_PRO
     : TAUX_DEDUCTION_FISCALE_PART;
