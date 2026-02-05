@@ -25,6 +25,17 @@
   }
 }
 
+// Hide number input spinners (arrows)
+.amount-selector input[type='number'] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 // Amount selector button hover effect
 .amount-selector__btn {
   transition: all 0.2s ease;
