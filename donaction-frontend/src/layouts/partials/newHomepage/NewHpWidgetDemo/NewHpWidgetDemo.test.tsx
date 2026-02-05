@@ -37,32 +37,32 @@ describe('NewHpWidgetDemo', () => {
 
   it('renders donor type toggle with both options', () => {
     render(<NewHpWidgetDemo />);
-    expect(screen.getByRole('button', { name: /particulier/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /entreprise/i })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /particulier/i })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /entreprise/i })).toBeInTheDocument();
   });
 
   it('displays default amount selection buttons for individuals', () => {
     render(<NewHpWidgetDemo />);
-    expect(screen.getByRole('button', { name: '10 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '20 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '50 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '100 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '10 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '20 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '50 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '100 €' })).toBeInTheDocument();
   });
 
   it('shows organization amounts when enterprise is selected', () => {
     render(<NewHpWidgetDemo />);
-    const entrepriseBtn = screen.getByRole('button', { name: /entreprise/i });
+    const entrepriseBtn = screen.getByRole('radio', { name: /entreprise/i });
     fireEvent.click(entrepriseBtn);
 
-    expect(screen.getByRole('button', { name: '100 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '200 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '500 €' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '1000 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '100 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '200 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '500 €' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '1000 €' })).toBeInTheDocument();
   });
 
   it('updates tax calculation when amount changes', () => {
     render(<NewHpWidgetDemo />);
-    const button100 = screen.getByRole('button', { name: '100 €' });
+    const button100 = screen.getByRole('radio', { name: '100 €' });
     fireEvent.click(button100);
 
     // 100€ - 66% = 34€ cost after tax
@@ -73,11 +73,11 @@ describe('NewHpWidgetDemo', () => {
     render(<NewHpWidgetDemo />);
 
     // First select 100€
-    const button100 = screen.getByRole('button', { name: '100 €' });
+    const button100 = screen.getByRole('radio', { name: '100 €' });
     fireEvent.click(button100);
 
     // Then switch to enterprise
-    const entrepriseBtn = screen.getByRole('button', { name: /entreprise/i });
+    const entrepriseBtn = screen.getByRole('radio', { name: /entreprise/i });
     fireEvent.click(entrepriseBtn);
 
     // 100€ - 60% = 40€ cost after tax
@@ -131,5 +131,73 @@ describe('NewHpWidgetDemo', () => {
 
     // 200€ - 66% = 68€ cost after tax
     expect(screen.getByText('68.00 €')).toBeInTheDocument();
+  });
+
+  // Edge case tests for input validation
+  describe('input validation edge cases', () => {
+    it('resets to minimum when empty string is entered', () => {
+      render(<NewHpWidgetDemo />);
+      const input = screen.getByLabelText(/montant libre/i);
+      fireEvent.change(input, { target: { value: '' } });
+
+      // Should reset to 1€ (MIN_DONATION_AMOUNT)
+      expect(input).toHaveValue(1);
+    });
+
+    it('caps amounts at maximum (100000)', () => {
+      render(<NewHpWidgetDemo />);
+      const input = screen.getByLabelText(/montant libre/i);
+      fireEvent.change(input, { target: { value: '999999' } });
+
+      // 100000€ - 66% = 34000€ cost after tax
+      expect(screen.getByText('34000.00 €')).toBeInTheDocument();
+    });
+
+    it('prevents amounts below minimum', () => {
+      render(<NewHpWidgetDemo />);
+      const input = screen.getByLabelText(/montant libre/i);
+      fireEvent.change(input, { target: { value: '0' } });
+
+      // Should not update (stays at default 50)
+      expect(input).toHaveValue(50);
+    });
+  });
+
+  // Accessibility tests
+  describe('accessibility', () => {
+    it('modal has correct aria attributes', () => {
+      render(<NewHpWidgetDemo />);
+      const continueBtn = screen.getByRole('button', { name: /continuer/i });
+      fireEvent.click(continueBtn);
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toHaveAttribute('aria-modal', 'true');
+      expect(dialog).toHaveAttribute('aria-labelledby', 'demo-blocker-title');
+    });
+
+    it('closes modal on Escape key', () => {
+      render(<NewHpWidgetDemo />);
+      const continueBtn = screen.getByRole('button', { name: /continuer/i });
+      fireEvent.click(continueBtn);
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('amount buttons have aria-checked attribute', () => {
+      render(<NewHpWidgetDemo />);
+      const button50 = screen.getByRole('radio', { name: '50 €' });
+      expect(button50).toHaveAttribute('aria-checked', 'true');
+
+      const button100 = screen.getByRole('radio', { name: '100 €' });
+      expect(button100).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('donor type toggle has radiogroup role', () => {
+      render(<NewHpWidgetDemo />);
+      const radiogroup = screen.getByRole('radiogroup', { name: /type de donateur/i });
+      expect(radiogroup).toBeInTheDocument();
+    });
   });
 });

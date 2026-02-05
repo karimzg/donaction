@@ -1,24 +1,44 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import AmountSelector from './AmountSelector';
 import DonorTypeToggle from './DonorTypeToggle';
 import TaxCalculationDisplay from './TaxCalculationDisplay';
 import DemoBlocker from './DemoBlocker';
-import { calculateDemoTaxReduction } from '../utils';
+import {
+  calculateDemoTaxReduction,
+  DEFAULT_DONATION_AMOUNT,
+  MIN_DONATION_AMOUNT,
+} from '../utils';
+import { TaxCalculationResult } from '../types';
 import './index.scss';
 
-const DEFAULT_AMOUNT = 50;
-
 export default function DemoWidget() {
-  const [amount, setAmount] = useState<number>(DEFAULT_AMOUNT);
+  const [amount, setAmount] = useState<number>(DEFAULT_DONATION_AMOUNT);
   const [isOrganization, setIsOrganization] = useState<boolean>(false);
   const [showBlocker, setShowBlocker] = useState<boolean>(false);
 
-  const taxResult = useMemo(
-    () => calculateDemoTaxReduction(amount, isOrganization),
-    [amount, isOrganization]
-  );
+  // Error boundary: safe tax calculation with fallback
+  const taxResult = useMemo((): TaxCalculationResult => {
+    try {
+      return calculateDemoTaxReduction(amount, isOrganization);
+    } catch (error) {
+      console.error('Tax calculation error:', error);
+      // Fallback to safe defaults
+      return {
+        originalAmount: MIN_DONATION_AMOUNT,
+        taxReduction: 0,
+        costAfterTax: MIN_DONATION_AMOUNT,
+        taxRate: 0,
+        donorType: isOrganization ? 'entreprise' : 'particulier',
+      };
+    }
+  }, [amount, isOrganization]);
+
+  // Debounced amount setter for performance
+  const handleAmountChange = useCallback((newAmount: number) => {
+    setAmount(newAmount);
+  }, []);
 
   const handleContinue = () => {
     setShowBlocker(true);
@@ -28,7 +48,7 @@ export default function DemoWidget() {
     <>
       <div className="demo-widget relative">
         {/* Demo Badge */}
-        <span className="demo-widget__badge absolute -top-3 -right-3 bg-[#fb9289] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">
+        <span className="demo-widget__badge absolute -top-3 -right-3 bg-donaction-accent text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">
           Mode Démo
         </span>
 
@@ -55,7 +75,7 @@ export default function DemoWidget() {
           <div className="mb-6">
             <AmountSelector
               value={amount}
-              onChange={setAmount}
+              onChange={handleAmountChange}
               isOrganization={isOrganization}
             />
           </div>
@@ -69,7 +89,7 @@ export default function DemoWidget() {
           <button
             type="button"
             onClick={handleContinue}
-            className="w-full bg-[#73cfa8] hover:bg-[#5bb892] text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-[#73cfa8]/25"
+            className="w-full bg-donaction-primary hover:bg-donaction-primary-dark text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-donaction-primary/25"
           >
             Continuer →
           </button>

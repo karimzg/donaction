@@ -52,6 +52,10 @@ module.exports = {
 				border: theme.colors.default.theme_color.border,
 				'theme-dark': theme.colors.default.theme_color.theme_dark,
 				'theme-light': theme.colors.default.theme_color.theme_light,
+				// Donaction semantic colors for interactive components
+				'donaction-primary': '#73cfa8',
+				'donaction-primary-dark': '#5bb892',
+				'donaction-accent': '#fb9289',
 			},
 			fontSize: {
 				base: font_base + 'px',

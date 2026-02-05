@@ -24,7 +24,11 @@ export default function TaxCalculationDisplay({
   result,
 }: TaxCalculationDisplayProps) {
   return (
-    <div className="tax-display bg-gradient-to-br from-[#73cfa8]/5 to-[#73cfa8]/10 rounded-xl p-6 border border-[#73cfa8]/20">
+    <div
+      className="tax-display bg-gradient-to-br from-donaction-primary/5 to-donaction-primary/10 rounded-xl p-6 border border-donaction-primary/20"
+      role="region"
+      aria-label="Résultat du calcul fiscal"
+    >
       <div className="flex items-center gap-2 mb-4">
         <h3 className="font-semibold text-gray-800">
           Coût réel après réduction d&apos;impôts
@@ -35,16 +39,16 @@ export default function TaxCalculationDisplay({
       </div>
 
       <div className="flex items-baseline gap-3 mb-3">
-        <span className="text-4xl font-bold text-[#73cfa8]">
+        <span className="text-4xl font-bold text-donaction-primary" aria-live="polite">
           {result.costAfterTax.toFixed(2)} €
         </span>
-        <span className="text-gray-400 line-through text-lg">
+        <span className="text-gray-400 line-through text-lg" aria-label={`Prix original: ${result.originalAmount.toFixed(2)} euros`}>
           {result.originalAmount.toFixed(2)} €
         </span>
       </div>
 
       <div className="flex items-center gap-2 text-gray-600">
-        <svg className="w-5 h-5 text-[#73cfa8]" fill="currentColor" viewBox="0 0 20 20">
+        <svg className="w-5 h-5 text-donaction-primary" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
           <path
             fillRule="evenodd"
             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -53,7 +57,7 @@ export default function TaxCalculationDisplay({
         </svg>
         <span>
           Vous économisez{' '}
-          <strong className="text-[#3b9b75]">
+          <strong className="text-donaction-primary-dark">
             {result.taxReduction.toFixed(2)} €
           </strong>
         </span>

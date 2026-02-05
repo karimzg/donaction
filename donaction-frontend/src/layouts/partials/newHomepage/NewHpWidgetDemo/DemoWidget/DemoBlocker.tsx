@@ -1,15 +1,17 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { DemoBlockerProps } from '../types';
 
 function LockIcon() {
   return (
     <svg
-      className="w-16 h-16 text-[#fb9289]"
+      className="w-16 h-16 text-donaction-accent"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
+      aria-hidden="true"
     >
       <path
         strokeLinecap="round"
@@ -22,9 +24,30 @@ function LockIcon() {
 }
 
 export default function DemoBlocker({ onClose }: DemoBlockerProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus trap: focus close button on mount
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+
+    // Handle Escape key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
     <div
       className="demo-blocker fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="demo-blocker-title"
+      aria-describedby="demo-blocker-description"
       onClick={onClose}
     >
       <div
@@ -32,22 +55,29 @@ export default function DemoBlocker({ onClose }: DemoBlockerProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center mb-6">
-          <div className="bg-[#fb9289]/10 p-4 rounded-full">
+          <div className="bg-donaction-accent/10 p-4 rounded-full">
             <LockIcon />
           </div>
         </div>
 
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+        <h3
+          id="demo-blocker-title"
+          className="text-2xl font-bold text-gray-900 mb-3"
+        >
           Mode Démonstration
         </h3>
 
-        <p className="text-gray-600 mb-8 leading-relaxed">
+        <p
+          id="demo-blocker-description"
+          className="text-gray-600 mb-8 leading-relaxed"
+        >
           Cette interface est une démonstration. Pour effectuer un don réel et
           soutenir une association, découvrez nos projets partenaires.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="px-6 py-3 border-2 border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
@@ -56,7 +86,7 @@ export default function DemoBlocker({ onClose }: DemoBlockerProps) {
           </button>
           <Link
             href="/projets"
-            className="px-6 py-3 bg-[#73cfa8] text-white rounded-lg font-semibold hover:bg-[#5bb892] transition-colors"
+            className="px-6 py-3 bg-donaction-primary text-white rounded-lg font-semibold hover:bg-donaction-primary-dark transition-colors"
           >
             Voir les projets
           </Link>
