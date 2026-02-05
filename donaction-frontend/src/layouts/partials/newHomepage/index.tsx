@@ -1,6 +1,7 @@
 import NewHpHero from './NewHpHero';
 import NewHpReassurance from './NewHpReassurance';
 import NewHpWhyDonaction from './NewHpWhyDonaction';
+import NewHpWidgetDemo from './NewHpWidgetDemo';
 
 export default function NewHomepageContent() {
   return (
@@ -8,6 +9,7 @@ export default function NewHomepageContent() {
       <NewHpHero />
       <NewHpReassurance />
       <NewHpWhyDonaction />
+      <NewHpWidgetDemo />
     </main>
   );
 }
