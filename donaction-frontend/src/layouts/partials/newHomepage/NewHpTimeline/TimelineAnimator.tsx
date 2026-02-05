@@ -3,18 +3,33 @@
 import { useEffect, useRef, useState, ReactNode } from 'react';
 
 interface TimelineAnimatorProps {
+  /** Content to animate on scroll */
   children: ReactNode;
+  /** Additional CSS classes */
   className?: string;
 }
 
+/**
+ * Client component that triggers animations when content enters viewport.
+ * Uses IntersectionObserver to detect scroll position and adds 'is-visible'
+ * class to enable CSS animations. SSR-safe with fallback for unsupported browsers.
+ */
 export default function TimelineAnimator({
   children,
   className,
 }: TimelineAnimatorProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  // SSR-safe: default to visible if IntersectionObserver not supported
+  const [isVisible, setIsVisible] = useState(
+    typeof window !== 'undefined' && !('IntersectionObserver' in window)
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Skip if IntersectionObserver not available (already visible via fallback)
+    if (!('IntersectionObserver' in window)) {
+      return;
+    }
+
     const callback = (entries: IntersectionObserverEntry[]) => {
       if (entries[0].isIntersecting) {
         setIsVisible(true);
@@ -27,11 +42,17 @@ export default function TimelineAnimator({
       threshold: 0.1,
     });
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const currentRef = containerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+      observer.disconnect();
+    };
   }, []);
 
   return (

@@ -5,6 +5,10 @@ import DocumentIcon from './icons/DocumentIcon';
 import PaletteIcon from './icons/PaletteIcon';
 import './index.scss';
 
+/**
+ * CSS variable type for staggered animation delays.
+ * --step-index is used in SCSS to calculate transition-delay per step.
+ */
 type StepStyle = React.CSSProperties & { '--step-index': number };
 
 const TIMELINE_STEPS = [
@@ -38,6 +42,16 @@ const TIMELINE_STEPS = [
   },
 ] as const;
 
+/**
+ * Timeline activation steps component with scroll-triggered animations.
+ *
+ * Features:
+ * - Hybrid architecture: Server Component for static content + Client TimelineAnimator
+ * - Staggered entrance animations via CSS --step-index variable
+ * - Line draw animation using stroke-dashoffset
+ * - Responsive horizontal (desktop) / vertical (mobile) layouts
+ * - Reduced motion and SSR-safe fallbacks
+ */
 export default function NewHpTimeline() {
   return (
     <section className="new-hp-timeline w-full py-16 md:py-20 lg:py-24">
@@ -48,9 +62,9 @@ export default function NewHpTimeline() {
           </h2>
 
           <div className="new-hp-timeline__container relative">
-            {/* Connecting Line - Desktop (horizontal) - positioned to connect circles */}
+            {/* Connecting Line - Desktop (horizontal) */}
             <svg
-              className="new-hp-timeline__line new-hp-timeline__line--desktop hidden md:block absolute top-[36px] left-[12.5%] w-[75%] h-[4px] z-0"
+              className="new-hp-timeline__line new-hp-timeline__line--desktop"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
@@ -60,9 +74,6 @@ export default function NewHpTimeline() {
                 y1="2"
                 x2="100%"
                 y2="2"
-                stroke="#e5e7eb"
-                strokeWidth="4"
-                strokeLinecap="round"
               />
               <line
                 className="new-hp-timeline__line-progress"
@@ -70,15 +81,12 @@ export default function NewHpTimeline() {
                 y1="2"
                 x2="100%"
                 y2="2"
-                stroke="#73cfa8"
-                strokeWidth="4"
-                strokeLinecap="round"
               />
             </svg>
 
             {/* Connecting Line - Mobile (vertical) */}
             <svg
-              className="new-hp-timeline__line new-hp-timeline__line--mobile md:hidden absolute top-[36px] left-[47px] w-[4px] h-[calc(100%-72px)] z-0"
+              className="new-hp-timeline__line new-hp-timeline__line--mobile"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
@@ -88,9 +96,6 @@ export default function NewHpTimeline() {
                 y1="0"
                 x2="2"
                 y2="100%"
-                stroke="#e5e7eb"
-                strokeWidth="4"
-                strokeLinecap="round"
               />
               <line
                 className="new-hp-timeline__line-progress"
@@ -98,9 +103,6 @@ export default function NewHpTimeline() {
                 y1="0"
                 x2="2"
                 y2="100%"
-                stroke="#73cfa8"
-                strokeWidth="4"
-                strokeLinecap="round"
               />
             </svg>
 
@@ -117,27 +119,26 @@ export default function NewHpTimeline() {
                   style={{ '--step-index': index } as StepStyle}
                   role="listitem"
                 >
-                  {/* Step marker with opaque background to hide line */}
+                  {/* Step marker with opaque background to mask connecting line */}
                   <div className="new-hp-timeline__step-marker relative z-10">
-                    {/* White background circle to mask the line */}
-                    <div className="new-hp-timeline__step-bg absolute inset-[-4px] rounded-full bg-[#f6f7f9]" />
-                    <div className="new-hp-timeline__step-circle relative w-[72px] h-[72px] rounded-full flex items-center justify-center">
-                      <step.Icon className="new-hp-timeline__step-icon w-9 h-9 text-gray-700" />
+                    <div className="new-hp-timeline__step-bg" />
+                    <div className="new-hp-timeline__step-circle">
+                      <step.Icon className="new-hp-timeline__step-icon" />
                     </div>
-                    <span className="new-hp-timeline__step-number absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#73cfa8] text-white text-xs font-bold flex items-center justify-center shadow-md">
+                    <span className="new-hp-timeline__step-number">
                       {index + 1}
                     </span>
                   </div>
 
                   {/* Step content card */}
-                  <div className="new-hp-timeline__step-content flex flex-col gap-1.5 md:mt-4 md:p-4 md:rounded-xl md:bg-white/60 md:backdrop-blur-sm md:border md:border-gray-100 md:shadow-sm md:min-h-[120px] md:w-full">
-                    <span className="new-hp-timeline__step-duration inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#73cfa8]/15 text-[#3d8a6a] w-fit md:mx-auto">
+                  <div className="new-hp-timeline__step-content">
+                    <span className="new-hp-timeline__step-duration">
                       {step.duration}
                     </span>
-                    <span className="new-hp-timeline__step-title text-base md:text-lg font-semibold text-gray-800 mt-0.5">
+                    <span className="new-hp-timeline__step-title">
                       {step.title}
                     </span>
-                    <span className="new-hp-timeline__step-description text-sm text-gray-500 leading-relaxed">
+                    <span className="new-hp-timeline__step-description">
                       {step.description}
                     </span>
                   </div>
