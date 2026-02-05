@@ -1,0 +1,387 @@
+// =============================================================================
+// NewHpTimeline Component Styles
+// =============================================================================
+
+// Design tokens - centralized color definitions
+$color-primary: #73cfa8;
+$color-primary-dark: #3d8a6a;
+$color-gray-line: #e5e7eb;
+$section-bg: #f6f7f9;
+
+// Layout variables - calculated from circle sizes for maintainability
+$circle-size-desktop: 72px;
+$circle-size-tablet: 64px;
+$circle-size-mobile: 64px;
+$line-offset-desktop: calc($circle-size-desktop / 2); // 36px
+$line-offset-mobile: calc($circle-size-mobile / 2 + 15px); // 47px (centered on mobile padding)
+
+// Animation timing variables
+$entrance-duration: 0.7s;
+$entrance-delay-base: 0.2s;
+$entrance-delay-step: 0.2s;
+$line-draw-duration: 1s;
+$hover-duration: 0.3s;
+
+// =============================================================================
+// Main Component
+// =============================================================================
+
+.new-hp-timeline {
+  background: linear-gradient(180deg, #f3f4f6 0%, $section-bg 30%, $section-bg 70%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+
+  // Title animation - slide up with fade
+  &__title {
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+      opacity $entrance-duration cubic-bezier(0.22, 1, 0.36, 1),
+      transform $entrance-duration cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  // Container positioning
+  &__container {
+    position: relative;
+  }
+
+  // =============================================================================
+  // Connecting Lines
+  // =============================================================================
+
+  &__line {
+    position: absolute;
+    z-index: 0;
+  }
+
+  &__line--desktop {
+    display: none;
+    top: $line-offset-desktop;
+    left: 12.5%;
+    width: 75%;
+    height: 4px;
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+  }
+
+  &__line--mobile {
+    display: block;
+    top: $line-offset-desktop;
+    left: $line-offset-mobile;
+    width: 4px;
+    height: calc(100% - $circle-size-mobile - 8px);
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__line-bg {
+    stroke: $color-gray-line;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  &__line-progress {
+    stroke: $color-primary;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    transition: stroke-dashoffset $line-draw-duration cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(#{$entrance-delay-base} + 0.3s);
+  }
+
+  &__wrapper.is-visible &__line-progress {
+    stroke-dashoffset: 0;
+  }
+
+  // =============================================================================
+  // Step Items
+  // =============================================================================
+
+  &__step {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    transition:
+      opacity $entrance-duration cubic-bezier(0.22, 1, 0.36, 1),
+      transform $entrance-duration cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(
+      var(--step-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.4s
+    );
+  }
+
+  &__wrapper.is-visible &__step {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  // =============================================================================
+  // Step Marker (Circle + Number Badge)
+  // =============================================================================
+
+  &__step-marker {
+    flex-shrink: 0;
+  }
+
+  // Background circle to mask the connecting line
+  &__step-bg {
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    background: $section-bg;
+    transition: transform $hover-duration ease;
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-bg {
+      transform: scale(1.08);
+    }
+  }
+
+  // Main step circle
+  &__step-circle {
+    position: relative;
+    width: $circle-size-desktop;
+    height: $circle-size-desktop;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #ffffff 0%, #f0f1f3 100%);
+    border: 2px solid $color-gray-line;
+    box-shadow:
+      0 4px 12px -4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    transition:
+      border-color $hover-duration ease,
+      box-shadow $hover-duration ease,
+      transform $hover-duration ease;
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-circle {
+      border-color: rgba($color-primary, 0.5);
+      box-shadow:
+        0 8px 24px -8px rgba($color-primary, 0.25),
+        0 4px 12px -4px rgba(0, 0, 0, 0.06),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8);
+      transform: scale(1.05);
+    }
+  }
+
+  // Step icon inside circle
+  &__step-icon {
+    width: 36px;
+    height: 36px;
+    color: #374151; // gray-700
+    transition: transform $hover-duration ease;
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  // Step number badge
+  &__step-number {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: $color-primary;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba($color-primary, 0.4);
+    transition:
+      transform $hover-duration ease,
+      box-shadow $hover-duration ease;
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-number {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba($color-primary, 0.5);
+    }
+  }
+
+  // =============================================================================
+  // Step Content Card
+  // =============================================================================
+
+  &__step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition:
+      background $hover-duration ease,
+      border-color $hover-duration ease,
+      box-shadow $hover-duration ease,
+      transform $hover-duration ease;
+
+    @media (min-width: 768px) {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      border: 1px solid #f3f4f6;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      min-height: 120px;
+      width: 100%;
+    }
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-content {
+      @media (min-width: 768px) {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba($color-primary, 0.2);
+        box-shadow: 0 8px 24px -12px rgba($color-primary, 0.15);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  // Duration badge
+  &__step-duration {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba($color-primary, 0.15);
+    color: $color-primary-dark;
+    width: fit-content;
+    transition: background $hover-duration ease;
+
+    @media (min-width: 768px) {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (hover: hover) {
+    &__step:hover &__step-duration {
+      background: rgba($color-primary, 0.25);
+    }
+  }
+
+  // Step title
+  &__step-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937; // gray-800
+    margin-top: 2px;
+
+    @media (min-width: 768px) {
+      font-size: 18px;
+    }
+  }
+
+  // Step description
+  &__step-description {
+    font-size: 14px;
+    color: #6b7280; // gray-500
+    line-height: 1.5;
+  }
+}
+
+// =============================================================================
+// Responsive Adjustments
+// =============================================================================
+
+@media (max-width: 767px) {
+  .new-hp-timeline {
+    &__step {
+      padding-left: 16px;
+    }
+
+    &__step-bg {
+      inset: -3px;
+    }
+
+    &__step-circle {
+      width: $circle-size-mobile;
+      height: $circle-size-mobile;
+    }
+
+    &__step-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    &__step-number {
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+    }
+
+    &__step-content {
+      padding-top: 4px;
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .new-hp-timeline {
+    &__step-circle {
+      width: $circle-size-tablet;
+      height: $circle-size-tablet;
+    }
+
+    &__step-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    &__step-content {
+      padding: 12px;
+      min-height: 110px;
+    }
+  }
+}
+
+// =============================================================================
+// Accessibility: Reduced Motion
+// =============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .new-hp-timeline {
+    &__title,
+    &__step {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    &__line-progress {
+      transition: none;
+      stroke-dashoffset: 0;
+    }
+
+    &__step-circle,
+    &__step-bg,
+    &__step-icon,
+    &__step-number,
+    &__step-duration,
+    &__step-content {
+      transition: none;
+    }
+  }
+}
