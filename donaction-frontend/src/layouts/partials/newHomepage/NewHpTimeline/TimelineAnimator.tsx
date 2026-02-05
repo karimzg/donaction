@@ -30,8 +30,14 @@ export default function TimelineAnimator({
       return;
     }
 
+    // Fallback timeout: ensure visibility after 3s if observer never fires
+    const fallbackTimeout = setTimeout(() => {
+      setIsVisible(true);
+    }, 3000);
+
     const callback = (entries: IntersectionObserverEntry[]) => {
       if (entries[0].isIntersecting) {
+        clearTimeout(fallbackTimeout);
         setIsVisible(true);
       }
     };
@@ -48,6 +54,7 @@ export default function TimelineAnimator({
     }
 
     return () => {
+      clearTimeout(fallbackTimeout);
       if (currentRef) {
         observer.unobserve(currentRef);
       }
