@@ -13,6 +13,14 @@ $entrance-delay-base: 0.15s;
 $entrance-delay-step: 0.08s;
 $hover-duration: 0.3s;
 
+// Borders & shadows
+$border-subtle: 1.5px solid rgba(0, 0, 0, 0.06);
+$border-separator: 1px solid rgba(0, 0, 0, 0.06);
+$shadow-premium: 0 8px 24px -4px rgba($color-premium, 0.35);
+$shadow-premium-hover: 0 12px 32px -4px rgba($color-premium, 0.45);
+$shadow-cta-premium: 0 4px 12px rgba($color-premium, 0.3);
+$shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
+
 .new-hp-features {
   background: linear-gradient(180deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);
   position: relative;
@@ -265,7 +273,7 @@ $hover-duration: 0.3s;
     background: linear-gradient(135deg, $color-premium 0%, $color-premium-dark 100%);
     color: white;
     border: 2px solid transparent;
-    box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.35);
+    box-shadow: $shadow-premium;
   }
 
   &__arrow-icon {
@@ -281,7 +289,7 @@ $hover-duration: 0.3s;
     padding: 2rem;
     border-radius: 20px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 1.5px solid rgba(0, 0, 0, 0.06);
+    border: $border-subtle;
     opacity: 0;
     animation: features-example-entrance $entrance-duration ease-out calc(#{$entrance-delay-base} + 0.5s) forwards;
 
@@ -318,7 +326,7 @@ $hover-duration: 0.3s;
     padding: 1.25rem;
     border-radius: 14px;
     background: white;
-    border: 1.5px solid rgba(0, 0, 0, 0.06);
+    border: $border-subtle;
   }
 
   &__example-card--free {
@@ -352,7 +360,7 @@ $hover-duration: 0.3s;
   &__example-row--result {
     margin-top: 0.5rem;
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: $border-separator;
   }
 
   &__example-label {
@@ -411,7 +419,7 @@ $hover-duration: 0.3s;
     font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+    box-shadow: $shadow-cta-premium-hover;
     animation: float 3s ease-in-out infinite;
     white-space: nowrap;
   }
@@ -438,7 +446,7 @@ $hover-duration: 0.3s;
     background: linear-gradient(135deg, $color-premium 0%, $color-premium-dark 100%);
     color: white;
     border: 1px solid rgba(245, 158, 11, 0.6);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    box-shadow: $shadow-cta-premium;
   }
 
   &__badge-icon {
@@ -675,7 +683,7 @@ $hover-duration: 0.3s;
     }
 
     &__cta--premium:hover {
-      box-shadow: 0 12px 32px -4px rgba(245, 158, 11, 0.45);
+      box-shadow: $shadow-premium-hover;
       transform: translateY(-2px);
     }
 

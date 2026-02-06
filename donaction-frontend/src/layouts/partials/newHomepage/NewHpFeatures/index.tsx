@@ -24,20 +24,33 @@ type CardStyle = React.CSSProperties & { "--card-index": number };
 
 const CURRENCY = "€";
 
-const PRICING = {
-  FREE_MONTHLY: `0${CURRENCY}`,
-  PREMIUM_MONTHLY: `69${CURRENCY}`,
-} as const;
+/** Format a number using French locale (e.g. 1.75 → "1,75") */
+const formatFr = (value: number, decimals = 2): string =>
+  new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals,
+  }).format(value);
 
+/** Round to 2 decimals to avoid floating-point drift */
+const round2 = (value: number): number =>
+  Math.round(value * 100) / 100;
+
+/** Transaction fee rates applied per donation (not subscription fees) */
 const FEE_RATES = {
   FREE: 6,
   PREMIUM: 1.75,
 } as const;
 
+/** Monthly subscription price per tier */
+const PRICING = {
+  FREE_MONTHLY: `0${CURRENCY}`,
+  PREMIUM_MONTHLY: `69${CURRENCY}`,
+} as const;
+
 const FEES = {
   FREE_RATE: `${FEE_RATES.FREE}%`,
   FREE_LABEL: "Frais plateforme*",
-  PREMIUM_RATE: `${FEE_RATES.PREMIUM.toFixed(2).replace(".", ",")}%`,
+  PREMIUM_RATE: `${formatFr(FEE_RATES.PREMIUM)}%`,
   PREMIUM_LABEL: "Frais plateforme*",
 } as const;
 
@@ -63,14 +76,14 @@ const DONATION_EXAMPLE = {
     {
       id: "free",
       name: "Gratuit",
-      feeAmount: DONATION_AMOUNT * (FEE_RATES.FREE / 100),
-      netAmount: DONATION_AMOUNT * (1 - FEE_RATES.FREE / 100),
+      feeAmount: round2(DONATION_AMOUNT * (FEE_RATES.FREE / 100)),
+      netAmount: round2(DONATION_AMOUNT * (1 - FEE_RATES.FREE / 100)),
     },
     {
       id: "premium",
       name: "Premium",
-      feeAmount: DONATION_AMOUNT * (FEE_RATES.PREMIUM / 100),
-      netAmount: DONATION_AMOUNT * (1 - FEE_RATES.PREMIUM / 100),
+      feeAmount: round2(DONATION_AMOUNT * (FEE_RATES.PREMIUM / 100)),
+      netAmount: round2(DONATION_AMOUNT * (1 - FEE_RATES.PREMIUM / 100)),
     },
   ] as DonationExampleTier[],
 } as const;
