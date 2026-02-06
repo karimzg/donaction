@@ -28,6 +28,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@/components': resolve(__dirname, './src/layouts/components'),
+      '@/partials': resolve(__dirname, './src/layouts/partials'),
+      '@/helpers': resolve(__dirname, './src/layouts/helpers'),
+      '@/shortcodes': resolve(__dirname, './src/layouts/shortcodes'),
+      '@/shapes': resolve(__dirname, './src/shapes'),
       '@': resolve(__dirname, './src'),
     },
   },
