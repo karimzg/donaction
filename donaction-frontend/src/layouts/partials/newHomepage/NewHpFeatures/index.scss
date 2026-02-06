@@ -689,33 +689,33 @@ $hover-duration: 0.3s;
 @keyframes title-entrance {
   0% {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: translate3d(0, -30px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes tier-entrance {
   0% {
     opacity: 0;
-    transform: translateY(30px) scale(0.98);
+    transform: translate3d(0, 30px, 0) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @keyframes card-entrance {
   0% {
     opacity: 0;
-    transform: translateY(28px) scale(0.95);
+    transform: translate3d(0, 28px, 0) scale(0.95);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
@@ -740,11 +740,11 @@ $hover-duration: 0.3s;
 @keyframes features-example-entrance {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 20px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

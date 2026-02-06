@@ -22,23 +22,32 @@ interface FeatureItem {
 
 type CardStyle = React.CSSProperties & { "--card-index": number };
 
+const CURRENCY = "€";
+
 const PRICING = {
-  FREE_MONTHLY: "0\u20ac",
-  PREMIUM_MONTHLY: "69\u20ac",
+  FREE_MONTHLY: `0${CURRENCY}`,
+  PREMIUM_MONTHLY: `69${CURRENCY}`,
+} as const;
+
+const FEE_RATES = {
+  FREE: 6,
+  PREMIUM: 1.75,
 } as const;
 
 const FEES = {
-  FREE_RATE: "6%",
+  FREE_RATE: `${FEE_RATES.FREE}%`,
   FREE_LABEL: "Frais plateforme*",
-  PREMIUM_RATE: "1,75%",
+  PREMIUM_RATE: `${FEE_RATES.PREMIUM.toFixed(2).replace(".", ",")}%`,
   PREMIUM_LABEL: "Frais plateforme*",
 } as const;
 
 const LABELS = {
-  PREMIUM_BADGE: "\u2b50 Bient\u00f4t disponible",
+  PREMIUM_BADGE: "⭐ Bientôt disponible",
   FREE_FOOTNOTE: "*Frais bancaires + frais de fonctionnement Donaction",
   PREMIUM_FOOTNOTE: "*Uniquement les frais bancaires",
 } as const;
+
+const DONATION_AMOUNT = 100;
 
 interface DonationExampleTier {
   id: string;
@@ -48,11 +57,21 @@ interface DonationExampleTier {
 }
 
 const DONATION_EXAMPLE = {
-  amount: 100,
-  currency: "\u20ac",
+  amount: DONATION_AMOUNT,
+  currency: CURRENCY,
   tiers: [
-    { id: "free", name: "Gratuit", feeAmount: 6, netAmount: 94 },
-    { id: "premium", name: "Premium", feeAmount: 1.75, netAmount: 98.25 },
+    {
+      id: "free",
+      name: "Gratuit",
+      feeAmount: DONATION_AMOUNT * (FEE_RATES.FREE / 100),
+      netAmount: DONATION_AMOUNT * (1 - FEE_RATES.FREE / 100),
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      feeAmount: DONATION_AMOUNT * (FEE_RATES.PREMIUM / 100),
+      netAmount: DONATION_AMOUNT * (1 - FEE_RATES.PREMIUM / 100),
+    },
   ] as DonationExampleTier[],
 } as const;
 
@@ -224,7 +243,7 @@ function DonationExampleBox() {
               </span>
             </div>
             <div className="new-hp-features__example-row new-hp-features__example-row--result">
-              <span className="new-hp-features__example-label">Votre club re&ccedil;oit</span>
+              <span className="new-hp-features__example-label">Votre club reçoit</span>
               <span className={`new-hp-features__example-amount new-hp-features__example-amount--${tier.id}`}>
                 {tier.netAmount}{currency}
               </span>
@@ -243,7 +262,7 @@ export default function NewHpFeatures() {
         <div className="new-hp-features__header">
           <h2 className="new-hp-features__title">Nos offres</h2>
           <p className="new-hp-features__subtitle">
-            Fonctionnalit&eacute;s et tarifs en toute transparence
+            Fonctionnalités et tarifs en toute transparence
           </p>
         </div>
 
@@ -276,7 +295,7 @@ export default function NewHpFeatures() {
               <ul
                 className="new-hp-features__cards"
                 role="list"
-                aria-label="Fonctionnalit&eacute;s gratuites"
+                aria-label="Fonctionnalités gratuites"
               >
                 {FREE_FEATURES.map((feature, index) => (
                   <FeatureCard
@@ -293,7 +312,7 @@ export default function NewHpFeatures() {
               <Link
                 href="/inscription"
                 className="new-hp-features__cta new-hp-features__cta--free"
-                aria-label="S&apos;inscrire &agrave; l&apos;offre Gratuite"
+                aria-label="S'inscrire à l'offre Gratuite"
               >
                 Commencer gratuitement
                 <ArrowIcon />
@@ -326,13 +345,13 @@ export default function NewHpFeatures() {
                   <span className="new-hp-features__fee-label">{FEES.PREMIUM_LABEL}</span>
                 </div>
                 <p className="new-hp-features__tier-description">
-                  Fonctionnalit&eacute;s avanc&eacute;es
+                  Fonctionnalités avancées
                 </p>
               </div>
               <ul
                 className="new-hp-features__cards"
                 role="list"
-                aria-label="Fonctionnalit&eacute;s premium"
+                aria-label="Fonctionnalités premium"
               >
                 {PREMIUM_FEATURES.map((feature, index) => (
                   <FeatureCard
@@ -349,7 +368,7 @@ export default function NewHpFeatures() {
               <Link
                 href="/inscription?plan=premium"
                 className="new-hp-features__cta new-hp-features__cta--premium"
-                aria-label="S&apos;inscrire &agrave; l&apos;offre Premium"
+                aria-label="S'inscrire à l'offre Premium"
               >
                 Choisir Premium
                 <ArrowIcon />
