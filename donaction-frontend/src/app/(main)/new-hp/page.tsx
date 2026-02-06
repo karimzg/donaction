@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 
 export default async function NewHpPage() {
   const isPreview = await GetServerCookie('isPreviewMode');
-  const projets = await getProjets(1, 3, true, !!isPreview, cookies().toString());
+  const projets = await getProjets(1, 3, true, !!isPreview, cookies().toString())
+    .catch(() => undefined);
 
   return <NewHomepageContent projets={projets} />;
 }

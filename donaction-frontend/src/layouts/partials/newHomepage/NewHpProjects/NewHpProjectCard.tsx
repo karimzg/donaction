@@ -40,16 +40,18 @@ export default function NewHpProjectCard({ projet, index, className }: NewHpProj
         <div className="new-hp-projects__card-content flex flex-col h-full">
           {/* Cover image */}
           <div className="new-hp-projects__card-image relative overflow-hidden rounded-t-2xl aspect-video">
-            <ImageHtml
-              className="w-full h-full object-cover"
-              width={420}
-              height={236}
-              src={projet.couverture?.url || ''}
-              alt={projet.couverture?.alternativeText || projet.titre}
-              namedtransformation="project_card"
-              nosizes={true}
-              loading="lazy"
-            />
+            {projet.couverture?.url && (
+              <ImageHtml
+                className="w-full h-full object-cover"
+                width={420}
+                height={236}
+                src={projet.couverture.url}
+                alt={projet.couverture.alternativeText || projet.titre}
+                namedtransformation="project_card"
+                nosizes={true}
+                loading="lazy"
+              />
+            )}
 
             {/* Status badge */}
             <span
@@ -82,16 +84,18 @@ export default function NewHpProjectCard({ projet, index, className }: NewHpProj
             {/* Club info */}
             {projet.klubr && (
               <div className="flex items-center gap-2 mb-3">
-                <ImageHtml
-                  className="w-8 h-8 rounded-full object-contain"
-                  width={32}
-                  height={32}
-                  src={projet.klubr.logo?.url || ''}
-                  alt={projet.klubr.logo?.alt || projet.klubr.denomination}
-                  namedtransformation="logo"
-                  nosizes={true}
-                  loading="lazy"
-                />
+                {projet.klubr.logo?.url && (
+                  <ImageHtml
+                    className="w-8 h-8 rounded-full object-contain"
+                    width={32}
+                    height={32}
+                    src={projet.klubr.logo.url}
+                    alt={projet.klubr.logo.alt || projet.klubr.denomination}
+                    namedtransformation="logo"
+                    nosizes={true}
+                    loading="lazy"
+                  />
+                )}
                 <span className="text-xs text-gray-500 truncate">
                   {projet.klubr.denomination}
                 </span>
