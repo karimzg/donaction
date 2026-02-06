@@ -5,6 +5,9 @@
 *.swo
 *~
 
+# Claude Code
+.plan/
+
 # Node.js
 node_modules/
 npm-debug.log*
@@ -20,6 +23,7 @@ out/
 .next/
 .nuxt/
 .cache/
+*.tsbuildinfo
 
 # Testing
 coverage/

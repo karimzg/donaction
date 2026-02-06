@@ -93,6 +93,9 @@ $hover-duration: 0.3s;
   }
 
   &__tier-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     position: relative;
     padding: 2.5rem 2rem;
     border-radius: 24px;
