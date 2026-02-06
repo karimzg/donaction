@@ -17,13 +17,68 @@ $hover-duration: 0.3s;
   background: linear-gradient(180deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  padding: 4rem 0;
+
+  @media (min-width: 768px) {
+    padding: 5rem 0;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 6rem 0;
+  }
+
+  &__container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  &__header {
+    margin-bottom: 3rem;
+
+    @media (min-width: 768px) {
+      margin-bottom: 4rem;
+    }
+  }
 
   &__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    text-align: center;
+    color: #111827;
+    margin-bottom: 1rem;
     opacity: 0;
     animation: title-entrance $entrance-duration ease-out forwards;
+
+    @media (min-width: 768px) {
+      font-size: 2.25rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 3rem;
+    }
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: #4b5563;
+    font-size: 1.125rem;
+  }
+
+  &__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    @media (min-width: 1024px) {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
   }
 
   &__tier {
+    flex: 1;
     opacity: 0;
     animation: tier-entrance $entrance-duration ease-out forwards;
   }
@@ -34,6 +89,7 @@ $hover-duration: 0.3s;
 
   &__tier--premium {
     animation-delay: calc(#{$entrance-delay-base} + 0.15s);
+    position: relative;
   }
 
   &__tier-container {
@@ -89,11 +145,45 @@ $hover-duration: 0.3s;
     }
   }
 
+  &__tier-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  &__tier-badge-wrapper {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__tier-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+
+    @media (min-width: 768px) {
+      font-size: 1.875rem;
+    }
+  }
+
+  &__tier-description {
+    color: #4b5563;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+
+    @media (min-width: 768px) {
+      font-size: 1rem;
+    }
+  }
+
   &__pricing {
     display: flex;
     align-items: baseline;
     justify-content: center;
     gap: 0.25rem;
+    margin-top: 0.75rem;
   }
 
   &__price {
@@ -125,10 +215,7 @@ $hover-duration: 0.3s;
     letter-spacing: 0.05em;
     box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
     animation: float 3s ease-in-out infinite;
-  }
-
-  &__tier-header {
-    text-align: center;
+    white-space: nowrap;
   }
 
   &__badge {
@@ -162,21 +249,15 @@ $hover-duration: 0.3s;
     flex-shrink: 0;
   }
 
-  &__badge-check {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(115, 207, 168, 0.15);
-    color: $color-primary;
-    font-weight: 700;
-  }
+  &__cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
 
-  &__tier--premium &__badge-check {
-    background: rgba(245, 158, 11, 0.2);
-    color: $color-premium;
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
   }
 
   &__card {
@@ -190,6 +271,11 @@ $hover-duration: 0.3s;
   }
 
   &__card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
     padding: 1.75rem 1.5rem;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.95);
@@ -199,8 +285,7 @@ $hover-duration: 0.3s;
       transform $hover-duration ease,
       background $hover-duration ease,
       border-color $hover-duration ease,
-      box-shadow $hover-duration ease,
-      backdrop-filter $hover-duration ease;
+      box-shadow $hover-duration ease;
     position: relative;
     overflow: hidden;
 
@@ -231,33 +316,29 @@ $hover-duration: 0.3s;
     }
   }
 
-  &__card-content:hover {
-    transform: translateY(-8px);
+  &__card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
   }
 
-  // Free tier hover
-  &__tier--free &__card-content:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(232, 247, 242, 0.8) 100%);
-    border-color: rgba(115, 207, 168, 0.5);
-    box-shadow:
-      0 16px 40px -8px rgba(115, 207, 168, 0.25),
-      0 8px 20px -6px rgba(0, 0, 0, 0.08);
+  &__card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
 
-    &::before {
-      opacity: 1;
+    @media (min-width: 768px) {
+      font-size: 1.125rem;
     }
   }
 
-  // Premium tier hover
-  &__tier--premium &__card-content:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(254, 243, 199, 0.8) 100%);
-    border-color: rgba(245, 158, 11, 0.5);
-    box-shadow:
-      0 16px 40px -8px rgba(245, 158, 11, 0.25),
-      0 8px 20px -6px rgba(245, 158, 11, 0.1);
+  &__card-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
 
-    &::before {
-      opacity: 1;
+    @media (min-width: 768px) {
+      font-size: 1rem;
     }
   }
 
@@ -295,6 +376,10 @@ $hover-duration: 0.3s;
     }
   }
 
+  &__icon-wrapper--free {
+    background: linear-gradient(135deg, #f0f9f7 0%, #e8f7f2 100%);
+  }
+
   &__icon-wrapper--premium {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
     border: 1px solid rgba(245, 158, 11, 0.2);
@@ -312,24 +397,6 @@ $hover-duration: 0.3s;
     background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
   }
 
-  &__card-content:hover &__icon-wrapper {
-    transform: scale(1.08);
-    background: linear-gradient(135deg, #e8f7f2 0%, #d6eff0 100%);
-
-    &::before {
-      opacity: 1;
-    }
-
-    &::after {
-      opacity: 1;
-    }
-  }
-
-  &__tier--premium &__card-content:hover &__icon-wrapper {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.35) 100%);
-    border-color: rgba(245, 158, 11, 0.4);
-  }
-
   &__icon {
     width: 40px;
     height: 40px;
@@ -338,8 +405,66 @@ $hover-duration: 0.3s;
     z-index: 1;
   }
 
-  &__card-content:hover &__icon {
-    transform: scale(1.15) rotate(5deg);
+  // Icon color modifiers
+  &__icon--free {
+    color: $color-primary;
+  }
+
+  &__icon--premium {
+    color: $color-premium;
+  }
+
+  // Hover effects - only for devices with hover capability
+  @media (hover: hover) {
+    &__card-content:hover {
+      transform: translateY(-8px);
+    }
+
+    &__tier--free &__card-content:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(232, 247, 242, 0.8) 100%);
+      border-color: rgba(115, 207, 168, 0.5);
+      box-shadow:
+        0 16px 40px -8px rgba(115, 207, 168, 0.25),
+        0 8px 20px -6px rgba(0, 0, 0, 0.08);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &__tier--premium &__card-content:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(254, 243, 199, 0.8) 100%);
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow:
+        0 16px 40px -8px rgba(245, 158, 11, 0.25),
+        0 8px 20px -6px rgba(245, 158, 11, 0.1);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &__card-content:hover &__icon-wrapper {
+      transform: scale(1.08);
+      background: linear-gradient(135deg, #e8f7f2 0%, #d6eff0 100%);
+
+      &::before {
+        opacity: 1;
+      }
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &__tier--premium &__card-content:hover &__icon-wrapper {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.35) 100%);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    &__card-content:hover &__icon {
+      transform: scale(1.15) rotate(5deg);
+    }
   }
 }
 
@@ -447,25 +572,20 @@ $hover-duration: 0.3s;
 
 @media (max-width: 639px) {
   .new-hp-features {
-    &__cards {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
     &__tier-container {
       padding: 1.5rem 1.25rem;
     }
 
     &__tier-header {
       margin-bottom: 1.5rem;
+    }
 
-      h3 {
-        font-size: 1.5rem;
-      }
+    &__tier-title {
+      font-size: 1.5rem;
+    }
 
-      p {
-        font-size: 0.875rem;
-      }
+    &__tier-description {
+      font-size: 0.875rem;
     }
 
     &__badge {
@@ -486,11 +606,6 @@ $hover-duration: 0.3s;
     &__icon {
       width: 32px;
       height: 32px;
-    }
-
-    &__badge-check {
-      width: 22px;
-      height: 22px;
     }
 
     &__badge-icon {
