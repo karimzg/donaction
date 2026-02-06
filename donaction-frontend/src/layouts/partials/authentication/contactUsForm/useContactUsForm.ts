@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { FeedbackParamsType } from '@/partials/sponsorshipForm/logic/entities';
 import { createReCaptchaToken, postContactUs } from '@/core/services/cms';
 import { pushToast } from '@/core/store/modules/rootSlice';
@@ -9,11 +10,13 @@ import { sendGaEvent } from '@/core/helpers/sendGaEvent';
 export default function useContactUsForm() {
 	const dispatch = useAppDispatch();
 	const session = useAppSelector(selectSession);
+	const searchParams = useSearchParams();
+	const prefilledObject = searchParams?.get('objet') || '';
 	const receivedFeedbacks = useRef<Array<FeedbackParamsType>>([]);
 	const [config, setConfig] = useState({
 		defaultValues: {
 			email: session?.data?.email || '',
-			object: '',
+			object: prefilledObject,
 			msg: '',
 		},
 		triggerValidation: 1,
