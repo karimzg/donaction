@@ -6,6 +6,8 @@ import './index.scss';
 
 type CardStyle = React.CSSProperties & { '--card-index': number };
 
+const CONTACT_EMAIL = 'contact@donaction.fr';
+
 const FEDERATION_ADVANTAGES = [
   {
     id: 'multi-club',
@@ -72,10 +74,11 @@ export default function NewHpFederations() {
             Demander une démo
           </Link>
           <a
-            href="mailto:contact@donaction.fr"
+            href={`mailto:${CONTACT_EMAIL}`}
+            rel="noopener noreferrer"
             className="new-hp-federations__cta-email text-[#73cfa8] hover:text-[#5ec497] font-medium transition-colors duration-300"
           >
-            contact@donaction.fr
+            {CONTACT_EMAIL}
           </a>
         </div>
       </div>

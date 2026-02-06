@@ -267,7 +267,12 @@ $hover-duration: 0.3s;
       opacity: 1;
     }
 
-    &__card-content,
+    &__card-content {
+      transition: none;
+      backdrop-filter: none;
+      background: rgba(30, 41, 59, 0.95);
+    }
+
     &__icon-wrapper,
     &__icon,
     &__cta-button,
