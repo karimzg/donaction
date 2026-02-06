@@ -196,11 +196,206 @@ $hover-duration: 0.3s;
     line-height: 1;
   }
 
+  &__price--free {
+    color: $color-primary-dark;
+  }
+
   &__price-period {
     font-size: 1rem;
     font-weight: 500;
-    color: $color-premium-dark;
+    color: #6b7280;
     opacity: 0.8;
+  }
+
+  // Fee badge
+  &__fee {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+  }
+
+  &__fee--free {
+    background: rgba(115, 207, 168, 0.1);
+    color: $color-primary-dark;
+  }
+
+  &__fee--premium {
+    background: rgba(245, 158, 11, 0.1);
+    color: $color-premium-dark;
+  }
+
+  &__fee-rate {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  &__fee-label {
+    font-weight: 500;
+  }
+
+  // CTA buttons
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all $hover-duration ease;
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  &__cta--free {
+    background: transparent;
+    color: $color-primary-dark;
+    border: 2px solid rgba(115, 207, 168, 0.4);
+  }
+
+  &__cta--premium {
+    background: linear-gradient(135deg, $color-premium 0%, $color-premium-dark 100%);
+    color: white;
+    border: 2px solid transparent;
+    box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.35);
+  }
+
+  &__arrow-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform $hover-duration ease;
+  }
+
+  // Donation example
+  &__example {
+    max-width: 720px;
+    margin: 3rem auto 0;
+    padding: 2rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1.5px solid rgba(0, 0, 0, 0.06);
+    opacity: 0;
+    animation: features-example-entrance $entrance-duration ease-out calc(#{$entrance-delay-base} + 0.5s) forwards;
+
+    @media (min-width: 768px) {
+      padding: 2.5rem 3rem;
+    }
+  }
+
+  &__example-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    @media (min-width: 768px) {
+      font-size: 1.25rem;
+    }
+  }
+
+  &__example-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    @media (min-width: 640px) {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
+  }
+
+  &__example-card {
+    flex: 1;
+    padding: 1.25rem;
+    border-radius: 14px;
+    background: white;
+    border: 1.5px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__example-card--free {
+    border-color: rgba(115, 207, 168, 0.2);
+  }
+
+  &__example-card--premium {
+    border-color: rgba(245, 158, 11, 0.25);
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  }
+
+  &__example-tier {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+  }
+
+  &__example-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+
+  &__example-row--result {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__example-label {
+    font-weight: 500;
+  }
+
+  &__example-value {
+    font-weight: 600;
+  }
+
+  &__example-amount {
+    font-size: 1.25rem;
+    font-weight: 800;
+
+    @media (min-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__example-amount--free {
+    color: $color-primary-dark;
+  }
+
+  &__example-amount--premium {
+    color: $color-premium-dark;
+  }
+
+  // Footnote (inside each tier card)
+  &__footnote {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    font-style: italic;
+    margin-top: 1.5rem;
+    line-height: 1.4;
+  }
+
+  &__footnote--free {
+    color: rgba($color-primary-dark, 0.5);
+  }
+
+  &__footnote--premium {
+    color: rgba($color-premium-dark, 0.55);
   }
 
   &__tier-badge-highlight {
@@ -472,6 +667,21 @@ $hover-duration: 0.3s;
     &__card-content:hover &__icon {
       transform: scale(1.15) rotate(5deg);
     }
+
+    &__cta--free:hover {
+      background: rgba(115, 207, 168, 0.1);
+      border-color: rgba(115, 207, 168, 0.6);
+      transform: translateY(-2px);
+    }
+
+    &__cta--premium:hover {
+      box-shadow: 0 12px 32px -4px rgba(245, 158, 11, 0.45);
+      transform: translateY(-2px);
+    }
+
+    &__cta:hover &__arrow-icon {
+      transform: translateX(4px);
+    }
   }
 }
 
@@ -524,6 +734,17 @@ $hover-duration: 0.3s;
   }
   50%, 100% {
     left: 100%;
+  }
+}
+
+@keyframes features-example-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -637,9 +858,16 @@ $hover-duration: 0.3s;
       animation: none;
     }
 
+    &__example {
+      animation: none;
+      opacity: 1;
+    }
+
     &__card-content,
     &__icon-wrapper,
-    &__icon {
+    &__icon,
+    &__cta,
+    &__arrow-icon {
       transition: none;
     }
   }

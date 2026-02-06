@@ -23,11 +23,37 @@ interface FeatureItem {
 type CardStyle = React.CSSProperties & { "--card-index": number };
 
 const PRICING = {
-  PREMIUM_MONTHLY: "29€",
+  FREE_MONTHLY: "0\u20ac",
+  PREMIUM_MONTHLY: "69\u20ac",
+} as const;
+
+const FEES = {
+  FREE_RATE: "6%",
+  FREE_LABEL: "Frais plateforme*",
+  PREMIUM_RATE: "1,75%",
+  PREMIUM_LABEL: "Frais plateforme*",
 } as const;
 
 const LABELS = {
-  PREMIUM_BADGE: "⭐ Bientôt disponible",
+  PREMIUM_BADGE: "\u2b50 Bient\u00f4t disponible",
+  FREE_FOOTNOTE: "*Frais bancaires + frais de fonctionnement Donaction",
+  PREMIUM_FOOTNOTE: "*Uniquement les frais bancaires",
+} as const;
+
+interface DonationExampleTier {
+  id: string;
+  name: string;
+  feeAmount: number;
+  netAmount: number;
+}
+
+const DONATION_EXAMPLE = {
+  amount: 100,
+  currency: "\u20ac",
+  tiers: [
+    { id: "free", name: "Gratuit", feeAmount: 6, netAmount: 94 },
+    { id: "premium", name: "Premium", feeAmount: 1.75, netAmount: 98.25 },
+  ] as DonationExampleTier[],
 } as const;
 
 const FREE_FEATURES: FeatureItem[] = [
@@ -120,6 +146,23 @@ function StarIcon() {
   );
 }
 
+function ArrowIcon() {
+  return (
+    <svg
+      className="new-hp-features__arrow-icon"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 function FeatureCard({ feature, index, isFree }: FeatureCardProps) {
   return (
     <li
@@ -159,24 +202,54 @@ function FeatureCard({ feature, index, isFree }: FeatureCardProps) {
   );
 }
 
+function DonationExampleBox() {
+  const { amount, currency, tiers } = DONATION_EXAMPLE;
+
+  return (
+    <div className="new-hp-features__example" aria-label="Exemple de don">
+      <h3 className="new-hp-features__example-title">
+        Exemple concret : pour un don de {amount}{currency}
+      </h3>
+      <div className="new-hp-features__example-grid">
+        {tiers.map((tier) => (
+          <div
+            key={tier.id}
+            className={`new-hp-features__example-card new-hp-features__example-card--${tier.id}`}
+          >
+            <span className="new-hp-features__example-tier">{tier.name}</span>
+            <div className="new-hp-features__example-row">
+              <span className="new-hp-features__example-label">Frais plateforme</span>
+              <span className="new-hp-features__example-value">
+                {tier.feeAmount}{currency}
+              </span>
+            </div>
+            <div className="new-hp-features__example-row new-hp-features__example-row--result">
+              <span className="new-hp-features__example-label">Votre club re&ccedil;oit</span>
+              <span className={`new-hp-features__example-amount new-hp-features__example-amount--${tier.id}`}>
+                {tier.netAmount}{currency}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function NewHpFeatures() {
   return (
     <section className="new-hp-features">
       <div className="new-hp-features__container">
         <div className="new-hp-features__header">
-          <h2 className="new-hp-features__title">Fonctionnalités par offre</h2>
+          <h2 className="new-hp-features__title">Nos offres</h2>
           <p className="new-hp-features__subtitle">
-            Choisissez l&apos;offre qui correspond à vos besoins
+            Fonctionnalit&eacute;s et tarifs en toute transparence
           </p>
         </div>
 
         <div className="new-hp-features__grid">
           {/* Free Tier */}
-          <Link
-            href="/inscription"
-            className="new-hp-features__tier new-hp-features__tier--free"
-            aria-label="S'inscrire à l'offre Gratuite"
-          >
+          <div className="new-hp-features__tier new-hp-features__tier--free">
             <div className="new-hp-features__tier-container">
               <div className="new-hp-features__tier-header">
                 <div className="new-hp-features__tier-badge-wrapper">
@@ -186,6 +259,16 @@ export default function NewHpFeatures() {
                   </span>
                 </div>
                 <h3 className="new-hp-features__tier-title">Pour commencer</h3>
+                <div className="new-hp-features__pricing">
+                  <span className="new-hp-features__price new-hp-features__price--free">
+                    {PRICING.FREE_MONTHLY}
+                  </span>
+                  <span className="new-hp-features__price-period">/mois</span>
+                </div>
+                <div className="new-hp-features__fee new-hp-features__fee--free">
+                  <span className="new-hp-features__fee-rate">{FEES.FREE_RATE}</span>
+                  <span className="new-hp-features__fee-label">{FEES.FREE_LABEL}</span>
+                </div>
                 <p className="new-hp-features__tier-description">
                   Tout ce dont vous avez besoin
                 </p>
@@ -193,7 +276,7 @@ export default function NewHpFeatures() {
               <ul
                 className="new-hp-features__cards"
                 role="list"
-                aria-label="Fonctionnalités gratuites"
+                aria-label="Fonctionnalit&eacute;s gratuites"
               >
                 {FREE_FEATURES.map((feature, index) => (
                   <FeatureCard
@@ -204,15 +287,22 @@ export default function NewHpFeatures() {
                   />
                 ))}
               </ul>
+              <p className="new-hp-features__footnote new-hp-features__footnote--free">
+                {LABELS.FREE_FOOTNOTE}
+              </p>
+              <Link
+                href="/inscription"
+                className="new-hp-features__cta new-hp-features__cta--free"
+                aria-label="S&apos;inscrire &agrave; l&apos;offre Gratuite"
+              >
+                Commencer gratuitement
+                <ArrowIcon />
+              </Link>
             </div>
-          </Link>
+          </div>
 
           {/* Premium Tier */}
-          <Link
-            href="/inscription?plan=premium"
-            className="new-hp-features__tier new-hp-features__tier--premium"
-            aria-label="S'inscrire à l'offre Premium"
-          >
+          <div className="new-hp-features__tier new-hp-features__tier--premium">
             <div className="new-hp-features__tier-badge-highlight">
               {LABELS.PREMIUM_BADGE}
             </div>
@@ -231,14 +321,18 @@ export default function NewHpFeatures() {
                   </span>
                   <span className="new-hp-features__price-period">/mois</span>
                 </div>
+                <div className="new-hp-features__fee new-hp-features__fee--premium">
+                  <span className="new-hp-features__fee-rate">{FEES.PREMIUM_RATE}</span>
+                  <span className="new-hp-features__fee-label">{FEES.PREMIUM_LABEL}</span>
+                </div>
                 <p className="new-hp-features__tier-description">
-                  Fonctionnalités avancées
+                  Fonctionnalit&eacute;s avanc&eacute;es
                 </p>
               </div>
               <ul
                 className="new-hp-features__cards"
                 role="list"
-                aria-label="Fonctionnalités premium"
+                aria-label="Fonctionnalit&eacute;s premium"
               >
                 {PREMIUM_FEATURES.map((feature, index) => (
                   <FeatureCard
@@ -249,9 +343,22 @@ export default function NewHpFeatures() {
                   />
                 ))}
               </ul>
+              <p className="new-hp-features__footnote new-hp-features__footnote--premium">
+                {LABELS.PREMIUM_FOOTNOTE}
+              </p>
+              <Link
+                href="/inscription?plan=premium"
+                className="new-hp-features__cta new-hp-features__cta--premium"
+                aria-label="S&apos;inscrire &agrave; l&apos;offre Premium"
+              >
+                Choisir Premium
+                <ArrowIcon />
+              </Link>
             </div>
-          </Link>
+          </div>
         </div>
+
+        <DonationExampleBox />
       </div>
     </section>
   );
