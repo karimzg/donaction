@@ -1,12 +1,11 @@
 import Link from 'next/link';
+import { CONTACT_EMAIL } from '@/core/constants/contact';
 import MultiClubIcon from './icons/MultiClubIcon';
 import ReportingIcon from './icons/ReportingIcon';
 import DedicatedSupportIcon from './icons/DedicatedSupportIcon';
 import './index.scss';
 
-type CardStyle = React.CSSProperties & { '--card-index': number };
-
-const CONTACT_EMAIL = 'contact@donaction.fr';
+const DEMO_CTA_URL = `/contact?${new URLSearchParams({ objet: 'Demande de Démo' }).toString()}`;
 
 const FEDERATION_ADVANTAGES = [
   {
@@ -48,7 +47,7 @@ export default function NewHpFederations() {
             <li
               key={advantage.id}
               className="new-hp-federations__card"
-              style={{ '--card-index': index } as CardStyle}
+              style={{ '--card-index': index }}
             >
               <div className="new-hp-federations__card-content flex flex-col items-center text-center gap-4">
                 <div className="new-hp-federations__icon-wrapper">
@@ -68,7 +67,7 @@ export default function NewHpFederations() {
         </ul>
         <div className="new-hp-federations__cta flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
           <Link
-            href="/contact?objet=Demande+de+D%C3%A9mo"
+            href={DEMO_CTA_URL}
             className="new-hp-federations__cta-button bg-[#73cfa8] hover:bg-[#5ec497] text-gray-900 font-semibold px-8 py-3 rounded-lg transition-colors duration-300"
           >
             Demander une démo
@@ -76,6 +75,7 @@ export default function NewHpFederations() {
           <a
             href={`mailto:${CONTACT_EMAIL}`}
             rel="noopener noreferrer"
+            aria-label="Contacter par email"
             className="new-hp-federations__cta-email text-[#73cfa8] hover:text-[#5ec497] font-medium transition-colors duration-300"
           >
             {CONTACT_EMAIL}

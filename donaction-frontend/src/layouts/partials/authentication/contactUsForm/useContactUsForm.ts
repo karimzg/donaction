@@ -12,7 +12,10 @@ export default function useContactUsForm() {
 	const session = useAppSelector(selectSession);
 	const searchParams = useSearchParams();
 	const rawObject = searchParams?.get('objet') || '';
-	const prefilledObject = rawObject.replace(/[<>'"]/g, '').slice(0, 200).trim();
+	const prefilledObject = rawObject
+		.replace(/[<>"'`&;(){}[\]\\]/g, '')
+		.slice(0, 200)
+		.trim();
 	const receivedFeedbacks = useRef<Array<FeedbackParamsType>>([]);
 	const [config, setConfig] = useState({
 		defaultValues: {

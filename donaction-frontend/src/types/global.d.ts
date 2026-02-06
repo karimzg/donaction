@@ -2,6 +2,12 @@ import React from 'react';
 
 export {};
 
+declare module 'react' {
+	interface CSSProperties {
+		[key: `--${string}`]: string | number;
+	}
+}
+
 declare global {
 	interface Window {
 		gtag: (command: 'config' | 'event', trackingId: string, options?: GtagOptions) => void;

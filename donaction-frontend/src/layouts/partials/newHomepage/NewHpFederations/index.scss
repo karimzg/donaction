@@ -69,15 +69,19 @@ $hover-duration: 0.3s;
   &__card-content {
     padding: 2rem 1.5rem;
     border-radius: 16px;
-    background: rgba(30, 41, 59, 0.6);
+    background: rgba(30, 41, 59, 0.85);
     border: 1px solid rgba(148, 163, 184, 0.2);
     height: 100%;
-    backdrop-filter: blur(10px);
     transition:
       transform $hover-duration ease,
       background $hover-duration ease,
       border-color $hover-duration ease,
       box-shadow $hover-duration ease;
+
+    @supports (backdrop-filter: blur(10px)) {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(10px);
+    }
 
     &:hover {
       transform: translateY(-6px);

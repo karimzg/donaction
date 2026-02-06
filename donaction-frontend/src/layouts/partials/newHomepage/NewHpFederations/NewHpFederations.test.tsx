@@ -91,14 +91,16 @@ describe('NewHpFederations', () => {
     );
   });
 
-  it('renders contact email as mailto link', () => {
+  it('renders contact email as mailto link with aria-label', () => {
     render(<NewHpFederations />);
 
     const emailLink = screen.getByRole('link', {
-      name: /contact@donaction\.fr/i,
+      name: /contacter par email/i,
     });
     expect(emailLink).toBeInTheDocument();
     expect(emailLink).toHaveAttribute('href', 'mailto:contact@donaction.fr');
+    expect(emailLink).toHaveAttribute('aria-label', 'Contacter par email');
+    expect(emailLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('renders both CTA elements together', () => {
@@ -106,7 +108,7 @@ describe('NewHpFederations', () => {
 
     const demoLink = screen.getByRole('link', { name: /demander une démo/i });
     const emailLink = screen.getByRole('link', {
-      name: /contact@donaction\.fr/i,
+      name: /contacter par email/i,
     });
 
     expect(demoLink).toBeInTheDocument();
