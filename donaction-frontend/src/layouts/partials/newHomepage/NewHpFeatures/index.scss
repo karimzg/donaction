@@ -416,6 +416,10 @@ $hover-duration: 0.3s;
 
   // Hover effects - only for devices with hover capability
   @media (hover: hover) {
+    &__card-content {
+      will-change: transform, box-shadow;
+    }
+
     &__card-content:hover {
       transform: translateY(-8px);
     }

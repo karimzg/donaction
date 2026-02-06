@@ -26,6 +26,10 @@ const PRICING = {
   PREMIUM_MONTHLY: "29€",
 } as const;
 
+const LABELS = {
+  PREMIUM_BADGE: "⭐ Bientôt disponible",
+} as const;
+
 const FREE_FEATURES: FeatureItem[] = [
   {
     id: "page",
@@ -210,7 +214,7 @@ export default function NewHpFeatures() {
             aria-label="S'inscrire à l'offre Premium"
           >
             <div className="new-hp-features__tier-badge-highlight">
-              ⭐ Bientôt disponible
+              {LABELS.PREMIUM_BADGE}
             </div>
             <div className="new-hp-features__tier-container new-hp-features__tier-container--premium">
               <div className="new-hp-features__tier-header">
