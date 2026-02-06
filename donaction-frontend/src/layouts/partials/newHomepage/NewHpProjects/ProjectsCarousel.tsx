@@ -4,6 +4,8 @@ import { KlubProjet } from '@/core/models/klub-project';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import NewHpProjectCard from './NewHpProjectCard';
 
+const SLIDE_WIDTH_PERCENT = 0.82;
+
 type ProjectsCarouselProps = {
   projets: Array<KlubProjet>;
 };
@@ -15,7 +17,7 @@ export default function ProjectsCarousel({ projets }: ProjectsCarouselProps) {
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
     const { scrollLeft, clientWidth } = scrollRef.current;
-    const index = Math.round(scrollLeft / (clientWidth * 0.82));
+    const index = Math.round(scrollLeft / (clientWidth * SLIDE_WIDTH_PERCENT));
     setActiveIndex(Math.min(index, projets.length - 1));
   }, [projets.length]);
 

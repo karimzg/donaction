@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import NewHpProjects from './index';
+import { getProjectDeadlineInfo } from './helpers';
 
 vi.mock('next/link', () => ({
   default: ({ children, href, className }: { children: React.ReactNode; href: string; className?: string }) => (
@@ -129,5 +130,82 @@ describe('NewHpProjects', () => {
     render(<NewHpProjects projets={mockProjets} />);
 
     expect(screen.getByText(/découvrez les projets/i)).toBeInTheDocument();
+  });
+
+  it('renders expired badge for past-deadline projects', () => {
+    render(<NewHpProjects projets={mockProjets} />);
+
+    expect(screen.getAllByText(/terminé/i).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('renders deadline badge for active projects', () => {
+    render(<NewHpProjects projets={mockProjets} />);
+
+    const deadlineBadges = screen.getAllByText(/J-\d+/);
+    expect(deadlineBadges.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('renders card as div when klubr slug is missing', () => {
+    const projetsNoSlug = [{
+      ...mockProjets[0],
+      uuid: 'proj-no-slug',
+      klubr: { ...mockProjets[0].klubr, slug: '' },
+    }] as any;
+
+    const { container } = render(<NewHpProjects projets={projetsNoSlug} />);
+
+    const article = container.querySelector('article');
+    expect(article).toBeTruthy();
+    const link = article!.querySelector('a');
+    expect(link).toBeNull();
+  });
+
+  it('handles zero montantAFinancer without division error', () => {
+    const projetsZero = [{
+      ...mockProjets[0],
+      uuid: 'proj-zero',
+      montantAFinancer: 0,
+      montantTotalDonations: 100,
+    }] as any;
+
+    const { container } = render(<NewHpProjects projets={projetsZero} />);
+
+    const progressFill = container.querySelector('.new-hp-projects__progress-fill') as HTMLElement;
+    expect(progressFill).toBeTruthy();
+    expect(progressFill.style.width).toBe('0%');
+  });
+});
+
+describe('getProjectDeadlineInfo', () => {
+  it('returns not expired with daysLeft for future date', () => {
+    const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+    const result = getProjectDeadlineInfo(future);
+
+    expect(result.isExpired).toBe(false);
+    expect(result.daysLeft).toBeGreaterThanOrEqual(9);
+    expect(result.daysLeft).toBeLessThanOrEqual(11);
+  });
+
+  it('returns expired with null daysLeft for past date', () => {
+    const past = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+    const result = getProjectDeadlineInfo(past);
+
+    expect(result.isExpired).toBe(true);
+    expect(result.daysLeft).toBeNull();
+  });
+
+  it('returns defaults for null input', () => {
+    const result = getProjectDeadlineInfo(null);
+
+    expect(result.isExpired).toBe(false);
+    expect(result.daysLeft).toBeNull();
+  });
+
+  it('handles string date input', () => {
+    const future = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+    const result = getProjectDeadlineInfo(future);
+
+    expect(result.isExpired).toBe(false);
+    expect(result.daysLeft).toBeGreaterThanOrEqual(4);
   });
 });

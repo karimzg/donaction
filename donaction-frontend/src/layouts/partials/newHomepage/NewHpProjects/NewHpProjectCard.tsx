@@ -1,8 +1,8 @@
 import { KlubProjet } from '@/core/models/klub-project';
 import { formatCurrency } from '@/core/helpers/currency/CurrencyHelpers';
-import { endOfDay, isAfter, differenceInDays } from 'date-fns';
 import ImageHtml from '@/components/media/ImageHtml';
 import Link from 'next/link';
+import { getProjectDeadlineInfo } from './helpers';
 
 type CardStyle = React.CSSProperties & { '--card-index': number };
 
@@ -14,24 +14,29 @@ type NewHpProjectCardProps = {
 
 export default function NewHpProjectCard({ projet, index, className }: NewHpProjectCardProps) {
   const klubSlug = projet.klubr?.slug;
-  const projectUrl = klubSlug ? `/${klubSlug}/nos-projets/${projet.slug}` : '#';
-  const progress = projet.montantAFinancer
+  const projectUrl = klubSlug ? `/${klubSlug}/nos-projets/${projet.slug}` : null;
+  const progress = projet.montantAFinancer > 0
     ? Math.min((projet.montantTotalDonations / projet.montantAFinancer) * 100, 100)
     : 0;
   const progressWidth = progress > 0 ? Math.max(progress, 3) : 0;
+  const { isExpired, daysLeft } = getProjectDeadlineInfo(projet.dateLimiteFinancementProjet);
 
-  const deadline = projet.dateLimiteFinancementProjet
-    ? new Date(projet.dateLimiteFinancementProjet)
-    : null;
-  const isExpired = deadline ? isAfter(new Date(), endOfDay(deadline)) : false;
-  const daysLeft = deadline && !isExpired ? differenceInDays(deadline, new Date()) : null;
+  const CardWrapper = projectUrl
+    ? ({ children }: { children: React.ReactNode }) => (
+        <Link href={projectUrl} className="new-hp-projects__card-link block h-full">
+          {children}
+        </Link>
+      )
+    : ({ children }: { children: React.ReactNode }) => (
+        <div className="new-hp-projects__card-link block h-full">{children}</div>
+      );
 
   return (
     <article
       className={`new-hp-projects__card ${className || ''}`}
       style={{ '--card-index': index } as CardStyle}
     >
-      <Link href={projectUrl} className="new-hp-projects__card-link block h-full">
+      <CardWrapper>
         <div className="new-hp-projects__card-content flex flex-col h-full">
           {/* Cover image */}
           <div className="new-hp-projects__card-image relative overflow-hidden rounded-t-2xl aspect-video">
@@ -43,6 +48,7 @@ export default function NewHpProjectCard({ projet, index, className }: NewHpProj
               alt={projet.couverture?.alternativeText || projet.titre}
               namedtransformation="project_card"
               nosizes={true}
+              loading="lazy"
             />
 
             {/* Status badge */}
@@ -84,6 +90,7 @@ export default function NewHpProjectCard({ projet, index, className }: NewHpProj
                   alt={projet.klubr.logo?.alt || projet.klubr.denomination}
                   namedtransformation="logo"
                   nosizes={true}
+                  loading="lazy"
                 />
                 <span className="text-xs text-gray-500 truncate">
                   {projet.klubr.denomination}
@@ -131,7 +138,7 @@ export default function NewHpProjectCard({ projet, index, className }: NewHpProj
             </div>
           </div>
         </div>
-      </Link>
+      </CardWrapper>
     </article>
   );
 }
