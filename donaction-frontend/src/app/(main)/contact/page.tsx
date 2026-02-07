@@ -1,6 +1,6 @@
 import NeedHelp from '@/partials/mecenatPage/needHelp';
 import ContactUsForm from '@/partials/authentication/contactUsForm';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { getContactPage } from '@/core/services/cms';
 import './page.scss';
 import { Metadata } from 'next';
@@ -77,10 +77,12 @@ export default async function Page() {
                     height={324}
                     className={'md:block hidden mx-auto'}
                 />)}
-				<ContactUsForm
-					title={content.data.attributes.titre}
-					content={content.data.attributes.contenu[0].children[0].text}
-				/>
+				<Suspense fallback={<div className="w-full h-full" />}>
+					<ContactUsForm
+						title={content.data.attributes.titre}
+						content={content.data.attributes.contenu[0].children[0].text}
+					/>
+				</Suspense>
 			</div>
 
 			{content?.data?.attributes?.FAQ && (
