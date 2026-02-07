@@ -5,6 +5,7 @@ import NewHpFeatures from './NewHpFeatures';
 import NewHpTimeline from './NewHpTimeline';
 import NewHpWidgetDemo from './NewHpWidgetDemo';
 import NewHpProjects from './NewHpProjects';
+import NewHpFederations from './NewHpFederations';
 import { KlubProjet } from '@/core/models/klub-project';
 import { Pagination } from '@/core/models/misc';
 
@@ -22,6 +23,7 @@ export default function NewHomepageContent({ projets }: NewHomepageContentProps)
       <NewHpTimeline />
       <NewHpWidgetDemo />
       <NewHpProjects projets={projets?.data || []} />
+      <NewHpFederations />
     </main>
   );
 }
