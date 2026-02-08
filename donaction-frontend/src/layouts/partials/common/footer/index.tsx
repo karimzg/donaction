@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import DonactionLogo from '@/components/DonactionLogo';
 import React from 'react';
+import { SHOW_SOCIAL_LINKS, SHOW_CLUBS_NAV } from '@/core/helpers/featureFlags';
 import './index.scss';
-
-const SHOW_SOCIAL_LINKS = false;
 
 /* Club colors intentionally NOT used for footer — same dark design everywhere */
 const Footer: React.FC = () => {
@@ -72,7 +71,7 @@ const Footer: React.FC = () => {
 					<Link href='/' className='footer__link'>
 						Accueil
 					</Link>
-					{process.env.NEXT_PUBLIC_ENVIRONMENT !== 'prod' && (
+					{SHOW_CLUBS_NAV && (
 						<Link href='/projets' className='footer__link'>
 							Projets
 						</Link>

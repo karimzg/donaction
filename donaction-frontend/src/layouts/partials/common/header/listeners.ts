@@ -1,21 +1,7 @@
-import { signOut } from 'next-auth/react';
-
-export function initListeners() {
-	document.querySelectorAll('#LOGOUT_BTN')?.forEach((_) => {
-		_?.addEventListener('click', (e) => {
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			signOut();
-		});
-	});
-}
-
-export function removeListeners() {
-	document.querySelectorAll('#LOGOUT_BTN')?.forEach((_) => {
-		_?.removeEventListener('click', (e) => {
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			signOut();
-		});
-	});
-}
+/**
+ * @deprecated Logout is now handled via React onClick + signOut().
+ * This file is kept empty to avoid breaking imports during transition.
+ * TODO: Remove this file and its imports once confirmed safe.
+ */
+export function initListeners() {}
+export function removeListeners() {}

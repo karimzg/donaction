@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import ImageHtml from '@/components/media/ImageHtml';
 import { useAppSelector } from '@/core/store/hooks';
 import { selectSession } from '@/core/store/modules/authSlice';
@@ -10,19 +10,15 @@ import switchSvg from '../../../../../public/images/icons/switch.svg';
 import { VscChevronDown } from 'react-icons/vsc';
 import settings from '../../../../../public/images/icons/settings.svg';
 import myDonations from '../../../../../public/images/icons/myDonations.svg';
-import logout from '../../../../../public/images/icons/logout.svg';
+import logoutIcon from '../../../../../public/images/icons/logout.svg';
 import DropdownList from '@/components/dropdownList';
-import { initListeners, removeListeners } from '@/partials/common/header/listeners';
+import { signOut } from 'next-auth/react';
 
 const ClientController: React.FC<{ component: string; txtColor: string }> = (props) => {
 	const selectedSession = useAppSelector(selectSession);
 
-	useEffect(() => {
-		initListeners();
-
-		return () => {
-			removeListeners();
-		};
+	const handleLogout = useCallback(() => {
+		signOut();
 	}, []);
 
 
@@ -186,16 +182,16 @@ const ClientController: React.FC<{ component: string; txtColor: string }> = (pro
 								</Link>
 							</li>
 							<li className='px-4 py-1 mb-2'>
-								<Link
-									id='LOGOUT_BTN'
-									href='#'
-									className='font-medium text-md flex flex-row items-center gap-4'
+								<button
+									type='button'
+									onClick={handleLogout}
+									className='font-medium text-md flex flex-row items-center gap-4 w-full text-left'
 								>
 									<div className='p-3 rounded-full bg-[#E4E4E5]'>
-										<Image width={20} height={20} src={logout} alt='logout' />
+										<Image width={20} height={20} src={logoutIcon} alt='logout' />
 									</div>
 									<p>Se Déconnecter</p>
-								</Link>
+								</button>
 							</li>
 						</ul>
 					</DropdownList>

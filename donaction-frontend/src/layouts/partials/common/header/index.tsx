@@ -9,6 +9,7 @@ import ClientController from '@/partials/common/header/clientController';
 import PreviewMode from '@/partials/common/previewMode';
 import MobileDrawer from '@/partials/common/header/mobileDrawer';
 import UseSticky from '@/partials/common/header/sticky';
+import { SHOW_CLUBS_NAV } from '@/core/helpers/featureFlags';
 import './index.scss';
 
 interface IHeader {
@@ -41,8 +42,6 @@ const Header: React.FC<IHeader> = (props) => {
 			>
 				{isClubPage && <div className='header__accent-bar w-full' />}
 
-				<ClientController txtColor='#000' component='INIT' />
-
 				<nav className='p-4 w-full flex flex-row items-center justify-between xl:max-w-screen-xl lg:max-w-screen-lg md:max-w-screen-md max-w-screen-sm mx-auto'>
 					<Link href='/' className='w-[142.25px] md:w-[160px] flex'>
 						<DonactionLogo />
@@ -68,7 +67,7 @@ const Header: React.FC<IHeader> = (props) => {
 							</li>
 							{!!props?.slugs &&
 								props.slugs.length > 0 &&
-								process.env.NEXT_PUBLIC_ENVIRONMENT !== 'prod' && (
+								SHOW_CLUBS_NAV && (
 									<li>
 										<DropdownList
 											className='text-black'

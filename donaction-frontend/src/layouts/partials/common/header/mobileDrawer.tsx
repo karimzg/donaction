@@ -6,13 +6,15 @@ import Image from 'next/image';
 import { FaChevronDown } from 'react-icons/fa';
 import settings from '../../../../../public/images/icons/settings.svg';
 import myDonations from '../../../../../public/images/icons/myDonations.svg';
-import logout from '../../../../../public/images/icons/logout.svg';
+import logoutIcon from '../../../../../public/images/icons/logout.svg';
 import { useAppSelector } from '@/core/store/hooks';
 import { selectSession } from '@/core/store/modules/authSlice';
 import { NavSlugs } from '@/core/models/club';
 import ClientController from '@/partials/common/header/clientController';
 import { Session } from 'next-auth';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import { SHOW_CLUBS_NAV } from '@/core/helpers/featureFlags';
 
 const MobileDrawer: React.FC<{
 	slugs?: Array<NavSlugs>;
@@ -120,16 +122,16 @@ const MobileDrawer: React.FC<{
 									</Link>
 								</li>
 								<li className='px-4 py-1 mb-2 drawer-nav-item'>
-									<Link
-										id='LOGOUT_BTN'
-										href='#'
-										className='font-medium text-md flex flex-row items-center gap-4'
+									<button
+										type='button'
+										onClick={() => signOut()}
+										className='font-medium text-md flex flex-row items-center gap-4 w-full text-left'
 									>
 										<div className='p-3 rounded-full bg-[#E4E4E5]'>
-											<Image width={20} height={20} src={logout} alt='logout' />
+											<Image width={20} height={20} src={logoutIcon} alt='logout' />
 										</div>
 										<p>Se Déconnecter</p>
-									</Link>
+									</button>
 								</li>
 							</ul>
 						</div>
@@ -140,7 +142,7 @@ const MobileDrawer: React.FC<{
 
 				{/* Navigation links */}
 				<div className='w-full p-4 flex flex-col gap-4 items-start font-semibold text-black justify-start flex-1'>
-					{process.env.NEXT_PUBLIC_ENVIRONMENT !== 'prod' && (
+					{SHOW_CLUBS_NAV && (
 						<>
 							<div
 								className='w-full flex items-center justify-between cursor-pointer drawer-nav-item'

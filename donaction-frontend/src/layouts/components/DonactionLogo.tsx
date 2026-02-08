@@ -1,5 +1,10 @@
 import Image from 'next/image';
 
+const LOGO_HEIGHTS = {
+	header: '32px',
+	footer: '28px',
+} as const;
+
 interface DonactionLogoProps {
 	width?: number;
 	height?: number;
@@ -22,7 +27,7 @@ const DonactionLogo: React.FC<DonactionLogoProps> = ({
 			className={`${className} ${context === 'footer' ? 'brightness-0 invert' : ''}`}
 			style={{
 				width: 'auto',
-				height: context === 'header' ? '32px' : '28px',
+				height: LOGO_HEIGHTS[context],
 				maxWidth: `${width}px`,
 				objectFit: 'contain',
 			}}
