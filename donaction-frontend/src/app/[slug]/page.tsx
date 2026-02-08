@@ -151,7 +151,6 @@ export default async function club({ params }: { params: { slug: string } }) {
 	const primaryColor = klub.klubr_house?.primary_color || '#F17424';
 	const secondaryColor = klub.klubr_house?.secondary_color || '#000000';
 	const textColor = klub.klubr_house?.header_text_color || '#000000';
-	const footerTextColor = klub.klubr_house?.footer_text_color || '#FFFFFF';
 
 	/* ClubIntroduction */
 	const category =
@@ -291,9 +290,11 @@ export default async function club({ params }: { params: { slug: string } }) {
 			<Header
 				session={session}
 				slugs={slugs}
-				bg1={secondaryColor}
-				bg2={primaryColor}
-				txtColor={textColor}
+				clubColors={{
+					primary: primaryColor,
+					secondary: secondaryColor,
+					headerText: textColor,
+				}}
 			/>
 			<StatusIndicator
 				status={klub.status || ''}
@@ -371,7 +372,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 					displaySectionLocalisation(section, index),
 				)}
 			</div>
-			<Footer bg1={secondaryColor} bg2={primaryColor} textColor={footerTextColor} />
+			<Footer />
 		</>
 	);
 }

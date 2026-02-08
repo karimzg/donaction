@@ -141,7 +141,6 @@ export default async function ProjectPage({
 	const primaryColor = klub?.klubr_house?.primary_color || '#FFFFFF';
 	const secondaryColor = klub?.klubr_house?.secondary_color || '#000000';
 	const textColor = klub?.klubr_house?.header_text_color || '#000000';
-	const footerTextColor = klub.klubr_house?.footer_text_color || '#FFFFFF';
 	const projets = await getProjetsByKlub(klub.uuid, 1, 3, projet.uuid, cookies().toString()).catch(
 		(error) => {
 			console.error('Error fetching last 3 projets', error?.config);
@@ -322,7 +321,15 @@ export default async function ProjectPage({
 
 	return (
 		<>
-			<Header session={session} slugs={slugs} txtColor={'#000'} />
+			<Header
+				session={session}
+				slugs={slugs}
+				clubColors={{
+					primary: primaryColor,
+					secondary: secondaryColor,
+					headerText: textColor,
+				}}
+			/>
 			<script
 				type='application/ld+json'
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -471,7 +478,7 @@ export default async function ProjectPage({
 					</div>
 				) : null}
 			</div>
-			<Footer bg1={secondaryColor} bg2={primaryColor} textColor={footerTextColor} />
+			<Footer />
 		</>
 	);
 }

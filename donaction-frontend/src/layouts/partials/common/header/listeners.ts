@@ -8,22 +8,6 @@ export function initListeners() {
 			signOut();
 		});
 	});
-	document.querySelector('#MOBILE_DRAWER_OPENER')?.addEventListener('click', (e) => {
-		e.stopPropagation();
-		e.stopImmediatePropagation();
-		const MOBILE_DRAWER = document.querySelector('#MOBILE_DRAWER') as HTMLDivElement;
-		if (MOBILE_DRAWER) {
-			MOBILE_DRAWER.style.right = '0';
-		}
-	});
-	document.querySelector('#MOBILE_DRAWER_CLOSER')?.addEventListener('click', (e) => {
-		e.stopPropagation();
-		e.stopImmediatePropagation();
-		const MOBILE_DRAWER = document.querySelector('#MOBILE_DRAWER') as HTMLDivElement;
-		if (MOBILE_DRAWER) {
-			MOBILE_DRAWER.style.right = '-100%';
-		}
-	});
 }
 
 export function removeListeners() {
@@ -33,21 +17,5 @@ export function removeListeners() {
 			e.stopImmediatePropagation();
 			signOut();
 		});
-	});
-	document.querySelector('#MOBILE_DRAWER_OPENER')?.removeEventListener('click', (e) => {
-		e.stopPropagation();
-		e.stopImmediatePropagation();
-		const MOBILE_DRAWER = document.querySelector('#MOBILE_DRAWER') as HTMLDivElement;
-		if (MOBILE_DRAWER) {
-			MOBILE_DRAWER.style.right = '0';
-		}
-	});
-	document.querySelector('#MOBILE_DRAWER_CLOSER')?.removeEventListener('click', (e) => {
-		e.stopPropagation();
-		e.stopImmediatePropagation();
-		const MOBILE_DRAWER = document.querySelector('#MOBILE_DRAWER') as HTMLDivElement;
-		if (MOBILE_DRAWER) {
-			MOBILE_DRAWER.style.right = '-100%';
-		}
 	});
 }

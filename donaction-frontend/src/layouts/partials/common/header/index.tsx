@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavSlugs } from '@/core/models/club';
-import KlubrLogo from '@/components/KlubrLogo';
+import DonactionLogo from '@/components/DonactionLogo';
 import Link from 'next/link';
 import DropdownList from '@/components/dropdownList';
 import { VscChevronDown } from 'react-icons/vsc';
@@ -9,109 +9,102 @@ import ClientController from '@/partials/common/header/clientController';
 import PreviewMode from '@/partials/common/previewMode';
 import MobileDrawer from '@/partials/common/header/mobileDrawer';
 import UseSticky from '@/partials/common/header/sticky';
+import './index.scss';
 
 interface IHeader {
-	bg1?: string;
-	bg2?: string;
-	txtColor?: string;
 	session: Session | null;
 	slugs?: Array<NavSlugs>;
+	clubColors?: {
+		primary: string;
+		secondary: string;
+		headerText: string;
+	};
 }
 
 const Header: React.FC<IHeader> = (props) => {
+	const isClubPage = !!props.clubColors;
+
+	/* Club primary used ONLY for accent elements (underline, bar) — text stays dark */
+	const clubStyle = isClubPage
+		? ({
+				'--club-primary': props.clubColors!.primary,
+				'--club-secondary': props.clubColors!.secondary,
+			} as React.CSSProperties)
+		: undefined;
+
 	return (
 		<>
-			<header id={'HEADER_TAG'} className='w-full z-50'>
-				<ClientController txtColor={props.txtColor || '#000'} component={'INIT'} />
-				<nav
-					className={
-						'p-4 w-full flex flex-row items-center justify-between xl:max-w-screen-xl lg:max-w-screen-lg md:max-w-screen-md max-w-screen-sm mx-auto'
-					}
-				>
-					<Link href='/' className={'w-[142.25px] md:w-[185px] flex'}>
-						<KlubrLogo></KlubrLogo>
+			<header
+				id='HEADER_TAG'
+				className={`header w-full z-50 ${isClubPage ? 'header--club' : ''}`}
+				style={clubStyle}
+			>
+				{isClubPage && <div className='header__accent-bar w-full' />}
+
+				<ClientController txtColor='#000' component='INIT' />
+
+				<nav className='p-4 w-full flex flex-row items-center justify-between xl:max-w-screen-xl lg:max-w-screen-lg md:max-w-screen-md max-w-screen-sm mx-auto'>
+					<Link href='/' className='w-[142.25px] md:w-[160px] flex'>
+						<DonactionLogo />
 					</Link>
+
 					<PreviewMode session={props.session} />
 
-					<button id={'MOBILE_DRAWER_OPENER'} className='lg:hidden' aria-label='drawer toggler'>
-						<svg
-							width='23'
-							height='18'
-							viewBox='0 0 23 18'
-							fill='none'
-							className={'stickyHeaderTxtColor'}
-							xmlns='http://www.w3.org/2000/svg'
-						>
-							<path
-								d='M2 2H21'
-								stroke={props.txtColor || '#FFFFFF'}
-								strokeWidth='3'
-								strokeLinecap='round'
-							/>
-							<path
-								d='M2 9H21'
-								stroke={props.txtColor || '#FFFFFF'}
-								strokeWidth='3'
-								strokeLinecap='round'
-							/>
-							<path
-								d='M2 16H21'
-								stroke={props.txtColor || '#FFFFFF'}
-								strokeWidth='3'
-								strokeLinecap='round'
-							/>
-						</svg>
-					</button>
+					<MobileDrawer
+						serverSession={props.session}
+						slugs={props.slugs}
+						txtColor='#000'
+					/>
 
-					<div className={'w-full flex-row items-center justify-between lg:flex hidden'}>
-						<ul className={'ml-10 flex items-center gap-10'}>
+					<div className='w-full flex-row items-center justify-between lg:flex hidden'>
+						<ul className='ml-10 flex items-center gap-10'>
 							<li>
 								<Link
 									href='/mecenat'
-									className='stickyHeaderTxtColor'
-									style={{ color: props.txtColor || '#000' }}
+									className='header__nav-link stickyHeaderTxtColor text-black'
 								>
 									Le mécénat
 								</Link>
 							</li>
 							{!!props?.slugs &&
-								props?.slugs.length > 0 &&
+								props.slugs.length > 0 &&
 								process.env.NEXT_PUBLIC_ENVIRONMENT !== 'prod' && (
 									<li>
 										<DropdownList
-											className={'text-black'}
+											className='text-black'
+											variant='glass'
 											toggler={
-												<span
-													className='inline-flex items-center cursor-pointer stickyHeaderTxtColor'
-													style={{ color: props.txtColor || '#000' }}
-												>
+												<span className='inline-flex items-center cursor-pointer header__nav-link stickyHeaderTxtColor text-black'>
 													Clubs
-													<VscChevronDown />
+													<VscChevronDown className='ml-1 dropdown-chevron transition-transform duration-200' />
 												</span>
 											}
 										>
-											<ul className='min-w-[250px] p-4'>
-												{props?.slugs.map((slug, index) => (
-													<li key={index}>
-														<Link href={`/${slug.slug}`} className={'block p-2'}>
+											<div className='dropdown-glass__inner'>
+												<div className='dropdown-glass__items'>
+													{props.slugs.map((slug, index) => (
+														<Link
+															key={index}
+															href={`/${slug.slug}`}
+															className='dropdown-glass-item'
+														>
 															{slug.label}
 														</Link>
-													</li>
-												))}
-												<li>
-													<Link href={`/clubs`} className={'block p-2 underline'}>
-														Voir tous les Clubs
-													</Link>
-												</li>
-											</ul>
+													))}
+												</div>
+												<span className='dropdown-glass__divider' />
+												<Link href='/clubs' className='dropdown-glass-cta'>
+													Voir tous les clubs
+													<span aria-hidden='true'>→</span>
+												</Link>
+											</div>
 										</DropdownList>
 									</li>
 								)}
 							<li>
 								<Link
 									href='/contact'
-									className={'stickyHeaderTxtColor'}
-									style={{ color: props.txtColor || '#000' }}
+									className='header__nav-link stickyHeaderTxtColor text-black'
 								>
 									Contact
 								</Link>
@@ -119,46 +112,13 @@ const Header: React.FC<IHeader> = (props) => {
 						</ul>
 
 						{!!props.session ? (
-							<ClientController
-								component={'DESK_CONNECTED_BTNS'}
-								txtColor={props.txtColor || '#000'}
-							/>
+							<ClientController component='DESK_CONNECTED_BTNS' txtColor='#000' />
 						) : (
-							<ClientController
-								component={'DESK_DISCONNECTED_BTNS'}
-								txtColor={props.txtColor || '#000'}
-							/>
+							<ClientController component='DESK_DISCONNECTED_BTNS' txtColor='#000' />
 						)}
 					</div>
 				</nav>
-				<MobileDrawer
-					serverSession={props.session}
-					slugs={props.slugs}
-					txtColor={props.txtColor || '#000'}
-				/>
 			</header>
-			{props.bg1 ? (
-				<div
-					className={`w-full min-h-[300px] absolute top-16 left-0`}
-					style={{
-						clipPath: 'polygon(0 0, 100% 0, 100% 70%, 51% 100%, 0 70%)',
-						backgroundColor: props.bg1,
-					}}
-				/>
-			) : (
-				<></>
-			)}
-			{props.bg2 ? (
-				<div
-					className={`w-full min-h-[300px] absolute top-0 left-0`}
-					style={{
-						clipPath: 'polygon(0 0, 100% 0, 100% 70%, 51% 100%, 0 70%)',
-						backgroundColor: props.bg2,
-					}}
-				/>
-			) : (
-				<></>
-			)}
 
 			<UseSticky />
 		</>

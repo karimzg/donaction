@@ -2,39 +2,41 @@
 import { useEffect } from 'react';
 
 const UseSticky = () => {
-	let previousScrollY: number = NaN;
-	let timeoutId: NodeJS.Timeout;
 	useEffect(() => {
+		let previousScrollY: number = NaN;
 		const header = document.querySelector('#HEADER_TAG') as HTMLHeadElement;
+
 		const stickyHeader = () => {
 			const scrollY = window.scrollY;
 			if (!isNaN(previousScrollY)) {
-				const shouldBeFixed = scrollY > 100 && scrollY < previousScrollY;
-				const isAlreadyFixed = header?.classList?.contains('header-fixed-top');
+				const shouldBeFixed = scrollY > 80 && scrollY < previousScrollY;
+				const isAlreadyFixed = header?.classList?.contains('header--sticky');
 
 				if (shouldBeFixed && !isAlreadyFixed) {
-					header?.classList.add('header-fixed-top');
-					// settxtColorUsed('#000000');
+					header?.classList.add('header--sticky');
 				} else if (!shouldBeFixed && isAlreadyFixed) {
-					header?.classList.remove('header-fixed-top');
-					// settxtColorUsed(txtColor);
+					header?.classList.remove('header--sticky');
 				}
 			}
 
 			previousScrollY = scrollY;
 		};
 
-		const debounce = () => {
-			clearTimeout(+timeoutId);
-			timeoutId = setTimeout(() => {
-				stickyHeader();
-			}, 100);
+		let ticking = false;
+		const onScroll = () => {
+			if (!ticking) {
+				requestAnimationFrame(() => {
+					stickyHeader();
+					ticking = false;
+				});
+				ticking = true;
+			}
 		};
 
-		window.addEventListener('scroll', debounce);
+		window.addEventListener('scroll', onScroll, { passive: true });
 
 		return () => {
-			window.removeEventListener('scroll', debounce);
+			window.removeEventListener('scroll', onScroll);
 			document.body.style.overflow = 'auto';
 		};
 	}, []);
