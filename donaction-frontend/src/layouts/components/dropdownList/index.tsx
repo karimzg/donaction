@@ -6,12 +6,13 @@ interface IDropdownList {
 	toggler: React.ReactElement;
 	className?: string;
 	listPosition?: string;
-	variant?: 'default' | 'glass';
+	variant?: 'default' | 'glass' | 'user';
 }
 
 const DropdownList: React.FC<React.PropsWithChildren<IDropdownList>> = (props) => {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const isGlass = props.variant === 'glass';
+	const isUser = props.variant === 'user';
 	const panelRef = React.useRef<HTMLDivElement>(null);
 
 	/* For glass variant: calculate offset so panel spans full viewport width */
@@ -27,7 +28,9 @@ const DropdownList: React.FC<React.PropsWithChildren<IDropdownList>> = (props) =
 
 	const panelClass = isGlass
 		? `dropdown-glass ${isHovered ? 'dropdown-glass--open' : ''}`
-		: `${isHovered ? 'block' : 'hidden'} bg-white boxBoxShadow rounded-xl`;
+		: isUser
+			? `user-dropdown-panel ${isHovered ? 'user-dropdown-panel--open' : ''}`
+			: `${isHovered ? 'block' : 'hidden'} bg-white boxBoxShadow rounded-xl`;
 
 	return (
 		<div

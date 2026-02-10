@@ -2,11 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import DonactionLogo from '@/components/DonactionLogo';
-import Image from 'next/image';
 import { FaChevronDown } from 'react-icons/fa';
-import settings from '../../../../../public/images/icons/settings.svg';
-import myDonations from '../../../../../public/images/icons/myDonations.svg';
-import logoutIcon from '../../../../../public/images/icons/logout.svg';
 import { useAppSelector } from '@/core/store/hooks';
 import { selectSession } from '@/core/store/modules/authSlice';
 import { NavSlugs } from '@/core/models/club';
@@ -15,6 +11,8 @@ import { Session } from 'next-auth';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { SHOW_CLUBS_NAV } from '@/core/helpers/featureFlags';
+import { SettingsIcon, DonationsIcon, LogoutIcon, DashboardIcon } from './icons';
+import { getActiveProfile, ROLE_LABELS, ADMIN_ROLES } from './helpers';
 
 const MobileDrawer: React.FC<{
 	slugs?: Array<NavSlugs>;
@@ -36,6 +34,19 @@ const MobileDrawer: React.FC<{
 	useEffect(() => {
 		setIsOpen(false);
 	}, [pathName]);
+
+	const activeProfile = selectedSession.status === 'authenticated'
+		? getActiveProfile(
+				selectedSession?.data?.klubr_membres,
+				selectedSession?.data?.last_member_profile_used,
+			)
+		: undefined;
+	const roleKey = activeProfile?.role;
+	const roleLabel = roleKey ? ROLE_LABELS[roleKey] : null;
+	const isAdmin = roleKey ? ADMIN_ROLES.has(roleKey) : false;
+	const hasClubMembership =
+		selectedSession.status === 'authenticated' &&
+		(selectedSession?.data?.klubr_membres?.length ?? 0) > 0;
 
 	return (
 		<>
@@ -86,7 +97,7 @@ const MobileDrawer: React.FC<{
 							onClick={() => setState((_) => ({ ..._, isProfileOpen: !_.isProfileOpen }))}
 							className='p-4 flex flex-row items-center gap-4 justify-between text-black cursor-pointer'
 						>
-							<div className='flex flex-row items-center gap-4'>
+							<div className='flex flex-row items-center gap-3'>
 								<ClientController txtColor={props.txtColor} component='USER_DETAIL_DROPDOWN' />
 							</div>
 							<FaChevronDown
@@ -94,43 +105,53 @@ const MobileDrawer: React.FC<{
 							/>
 						</div>
 						<div className={`${state.isProfileOpen ? 'block' : 'hidden'}`}>
-							<hr className='w-full' />
-							<ClientController txtColor={props.txtColor} component='USER_ADMIN_BTN' />
-							<ul className='text-black'>
-								<li className='px-4 py-1 mt-2 drawer-nav-item'>
+							<div className='border-t border-gray-100 mx-3' />
+
+							{hasClubMembership && (
+								<div className='px-4 py-2'>
+									<Link
+										href='/admin'
+										className='header__cta-dashboard w-full justify-center'
+										onClick={closeDrawer}
+									>
+										<DashboardIcon className='w-4 h-4' />
+										Mon espace club
+									</Link>
+								</div>
+							)}
+
+							<ul className='text-black' role='menu'>
+								<li className='user-dropdown__item mx-2 mt-1 drawer-nav-item' role='menuitem'>
 									<Link
 										href='/profile'
-										className='font-medium text-md flex flex-row items-center gap-4'
+										className='user-dropdown__link'
 										onClick={closeDrawer}
 									>
-										<div className='p-3 rounded-full bg-[#E4E4E5]'>
-											<Image width={20} height={20} src={settings} alt='paramètres' />
-										</div>
-										<p>Paramètres</p>
+										<SettingsIcon className='w-5 h-5 text-gray-500' />
+										Paramètres
 									</Link>
 								</li>
-								<li className='px-4 py-1 drawer-nav-item'>
+								<li className='user-dropdown__item mx-2 drawer-nav-item' role='menuitem'>
 									<Link
 										href='/mes-dons'
-										className='font-medium text-md flex flex-row items-center gap-4'
+										className='user-dropdown__link'
 										onClick={closeDrawer}
 									>
-										<div className='p-3 rounded-full bg-[#E4E4E5]'>
-											<Image width={20} height={20} src={myDonations} alt='mes-dons' />
-										</div>
-										<p>Mes dons</p>
+										<DonationsIcon className='w-5 h-5 text-gray-500' />
+										Mes dons
 									</Link>
 								</li>
-								<li className='px-4 py-1 mb-2 drawer-nav-item'>
+
+								<div className='border-t border-gray-100 mx-3 my-1' />
+
+								<li className='user-dropdown__item user-dropdown__item--logout mx-2 mb-1 drawer-nav-item' role='menuitem'>
 									<button
 										type='button'
 										onClick={() => signOut()}
-										className='font-medium text-md flex flex-row items-center gap-4 w-full text-left'
+										className='user-dropdown__link w-full text-left'
 									>
-										<div className='p-3 rounded-full bg-[#E4E4E5]'>
-											<Image width={20} height={20} src={logoutIcon} alt='logout' />
-										</div>
-										<p>Se Déconnecter</p>
+										<LogoutIcon className='w-5 h-5' />
+										Se déconnecter
 									</button>
 								</li>
 							</ul>

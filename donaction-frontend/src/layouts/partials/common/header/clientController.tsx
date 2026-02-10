@@ -5,14 +5,11 @@ import ImageHtml from '@/components/media/ImageHtml';
 import { useAppSelector } from '@/core/store/hooks';
 import { selectSession } from '@/core/store/modules/authSlice';
 import Link from 'next/link';
-import Image from 'next/image';
-import switchSvg from '../../../../../public/images/icons/switch.svg';
 import { VscChevronDown } from 'react-icons/vsc';
-import settings from '../../../../../public/images/icons/settings.svg';
-import myDonations from '../../../../../public/images/icons/myDonations.svg';
-import logoutIcon from '../../../../../public/images/icons/logout.svg';
 import DropdownList from '@/components/dropdownList';
 import { signOut } from 'next-auth/react';
+import { SettingsIcon, DonationsIcon, LogoutIcon, DashboardIcon } from './icons';
+import { getDisplayName, getActiveProfile, ROLE_LABELS, ADMIN_ROLES } from './helpers';
 
 const ClientController: React.FC<{ component: string; txtColor: string }> = (props) => {
 	const selectedSession = useAppSelector(selectSession);
@@ -21,105 +18,109 @@ const ClientController: React.FC<{ component: string; txtColor: string }> = (pro
 		signOut();
 	}, []);
 
-
 	const getComponent = () => {
 		switch (props.component) {
 			case 'USER_DETAIL_NAV':
 				if (selectedSession.status === 'authenticated') {
 					return (
-						<>
-							<ImageHtml
-								src={selectedSession?.data?.avatar?.url || selectedSession?.data?.image || ''}
-								loading='lazy'
-								decoding='async'
-								alt='avatar'
-								className='img h-[36px] w-[36px] object-cover rounded-full'
-								width={36}
-								height={36}
-								namedtransformation='avatar'
-								nosizes={true}
-							/>
-						</>
+						<ImageHtml
+							src={selectedSession?.data?.avatar?.url || selectedSession?.data?.image || ''}
+							loading='lazy'
+							decoding='async'
+							alt='avatar'
+							className='img h-[44px] w-[44px] object-cover rounded-full'
+							width={44}
+							height={44}
+							namedtransformation='avatar'
+							nosizes={true}
+						/>
 					);
 				}
 				return (
-					<div className='min-w-[150px]'>
-						<div className='animate-pulse flex items-center justify-start gap-2'>
-							<div className='rounded-full bg-gray-300 h-[36px] w-[36px]'></div>
-						</div>
+					<div className='animate-pulse'>
+						<div className='rounded-full bg-gray-300 h-[44px] w-[44px]' />
 					</div>
 				);
 
-			case 'USER_DETAIL_DROPDOWN':
+			case 'USER_DETAIL_DROPDOWN': {
 				if (selectedSession.status === 'authenticated') {
+					const data = selectedSession?.data;
+					const displayName = getDisplayName(data);
+					const activeProfile = getActiveProfile(
+						data?.klubr_membres,
+						data?.last_member_profile_used,
+					);
+					const roleKey = activeProfile?.role;
+					const roleLabel = roleKey ? ROLE_LABELS[roleKey] : null;
+					const isAdmin = roleKey ? ADMIN_ROLES.has(roleKey) : false;
+
 					return (
 						<>
 							<ImageHtml
-								src={selectedSession?.data?.avatar?.url || selectedSession?.data?.image || ''}
+								src={data?.avatar?.url || data?.image || ''}
 								loading='lazy'
 								decoding='async'
 								alt='avatar'
-								className='img h-[36px] w-[36px] object-cover rounded-full'
-								width={36}
-								height={36}
+								className='img h-[44px] w-[44px] object-cover rounded-full flex-shrink-0'
+								width={44}
+								height={44}
 								namedtransformation='avatar'
 								nosizes={true}
 							/>
-							<div className='flex flex-col items-start gap-0'>
-								<strong className='font-primary'>{selectedSession?.data?.nom}</strong>
-								<p className='text-sm text-gray-500'>{selectedSession?.data?.email}</p>
+							<div className='flex flex-col items-start gap-0.5 min-w-0'>
+								<strong className='font-primary text-sm leading-tight truncate max-w-[180px]'>
+									{displayName}
+								</strong>
+								<p className='text-xs text-gray-400 truncate max-w-[180px]'>
+									{data?.email}
+								</p>
+								{roleLabel && (
+									<span
+										className={`user-dropdown__role-badge ${isAdmin ? 'user-dropdown__role-badge--admin' : ''}`}
+									>
+										{roleLabel}
+									</span>
+								)}
 							</div>
 						</>
 					);
 				}
 				return (
 					<div className='min-w-[200px]'>
-						<div className='animate-pulse flex items-center justify-start gap-2'>
-							<div className='rounded-full bg-gray-300 h-[36px] w-[36px]'></div>
-							<div className='flex-1 py-1 mx-0'>
-								<div className='space-y-3'>
-									<div className='grid grid-cols-3 gap-4'>
-										<div className='h-2 bg-gray-300 rounded col-span-2'></div>
-										<div className='h-2 bg-gray-300 rounded col-span-1'></div>
-									</div>
-									<div className='h-2 bg-gray-300 rounded'></div>
+						<div className='animate-pulse flex items-center justify-start gap-3'>
+							<div className='rounded-full bg-gray-300 h-[44px] w-[44px] flex-shrink-0' />
+							<div className='flex-1 py-1'>
+								<div className='space-y-2'>
+									<div className='h-2.5 bg-gray-300 rounded w-3/4' />
+									<div className='h-2 bg-gray-300 rounded w-1/2' />
 								</div>
 							</div>
 						</div>
 					</div>
 				);
+			}
 
-			case 'USER_ADMIN_BTN':
+			case 'HEADER_DASHBOARD_BTN':
 				if (selectedSession.status === 'authenticated') {
 					return selectedSession?.data && selectedSession?.data?.klubr_membres?.length > 0 ? (
-						<>
-							<Link
-								href='/admin'
-								className='m-2 py-4 rounded-xl font-medium flex items-center justify-center gap-2 bg-[#E4E4E5] text-black'
-							>
-								<Image src={switchSvg} alt='Mon espace club' />
-								<p>Mon Espace Club</p>
-							</Link>
-							<hr className='w-full' />
-						</>
-					) : (
-						<></>
-					);
+						<Link href='/admin' className='header__cta-dashboard'>
+							<DashboardIcon className='w-4 h-4' />
+							Mon espace club
+						</Link>
+					) : null;
 				}
-				return (
-					<>
-						<div className='min-w-[200px] p-2'>
-							<div className='animate-pulse flex items-center justify-start gap-2'>
-								<div className='bg-gray-300 rounded-xl w-full h-[60px]'></div>
-							</div>
-						</div>
-						<hr className='w-full' />
-					</>
-				);
+				return null;
 
 			case 'DESK_DISCONNECTED_BTNS':
 				if (selectedSession.status === 'authenticated') {
 					return <ClientController component='DESK_CONNECTED_BTNS' txtColor={props.txtColor} />;
+				}
+				if (selectedSession.status === 'loading') {
+					return (
+						<div className='animate-pulse flex items-center gap-2'>
+							<div className='rounded-full bg-gray-300 h-[44px] w-[44px]' />
+						</div>
+					);
 				}
 				return (
 					<div className='flex items-center gap-6'>
@@ -140,6 +141,7 @@ const ClientController: React.FC<{ component: string; txtColor: string }> = (pro
 				return (
 					<DropdownList
 						listPosition='right-0'
+						variant='user'
 						toggler={
 							<div className='flex items-center gap-2 text-black cursor-pointer'>
 								<ClientController txtColor={props.txtColor} component='USER_DETAIL_NAV' />
@@ -149,48 +151,38 @@ const ClientController: React.FC<{ component: string; txtColor: string }> = (pro
 								/>
 							</div>
 						}
-						className='text-black user-dropdown-enter'
+						className='text-black'
 					>
-						<ul className='p-0 w-[300px]'>
-							<div className='p-4 flex flex-row items-center gap-4' id='USER_DETAIL_DROPDOWN'>
+						<ul className='p-0 w-[300px] user-dropdown' role='menu'>
+							<div className='p-4 flex flex-row items-center gap-3'>
 								<ClientController txtColor={props.txtColor} component='USER_DETAIL_DROPDOWN' />
 							</div>
-							<hr className='w-full' />
-							<div data-id='USER_ADMIN_BTN'>
-								<ClientController txtColor={props.txtColor} component='USER_ADMIN_BTN' />
-							</div>
-							<li className='px-4 py-1 mt-2'>
-								<Link
-									href='/profile'
-									className='font-medium text-md flex flex-row items-center gap-4'
-								>
-									<div className='p-3 rounded-full bg-[#E4E4E5]'>
-										<Image width={20} height={20} src={settings} alt='paramètres' />
-									</div>
-									<p>Paramètres</p>
+
+							<div className='border-t border-gray-100 mx-3 my-1' />
+
+							<li className='user-dropdown__item' role='menuitem'>
+								<Link href='/profile' className='user-dropdown__link'>
+									<SettingsIcon className='w-5 h-5 text-gray-500' />
+									Paramètres
 								</Link>
 							</li>
-							<li className='px-4 py-1'>
-								<Link
-									href='/mes-dons'
-									className='font-medium text-md flex flex-row items-center gap-4'
-								>
-									<div className='p-3 rounded-full bg-[#E4E4E5]'>
-										<Image width={20} height={20} src={myDonations} alt='mes-dons' />
-									</div>
-									<p>Mes dons</p>
+							<li className='user-dropdown__item' role='menuitem'>
+								<Link href='/mes-dons' className='user-dropdown__link'>
+									<DonationsIcon className='w-5 h-5 text-gray-500' />
+									Mes dons
 								</Link>
 							</li>
-							<li className='px-4 py-1 mb-2'>
+
+							<div className='border-t border-gray-100 mx-3 my-1' />
+
+							<li className='user-dropdown__item user-dropdown__item--logout' role='menuitem'>
 								<button
 									type='button'
 									onClick={handleLogout}
-									className='font-medium text-md flex flex-row items-center gap-4 w-full text-left'
+									className='user-dropdown__link w-full text-left'
 								>
-									<div className='p-3 rounded-full bg-[#E4E4E5]'>
-										<Image width={20} height={20} src={logoutIcon} alt='logout' />
-									</div>
-									<p>Se Déconnecter</p>
+									<LogoutIcon className='w-5 h-5' />
+									Se déconnecter
 								</button>
 							</li>
 						</ul>

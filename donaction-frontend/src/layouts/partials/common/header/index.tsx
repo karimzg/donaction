@@ -110,11 +110,16 @@ const Header: React.FC<IHeader> = (props) => {
 							</li>
 						</ul>
 
-						{!!props.session ? (
-							<ClientController component='DESK_CONNECTED_BTNS' txtColor='#000' />
-						) : (
-							<ClientController component='DESK_DISCONNECTED_BTNS' txtColor='#000' />
-						)}
+						<div className='flex items-center gap-4'>
+							{!!props.session && (
+								<ClientController component='HEADER_DASHBOARD_BTN' txtColor='#000' />
+							)}
+							{!!props.session ? (
+								<ClientController component='DESK_CONNECTED_BTNS' txtColor='#000' />
+							) : (
+								<ClientController component='DESK_DISCONNECTED_BTNS' txtColor='#000' />
+							)}
+						</div>
 					</div>
 				</nav>
 			</header>
