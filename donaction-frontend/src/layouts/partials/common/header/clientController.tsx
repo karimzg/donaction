@@ -11,7 +11,14 @@ import { signOut } from 'next-auth/react';
 import { SettingsIcon, DonationsIcon, LogoutIcon, DashboardIcon } from './icons';
 import { getDisplayName, getActiveProfile, ROLE_LABELS, ADMIN_ROLES } from './helpers';
 
-const ClientController: React.FC<{ component: string; txtColor: string }> = (props) => {
+export type HeaderComponent =
+	| 'USER_DETAIL_NAV'
+	| 'USER_DETAIL_DROPDOWN'
+	| 'HEADER_DASHBOARD_BTN'
+	| 'DESK_DISCONNECTED_BTNS'
+	| 'DESK_CONNECTED_BTNS';
+
+const ClientController: React.FC<{ component: HeaderComponent; txtColor: string }> = (props) => {
 	const selectedSession = useAppSelector(selectSession);
 
 	const handleLogout = useCallback(() => {
@@ -101,13 +108,13 @@ const ClientController: React.FC<{ component: string; txtColor: string }> = (pro
 			}
 
 			case 'HEADER_DASHBOARD_BTN':
-				if (selectedSession.status === 'authenticated') {
-					return selectedSession?.data && selectedSession?.data?.klubr_membres?.length > 0 ? (
+				if (selectedSession.status === 'authenticated' && (selectedSession.data?.klubr_membres?.length ?? 0) > 0) {
+					return (
 						<Link href='/admin' className='header__cta-dashboard'>
 							<DashboardIcon className='w-4 h-4' />
 							Mon espace club
 						</Link>
-					) : null;
+					);
 				}
 				return null;
 

@@ -43,7 +43,7 @@ export function getActiveProfile(
 
 	if (lastProfileUsed) {
 		const match = klubrMembres.find(
-			(m) => String(m.uuid) === lastProfileUsed,
+			(m) => m.uuid === lastProfileUsed,
 		);
 		if (match) return match;
 	}

@@ -29,7 +29,7 @@ describe('getDisplayName', () => {
 });
 
 describe('getActiveProfile', () => {
-	const makeMember = (uuid: number, role?: string): KlubrMembre => ({
+	const makeMember = (uuid: string, role?: string): KlubrMembre => ({
 		uuid,
 		nom: 'Test',
 		prenom: 'User',
@@ -40,21 +40,21 @@ describe('getActiveProfile', () => {
 	});
 
 	it('returns matching profile by uuid', () => {
-		const members = [makeMember(1, 'Admin'), makeMember(2, 'KlubMember')];
+		const members = [makeMember('1', 'Admin'), makeMember('2', 'KlubMember')];
 		const result = getActiveProfile(members, '2');
-		expect(result?.uuid).toBe(2);
+		expect(result?.uuid).toBe('2');
 	});
 
 	it('falls back to first member when no uuid match', () => {
-		const members = [makeMember(1, 'Admin'), makeMember(2, 'KlubMember')];
+		const members = [makeMember('1', 'Admin'), makeMember('2', 'KlubMember')];
 		const result = getActiveProfile(members, '999');
-		expect(result?.uuid).toBe(1);
+		expect(result?.uuid).toBe('1');
 	});
 
 	it('falls back to first member when lastProfileUsed is null', () => {
-		const members = [makeMember(1, 'Admin')];
+		const members = [makeMember('1', 'Admin')];
 		const result = getActiveProfile(members, null);
-		expect(result?.uuid).toBe(1);
+		expect(result?.uuid).toBe('1');
 	});
 
 	it('returns undefined for empty array', () => {

@@ -35,6 +35,16 @@ const MobileDrawer: React.FC<{
 		setIsOpen(false);
 	}, [pathName]);
 
+	// Close drawer on Escape key
+	useEffect(() => {
+		if (!isOpen) return;
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') closeDrawer();
+		};
+		document.addEventListener('keydown', handleEscape);
+		return () => document.removeEventListener('keydown', handleEscape);
+	}, [isOpen, closeDrawer]);
+
 	const activeProfile = selectedSession.status === 'authenticated'
 		? getActiveProfile(
 				selectedSession?.data?.klubr_membres,

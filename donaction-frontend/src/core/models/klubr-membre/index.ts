@@ -8,7 +8,7 @@ export type KlubrMembreRole =
     | 'KlubMember';
 
 export type KlubrMembre = {
-    uuid: number;
+    uuid: string;
     nom: string;
     prenom: string;
     fonction: string;
