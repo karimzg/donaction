@@ -82,7 +82,6 @@ export default async function OurProjectsPage({ params }: { params: { slug: stri
 	const primaryColor = klub?.klubr_house?.primary_color || '#FFFFFF';
 	const secondaryColor = klub?.klubr_house?.secondary_color || '#000000';
 	const textColor = klub?.klubr_house?.header_text_color || '#000000';
-	const footerTextColor = klub.klubr_house?.footer_text_color || '#FFFFFF';
 	const result = await getProjetsByKlub(klub.uuid, 1, 10, undefined, cookies().toString()).catch(
 		(error) => {
 			console.error('Error fetching projets', error?.config);
@@ -105,9 +104,11 @@ export default async function OurProjectsPage({ params }: { params: { slug: stri
 			<Header
 				session={session}
 				slugs={slugs}
-				bg1={secondaryColor}
-				bg2={primaryColor}
-				txtColor={textColor}
+				clubColors={{
+					primary: primaryColor,
+					secondary: secondaryColor,
+					headerText: textColor,
+				}}
 			/>
 			<div className='text-black py-10 z-10 bg-white w-full min-h-[25rem] flex flex-col items-center'>
 				<div className='minMaxWidth flex flex-col gap-6'>
@@ -143,7 +144,7 @@ export default async function OurProjectsPage({ params }: { params: { slug: stri
 					)}
 				</div>
 			</div>
-			<Footer bg1={secondaryColor} bg2={primaryColor} textColor={footerTextColor} />
+			<Footer />
 		</>
 	);
 }

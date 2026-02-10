@@ -1,9 +1,247 @@
-
-
+/* ===== Default variant (legacy) ===== */
 .dropDownListContainer {
+	li:hover {
+		background-color: rgb(0 0 0 / 0.05);
+		border-radius: 10px;
+	}
+}
 
-  li:hover {
-    background-color: rgb(0 0 0 / 0.05);
-    border-radius: 10px;
-  }
+/* ===== Glass variant — Full-width reveal bar ===== */
+.dropdown-glass {
+	/* Full-bleed: offset calculated via JS --glass-offset */
+	left: var(--glass-offset, 0);
+	width: 100vw;
+	top: 100%;
+
+	/* Sharp edges — zero border-radius */
+	border-radius: 0;
+
+	/* Glassmorphism — matches header sticky */
+	background: rgba(255, 255, 255, 0.94);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.05);
+
+	/* Hidden state */
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(-4px);
+	transition:
+		opacity 0.2s ease,
+		transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+		visibility 0s 0.3s;
+
+	/* Top accent line — sweeps from center outward */
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 2px;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			#73cfa8 15%,
+			#73cfa8 85%,
+			transparent
+		);
+		transform: scaleX(0);
+		transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Open state */
+	&--open {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+		transform: translateY(0);
+		transition:
+			opacity 0.25s ease,
+			transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+			visibility 0s;
+
+		&::before {
+			transform: scaleX(1);
+		}
+	}
+}
+
+/* Chevron rotation when open */
+.dropdown--open .dropdown-chevron {
+	transform: rotate(180deg);
+}
+
+/* ===== Inner layout — horizontal ===== */
+.dropdown-glass__inner {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 14px 32px;
+	display: flex;
+	align-items: center;
+	gap: 24px;
+}
+
+.dropdown-glass__items {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.dropdown-glass__divider {
+	width: 1px;
+	height: 20px;
+	background-color: rgba(0, 0, 0, 0.1);
+	flex-shrink: 0;
+}
+
+/* ===== Glass nav items ===== */
+.dropdown-glass-item {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	padding: 6px 14px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #374151;
+	white-space: nowrap;
+
+	/* Stagger entry — hidden by default */
+	opacity: 0;
+	transform: translateY(-6px);
+	transition-property: opacity, transform, color;
+	transition-duration: 0.2s, 0.2s, 0.15s;
+	transition-timing-function: ease;
+	transition-delay: 0s;
+
+	/* Underline accent on hover */
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 2px;
+		left: 14px;
+		width: calc(100% - 28px);
+		height: 2px;
+		background-color: #73cfa8;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.2s ease;
+	}
+
+	&:hover {
+		color: #111827;
+
+		&::after {
+			transform: scaleX(1);
+		}
+	}
+}
+
+/* Stagger items on open */
+.dropdown-glass--open .dropdown-glass-item {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+@for $i from 1 through 10 {
+	.dropdown-glass--open .dropdown-glass-item:nth-child(#{$i}) {
+		transition-delay: #{0.06 + $i * 0.04}s, #{0.06 + $i * 0.04}s, 0s;
+	}
+}
+
+/* ===== "Voir tous" CTA ===== */
+.dropdown-glass-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #059669;
+	white-space: nowrap;
+
+	/* Stagger entry — appears after items */
+	opacity: 0;
+	transform: translateY(-6px);
+	transition-property: opacity, transform, color, gap;
+	transition-duration: 0.2s, 0.2s, 0.15s, 0.2s;
+	transition-timing-function: ease;
+	transition-delay: 0s;
+
+	&:hover {
+		color: #047857;
+		gap: 10px;
+	}
+}
+
+.dropdown-glass--open .dropdown-glass-cta {
+	opacity: 1;
+	transform: translateY(0);
+	transition-delay: 0.3s, 0.3s, 0s, 0s;
+}
+
+/* ===== User variant — opacity/visibility transitions ===== */
+.user-dropdown-panel {
+	background: #fff;
+	border-radius: 12px;
+	box-shadow:
+		0 4px 24px rgba(0, 0, 0, 0.08),
+		0 1px 4px rgba(0, 0, 0, 0.04);
+
+	/* Hidden state */
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(-6px);
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+		visibility 0s 0.2s;
+
+	/* Open state */
+	&--open {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+		transform: translateY(0);
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+			visibility 0s;
+	}
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+	.dropdown-glass {
+		transition: none;
+
+		&::before {
+			transition: none;
+		}
+	}
+
+	.dropdown-glass-item {
+		transition: none;
+		opacity: 1;
+		transform: none;
+
+		&::after {
+			transition: none;
+		}
+	}
+
+	.dropdown-glass-cta {
+		transition: none;
+		opacity: 1;
+		transform: none;
+	}
+
+	.dropdown-chevron {
+		transition: none;
+	}
+
+	.user-dropdown-panel {
+		transition: none;
+	}
 }

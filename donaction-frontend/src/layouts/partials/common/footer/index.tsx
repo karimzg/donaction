@@ -1,100 +1,129 @@
 import Link from 'next/link';
-import KlubrLogo from '@/components/KlubrLogo';
+import DonactionLogo from '@/components/DonactionLogo';
 import React from 'react';
+import { SHOW_SOCIAL_LINKS, SHOW_CLUBS_NAV } from '@/core/helpers/featureFlags';
+import './index.scss';
 
-const Footer = ({
-                    bg1,
-                    bg2,
-                    textColor = '#FFFFFF',
-                }: {
-    bg1: string;
-    bg2: string;
-    textColor?: string;
-}) => {
-    const currentYear = new Date().getFullYear();
+/* Club colors intentionally NOT used for footer — same dark design everywhere */
+const Footer: React.FC = () => {
+	const currentYear = new Date().getFullYear();
 
-    return (
-        <>
-            <footer className={`z-10 relative  mt-[110px] w-full`}>
-                <div
-                    className={
-                        'minMaxWidth m-auto flex items-center max-[768px]:justify-evenly max-[768px]:gap-4 max-[768px]:pl-8 max-[768px]:pr-16'
-                    }
-                >
-                    <div
-                        className={`w-full min-h-[100%] absolute left-0 -z-20`}
-                        style={{
-                            clipPath: 'polygon(0 100%, 100% 100%, 100% 123px, 36% 0, 0 123px)',
-                            backgroundColor: bg1,
-                            bottom: 'calc(4rem + 1px)',
-                        }}
-                    />
-                    <div
-                        className={`w-full min-h-[100%] absolute bottom-16 left-0 -z-20`}
-                        style={{
-                            clipPath: 'polygon(0 100%, 100% 100%, 100% 123px, 36% 0, 0 123px)',
-                            backgroundColor: '#FFF',
-                        }}
-                    />
-                    <div
-                        className={`w-full min-h-[100%] absolute bottom-0 left-0 -z-20`}
-                        style={{
-                            clipPath: 'polygon(0 100%, 100% 100%, 100% 123px, 36% 0, 0 123px)',
-                            backgroundColor: bg1,
-                        }}
-                    />
-                    <div
-                        className='flex items-center z-10 w-full h-full text-white justify-evenly max-[768px]:flex-wrap max-[768px]:gap-8 max-[768px]:items-start  mt-28 mb-16'>
-                        <div className={'flex justify-center max-[768px]:w-full'}>
-                            <KlubrLogo
-                                border={'#000000'}
-                                dotBorder={'#000000'}
-                                dotBg={'#FFFFFF'}
-                                bg={'#FFFFFF'}
-                                context={'footer'}
-                            ></KlubrLogo>
-                        </div>
-                        <div
-                            className='flex flex-col items-start justify-center mx-8 max-[768px]:min-w-[180px]'
-                            style={{color: textColor}}
-                        >
-                            <Link href={'/'}> Acceuil </Link>
-                            {process.env.NEXT_PUBLIC_ENVIRONMENT !== 'prod' && (
-                                <>
-                                    <Link href={'/clubs'}> Nos Klubs </Link>
-                                    <Link href={'/projets'}> Nos projets </Link>
-                                </>
-                            )}
-                            <Link href={'/mecenat'}> Le mécénat </Link>
-                            <Link href={'/conditions-generales-d-utilisation'}>
-                                {' '}
-                                Conditions générales d'utilisation{' '}
-                            </Link>
-                            <Link href={'/politique-de-confidentialite'}> Politique de confidentialité </Link>
-                            <Link href={'/contact'}> Contact </Link>
-                        </div>
-                        <div
-                            className='flex flex-col items-start justify-center mx-8 max-[768px]:min-w-[180px]'
-                            style={{color: textColor}}
-                        >
-                            <p className='font-semibold'>Nos coordonnées</p>
-                            <span>FONDS KLUBR</span>
-                            <span>10 clos du Golf du Sart</span>
-                            <span>59491 VILLENEUVE D’ASCQ</span>
-                            <span>hello&#64;donaction.fr</span>
-                            {/*<span>+33 X XX XX XX XX</span>*/}
-                        </div>
-                    </div>
-                </div>
-                <div className='flex items-center justify-center text-white gap-2 pb-4'>
-                    Copyright © {currentYear} - powered by
-                    <Link href={'https://nakaa.fr/'} target={'_blank'}><img src='/images/icons/beGoodee.svg'
-                                                                               alt='Nakaa logo'
-                                                                               className='mt-1'/></Link>
-                </div>
-            </footer>
-        </>
-    );
+	return (
+		<footer className='footer z-10 relative mt-16 w-full'>
+			<div className='footer__grid xl:max-w-screen-xl lg:max-w-screen-lg mx-auto'>
+				{/* Brand column */}
+				<div className='footer__column'>
+					<DonactionLogo context='footer' width={140} />
+					<p className='text-sm opacity-70 mt-2 max-w-[220px] md:text-left text-center'>
+						La plateforme solidaire de mécénat pour les associations.
+					</p>
+					{SHOW_SOCIAL_LINKS && (
+						<div className='footer__social'>
+							<a
+								href='https://linkedin.com'
+								target='_blank'
+								rel='noopener noreferrer'
+								aria-label='LinkedIn'
+							>
+								<svg
+									className='footer__social-icon'
+									fill='currentColor'
+									viewBox='0 0 24 24'
+								>
+									<path d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' />
+								</svg>
+							</a>
+							<a
+								href='https://twitter.com'
+								target='_blank'
+								rel='noopener noreferrer'
+								aria-label='X (Twitter)'
+							>
+								<svg
+									className='footer__social-icon'
+									fill='currentColor'
+									viewBox='0 0 24 24'
+								>
+									<path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' />
+								</svg>
+							</a>
+							<a
+								href='https://facebook.com'
+								target='_blank'
+								rel='noopener noreferrer'
+								aria-label='Facebook'
+							>
+								<svg
+									className='footer__social-icon'
+									fill='currentColor'
+									viewBox='0 0 24 24'
+								>
+									<path d='M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' />
+								</svg>
+							</a>
+						</div>
+					)}
+				</div>
+
+				{/* Navigation column */}
+				<div className='footer__column'>
+					<p className='footer__heading'>Navigation</p>
+					<Link href='/' className='footer__link'>
+						Accueil
+					</Link>
+					{SHOW_CLUBS_NAV && (
+						<Link href='/projets' className='footer__link'>
+							Projets
+						</Link>
+					)}
+					<Link href='/mecenat' className='footer__link'>
+						Mécénat
+					</Link>
+					<Link href='/contact' className='footer__link'>
+						Contact
+					</Link>
+				</div>
+
+				{/* Legal column */}
+				<div className='footer__column'>
+					<p className='footer__heading'>Légal</p>
+					<Link href='/conditions-generales-d-utilisation' className='footer__link'>
+						CGU
+					</Link>
+					<Link href='/politique-de-confidentialite' className='footer__link'>
+						Confidentialité
+					</Link>
+					<Link href='/contact' className='footer__link'>
+						Contact
+					</Link>
+				</div>
+
+				{/* Contact column */}
+				<div className='footer__column'>
+					<p className='footer__heading'>Contact</p>
+					<span className='font-semibold text-sm'>DONACTION</span>
+					<span className='text-sm opacity-70'>679 avenue de la république</span>
+					<span className='text-sm opacity-70'>59800 LILLE</span>
+					<a href='mailto:hello@donaction.fr' className='footer__link text-sm'>
+						hello&#64;donaction.fr
+					</a>
+				</div>
+			</div>
+
+			<hr className='footer__divider' />
+
+			<div className='footer__bottom'>
+				<span>Copyright © {currentYear}</span>
+				<span>—</span>
+				<span>
+					powered by{' '}
+					<Link href='https://nakaa.fr/' target='_blank' className='underline'>
+						Nakaa
+					</Link>
+				</span>
+			</div>
+		</footer>
+	);
 };
 
 export default Footer;
