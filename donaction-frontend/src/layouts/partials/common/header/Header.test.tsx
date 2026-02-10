@@ -167,6 +167,20 @@ describe('Header', () => {
 			render(<Header session={session} />);
 			expect(screen.getByTestId('client-controller-DESK_CONNECTED_BTNS')).toBeInTheDocument();
 		});
+
+		it('renders dashboard button when session exists', () => {
+			const session = {
+				user: { name: 'Test User', email: 'test@example.com' },
+				expires: new Date().toISOString(),
+			} as any;
+			render(<Header session={session} />);
+			expect(screen.getByTestId('client-controller-HEADER_DASHBOARD_BTN')).toBeInTheDocument();
+		});
+
+		it('does not render dashboard button when session is null', () => {
+			render(<Header session={null} />);
+			expect(screen.queryByTestId('client-controller-HEADER_DASHBOARD_BTN')).not.toBeInTheDocument();
+		});
 	});
 
 	describe('club navigation', () => {

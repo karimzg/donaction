@@ -135,7 +135,7 @@ describe('MobileDrawer', () => {
 				/>
 			);
 			const logoutButton = Array.from(container.querySelectorAll('button')).find((btn) =>
-				btn.textContent?.includes('Se Déconnecter')
+				btn.textContent?.includes('Se déconnecter')
 			);
 			expect(logoutButton).toBeInTheDocument();
 			expect(logoutButton?.tagName).toBe('BUTTON');
@@ -149,7 +149,7 @@ describe('MobileDrawer', () => {
 				/>
 			);
 			const logoutButton = Array.from(container.querySelectorAll('button')).find((btn) =>
-				btn.textContent?.includes('Se Déconnecter')
+				btn.textContent?.includes('Se déconnecter')
 			);
 			const parentLink = logoutButton?.closest('a');
 			expect(parentLink).not.toBeInTheDocument();
@@ -163,7 +163,7 @@ describe('MobileDrawer', () => {
 				/>
 			);
 			const logoutButton = Array.from(container.querySelectorAll('button')).find((btn) =>
-				btn.textContent?.includes('Se Déconnecter')
+				btn.textContent?.includes('Se déconnecter')
 			);
 			const li = logoutButton?.closest('li');
 			expect(li).toBeInTheDocument();
