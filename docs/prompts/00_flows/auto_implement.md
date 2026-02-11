@@ -35,17 +35,19 @@ Note: branch names are generated per issue in step 2.2.
 
 **0.2. PR Target Branch**
 
-Display current branch and available epic branches:
+Display base branch info:
 ```
-Current branch: `!git branch --show-current`
+Current base branch: `!git branch --show-current`
 
 Available epic branches:
 `!git branch -a | grep "epic/" | sed 's/remotes\/origin\///' | sort -u`
 ```
 
+This is the branch your PRs will merge into.
+
 Ask user (single choice):
-- [ ] Current branch (default)
-- [ ] Select from epic/* branches above
+- [ ] Use current branch as base: `<current-branch>` (default)
+- [ ] Select different branch (epic/* recommended)
 
 Store selected branch as `prTargetBranch` for Create PR step.
 
