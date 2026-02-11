@@ -17,7 +17,6 @@ $ARGUMENTS
 
 ## IMPORTANT RULES
 
-- NEVER ASK QUESTIONS after initial setup - work autonomously
 - EACH step must be 100% successful before proceeding to next
 - Use TodoWrite to track progress for each issue
 - Browser validation available via `claude-in-chrome` for visual/behavioral checks when needed
