@@ -130,9 +130,11 @@ All commands execute in:
      - API (Strapi): 1337
    - Check if dev server running: `lsof -i :<port>` or `curl localhost:<port>`
    - IF not running: start with `npm run dev` (background)
-   - IF failed to start: warn user, continue without browser validation
+   - IF failed to start: warn user, downgrade validation mode to "Automatic" if UI/UX
    - Check `claude-in-chrome` availability: `tabs_context_mcp`
-   - IF unavailable: warn user, skip browser validation steps
+   - IF unavailable AND `isUIUX = true` with validation enabled:
+     - Warn user: browser validation not available
+     - Ask: downgrade to "Automatic" or abort issue?
    - Note dev URL for browser validation steps
 
 1. Detect and load context:
