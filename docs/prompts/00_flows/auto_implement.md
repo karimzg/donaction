@@ -227,14 +227,19 @@ All commands execute in:
 - Dev server must be running before validation
 - Use `tabs_context_mcp` → `tabs_create_mcp` → `navigate` to target route
 
-**Standard checks:**
-| Check | Tools | When |
-|-------|-------|------|
-| Screenshots | `computer` action=screenshot | After design, before approval |
-| Responsive | `resize_window` (375/768/1440px) + screenshot | UI/UX validation |
-| Console errors | `read_console_messages` | After any implementation |
-| Interactions | `computer` action=left_click, `read_page` | Post-implementation |
-| Accessibility | `read_page` (a11y tree), keyboard nav | Test phase |
+**Validation Depth** (ask user at setup if browser validation is needed):
+- [ ] Basic: screenshots + console errors
+- [ ] Standard: + responsive check at all breakpoints (default)
+- [ ] Comprehensive: + accessibility audit (tab nav, focus states, ARIA)
+
+**Checks by depth:**
+| Check | Tools | Depth |
+|-------|-------|-------|
+| Screenshots | `computer` action=screenshot | Basic |
+| Console errors | `read_console_messages` | Basic |
+| Responsive | `resize_window` (375/768/1440px) + screenshot | Standard |
+| Interactions | `computer` action=left_click, `read_page` | Standard |
+| Accessibility | `read_page` (a11y tree), keyboard nav | Comprehensive |
 
 **Breakpoints:**
 - Mobile: 375px width
