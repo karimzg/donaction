@@ -6,14 +6,17 @@ import NewHpTimeline from './NewHpTimeline';
 import NewHpWidgetDemo from './NewHpWidgetDemo';
 import NewHpProjects from './NewHpProjects';
 import NewHpFederations from './NewHpFederations';
+import NewHpNeedHelp from './NewHpNeedHelp';
 import { KlubProjet } from '@/core/models/klub-project';
 import { Pagination } from '@/core/models/misc';
+import { FaqI } from '@/core/models/hp';
 
 type NewHomepageContentProps = {
   projets?: { data: Array<KlubProjet>; meta: { pagination: Pagination } };
+  faq?: FaqI;
 };
 
-export default function NewHomepageContent({ projets }: NewHomepageContentProps) {
+export default function NewHomepageContent({ projets, faq }: NewHomepageContentProps) {
   return (
     <main className="flex flex-col items-center justify-center text-black w-full">
       <NewHpHero />
@@ -24,6 +27,7 @@ export default function NewHomepageContent({ projets }: NewHomepageContentProps)
       <NewHpWidgetDemo />
       <NewHpProjects projets={projets?.data || []} />
       <NewHpFederations />
+      <NewHpNeedHelp faq={faq} />
     </main>
   );
 }
