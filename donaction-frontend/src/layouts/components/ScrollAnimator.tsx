@@ -16,27 +16,10 @@ interface ScrollAnimatorProps {
 /**
  * Client component that triggers CSS animations when content scrolls into viewport.
  * Uses IntersectionObserver to detect visibility and adds 'is-visible' class.
- * SSR-safe: falls back to visible state if IntersectionObserver is unavailable.
  *
- * Usage:
- * ```tsx
- * <ScrollAnimator className="my-section__wrapper">
- *   <div className="my-section__title">...</div>
- * </ScrollAnimator>
- * ```
- *
- * Then in SCSS:
- * ```scss
- * .my-section__title {
- *   opacity: 0;
- *   transform: translateY(30px);
- *   transition: opacity 0.6s ease, transform 0.6s ease;
- * }
- * .my-section__wrapper.is-visible .my-section__title {
- *   opacity: 1;
- *   transform: translateY(0);
- * }
- * ```
+ * SSR strategy: always render hidden (opacity: 0 via CSS), then useEffect on client
+ * either sets up observer or immediately shows content (reduced motion / no IO support).
+ * This avoids hydration mismatches between server and client state.
  */
 export default function ScrollAnimator({
   children,
@@ -44,21 +27,25 @@ export default function ScrollAnimator({
   threshold = 0.1,
   rootMargin = '0px 0px -15% 0px',
 }: ScrollAnimatorProps) {
-  const supportsObserver =
-    typeof window !== 'undefined' && 'IntersectionObserver' in window;
-
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  // Start visible if no observer support or user prefers reduced motion
-  const [isVisible, setIsVisible] = useState(
-    !supportsObserver || prefersReducedMotion
-  );
+  // Always start false — consistent between server & client (no hydration mismatch)
+  const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Already visible (e.g. from a previous render), skip
     if (isVisible) return;
+
+    // No IntersectionObserver support → show immediately
+    if (!('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    // User prefers reduced motion → show immediately (no animation)
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setIsVisible(true);
+      return;
+    }
 
     // Fallback: ensure visibility after 3s if observer never fires
     const fallbackTimeout = setTimeout(() => setIsVisible(true), 3000);
@@ -87,7 +74,6 @@ export default function ScrollAnimator({
     <div
       ref={containerRef}
       className={`${className || ''} ${isVisible ? 'is-visible' : ''}`.trim()}
-      data-visible={isVisible}
     >
       {children}
     </div>
