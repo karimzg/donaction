@@ -1,6 +1,8 @@
 ---
 name: auto_implement
 description: Automate all steps of the AI-driven development flow.
+version: 1.1.0
+last_updated: 2026-02-11
 ---
 
 # Goal
