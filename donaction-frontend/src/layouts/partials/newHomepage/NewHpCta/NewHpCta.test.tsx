@@ -30,7 +30,7 @@ describe('NewHpCta', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toBeInTheDocument();
-    expect(heading.textContent).toBeTruthy();
+    expect(heading).toHaveTextContent(/.+/);
   });
 
   it('renders subtitle paragraph', () => {
@@ -41,12 +41,12 @@ describe('NewHpCta', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders CTA button linking to /inscription', () => {
+  it('renders CTA button linking to /new-club', () => {
     render(<NewHpCta />);
 
     const cta = screen.getByRole('link', { name: /créer mon compte/i });
     expect(cta).toBeInTheDocument();
-    expect(cta).toHaveAttribute('href', '/inscription');
+    expect(cta).toHaveAttribute('href', '/new-club');
     expect(cta).toHaveClass('new-hp-cta__button');
   });
 
@@ -82,11 +82,21 @@ describe('NewHpCta', () => {
     expect(container.querySelector('.new-hp-cta__shape--3')).toBeInTheDocument();
   });
 
-  it('applies section base class', () => {
+  it('applies section base class with responsive padding', () => {
     const { container } = render(<NewHpCta />);
 
     const section = container.querySelector('.new-hp-cta');
     expect(section).toBeInTheDocument();
     expect(section).toHaveClass('w-full');
+    expect(section).toHaveClass('py-20');
+  });
+
+  it('renders content within max-width container', () => {
+    const { container } = render(<NewHpCta />);
+
+    const contentContainer = container.querySelector('.max-w-\\[1320px\\]');
+    expect(contentContainer).toBeInTheDocument();
+    expect(contentContainer).toHaveClass('relative');
+    expect(contentContainer).toHaveClass('z-10');
   });
 });

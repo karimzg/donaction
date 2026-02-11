@@ -23,7 +23,7 @@ export default function NewHpCta() {
         </p>
         <div className="flex flex-col items-center gap-4">
           <Link
-            href="/inscription"
+            href="/new-club"
             className="new-hp-cta__button inline-block rounded-xl font-bold text-white text-base md:text-lg px-10 py-4 md:px-12 md:py-[1.125rem] transition-all duration-200"
           >
             Créer mon compte

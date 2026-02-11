@@ -35,6 +35,7 @@ $float-duration: 20s;
 .new-hp-cta__shape {
   position: absolute;
   border-radius: 50%;
+  // Permanent will-change is acceptable here: shapes animate continuously via infinite keyframes
   will-change: transform;
 }
 
@@ -86,6 +87,7 @@ $float-duration: 20s;
 // ─── CTA Button ──────────────────────────────────────────────────────────────
 .new-hp-cta__button {
   background: linear-gradient(135deg, $color-green 0%, $color-green-dark 100%);
+  transition: transform $hover-duration ease, box-shadow $hover-duration ease;
   animation: nhp-cta-fadeUp $entrance-duration ease both;
   animation-delay: 0.2s;
   box-shadow:
