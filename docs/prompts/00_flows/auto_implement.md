@@ -112,6 +112,11 @@ All commands execute in:
 - ELSE: current directory
 
 0. **Dev server setup** (only if `isUIUX = true` OR plan indicates UI changes):
+   - Detect port from app context:
+     - Frontend (Next.js): 3000
+     - Admin (Angular): 4200
+     - SaaS (Vite): 5173
+     - API (Strapi): 1337
    - Check if dev server running: `lsof -i :<port>` or `curl localhost:<port>`
    - IF not running: start with `npm run dev` (background)
    - IF failed to start: warn user, continue without browser validation
