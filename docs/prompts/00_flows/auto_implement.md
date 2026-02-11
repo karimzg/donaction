@@ -108,9 +108,12 @@ Note: All other tasks (implement, commit, review, PR) use Sonnet by default.
      - [ ] Validate implementation only
      - [ ] Validate plan + implementation
 5. Branch setup:
+   - Check if branch already exists: `git rev-parse --verify <branchName>`
+   - IF exists: ask user to rename or checkout existing branch
    - IF "Create new branch": `git checkout -b <branchName>`
    - IF worktree: `git worktree add worktrees/<branch> -b <branch>`
    - IF current branch: stay on current branch
+   - On failure: log error, ask user to resolve, retry or skip issue
 6. Update todo: mark issue as "in_progress"
 
 **Implementation Phase:**
