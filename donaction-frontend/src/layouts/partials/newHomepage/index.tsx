@@ -7,6 +7,7 @@ import NewHpWidgetDemo from './NewHpWidgetDemo';
 import NewHpProjects from './NewHpProjects';
 import NewHpFederations from './NewHpFederations';
 import NewHpNeedHelp from './NewHpNeedHelp';
+import NewHpCta from './NewHpCta';
 import { KlubProjet } from '@/core/models/klub-project';
 import { Pagination } from '@/core/models/misc';
 import { FaqI } from '@/core/models/hp';
@@ -28,6 +29,7 @@ export default function NewHomepageContent({ projets, faq }: NewHomepageContentP
       <NewHpProjects projets={projets?.data || []} />
       <NewHpFederations />
       <NewHpNeedHelp faq={faq} />
+      <NewHpCta />
     </main>
   );
 }
