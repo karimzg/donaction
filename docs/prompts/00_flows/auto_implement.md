@@ -61,6 +61,18 @@ Ask user (single choice):
 
 Note: All other tasks (implement, commit, review, PR) use Sonnet by default.
 
+**0.4. Validation Strategy** (applies to all issues in the batch)
+
+Ask user (single choice):
+- [ ] Automatic (no manual approvals)
+- [ ] Manual (approve plan + final implementation)
+- [ ] Paranoid (approve every step: plan + design + implementation + tests)
+
+IF browser validation needed, select depth:
+- [ ] Basic: screenshots + console errors
+- [ ] Standard: + responsive check at all breakpoints (default)
+- [ ] Comprehensive: + accessibility audit (tab nav, focus states, ARIA)
+
 ### 1. Preparation
 
 1. Parse issue URLs/numbers from arguments
@@ -97,16 +109,7 @@ Note: All other tasks (implement, commit, review, PR) use Sonnet by default.
      - [ ] Technical issue
      ```
    - Set `isUIUX` based on user confirmation
-4. **Validation Mode** (based on confirmed issue type):
-   - IF `isUIUX = true`, ask user (single choice):
-     - [ ] Automatic (no validation)
-     - [ ] Validate plan + design only
-     - [ ] Validate all (plan + design + implementation)
-   - ELSE (Technical), ask user (single choice):
-     - [ ] Automatic (no validation)
-     - [ ] Validate plan only
-     - [ ] Validate implementation only
-     - [ ] Validate plan + implementation
+4. Apply validation strategy from step 0.4
 5. Branch setup:
    - Check if branch already exists: `git rev-parse --verify <branchName>`
    - IF exists: ask user to rename or checkout existing branch
@@ -168,7 +171,7 @@ All commands execute in:
      - **Prerequisites** (before UI/UX work): component type (client/server), file structure, data fetching setup, props interface...
      - **Post UI/UX work** (after design): helper functions, service calls, state management, API integration...
    - IF validate plan: wait for user approval before continuing
-5. **Implement changes:**
+4. **Implement changes:**
    - IF `isUIUX = true`:
      a. **Pre-UI/UX implementation** (if prerequisites identified in plan):
         - Use `/implement` for technical prerequisites only
@@ -191,7 +194,7 @@ All commands execute in:
    - ELSE (Technical issue):
      - Use `/implement` directly
    - IF validate implementation: wait for user approval before continuing
-6. **Run tests:**
+5. **Run tests:**
    - IF `isUIUX = true`:
      - Component tests (render, props, interactions)
      - **Browser validation (via claude-in-chrome):**
@@ -204,15 +207,16 @@ All commands execute in:
        - Navigate to affected route
        - Verify expected behavior
        - Check console for errors
-7. Commit changes: Use `/commit`
-8. Code review: Use `/review_code`
-9. Create PR: Use `/create_github_pull_request` with base branch `prTargetBranch`
+6. Commit changes: Use `/commit`
+7. Code review: Use `/review_code`
+8. Create PR: Use `/create_github_pull_request` with base branch `prTargetBranch`
 
 **Completion Phase:**
 
 1. Record PR URL and status
 2. Update todo: mark issue as "completed"
-3. Branch handling:
+3. Stop dev server if started in this issue's implementation phase
+4. Branch handling:
    - IF worktree: Keep worktree (needed for PR updates)
    - ELSE: Stay on feature branch
 
@@ -231,6 +235,10 @@ All commands execute in:
   - User stays on last feature branch
   - Manual switch: `git checkout main` when done
 - If error occurs: log it, mark todo as failed, continue to next issue
+- **Rollback on failure:**
+  - Tests fail: keep branch for manual fixes, mark issue as failed
+  - PR creation fails: keep branch, log error, continue to next issue
+  - Dev server crash: downgrade to Automatic validation, continue
 
 ## Browser Validation (claude-in-chrome)
 
@@ -242,12 +250,7 @@ All commands execute in:
 - Dev server must be running before validation
 - Use `tabs_context_mcp` → `tabs_create_mcp` → `navigate` to target route
 
-**Validation Depth** (asked once in step 0, applies to all issues in the batch):
-- [ ] Basic: screenshots + console errors
-- [ ] Standard: + responsive check at all breakpoints (default)
-- [ ] Comprehensive: + accessibility audit (tab nav, focus states, ARIA)
-
-**Checks by depth:**
+**Checks by validation depth** (configured in step 0.4):
 | Check | Tools | Depth |
 |-------|-------|-------|
 | Screenshots | `computer` action=screenshot | Basic |
