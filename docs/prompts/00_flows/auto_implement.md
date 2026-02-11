@@ -107,9 +107,12 @@ All commands execute in:
 - IF worktree: `cwd: worktrees/<branch>`
 - ELSE: current directory
 
-0. **Dev server setup** (if UI/UX or behavioral validation needed):
+0. **Dev server setup** (only if `isUIUX = true` OR plan indicates UI changes):
    - Check if dev server running: `lsof -i :<port>` or `curl localhost:<port>`
    - IF not running: start with `npm run dev` (background)
+   - IF failed to start: warn user, continue without browser validation
+   - Check `claude-in-chrome` availability: `tabs_context_mcp`
+   - IF unavailable: warn user, skip browser validation steps
    - Note dev URL for browser validation steps
 
 1. Detect and load context:
