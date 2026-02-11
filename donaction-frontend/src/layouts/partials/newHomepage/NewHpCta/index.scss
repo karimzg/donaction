@@ -11,9 +11,6 @@ $float-duration: 20s;
   background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 40%, #f0fdf4 100%);
   position: relative;
   overflow: hidden;
-
-  // Cancel the global footer mt-16 gap when CTA is the last section
-  margin-bottom: -4rem;
 }
 
 // ─── Dot Grid (echoes Hero dot pattern) ──────────────────────────────────────

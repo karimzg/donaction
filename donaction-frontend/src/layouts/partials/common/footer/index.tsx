@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
 	const currentYear = new Date().getFullYear();
 
 	return (
-		<footer className='footer z-10 relative mt-16 w-full'>
+		<footer className='footer z-10 relative w-full'>
 			<div className='footer__grid xl:max-w-screen-xl lg:max-w-screen-lg mx-auto'>
 				{/* Brand column */}
 				<div className='footer__column'>
