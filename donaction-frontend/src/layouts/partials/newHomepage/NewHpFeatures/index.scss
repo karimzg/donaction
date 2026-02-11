@@ -803,6 +803,10 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     &__grid {
       gap: 2.5rem;
     }
+
+    &__example {
+      padding: 1.5rem 1.25rem;
+    }
   }
 }
 
@@ -847,6 +851,20 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     &__badge-icon {
       width: 16px;
       height: 16px;
+    }
+
+    &__example {
+      padding: 1.25rem 1rem;
+      margin-top: 2rem;
+    }
+
+    &__example-title {
+      font-size: 1rem;
+    }
+
+    &__cta {
+      padding: 0.875rem 1.5rem;
+      font-size: 0.9375rem;
     }
   }
 }

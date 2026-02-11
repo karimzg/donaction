@@ -22,11 +22,11 @@ function CheckmarkIcon() {
 
 export default function NewHpHero() {
   return (
-    <section className="new-hp-hero min-h-[80vh] w-full relative flex items-center overflow-hidden">
+    <section className="new-hp-hero min-h-[auto] md:min-h-[80vh] w-full relative flex items-center overflow-hidden">
       {/* Background Pattern */}
       <div className="new-hp-hero__pattern absolute inset-0 pointer-events-none" />
 
-      <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-[1320px] mx-auto px-6 gap-12 relative z-10">
+      <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-[1320px] mx-auto px-6 gap-8 md:gap-12 relative z-10">
         {/* Text Content - 60% */}
         <div className="lg:w-[60%] flex flex-col gap-6 text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-[1.1] tracking-tight">
@@ -53,7 +53,7 @@ export default function NewHpHero() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex items-center gap-6 mt-4 text-sm text-gray-500 justify-center lg:justify-start">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 text-sm text-gray-500 justify-center lg:justify-start">
             {TRUST_INDICATORS.map((text) => (
               <span key={text} className="flex items-center gap-2">
                 <CheckmarkIcon />
@@ -64,7 +64,7 @@ export default function NewHpHero() {
         </div>
 
         {/* Illustration - 40% */}
-        <div className="lg:w-[40%] flex items-center justify-center">
+        <div className="order-first lg:order-none lg:w-[40%] flex items-center justify-center">
           <div className="new-hp-hero__illustration relative">
             <HeroIllustration />
           </div>
