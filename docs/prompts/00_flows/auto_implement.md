@@ -53,6 +53,14 @@ Ask user (single choice):
 
 Store selected branch as `prTargetBranch` for Create PR step.
 
+**0.3. Model Selection for Planning**
+
+Ask user (single choice):
+- [ ] Opus 4.6 (recommended - best for complex planning)
+- [ ] Sonnet 4.5 (faster, good for simple tasks)
+
+Note: All other tasks (implement, commit, review, PR) use Sonnet by default.
+
 ### 1. Preparation
 
 1. Parse issue URLs/numbers from arguments
@@ -150,12 +158,7 @@ All commands execute in:
      ```
    - Wait for user confirmation or additional file requests
    - If additional files requested: load them and re-display context
-3. **Model Selection for Planning:**
-   - Ask user (checkboxes - single choice):
-     - [ ] Opus 4.5 (recommended - best for complex planning)
-     - [ ] Sonnet 4.5 (faster, good for simple tasks)
-   - Note: All other tasks (implement, commit, review, PR) use Sonnet by default
-4. **Generate plan:** Use `/plan <issue-url>` with loaded context and selected model
+3. **Generate plan:** Use `/plan <issue-url>` with loaded context and model from step 0.3
    - IF `isUIUX = true`: Plan must separate technical points into:
      - **Prerequisites** (before UI/UX work): component type (client/server), file structure, data fetching setup, props interface...
      - **Post UI/UX work** (after design): helper functions, service calls, state management, API integration...
