@@ -38,22 +38,7 @@ IF "Create new branch" selected:
 - Display proposed name and let user edit before confirming
 - Store as `branchName` for step 2.1
 
-**0.2. Validation Mode**
-
-Ask user (checkboxes - single choice):
-
-FOR TECHNICAL ISSUES:
-- [ ] Automatic (no validation)
-- [ ] Validate plan only
-- [ ] Validate implementation only
-- [ ] Validate plan + implementation
-
-FOR UI/UX ISSUES:
-- [ ] Automatic (no validation)
-- [ ] Validate plan + design only
-- [ ] Validate all (plan + design + implementation)
-
-**0.3. PR Target Branch**
+**0.2. PR Target Branch**
 
 Display current branch and available epic branches:
 ```
@@ -67,7 +52,7 @@ Ask user (single choice):
 - [ ] Current branch (default)
 - [ ] Select from epic/* branches above
 
-Store selected branch as `prTargetBranch` for step 2.9 (Create PR).
+Store selected branch as `prTargetBranch` for Create PR step.
 
 ### 1. Preparation
 
@@ -103,11 +88,21 @@ Store selected branch as `prTargetBranch` for step 2.9 (Create PR).
      - [ ] Technical issue
      ```
    - Set `isUIUX` based on user confirmation
-4. Branch setup:
+4. **Validation Mode** (based on confirmed issue type):
+   - IF `isUIUX = true`, ask user (single choice):
+     - [ ] Automatic (no validation)
+     - [ ] Validate plan + design only
+     - [ ] Validate all (plan + design + implementation)
+   - ELSE (Technical), ask user (single choice):
+     - [ ] Automatic (no validation)
+     - [ ] Validate plan only
+     - [ ] Validate implementation only
+     - [ ] Validate plan + implementation
+5. Branch setup:
    - IF "Create new branch": `git checkout -b <branchName>`
    - IF worktree: `git worktree add worktrees/<branch> -b <branch>`
    - IF current branch: stay on current branch
-5. Update todo: mark issue as "in_progress"
+6. Update todo: mark issue as "in_progress"
 
 **Implementation Phase:**
 
