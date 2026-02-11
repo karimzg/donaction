@@ -79,7 +79,7 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     flex-direction: column;
     gap: 2rem;
 
-    @media (min-width: 1024px) {
+    @media (min-width: 768px) {
       flex-direction: row;
       gap: 1.5rem;
     }

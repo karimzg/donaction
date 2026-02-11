@@ -33,9 +33,9 @@ export default function NewHpWidgetDemo() {
   return (
     <section className="new-hp-widget-demo w-full py-16 md:py-20 lg:py-24">
       <div className="max-w-[1320px] mx-auto px-6">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-12 lg:gap-16">
           {/* Text Content - Left side */}
-          <div className="new-hp-widget-demo__content lg:w-[45%] text-center lg:text-left">
+          <div className="new-hp-widget-demo__content md:w-[45%] text-center md:text-left">
             <span className="inline-block bg-donaction-primary/10 text-donaction-primary-dark px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
               Démo interactive
             </span>
@@ -52,7 +52,7 @@ export default function NewHpWidgetDemo() {
               {SECTION_CONTENT.benefits.map((benefit) => (
                 <li
                   key={benefit}
-                  className="flex items-center gap-3 justify-center lg:justify-start"
+                  className="flex items-center gap-3 justify-center md:justify-start"
                 >
                   <CheckIcon />
                   <span className="text-gray-700 font-medium">{benefit}</span>
@@ -62,7 +62,7 @@ export default function NewHpWidgetDemo() {
           </div>
 
           {/* Widget Demo - Right side */}
-          <div className="new-hp-widget-demo__widget-container lg:w-[50%] w-full max-w-[500px]">
+          <div className="new-hp-widget-demo__widget-container md:w-[50%] w-full max-w-[500px]">
             <DemoWidget />
           </div>
         </div>
