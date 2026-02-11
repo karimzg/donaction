@@ -27,8 +27,16 @@ $ARGUMENTS
 **0.1. Isolation Strategy**
 
 Ask user (checkboxes - single choice):
-- [ ] Use git worktrees (recommended for parallel work)
+- [ ] Create new branch from current branch (recommended)
+- [ ] Use git worktrees (for parallel work)
 - [ ] Work on current branch (simpler, sequential only)
+
+IF "Create new branch" selected:
+- Fetch issue title: `!gh issue view <number> --json title -q .title`
+- Propose branch name: `feature/issue-<number>-<title-slugified>`
+  - Slugify: lowercase, replace spaces/special chars with `-`, trim to 60 chars max
+- Display proposed name and let user edit before confirming
+- Store as `branchName` for step 2.1
 
 **0.2. Validation Mode**
 
@@ -70,8 +78,10 @@ Store selected branch as `prTargetBranch` for step 2.9 (Create PR).
 
 **Setup Phase:**
 
-1. Extract issue number and create branch name: `feature/issue-<number>`
-2. Fetch issue details: `gh issue view <number> --json body,title,url`
+1. Fetch issue details: `gh issue view <number> --json body,title,url`
+2. Determine branch name:
+   - IF "Create new branch" strategy: use `branchName` from step 0.1 (user-confirmed)
+   - IF worktree or current branch: generate `feature/issue-<number>-<title-slugified>` from issue title
 3. **Classify issue type with confidence:**
    - Scan title + body for UI/UX indicators:
      - UI keywords: `design`, `layout`, `component`, `style`, `CSS`, `responsive`, `animation`, `visual`, `UI`, `interface`, `button`, `form`, `modal`
@@ -94,8 +104,9 @@ Store selected branch as `prTargetBranch` for step 2.9 (Create PR).
      ```
    - Set `isUIUX` based on user confirmation
 4. Branch setup:
+   - IF "Create new branch": `git checkout -b <branchName>`
    - IF worktree: `git worktree add worktrees/<branch> -b <branch>`
-   - ELSE: `git checkout -b <branch>`
+   - IF current branch: stay on current branch
 5. Update todo: mark issue as "in_progress"
 
 **Implementation Phase:**
