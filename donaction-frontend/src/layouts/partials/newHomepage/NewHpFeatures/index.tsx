@@ -1,3 +1,4 @@
+import ScrollAnimator from '@/components/ScrollAnimator';
 import Link from "next/link";
 import PageIcon from "./icons/PageIcon";
 import NotificationIcon from "./icons/NotificationIcon";
@@ -271,13 +272,14 @@ function DonationExampleBox() {
 export default function NewHpFeatures() {
   return (
     <section className="new-hp-features">
-      <div className="new-hp-features__container">
-        <div className="new-hp-features__header">
-          <h2 className="new-hp-features__title">Nos offres</h2>
-          <p className="new-hp-features__subtitle">
-            Fonctionnalités et tarifs en toute transparence
-          </p>
-        </div>
+      <ScrollAnimator className="new-hp-features__wrapper">
+        <div className="new-hp-features__container">
+          <div className="new-hp-features__header">
+            <h2 className="new-hp-features__title">Nos offres</h2>
+            <p className="new-hp-features__subtitle">
+              Fonctionnalités et tarifs en toute transparence
+            </p>
+          </div>
 
         <div className="new-hp-features__grid">
           {/* Free Tier */}
@@ -391,7 +393,8 @@ export default function NewHpFeatures() {
         </div>
 
         <DonationExampleBox />
-      </div>
+        </div>
+      </ScrollAnimator>
     </section>
   );
 }

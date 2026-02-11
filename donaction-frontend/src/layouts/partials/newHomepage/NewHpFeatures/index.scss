@@ -57,7 +57,8 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     color: #111827;
     margin-bottom: 1rem;
     opacity: 0;
-    animation: title-entrance $entrance-duration ease-out forwards;
+    transform: translate3d(0, -30px, 0);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
 
     @media (min-width: 768px) {
       font-size: 2.25rem;
@@ -66,6 +67,11 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     @media (min-width: 1024px) {
       font-size: 3rem;
     }
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   &__subtitle {
@@ -88,16 +94,22 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
   &__tier {
     flex: 1;
     opacity: 0;
-    animation: tier-entrance $entrance-duration ease-out forwards;
+    transform: translate3d(0, 30px, 0) scale(0.98);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
   }
 
   &__tier--free {
-    animation-delay: #{$entrance-delay-base};
+    transition-delay: #{$entrance-delay-base};
   }
 
   &__tier--premium {
-    animation-delay: calc(#{$entrance-delay-base} + 0.15s);
+    transition-delay: calc(#{$entrance-delay-base} + 0.15s);
     position: relative;
+  }
+
+  &__wrapper.is-visible &__tier {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   &__tier-container {
@@ -291,11 +303,18 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border: $border-subtle;
     opacity: 0;
-    animation: features-example-entrance $entrance-duration ease-out calc(#{$entrance-delay-base} + 0.5s) forwards;
+    transform: translate3d(0, 20px, 0);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(#{$entrance-delay-base} + 0.5s);
 
     @media (min-width: 768px) {
       padding: 2.5rem 3rem;
     }
+  }
+
+  &__wrapper.is-visible &__example {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   &__example-title {
@@ -468,12 +487,18 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
 
   &__card {
     opacity: 0;
-    animation: card-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc(var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.3s);
+    transform: translate3d(0, 28px, 0) scale(0.95);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.3s);
   }
 
   &__tier--premium &__card {
-    animation-delay: calc(var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.45s);
+    transition-delay: calc(var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.45s);
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   &__card-content {
@@ -693,40 +718,7 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
   }
 }
 
-// Keyframe animations
-@keyframes title-entrance {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, -30px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes tier-entrance {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 30px, 0) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@keyframes card-entrance {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 28px, 0) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
+// Keyframe animations (infinite effects only)
 @keyframes float {
   0%, 100% {
     transform: translateX(-50%) translateY(0);
@@ -742,17 +734,6 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
   }
   50%, 100% {
     left: 100%;
-  }
-}
-
-@keyframes features-example-entrance {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 20px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -874,19 +855,16 @@ $shadow-cta-premium-hover: 0 8px 20px rgba($color-premium, 0.3);
   .new-hp-features {
     &__title,
     &__tier,
-    &__card {
-      animation: none;
+    &__card,
+    &__example {
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     &__tier-container--premium::after,
     &__tier-badge-highlight {
       animation: none;
-    }
-
-    &__example {
-      animation: none;
-      opacity: 1;
     }
 
     &__card-content,

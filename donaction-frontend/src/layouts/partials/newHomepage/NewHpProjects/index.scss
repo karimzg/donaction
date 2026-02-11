@@ -41,21 +41,40 @@ $hover-duration: 0.3s;
 
   &__title {
     opacity: 0;
-    animation: nhp-title-entrance $entrance-duration ease-out forwards;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &__subtitle {
     opacity: 0;
-    animation: nhp-title-entrance $entrance-duration ease-out 0.1s forwards;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: 0.1s;
+  }
+
+  &__wrapper.is-visible &__subtitle {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   // Card animations
   &__card {
     opacity: 0;
-    animation: nhp-card-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc(
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &__card-content {
@@ -110,7 +129,12 @@ $hover-duration: 0.3s;
   // Social proof
   &__social-proof {
     opacity: 0;
-    animation: nhp-fade-in 0.4s ease-out 0.6s forwards;
+    transition: opacity 0.4s ease-out;
+    transition-delay: 0.6s;
+  }
+
+  &__wrapper.is-visible &__social-proof {
+    opacity: 1;
   }
 
   // Carousel
@@ -147,33 +171,18 @@ $hover-duration: 0.3s;
   // CTA
   &__cta {
     opacity: 0;
-    animation: nhp-title-entrance $entrance-duration ease-out 0.5s forwards;
-  }
-}
-
-// Keyframes
-@keyframes nhp-title-entrance {
-  0% {
-    opacity: 0;
     transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: 0.5s;
   }
-  100% {
+
+  &__wrapper.is-visible &__cta {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes nhp-card-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+// Keyframes (keep nhp-fade-in for carousel if still needed)
 @keyframes nhp-fade-in {
   0% {
     opacity: 0;
@@ -214,8 +223,9 @@ $hover-duration: 0.3s;
     &__card,
     &__cta,
     &__social-proof {
-      animation: none;
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     &__card-content,

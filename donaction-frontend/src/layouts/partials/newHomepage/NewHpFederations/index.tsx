@@ -1,3 +1,4 @@
+import ScrollAnimator from '@/components/ScrollAnimator';
 import Link from 'next/link';
 import { CONTACT_EMAIL } from '@/core/constants/contact';
 import MultiClubIcon from './icons/MultiClubIcon';
@@ -32,7 +33,8 @@ export default function NewHpFederations() {
   return (
     <section className="new-hp-federations w-full py-16 md:py-20 lg:py-24">
       <div className="max-w-[1320px] mx-auto px-6">
-        <h2 className="new-hp-federations__title text-2xl md:text-3xl lg:text-4xl font-bold text-center text-white mb-4 md:mb-6">
+        <ScrollAnimator className="new-hp-federations__wrapper">
+          <h2 className="new-hp-federations__title text-2xl md:text-3xl lg:text-4xl font-bold text-center text-white mb-4 md:mb-6">
           Pour les fédérations et comités
         </h2>
         <p className="new-hp-federations__subtitle text-center text-gray-200 mb-12 md:mb-16 max-w-2xl mx-auto">
@@ -81,6 +83,7 @@ export default function NewHpFederations() {
             {CONTACT_EMAIL}
           </a>
         </div>
+        </ScrollAnimator>
       </div>
     </section>
   );

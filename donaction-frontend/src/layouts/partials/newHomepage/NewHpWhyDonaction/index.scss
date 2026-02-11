@@ -14,15 +14,27 @@ $hover-duration: 0.3s;
 
   &__title {
     opacity: 0;
-    animation: title-entrance $entrance-duration ease-out forwards;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &__card {
     opacity: 0;
-    animation: card-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc(
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &__card-content {
@@ -92,29 +104,6 @@ $hover-duration: 0.3s;
   }
 }
 
-// Keyframe animations
-@keyframes title-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes card-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // Responsive adjustments
 @media (max-width: 1023px) {
   .new-hp-why-donaction {
@@ -159,8 +148,9 @@ $hover-duration: 0.3s;
   .new-hp-why-donaction {
     &__title,
     &__card {
-      animation: none;
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     &__card-content,

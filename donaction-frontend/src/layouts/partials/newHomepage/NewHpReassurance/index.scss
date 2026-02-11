@@ -33,8 +33,14 @@ $clock-tick-duration: 2s;
 
   &__badge {
     opacity: 0;
-    animation: badge-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc(var(--badge-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+    transform: translateY(20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(var(--badge-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+  }
+
+  &__wrapper.is-visible &__badge {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &__badge-content {
@@ -106,18 +112,7 @@ $clock-tick-duration: 2s;
   }
 }
 
-// Keyframe animations
-@keyframes badge-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+// Keyframe animations for infinite effects only
 @keyframes shield-pulse {
   0%,
   100% {
@@ -172,8 +167,9 @@ $clock-tick-duration: 2s;
 @media (prefers-reduced-motion: reduce) {
   .new-hp-reassurance {
     &__badge {
-      animation: none;
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     &__badge-content {

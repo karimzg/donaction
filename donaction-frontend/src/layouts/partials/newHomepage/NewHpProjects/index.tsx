@@ -1,3 +1,4 @@
+import ScrollAnimator from '@/components/ScrollAnimator';
 import { KlubProjet } from '@/core/models/klub-project';
 import Link from 'next/link';
 import NewHpProjectCard from './NewHpProjectCard';
@@ -14,7 +15,8 @@ export default function NewHpProjects({ projets }: NewHpProjectsProps) {
   return (
     <section className="new-hp-projects w-full py-16 md:py-20 lg:py-24">
       <div className="max-w-[1320px] mx-auto px-6">
-        <div className="new-hp-projects__header text-center mb-12 md:mb-16">
+        <ScrollAnimator className="new-hp-projects__wrapper">
+          <div className="new-hp-projects__header text-center mb-12 md:mb-16">
           <h2 className="new-hp-projects__title text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Projets à la une
           </h2>
@@ -48,6 +50,7 @@ export default function NewHpProjects({ projets }: NewHpProjectsProps) {
             Voir tous les projets
           </Link>
         </div>
+        </ScrollAnimator>
       </div>
     </section>
   );
