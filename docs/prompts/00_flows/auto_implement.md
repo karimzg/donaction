@@ -31,7 +31,7 @@ Ask user (checkboxes - single choice):
 - [ ] Use git worktrees (for parallel work)
 - [ ] Work on current branch (simpler, sequential only)
 
-Note: branch names are generated per issue in step 2.2.
+Note: branches are created per issue in step 2 (name generated from issue title, editable by user).
 
 **0.2. PR Target Branch**
 
