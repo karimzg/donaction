@@ -81,7 +81,7 @@ describe('NewHpHero', () => {
     const { container } = render(<NewHpHero />);
 
     const section = container.querySelector('.new-hp-hero');
-    expect(section).toHaveClass('min-h-[80vh]');
+    expect(section).toHaveClass('min-h-[auto]');
     expect(section).toHaveClass('w-full');
     expect(section).toHaveClass('relative');
 

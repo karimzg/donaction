@@ -107,11 +107,29 @@
 @media (max-width: 1023px) {
   .new-hp-hero {
     &__illustration {
-      order: -1;
       margin-bottom: 1rem;
 
       svg {
         max-width: 320px;
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .new-hp-hero {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+
+    &__scroll-indicator {
+      display: none;
+    }
+
+    &__illustration {
+      margin-bottom: 0.5rem;
+
+      svg {
+        max-width: 260px;
       }
     }
   }
@@ -124,7 +142,7 @@
     }
 
     &__illustration svg {
-      max-width: 280px;
+      max-width: 240px;
     }
   }
 }

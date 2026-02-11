@@ -49,6 +49,18 @@
   }
 }
 
+// Mobile adjustments
+@media (max-width: 639px) {
+  .demo-widget {
+    &__badge {
+      top: -8px;
+      right: -4px;
+      font-size: 0.6875rem;
+      padding: 0.2rem 0.5rem;
+    }
+  }
+}
+
 // Demo blocker animation
 .demo-blocker {
   animation: fadeIn 0.2s ease;
