@@ -242,7 +242,7 @@ All commands execute in:
 - Dev server must be running before validation
 - Use `tabs_context_mcp` → `tabs_create_mcp` → `navigate` to target route
 
-**Validation Depth** (ask user at setup if browser validation is needed):
+**Validation Depth** (asked once in step 0, applies to all issues in the batch):
 - [ ] Basic: screenshots + console errors
 - [ ] Standard: + responsive check at all breakpoints (default)
 - [ ] Comprehensive: + accessibility audit (tab nav, focus states, ARIA)
