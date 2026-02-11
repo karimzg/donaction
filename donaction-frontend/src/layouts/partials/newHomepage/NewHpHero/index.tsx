@@ -26,9 +26,9 @@ export default function NewHpHero() {
       {/* Background Pattern */}
       <div className="new-hp-hero__pattern absolute inset-0 pointer-events-none" />
 
-      <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-[1320px] mx-auto px-6 gap-8 md:gap-12 relative z-10">
+      <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-[1320px] mx-auto px-6 gap-8 md:gap-12 relative z-10">
         {/* Text Content - 60% */}
-        <div className="lg:w-[60%] flex flex-col gap-6 text-center lg:text-left">
+        <div className="md:w-[55%] lg:w-[60%] flex flex-col gap-6 text-center md:text-left">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-[1.1] tracking-tight">
             Transformez vos idées en{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#73cfa8] to-[#5bb892]">
@@ -43,7 +43,7 @@ export default function NewHpHero() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center lg:justify-start">
+          <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center md:justify-start">
             <Link href="/new-club" className="btn btn-primary">
               Créer mon club
             </Link>
@@ -53,7 +53,7 @@ export default function NewHpHero() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 text-sm text-gray-500 justify-center lg:justify-start">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 text-sm text-gray-500 justify-center md:justify-start">
             {TRUST_INDICATORS.map((text) => (
               <span key={text} className="flex items-center gap-2">
                 <CheckmarkIcon />
@@ -64,7 +64,7 @@ export default function NewHpHero() {
         </div>
 
         {/* Illustration - 40% */}
-        <div className="order-first lg:order-none lg:w-[40%] flex items-center justify-center">
+        <div className="order-first md:order-none md:w-[45%] lg:w-[40%] flex items-center justify-center">
           <div className="new-hp-hero__illustration relative">
             <HeroIllustration />
           </div>

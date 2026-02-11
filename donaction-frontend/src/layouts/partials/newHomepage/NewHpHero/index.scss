@@ -104,6 +104,14 @@
 }
 
 // Responsive adjustments
+@media (min-width: 768px) and (max-width: 1023px) {
+  .new-hp-hero {
+    &__illustration svg {
+      max-width: 280px;
+    }
+  }
+}
+
 @media (max-width: 1023px) {
   .new-hp-hero {
     &__illustration {
