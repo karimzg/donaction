@@ -43,11 +43,13 @@ $hover-duration: 0.3s;
     opacity: 0;
     transform: translateY(-20px);
     transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__title {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__subtitle {
@@ -55,11 +57,13 @@ $hover-duration: 0.3s;
     transform: translateY(-20px);
     transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
     transition-delay: 0.1s;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__subtitle {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   // Card animations
@@ -70,11 +74,13 @@ $hover-duration: 0.3s;
     transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__card {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__card-content {
@@ -131,10 +137,12 @@ $hover-duration: 0.3s;
     opacity: 0;
     transition: opacity 0.4s ease-out;
     transition-delay: 0.6s;
+    will-change: opacity;
   }
 
   &__wrapper.is-visible &__social-proof {
     opacity: 1;
+    will-change: auto;
   }
 
   // Carousel
@@ -174,11 +182,13 @@ $hover-duration: 0.3s;
     transform: translateY(-20px);
     transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
     transition-delay: 0.5s;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__cta {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 }
 

@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState, ReactNode } from 'react';
 
+const DEFAULT_THRESHOLD = 0.1;
+const DEFAULT_ROOT_MARGIN = '0px 0px -15% 0px';
+
 interface ScrollAnimatorProps {
   /** Content to animate on scroll */
   children: ReactNode;
@@ -20,19 +23,25 @@ interface ScrollAnimatorProps {
  * SSR strategy: always render hidden (opacity: 0 via CSS), then useEffect on client
  * either sets up observer or immediately shows content (reduced motion / no IO support).
  * This avoids hydration mismatches between server and client state.
+ *
+ * @example
+ * <ScrollAnimator className="section__wrapper" threshold={0.2}>
+ *   <h1>Animated content</h1>
+ * </ScrollAnimator>
  */
 export default function ScrollAnimator({
   children,
   className,
-  threshold = 0.1,
-  rootMargin = '0px 0px -15% 0px',
+  threshold = DEFAULT_THRESHOLD,
+  rootMargin = DEFAULT_ROOT_MARGIN,
 }: ScrollAnimatorProps) {
   // Always start false — consistent between server & client (no hydration mismatch)
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Already visible (e.g. from a previous render), skip
+    // When isVisible becomes true, the cleanup from the previous effect run
+    // disconnects the observer. This early return prevents re-creating it.
     if (isVisible) return;
 
     // No IntersectionObserver support → show immediately
@@ -53,18 +62,23 @@ export default function ScrollAnimator({
     // Without this, the observer can fire in the same frame as useEffect,
     // making the CSS transition from 0→1 imperceptible.
     const rafId = requestAnimationFrame(() => {
-      observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            setIsVisible(true);
-            observer?.disconnect();
-          }
-        },
-        { root: null, rootMargin, threshold }
-      );
+      try {
+        observer = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting) {
+              setIsVisible(true);
+              observer?.disconnect();
+            }
+          },
+          { root: null, rootMargin, threshold }
+        );
 
-      const el = containerRef.current;
-      if (el) observer.observe(el);
+        const el = containerRef.current;
+        if (el) observer.observe(el);
+      } catch {
+        // Fallback: show content immediately if observer creation fails
+        setIsVisible(true);
+      }
     });
 
     return () => {
@@ -77,6 +91,7 @@ export default function ScrollAnimator({
     <div
       ref={containerRef}
       className={`${className || ''} ${isVisible ? 'is-visible' : ''}`.trim()}
+      data-visible={isVisible}
     >
       {children}
     </div>

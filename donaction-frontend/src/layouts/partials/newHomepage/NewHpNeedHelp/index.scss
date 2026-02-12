@@ -20,11 +20,13 @@ $answer-transition: 0.35s;
   opacity: 0;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  will-change: opacity, transform;
 }
 
 .new-hp-needhelp__wrapper.is-visible .new-hp-needhelp__header {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
 }
 
 .new-hp-needhelp__title {
@@ -76,6 +78,7 @@ $answer-transition: 0.35s;
     transform: translateY(24px);
     transition: opacity $entrance-duration ease, transform $entrance-duration ease;
     transition-delay: 0.3s;
+    will-change: opacity, transform;
 
     // Decorative quotation mark
     &::before {
@@ -95,6 +98,7 @@ $answer-transition: 0.35s;
   .new-hp-needhelp__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 }
 
@@ -111,6 +115,7 @@ $answer-transition: 0.35s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease, border-color $hover-duration ease, box-shadow $hover-duration ease;
   transition-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+  will-change: opacity, transform;
 
   &--active {
     border-left-color: $color-primary;
@@ -122,6 +127,7 @@ $answer-transition: 0.35s;
   .new-hp-needhelp__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   // Desktop: dissolve item wrapper, children become grid items
@@ -156,6 +162,7 @@ $answer-transition: 0.35s;
     opacity: 0;
     transform: translateY(24px);
     transition-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+    will-change: opacity, transform;
 
     @media (hover: hover) {
       &:hover {
@@ -177,6 +184,7 @@ $answer-transition: 0.35s;
     .new-hp-needhelp__wrapper.is-visible & {
       opacity: 1;
       transform: translateY(0);
+      will-change: auto;
     }
   }
 }

@@ -24,11 +24,13 @@
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__content {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__widget-container {
@@ -38,11 +40,13 @@
     transform: translateY(30px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     transition-delay: 0.15s;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__widget-container {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 }
 

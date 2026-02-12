@@ -16,11 +16,13 @@ $hover-duration: 0.3s;
     opacity: 0;
     transform: translateY(-20px);
     transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__title {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__card {
@@ -30,11 +32,13 @@ $hover-duration: 0.3s;
     transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__card {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__card-content {

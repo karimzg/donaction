@@ -44,11 +44,13 @@ $hover-duration: 0.3s;
     transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
     position: relative;
     z-index: 1;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__title {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__subtitle {
@@ -58,11 +60,13 @@ $hover-duration: 0.3s;
     transition-delay: calc($entrance-delay-base * 0.5);
     position: relative;
     z-index: 1;
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__subtitle {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__grid {
@@ -77,11 +81,13 @@ $hover-duration: 0.3s;
     transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__card {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   &__card-content {

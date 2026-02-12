@@ -89,3 +89,25 @@
     transform: translateY(0);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-widget__badge {
+    animation: none;
+  }
+
+  .demo-widget__inner {
+    transition: none;
+  }
+
+  .demo-blocker {
+    animation: none;
+  }
+
+  .demo-blocker__card {
+    animation: none;
+  }
+
+  .amount-selector__btn {
+    transition: none;
+  }
+}
