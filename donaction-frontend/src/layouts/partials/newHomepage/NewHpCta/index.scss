@@ -72,21 +72,35 @@ $float-duration: 20s;
 // ─── Title ───────────────────────────────────────────────────────────────────
 .new-hp-cta__title {
   letter-spacing: -0.025em;
-  animation: nhp-cta-fadeUp $entrance-duration ease both;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+}
+
+.new-hp-cta__wrapper.is-visible .new-hp-cta__title {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 // ─── Subtitle ────────────────────────────────────────────────────────────────
 .new-hp-cta__subtitle {
-  animation: nhp-cta-fadeUp $entrance-duration ease both;
-  animation-delay: 0.1s;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: 0.1s;
+}
+
+.new-hp-cta__wrapper.is-visible .new-hp-cta__subtitle {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 // ─── CTA Button ──────────────────────────────────────────────────────────────
 .new-hp-cta__button {
   background: linear-gradient(135deg, $color-green 0%, $color-green-dark 100%);
-  transition: transform $hover-duration ease, box-shadow $hover-duration ease;
-  animation: nhp-cta-fadeUp $entrance-duration ease both;
-  animation-delay: 0.2s;
+  transition: transform $hover-duration ease, box-shadow $hover-duration ease, opacity $entrance-duration ease;
+  transition-delay: 0s, 0s, 0.2s;
+  opacity: 0;
   box-shadow:
     0 4px 14px rgba($color-green, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.08);
@@ -105,25 +119,25 @@ $float-duration: 20s;
   }
 }
 
+.new-hp-cta__wrapper.is-visible .new-hp-cta__button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 // ─── Reassurance ─────────────────────────────────────────────────────────────
 .new-hp-cta__reassurance {
-  animation: nhp-cta-fadeUp $entrance-duration ease both;
-  animation-delay: 0.3s;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: 0.3s;
 }
 
-// ─── Keyframes — Entrance ────────────────────────────────────────────────────
-@keyframes nhp-cta-fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.new-hp-cta__wrapper.is-visible .new-hp-cta__reassurance {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-// ─── Keyframes — Floating Shapes ─────────────────────────────────────────────
+// ─── Keyframes — Floating Shapes (infinite effects only) ─────────────────────
 @keyframes nhp-cta-float1 {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(15px, -20px) rotate(3deg); }
@@ -192,15 +206,13 @@ $float-duration: 20s;
   .new-hp-cta__subtitle,
   .new-hp-cta__button,
   .new-hp-cta__reassurance {
-    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .new-hp-cta__shape {
     animation: none !important;
-  }
-
-  .new-hp-cta__button {
-    transition: none;
   }
 }
 

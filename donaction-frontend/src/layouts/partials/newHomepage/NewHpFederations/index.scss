@@ -40,17 +40,33 @@ $hover-duration: 0.3s;
 
   &__title {
     opacity: 0;
-    animation: title-entrance $entrance-duration ease-out forwards;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
     position: relative;
     z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
   }
 
   &__subtitle {
     opacity: 0;
-    animation: subtitle-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc($entrance-delay-base * 0.5);
+    transform: translateY(-10px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc($entrance-delay-base * 0.5);
     position: relative;
     z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__subtitle {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
   }
 
   &__grid {
@@ -60,10 +76,18 @@ $hover-duration: 0.3s;
 
   &__card {
     opacity: 0;
-    animation: card-entrance $entrance-duration ease-out forwards;
-    animation-delay: calc(
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(
       var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
     );
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
   }
 
   &__card-content {
@@ -167,40 +191,6 @@ $hover-duration: 0.3s;
   }
 }
 
-// Keyframe animations
-@keyframes title-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes subtitle-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes card-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // Responsive adjustments
 @media (max-width: 1023px) {
   .new-hp-federations {
@@ -267,8 +257,9 @@ $hover-duration: 0.3s;
     &__title,
     &__subtitle,
     &__card {
-      animation: none;
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     &__card-content {

@@ -17,7 +17,16 @@ $answer-transition: 0.35s;
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 .new-hp-needhelp__header {
-  animation: nhp-needhelp-fadeUp $entrance-duration ease both;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  will-change: opacity, transform;
+}
+
+.new-hp-needhelp__wrapper.is-visible .new-hp-needhelp__header {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
 }
 
 .new-hp-needhelp__title {
@@ -65,8 +74,11 @@ $answer-transition: 0.35s;
     min-height: 320px;
     position: relative;
     overflow: hidden;
-    animation: nhp-needhelp-fadeUp $entrance-duration ease both;
-    animation-delay: 0.3s;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+    transition-delay: 0.3s;
+    will-change: opacity, transform;
 
     // Decorative quotation mark
     &::before {
@@ -82,6 +94,12 @@ $answer-transition: 0.35s;
       line-height: 1;
     }
   }
+
+  .new-hp-needhelp__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
 }
 
 // ─── FAQ Item ───────────────────────────────────────────────────────────────
@@ -93,14 +111,23 @@ $answer-transition: 0.35s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: border-color $hover-duration ease, box-shadow $hover-duration ease;
-  animation: nhp-needhelp-fadeUp $entrance-duration ease both;
-  animation-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease, border-color $hover-duration ease, box-shadow $hover-duration ease;
+  transition-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+  will-change: opacity, transform;
 
   &--active {
     border-left-color: $color-primary;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.04),
       0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .new-hp-needhelp__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
   }
 
   // Desktop: dissolve item wrapper, children become grid items
@@ -130,9 +157,12 @@ $answer-transition: 0.35s;
     transition:
       background-color $hover-duration ease,
       border-color $hover-duration ease,
-      transform $hover-duration ease;
-    animation: nhp-needhelp-fadeUp $entrance-duration ease both;
-    animation-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+      transform $hover-duration ease,
+      opacity $entrance-duration ease;
+    opacity: 0;
+    transform: translateY(24px);
+    transition-delay: calc(var(--item-index) * #{$entrance-delay-step} + #{$entrance-delay-base});
+    will-change: opacity, transform;
 
     @media (hover: hover) {
       &:hover {
@@ -149,6 +179,12 @@ $answer-transition: 0.35s;
           background-color: $color-primary-light;
         }
       }
+    }
+
+    .new-hp-needhelp__wrapper.is-visible & {
+      opacity: 1;
+      transform: translateY(0);
+      will-change: auto;
     }
   }
 }
@@ -313,25 +349,15 @@ $answer-transition: 0.35s;
   }
 }
 
-// ─── Keyframes ───────────────────────────────────────────────────────────────
-@keyframes nhp-needhelp-fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // ─── Reduced Motion ──────────────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .new-hp-needhelp__header,
   .new-hp-needhelp__faq-item,
   .new-hp-needhelp__faq-panel,
   .new-hp-needhelp__faq-trigger {
-    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .new-hp-needhelp__faq-body {
@@ -339,10 +365,6 @@ $answer-transition: 0.35s;
   }
 
   .new-hp-needhelp__faq-chevron {
-    transition: none;
-  }
-
-  .new-hp-needhelp__faq-trigger {
     transition: none;
   }
 

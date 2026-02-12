@@ -1,9 +1,11 @@
+import ScrollAnimator from '@/components/ScrollAnimator';
 import Link from 'next/link';
 import './index.scss';
 
 export default function NewHpCta() {
   return (
     <section className="new-hp-cta w-full py-20 md:py-24 lg:py-28">
+      <ScrollAnimator className="new-hp-cta__wrapper">
       {/* Decorative floating shapes */}
       <div className="new-hp-cta__shapes" aria-hidden="true">
         <div className="new-hp-cta__shape new-hp-cta__shape--1" />
@@ -33,6 +35,7 @@ export default function NewHpCta() {
           </span>
         </div>
       </div>
+      </ScrollAnimator>
     </section>
   );
 }

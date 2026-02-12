@@ -38,11 +38,13 @@ $hover-duration: 0.3s;
     transition:
       opacity $entrance-duration cubic-bezier(0.22, 1, 0.36, 1),
       transform $entrance-duration cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__title {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
   }
 
   // Container positioning
@@ -116,11 +118,13 @@ $hover-duration: 0.3s;
     transition-delay: calc(
       var(--step-index) * #{$entrance-delay-step} + #{$entrance-delay-base} + 0.4s
     );
+    will-change: opacity, transform;
   }
 
   &__wrapper.is-visible &__step {
     opacity: 1;
     transform: translateY(0) scale(1);
+    will-change: auto;
   }
 
   // =============================================================================

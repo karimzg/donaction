@@ -1,3 +1,4 @@
+import ScrollAnimator from '@/components/ScrollAnimator';
 import { FaqI } from '@/core/models/hp';
 import { SITE_URL } from '@/core/services/endpoints';
 import getPathname from '@/core/helpers/getPathname';
@@ -35,7 +36,8 @@ export default function NewHpNeedHelp({ faq }: NewHpNeedHelpProps) {
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
 			<div className="max-w-[1320px] mx-auto px-6">
-				<div className="new-hp-needhelp__header text-center mb-12 md:mb-16">
+				<ScrollAnimator className="new-hp-needhelp__wrapper">
+					<div className="new-hp-needhelp__header text-center mb-12 md:mb-16">
 					<h2 className="new-hp-needhelp__title text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
 						{faq.title || 'Questions fr\u00e9quentes'}
 					</h2>
@@ -46,6 +48,7 @@ export default function NewHpNeedHelp({ faq }: NewHpNeedHelpProps) {
 					)}
 				</div>
 				<FaqAccordion faqItems={faq.faq_item} />
+				</ScrollAnimator>
 			</div>
 		</section>
 	);
