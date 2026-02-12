@@ -47,8 +47,6 @@ export default function ScrollAnimator({
       return;
     }
 
-    // Fallback: ensure visibility after 3s if observer never fires
-    const fallbackTimeout = setTimeout(() => setIsVisible(true), 3000);
     let observer: IntersectionObserver | null = null;
 
     // Wait one frame so the browser has painted the hidden state (opacity: 0).
@@ -58,7 +56,6 @@ export default function ScrollAnimator({
       observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
-            clearTimeout(fallbackTimeout);
             setIsVisible(true);
             observer?.disconnect();
           }
@@ -72,7 +69,6 @@ export default function ScrollAnimator({
 
     return () => {
       cancelAnimationFrame(rafId);
-      clearTimeout(fallbackTimeout);
       observer?.disconnect();
     };
   }, [isVisible, rootMargin, threshold]);
