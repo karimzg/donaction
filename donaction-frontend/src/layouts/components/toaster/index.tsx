@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks';
 import { popToast, selectToasts, type IToast } from '@/core/store/modules/rootSlice';
+import { getActions, clearActions, type ToastAction } from './actionRegistry';
 import SuccessIcon from './icons/SuccessIcon';
 import ErrorIcon from './icons/ErrorIcon';
 import InfoIcon from './icons/InfoIcon';
 import WarnIcon from './icons/WarnIcon';
+import CloseIcon from './icons/CloseIcon';
 import './index.scss';
 
-const TOAST_DURATION = 3700; // visible time before dismiss starts
+const TOAST_DURATION = 5000; // visible time before dismiss starts
 const DISMISS_ANIMATION_DURATION = 400; // exit animation length
 
 const ICON_MAP: Record<IToast['type'], React.FC<{ className?: string }>> = {
@@ -32,6 +34,43 @@ const Toaster = () => {
 	const [dismissing, setDismissing] = useState<Set<string>>(new Set());
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
+	const dismissToast = useCallback(
+		(toastId: string) => {
+			// Clear existing auto-dismiss timers
+			const existingTimer = timersRef.current.get(toastId);
+			if (existingTimer) clearTimeout(existingTimer);
+			const existingRemoveTimer = timersRef.current.get(toastId + '-remove');
+			if (existingRemoveTimer) clearTimeout(existingRemoveTimer);
+
+			// Start dismiss animation
+			setDismissing((prev) => new Set(prev).add(toastId));
+
+			// Schedule removal after animation
+			const removeTimer = setTimeout(() => {
+				dispatch(popToast(toastId));
+				clearActions(toastId);
+				setDismissing((prev) => {
+					const next = new Set(prev);
+					next.delete(toastId);
+					return next;
+				});
+				timersRef.current.delete(toastId);
+				timersRef.current.delete(toastId + '-remove');
+			}, DISMISS_ANIMATION_DURATION);
+
+			timersRef.current.set(toastId + '-remove', removeTimer);
+		},
+		[dispatch],
+	);
+
+	const handleAction = useCallback(
+		(toastId: string, action: ToastAction) => {
+			action.callback();
+			dismissToast(toastId);
+		},
+		[dismissToast],
+	);
+
 	useEffect(() => {
 		// Schedule timers for new toasts
 		toasts.forEach((toast) => {
@@ -41,6 +80,7 @@ const Toaster = () => {
 
 					const removeTimer = setTimeout(() => {
 						dispatch(popToast(toast.id));
+						clearActions(toast.id);
 						setDismissing((prev) => {
 							const next = new Set(prev);
 							next.delete(toast.id);
@@ -68,6 +108,12 @@ const Toaster = () => {
 			}
 		});
 		keysToDelete.forEach((key) => timersRef.current.delete(key));
+
+		// Clean up action registry for externally removed toasts
+		keysToDelete.forEach((key) => {
+			const baseId = key.replace('-remove', '');
+			clearActions(baseId);
+		});
 
 		setDismissing((prev) => {
 			let changed = false;
@@ -98,6 +144,7 @@ const Toaster = () => {
 			{toasts.map((toast) => {
 				const Icon = ICON_MAP[toast.type];
 				const isDismissing = dismissing.has(toast.id);
+				const actions = toast.hasActions ? getActions(toast.id) : [];
 
 				return (
 					<div
@@ -111,6 +158,30 @@ const Toaster = () => {
 							</span>
 						)}
 						<span className="toastItem__text">{toast.title}</span>
+
+						{actions.length > 0 && (
+							<div className="toastItem__actions">
+								{actions.map((action, index) => (
+									<button
+										key={index}
+										className="toastItem__action"
+										onClick={() => handleAction(toast.id, action)}
+										type="button"
+									>
+										{action.label}
+									</button>
+								))}
+							</div>
+						)}
+
+						<button
+							className="toastItem__close"
+							onClick={() => dismissToast(toast.id)}
+							aria-label="Dismiss notification"
+							type="button"
+						>
+							<CloseIcon />
+						</button>
 					</div>
 				);
 			})}
