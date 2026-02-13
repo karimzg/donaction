@@ -19,13 +19,14 @@ vi.mock('@/core/store/modules/rootSlice', () => ({
 
 import Toaster from './index';
 import * as storeHooks from '@/core/store/hooks';
+import type { IToast } from '@/core/store/modules/rootSlice';
 
-const makeToast = (
-	overrides: Partial<{ id: string; title: string; type: 'success' | 'error' | 'info' | 'warn' }> = {}
-) => ({
+type ToastWithId = IToast & { id: string };
+
+const makeToast = (overrides: Partial<ToastWithId> = {}): ToastWithId => ({
 	id: 'toast-1',
 	title: 'Test message',
-	type: 'success' as const,
+	type: 'success',
 	...overrides,
 });
 
@@ -139,6 +140,20 @@ describe('Toaster', () => {
 
 			const container = screen.getByRole('status');
 			expect(container).toHaveAttribute('aria-live', 'polite');
+		});
+
+		it.each([
+			['success', 'Success notification'],
+			['error', 'Error notification'],
+			['info', 'Information notification'],
+			['warn', 'Warning notification'],
+		])('has aria-label for %s toast', (type, expectedLabel) => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ type: type as IToast['type'] }),
+			]);
+			const { container } = render(<Toaster />);
+			const item = container.querySelector('.toastItem');
+			expect(item).toHaveAttribute('aria-label', expectedLabel);
 		});
 
 		it('icons have aria-hidden="true"', () => {

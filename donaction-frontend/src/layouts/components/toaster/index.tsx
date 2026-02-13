@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks';
-import { popToast, selectToasts } from '@/core/store/modules/rootSlice';
+import { popToast, selectToasts, type IToast } from '@/core/store/modules/rootSlice';
 import SuccessIcon from './icons/SuccessIcon';
 import ErrorIcon from './icons/ErrorIcon';
 import InfoIcon from './icons/InfoIcon';
@@ -12,12 +12,19 @@ import './index.scss';
 const TOAST_DURATION = 3700; // visible time before dismiss starts
 const DISMISS_ANIMATION_DURATION = 400; // exit animation length
 
-const ICON_MAP = {
+const ICON_MAP: Record<IToast['type'], React.FC<{ className?: string }>> = {
 	success: SuccessIcon,
 	error: ErrorIcon,
 	info: InfoIcon,
 	warn: WarnIcon,
-} as const;
+};
+
+const ARIA_LABELS: Record<IToast['type'], string> = {
+	success: 'Success notification',
+	error: 'Error notification',
+	info: 'Information notification',
+	warn: 'Warning notification',
+};
 
 const Toaster = () => {
 	const dispatch = useAppDispatch();
@@ -50,25 +57,29 @@ const Toaster = () => {
 			}
 		});
 
-		// Clean up timers for externally removed toasts
+		// Clean up timers and dismissing state for externally removed toasts
 		const activeIds = new Set(toasts.map((t) => t.id));
+		const keysToDelete: string[] = [];
 		timersRef.current.forEach((timer, key) => {
 			const baseId = key.replace('-remove', '');
 			if (!activeIds.has(baseId)) {
 				clearTimeout(timer);
-				timersRef.current.delete(key);
+				keysToDelete.push(key);
 			}
 		});
+		keysToDelete.forEach((key) => timersRef.current.delete(key));
+
 		setDismissing((prev) => {
-			const next = new Set(prev);
 			let changed = false;
-			next.forEach((id) => {
-				if (!activeIds.has(id)) {
-					next.delete(id);
-					changed = true;
-				}
+			prev.forEach((id) => {
+				if (!activeIds.has(id)) changed = true;
 			});
-			return changed ? next : prev;
+			if (!changed) return prev;
+			const next = new Set<string>();
+			prev.forEach((id) => {
+				if (activeIds.has(id)) next.add(id);
+			});
+			return next;
 		});
 	}, [toasts, dispatch]);
 
@@ -92,6 +103,7 @@ const Toaster = () => {
 					<div
 						className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}`}
 						key={toast.id}
+						aria-label={ARIA_LABELS[toast.type]}
 					>
 						{Icon && (
 							<span className="toastItem__icon">
