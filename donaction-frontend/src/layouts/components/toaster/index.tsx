@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks';
 import { popToast, selectToasts, type IToast } from '@/core/store/modules/rootSlice';
 import { getActions, clearActions, clearAllActions, type ToastAction } from './actionRegistry';
+import useIsMobile from '@/core/hooks/useIsMobile';
+import useSwipeDismiss from './useSwipeDismiss';
 import SuccessIcon from './icons/SuccessIcon';
 import ErrorIcon from './icons/ErrorIcon';
 import InfoIcon from './icons/InfoIcon';
@@ -11,8 +13,9 @@ import WarnIcon from './icons/WarnIcon';
 import CloseIcon from './icons/CloseIcon';
 import './index.scss';
 
-const TOAST_DURATION = 5000; // visible time before dismiss starts
-const DISMISS_ANIMATION_DURATION = 400; // exit animation length
+export const TOAST_DURATION_DESKTOP = 5000;
+export const TOAST_DURATION_MOBILE = 4000;
+export const DISMISS_ANIMATION_DURATION = 400;
 
 const ICON_MAP: Record<IToast['type'], React.FC<{ className?: string }>> = {
 	success: SuccessIcon,
@@ -31,11 +34,75 @@ const ARIA_LABELS: Record<IToast['type'], string> = {
 /** Build the timer key used for the removal phase of a toast. */
 const getRemoveTimerKey = (toastId: string) => `${toastId}-remove`;
 
+/** Individual toast item with swipe support. */
+const ToastItem: React.FC<{
+	toast: IToast & { id: string };
+	depth: number;
+	isDismissing: boolean;
+	actions: ToastAction[];
+	isMobile: boolean;
+	onDismiss: (id: string) => void;
+	onAction: (id: string, action: ToastAction) => void;
+}> = ({ toast, depth, isDismissing, actions, isMobile, onDismiss, onAction }) => {
+	const Icon = ICON_MAP[toast.type];
+
+	const { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel } = useSwipeDismiss({
+		enabled: isMobile,
+		onDismiss: () => onDismiss(toast.id),
+	});
+
+	return (
+		<div
+			className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}${depth > 0 ? ` toastItem--depth-${depth}` : ''}`}
+			aria-label={ARIA_LABELS[toast.type]}
+			data-depth={depth}
+			onTouchStart={onTouchStart}
+			onTouchMove={onTouchMove}
+			onTouchEnd={onTouchEnd}
+			onTouchCancel={onTouchCancel}
+		>
+			{Icon && (
+				<span className="toastItem__icon">
+					<Icon />
+				</span>
+			)}
+			<span className="toastItem__text">{toast.title}</span>
+
+			{actions.length > 0 && (
+				<div className="toastItem__actions">
+					{actions.map((action) => (
+						<button
+							key={action.label}
+							className="toastItem__action"
+							onClick={() => onAction(toast.id, action)}
+							type="button"
+						>
+							{action.label}
+						</button>
+					))}
+				</div>
+			)}
+
+			<button
+				className="toastItem__close"
+				onClick={() => onDismiss(toast.id)}
+				aria-label="Dismiss notification"
+				type="button"
+			>
+				<CloseIcon />
+			</button>
+		</div>
+	);
+};
+
 const Toaster = () => {
 	const dispatch = useAppDispatch();
 	const toasts = useAppSelector(selectToasts);
+	const isMobile = useIsMobile();
 	const [dismissing, setDismissing] = useState<Set<string>>(new Set());
 	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+	const toastDuration = isMobile ? TOAST_DURATION_MOBILE : TOAST_DURATION_DESKTOP;
 
 	const dismissToast = useCallback(
 		(toastId: string) => {
@@ -80,7 +147,7 @@ const Toaster = () => {
 			if (!timersRef.current.has(toast.id)) {
 				const autoDismissTimer = setTimeout(() => {
 					dismissToast(toast.id);
-				}, TOAST_DURATION);
+				}, toastDuration);
 
 				timersRef.current.set(toast.id, autoDismissTimer);
 			}
@@ -116,7 +183,7 @@ const Toaster = () => {
 			});
 			return next;
 		});
-	}, [toasts, dismissToast]);
+	}, [toasts, dismissToast, toastDuration]);
 
 	// Cleanup all timers and action registry on unmount
 	useEffect(() => {
@@ -136,52 +203,27 @@ const Toaster = () => {
 	if (toasts.length === 0) return null;
 
 	return (
-		<div className="toastContainer" role="status" aria-live="polite">
+		<div
+			className={`toastContainer${isMobile ? ' toastContainer--mobile' : ''}`}
+			role="status"
+			aria-live="polite"
+		>
 			{toasts.map((toast, index) => {
-				const Icon = ICON_MAP[toast.type];
 				const isDismissing = dismissing.has(toast.id);
 				const actions = actionsMap.get(toast.id) ?? [];
-				// Depth: newest toast (last in array) = 0, oldest = highest
 				const depth = toasts.length - 1 - index;
 
 				return (
-					<div
-						className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}${depth > 0 ? ` toastItem--depth-${depth}` : ''}`}
+					<ToastItem
 						key={toast.id}
-						aria-label={ARIA_LABELS[toast.type]}
-						data-depth={depth}
-					>
-						{Icon && (
-							<span className="toastItem__icon">
-								<Icon />
-							</span>
-						)}
-						<span className="toastItem__text">{toast.title}</span>
-
-						{actions.length > 0 && (
-							<div className="toastItem__actions">
-								{actions.map((action) => (
-									<button
-										key={action.label}
-										className="toastItem__action"
-										onClick={() => handleAction(toast.id, action)}
-										type="button"
-									>
-										{action.label}
-									</button>
-								))}
-							</div>
-						)}
-
-						<button
-							className="toastItem__close"
-							onClick={() => dismissToast(toast.id)}
-							aria-label="Dismiss notification"
-							type="button"
-						>
-							<CloseIcon />
-						</button>
-					</div>
+						toast={toast}
+						depth={depth}
+						isDismissing={isDismissing}
+						actions={actions}
+						isMobile={isMobile}
+						onDismiss={dismissToast}
+						onAction={handleAction}
+					/>
 				);
 			})}
 		</div>
