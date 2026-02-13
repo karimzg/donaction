@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import NewHomepageContent from '@/partials/newHomepage';
+import HomepageContent from '@/partials/homepage';
 import { getProjets } from '@/core/services/projet';
 import { getHp } from '@/core/services/cms';
 import { cookies } from 'next/headers';
@@ -92,10 +92,7 @@ export default async function Page() {
 				type='application/ld+json'
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
-			<NewHomepageContent
-				projets={projets}
-				faq={hpResult?.data?.attributes?.FAQ}
-			/>
+			<HomepageContent projets={projets} faq={hpResult?.data?.attributes?.FAQ} />
 		</>
 	);
 }
