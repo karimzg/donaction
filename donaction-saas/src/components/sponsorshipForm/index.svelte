@@ -29,6 +29,7 @@
   import error from '../../assets/animations/error.json';
   import { initPlausible } from '../../utils/initPlausible';
   import { getProjectsList } from './logic/api';
+  import { clearAllToasts } from './logic/toaster';
 
   const { klubrUuid, projectUuid }: { klubrUuid?: string; projectUuid?: string } = $props();
 
@@ -94,6 +95,7 @@
 
   onDestroy(() => {
     console.log('HERE: ON DESTROY');
+    clearAllToasts();
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
     Object.keys(DEFAULT_VALUES).forEach((_) => {
