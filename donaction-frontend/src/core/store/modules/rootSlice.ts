@@ -4,6 +4,7 @@ import { RootState } from '../index';
 export interface IToast {
 	title: string;
 	type: 'info' | 'warn' | 'error' | 'success';
+	hasActions?: boolean;
 }
 
 interface ID {
@@ -43,11 +44,13 @@ export const rootSlice = createSlice({
 		setPopAuth: (state, action: PayloadAction<string>) => {
 			state.popAuth = action.payload;
 		},
-		pushToast: (state, action: PayloadAction<IToast>) => {
-			state.toasts.push({
-				...action.payload,
-				id: crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
-			});
+		pushToast: (state, action: PayloadAction<IToast & { id?: string }>) => {
+			const { title, type, hasActions } = action.payload;
+			const id =
+				action.payload.id ??
+				crypto?.randomUUID?.() ??
+				`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+			state.toasts.push({ title, type, hasActions, id });
 		},
 		popToast: (state, action: PayloadAction<string>) => {
 			state.toasts = state.toasts.filter((_) => _.id !== action.payload);

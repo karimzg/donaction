@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock SCSS
@@ -17,9 +17,16 @@ vi.mock('@/core/store/modules/rootSlice', () => ({
 	selectToasts: (state: { root: { toasts: unknown[] } }) => state.root.toasts,
 }));
 
+vi.mock('./actionRegistry', () => ({
+	getActions: vi.fn(() => []),
+	clearActions: vi.fn(),
+	clearAllActions: vi.fn(),
+}));
+
 import Toaster from './index';
 import * as storeHooks from '@/core/store/hooks';
 import type { IToast } from '@/core/store/modules/rootSlice';
+import { getActions } from './actionRegistry';
 
 type ToastWithId = IToast & { id: string };
 
@@ -94,14 +101,14 @@ describe('Toaster', () => {
 	});
 
 	describe('Auto-dismiss timing', () => {
-		it('adds dismissing class after TOAST_DURATION (3700ms)', () => {
+		it('adds dismissing class after TOAST_DURATION (5000ms)', () => {
 			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
 			expect(container.querySelector('.toastItem--dismissing')).toBeNull();
 
 			act(() => {
-				vi.advanceTimersByTime(3700);
+				vi.advanceTimersByTime(5000);
 			});
 
 			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
@@ -112,7 +119,7 @@ describe('Toaster', () => {
 			render(<Toaster />);
 
 			act(() => {
-				vi.advanceTimersByTime(3700 + 400);
+				vi.advanceTimersByTime(5000 + 400);
 			});
 
 			expect(mockDispatch).toHaveBeenCalledWith({
@@ -126,10 +133,110 @@ describe('Toaster', () => {
 			render(<Toaster />);
 
 			act(() => {
-				vi.advanceTimersByTime(3700);
+				vi.advanceTimersByTime(5000);
 			});
 
 			expect(mockDispatch).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('Dismiss button', () => {
+		it('renders a close button for each toast', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			const closeBtn = container.querySelector('.toastItem__close');
+			expect(closeBtn).toBeInTheDocument();
+		});
+
+		it('close button has correct aria-label', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			const closeBtn = container.querySelector('.toastItem__close');
+			expect(closeBtn).toHaveAttribute('aria-label', 'Dismiss notification');
+		});
+
+		it('clicking close triggers dismiss animation', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+
+			const closeBtn = container.querySelector('.toastItem__close') as HTMLElement;
+			fireEvent.click(closeBtn);
+
+			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
+		});
+
+		it('clicking close dispatches popToast after animation duration', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast({ id: 'manual-dismiss' })]);
+			render(<Toaster />);
+
+			const closeBtn = document.querySelector('.toastItem__close') as HTMLElement;
+			fireEvent.click(closeBtn);
+
+			act(() => {
+				vi.advanceTimersByTime(400);
+			});
+
+			expect(mockDispatch).toHaveBeenCalledWith({
+				type: 'root/popToast',
+				payload: 'manual-dismiss',
+			});
+		});
+
+		it('auto-dismiss still works when close is not clicked', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast({ id: 'auto' })]);
+			render(<Toaster />);
+
+			act(() => {
+				vi.advanceTimersByTime(5400);
+			});
+
+			expect(mockDispatch).toHaveBeenCalledWith({
+				type: 'root/popToast',
+				payload: 'auto',
+			});
+		});
+	});
+
+	describe('Contextual action buttons', () => {
+		it('does not render actions section when hasActions is falsy', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			expect(container.querySelector('.toastItem__actions')).toBeNull();
+		});
+
+		it('renders action buttons when hasActions is true', () => {
+			vi.mocked(getActions).mockReturnValue([
+				{ label: 'Undo', callback: vi.fn() },
+				{ label: 'Details', callback: vi.fn() },
+			]);
+
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ hasActions: true }),
+			]);
+			const { container } = render(<Toaster />);
+
+			const actionBtns = container.querySelectorAll('.toastItem__action');
+			expect(actionBtns).toHaveLength(2);
+			expect(actionBtns[0]).toHaveTextContent('Undo');
+			expect(actionBtns[1]).toHaveTextContent('Details');
+		});
+
+		it('clicking action button calls its callback and dismisses toast', () => {
+			const callbackFn = vi.fn();
+			vi.mocked(getActions).mockReturnValue([
+				{ label: 'Undo', callback: callbackFn },
+			]);
+
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ id: 'action-toast', hasActions: true }),
+			]);
+			const { container } = render(<Toaster />);
+
+			const actionBtn = container.querySelector('.toastItem__action') as HTMLElement;
+			fireEvent.click(actionBtn);
+
+			expect(callbackFn).toHaveBeenCalledTimes(1);
+			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
 		});
 	});
 
@@ -164,10 +271,18 @@ describe('Toaster', () => {
 				expect(svg).toHaveAttribute('aria-hidden', 'true');
 			});
 		});
+
+		it('dismiss button is keyboard accessible', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			const closeBtn = container.querySelector('.toastItem__close');
+			expect(closeBtn?.tagName).toBe('BUTTON');
+			expect(closeBtn).toHaveAttribute('type', 'button');
+		});
 	});
 
 	describe('DOM structure', () => {
-		it('renders toastContainer > toastItem > icon + text', () => {
+		it('renders toastContainer > toastItem > icon + text + close', () => {
 			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
@@ -177,6 +292,7 @@ describe('Toaster', () => {
 			const item = wrapper?.querySelector('.toastItem');
 			expect(item?.querySelector('.toastItem__icon')).toBeInTheDocument();
 			expect(item?.querySelector('.toastItem__text')).toHaveTextContent('Test message');
+			expect(item?.querySelector('.toastItem__close')).toBeInTheDocument();
 		});
 	});
 
@@ -192,7 +308,7 @@ describe('Toaster', () => {
 			render(<Toaster />);
 
 			act(() => {
-				vi.advanceTimersByTime(4100);
+				vi.advanceTimersByTime(5400);
 			});
 
 			expect(mockDispatch).toHaveBeenCalledTimes(1);
