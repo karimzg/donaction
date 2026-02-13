@@ -7,9 +7,14 @@ import GetServerCookie from '@/core/helpers/getServerCookie';
 import { SITE_URL } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
 	const cookieStr = cookies().toString();
-	const res = await getHp(cookieStr).catch(() => undefined);
+	const res = await getHp(cookieStr).catch((error) => {
+		console.error('Failed to fetch homepage CMS data:', error);
+		return undefined;
+	});
 
 	const title = res?.data?.attributes?.metaTitle
 		|| res?.data?.attributes?.titre
@@ -43,8 +48,14 @@ export default async function Page() {
 	const cookieStr = cookies().toString();
 
 	const [projets, hpResult] = await Promise.all([
-		getProjets(1, 3, true, !!isPreview, cookieStr).catch(() => undefined),
-		getHp(cookieStr).catch(() => undefined),
+		getProjets(1, 3, true, !!isPreview, cookieStr).catch((error) => {
+			console.error('Failed to fetch projects:', error);
+			return undefined;
+		}),
+		getHp(cookieStr).catch((error) => {
+			console.error('Failed to fetch homepage CMS data:', error);
+			return undefined;
+		}),
 	]);
 
 	const jsonLd: WithContext<WebPage> = {
