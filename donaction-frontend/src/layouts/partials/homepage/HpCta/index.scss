@@ -44,7 +44,7 @@ $float-duration: 20s;
   right: -3%;
   background: radial-gradient(circle at 40% 40%, rgba($color-green, 0.22) 0%, rgba($color-green, 0.10) 50%, transparent 75%);
   border: 1.5px solid rgba($color-green, 0.25);
-  animation: nhp-cta-float1 $float-duration ease-in-out infinite;
+  animation: hp-cta-float1 $float-duration ease-in-out infinite;
 }
 
 // Medium circle — bottom-left
@@ -55,7 +55,7 @@ $float-duration: 20s;
   left: -5%;
   background: radial-gradient(circle at 60% 60%, rgba($color-green, 0.20) 0%, rgba($color-green, 0.08) 55%, transparent 75%);
   border: 1.5px solid rgba($color-green, 0.20);
-  animation: nhp-cta-float2 #{$float-duration * 0.8} ease-in-out infinite;
+  animation: hp-cta-float2 #{$float-duration * 0.8} ease-in-out infinite;
 }
 
 // Small accent — center-left, faster
@@ -66,7 +66,7 @@ $float-duration: 20s;
   left: 10%;
   background: radial-gradient(circle, rgba($color-green, 0.25) 0%, rgba($color-green, 0.10) 50%, transparent 75%);
   border: 1.5px solid rgba($color-green, 0.22);
-  animation: nhp-cta-float3 #{$float-duration * 0.6} ease-in-out infinite;
+  animation: hp-cta-float3 #{$float-duration * 0.6} ease-in-out infinite;
 }
 
 // ─── Title ───────────────────────────────────────────────────────────────────
@@ -138,20 +138,20 @@ $float-duration: 20s;
 }
 
 // ─── Keyframes — Floating Shapes (infinite effects only) ─────────────────────
-@keyframes nhp-cta-float1 {
+@keyframes hp-cta-float1 {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(15px, -20px) rotate(3deg); }
   50% { transform: translate(-10px, -35px) rotate(-2deg); }
   75% { transform: translate(20px, -15px) rotate(4deg); }
 }
 
-@keyframes nhp-cta-float2 {
+@keyframes hp-cta-float2 {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   33% { transform: translate(-20px, 15px) rotate(-4deg); }
   66% { transform: translate(15px, 25px) rotate(3deg); }
 }
 
-@keyframes nhp-cta-float3 {
+@keyframes hp-cta-float3 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(12px, -18px) scale(1.08); }
 }
