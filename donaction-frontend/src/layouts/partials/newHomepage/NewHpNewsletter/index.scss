@@ -18,13 +18,11 @@ $hover-duration: 0.25s;
   opacity: 0;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
-  will-change: opacity, transform;
 }
 
 .new-hp-newsletter__wrapper.is-visible .new-hp-newsletter__content {
   opacity: 1;
   transform: translateY(0);
-  will-change: auto;
 }
 
 // ─── Icon ────────────────────────────────────────────────────────────────────
@@ -42,12 +40,10 @@ $hover-duration: 0.25s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
   transition-delay: $entrance-delay-base;
-  will-change: opacity, transform;
 
   .new-hp-newsletter__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
   }
 }
 
@@ -58,12 +54,10 @@ $hover-duration: 0.25s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
   transition-delay: calc(#{$entrance-delay-base} + #{$entrance-delay-step});
-  will-change: opacity, transform;
 
   .new-hp-newsletter__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
   }
 }
 
@@ -74,12 +68,10 @@ $hover-duration: 0.25s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
   transition-delay: calc(#{$entrance-delay-base} + 2 * #{$entrance-delay-step});
-  will-change: opacity, transform;
 
   .new-hp-newsletter__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
   }
 }
 
@@ -89,12 +81,10 @@ $hover-duration: 0.25s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
   transition-delay: calc(#{$entrance-delay-base} + 3 * #{$entrance-delay-step});
-  will-change: opacity, transform;
 
   .new-hp-newsletter__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
   }
 }
 
@@ -235,12 +225,10 @@ $hover-duration: 0.25s;
   transform: translateY(24px);
   transition: opacity $entrance-duration ease, transform $entrance-duration ease;
   transition-delay: calc(#{$entrance-delay-base} + 4 * #{$entrance-delay-step});
-  will-change: opacity, transform;
 
   .new-hp-newsletter__wrapper.is-visible & {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
   }
 }
 

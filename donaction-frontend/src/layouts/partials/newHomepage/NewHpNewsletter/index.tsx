@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ScrollAnimator from '@/components/ScrollAnimator';
 import { useAppDispatch } from '@/core/store/hooks';
 import { createReCaptchaToken, postNewsletters } from '@/core/services/cms';
@@ -8,11 +8,24 @@ import { pushToast } from '@/core/store/modules/rootSlice';
 import { emailRexExp } from '@/partials/sponsorshipForm/logic/validations';
 import './index.scss';
 
+type ApiError = { error?: { status?: number; message?: string } };
+
+const ALREADY_SUBSCRIBED_STATUS = 400;
+const ALREADY_SUBSCRIBED_MESSAGE = 'This attribute must be unique';
+
 export default function NewHpNewsletter() {
 	const dispatch = useAppDispatch();
 	const [email, setEmail] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [statusMessage, setStatusMessage] = useState('');
+	const isMounted = useRef(true);
+
+	useEffect(() => {
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -20,29 +33,41 @@ export default function NewHpNewsletter() {
 		const trimmed = email.trim();
 		if (!trimmed || !emailRexExp.test(trimmed)) {
 			dispatch(pushToast({ type: 'error', title: 'Veuillez saisir un e-mail valide.' }));
+			setStatusMessage('E-mail invalide.');
 			return;
 		}
 
 		setIsLoading(true);
+		setStatusMessage('Envoi en cours...');
 		try {
 			const formToken = await createReCaptchaToken('CREATE_NEWSLETTER_FORM');
 			await postNewsletters({ data: { email: trimmed, formToken } });
+			if (!isMounted.current) return;
 			setIsSubmitted(true);
+			setEmail('');
+			setStatusMessage('Inscription réussie !');
 			dispatch(
 				pushToast({ type: 'success', title: 'Vous êtes désormais abonné à la newsletter !' }),
 			);
-		} catch (error: any) {
+		} catch (error: unknown) {
+			if (!isMounted.current) return;
+			const apiError = error as ApiError;
 			if (
-				error?.error?.status === 400 &&
-				error.error?.message === 'This attribute must be unique'
+				apiError?.error?.status === ALREADY_SUBSCRIBED_STATUS &&
+				apiError.error?.message === ALREADY_SUBSCRIBED_MESSAGE
 			) {
 				setIsSubmitted(true);
+				setEmail('');
+				setStatusMessage('Déjà abonné.');
 				dispatch(pushToast({ type: 'success', title: 'Vous êtes déjà abonné !' }));
 			} else {
+				setStatusMessage('Erreur, veuillez réessayer.');
 				dispatch(pushToast({ type: 'error', title: 'Une erreur est survenue, réessayez.' }));
 			}
 		} finally {
-			setIsLoading(false);
+			if (isMounted.current) {
+				setIsLoading(false);
+			}
 		}
 	}
 
@@ -65,6 +90,10 @@ export default function NewHpNewsletter() {
 						<p className="new-hp-newsletter__subtitle text-gray-500 text-base md:text-lg mb-10 leading-relaxed">
 							Recevez nos dernières actualités et conseils pour optimiser vos collectes.
 						</p>
+
+						<div role="status" aria-live="polite" className="sr-only">
+							{statusMessage}
+						</div>
 
 						{isSubmitted ? (
 							<div className="new-hp-newsletter__success">

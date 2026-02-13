@@ -144,4 +144,29 @@ describe('NewHpNewsletter', () => {
 		expect(input).toHaveAttribute('type', 'email');
 		expect(input).toHaveAttribute('required');
 	});
+
+	it('shows spinner during submission', async () => {
+		// Make the token promise hang to keep loading state
+		mockCreateReCaptchaToken.mockReturnValue(new Promise(() => {}));
+
+		render(<NewHpNewsletter />);
+
+		const input = screen.getByPlaceholderText('Saisissez votre e-mail');
+		fireEvent.change(input, { target: { value: 'test@example.com' } });
+		fireEvent.submit(screen.getByRole('button', { name: /abonner/i }));
+
+		await waitFor(() => {
+			const button = screen.getByRole('button');
+			expect(button).toBeDisabled();
+			expect(button.querySelector('.new-hp-newsletter__spinner')).toBeInTheDocument();
+		});
+	});
+
+	it('has aria-live region for screen reader feedback', () => {
+		render(<NewHpNewsletter />);
+
+		const liveRegion = screen.getByRole('status');
+		expect(liveRegion).toBeInTheDocument();
+		expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+	});
 });
