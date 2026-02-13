@@ -26,6 +26,9 @@ const TOAST_CONFIG = {
   DISMISS_ANIMATION_DURATION: 400,
   ENTRY_ANIMATION_DURATION: 350,
   SWIPE_THRESHOLD: 50,
+  SWIPE_MIN_OPACITY: 0.3,
+  SWIPE_FADE_DISTANCE: 150,
+  SWIPE_SNAPBACK_DURATION: 200,
   MOBILE_BREAKPOINT: 768,
 } as const;
 
@@ -319,6 +322,24 @@ function getShadowRoot(): ShadowRoot | null {
 }
 
 /**
+ * Normalize legacy or modern toast type to internal ToastType
+ */
+function normalizeType(type: LegacyToastType | ToastType): ToastType {
+  if (type in LEGACY_TYPE_MAP) {
+    return LEGACY_TYPE_MAP[type as LegacyToastType];
+  }
+  return type as ToastType;
+}
+
+/**
+ * Parse an SVG string into a DOM element (CSP-safe, no innerHTML)
+ */
+function parseSVG(svgString: string): Element {
+  const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  return doc.documentElement;
+}
+
+/**
  * Check if device is mobile based on viewport width
  */
 function isMobile(): boolean {
@@ -367,10 +388,9 @@ function createToastElement(id: string, text: string, type: ToastType): HTMLDivE
   toast.setAttribute('aria-label', ARIA_LABELS[type]);
 
   // Icon container
-  // Safe: TOAST_ICONS are static SVG constants, not user input
   const iconContainer = document.createElement('div');
   iconContainer.className = 'don-toast__icon';
-  iconContainer.innerHTML = TOAST_ICONS[type];
+  iconContainer.appendChild(parseSVG(TOAST_ICONS[type]));
 
   // Text content
   const textElement = document.createElement('div');
@@ -381,8 +401,7 @@ function createToastElement(id: string, text: string, type: ToastType): HTMLDivE
   const closeButton = document.createElement('button');
   closeButton.className = 'don-toast__close';
   closeButton.type = 'button';
-  // Safe: CLOSE_ICON is a static SVG string, not user input
-  closeButton.innerHTML = CLOSE_ICON;
+  closeButton.appendChild(parseSVG(CLOSE_ICON));
   closeButton.setAttribute('aria-label', 'Dismiss notification');
   closeButton.addEventListener('click', () => dismissToast(id));
 
@@ -441,7 +460,7 @@ function attachSwipeHandlers(element: HTMLDivElement, toastId: string): (() => v
 
     // Direct DOM manipulation for smooth 60fps visual feedback
     element.style.transform = `translateY(${offset}px)`;
-    element.style.opacity = `${Math.max(0.3, 1 - Math.abs(offset) / 150)}`;
+    element.style.opacity = `${Math.max(TOAST_CONFIG.SWIPE_MIN_OPACITY, 1 - Math.abs(offset) / TOAST_CONFIG.SWIPE_FADE_DISTANCE)}`;
   };
 
   const onTouchEnd = (): void => {
@@ -449,13 +468,17 @@ function attachSwipeHandlers(element: HTMLDivElement, toastId: string): (() => v
       dismissToast(toastId);
     } else {
       // Snap back with transition
-      element.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      const ms = TOAST_CONFIG.SWIPE_SNAPBACK_DURATION;
+      element.style.transition = `transform ${ms}ms ease, opacity ${ms}ms ease`;
       element.style.transform = '';
       element.style.opacity = '';
-      const cleanup = () => {
+      // Timeout fallback if transitionend never fires (e.g. element removed early)
+      const fallbackTimer = setTimeout(cleanup, ms + 50);
+      function cleanup() {
+        clearTimeout(fallbackTimer);
         element.style.transition = '';
         element.removeEventListener('transitionend', cleanup);
-      };
+      }
       element.addEventListener('transitionend', cleanup);
     }
     currentOffset = 0;
@@ -562,7 +585,7 @@ export function dispatchToast(text: string, type: LegacyToastType | ToastType): 
   ensureStyles(shadowRoot);
 
   // Resolve type
-  const resolvedType = (LEGACY_TYPE_MAP[type as LegacyToastType] || type) as ToastType;
+  const resolvedType = normalizeType(type);
 
   // Ensure container exists
   const container = ensureToastContainer(shadowRoot);
