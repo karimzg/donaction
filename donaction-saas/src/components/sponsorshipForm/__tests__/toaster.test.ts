@@ -578,6 +578,24 @@ describe('Swipe-to-Dismiss (Mobile)', () => {
     // Toast should NOT be dismissing
     expect(toast.classList.contains('don-toast--dismissing')).toBe(false);
   });
+
+  it('cleans up touch listeners on toast removal', () => {
+    setViewportWidth(375);
+    dispatchToast('Test message', 'success');
+
+    const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
+    const removeListenerSpy = vi.spyOn(toast, 'removeEventListener');
+
+    // Dismiss and wait for removal
+    vi.advanceTimersByTime(__testing__.TOAST_CONFIG.DURATION_MOBILE);
+    vi.advanceTimersByTime(__testing__.TOAST_CONFIG.DISMISS_ANIMATION_DURATION);
+
+    const removedEvents = removeListenerSpy.mock.calls.map((call) => call[0]);
+    expect(removedEvents).toContain('touchstart');
+    expect(removedEvents).toContain('touchmove');
+    expect(removedEvents).toContain('touchend');
+    expect(removedEvents).toContain('touchcancel');
+  });
 });
 
 // ============================================================================

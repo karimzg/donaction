@@ -13,8 +13,9 @@ interface ToastInstance {
   element: HTMLDivElement;
   type: ToastType;
   text: string;
-  autoDismissTimer: NodeJS.Timeout | null;
-  removeTimer: NodeJS.Timeout | null;
+  autoDismissTimer: ReturnType<typeof setTimeout> | null;
+  removeTimer: ReturnType<typeof setTimeout> | null;
+  cleanupListeners?: () => void;
 }
 
 // --- Constants ---
@@ -366,6 +367,7 @@ function createToastElement(id: string, text: string, type: ToastType): HTMLDivE
   toast.setAttribute('aria-label', ARIA_LABELS[type]);
 
   // Icon container
+  // Safe: TOAST_ICONS are static SVG constants, not user input
   const iconContainer = document.createElement('div');
   iconContainer.className = 'don-toast__icon';
   iconContainer.innerHTML = TOAST_ICONS[type];
@@ -379,6 +381,7 @@ function createToastElement(id: string, text: string, type: ToastType): HTMLDivE
   const closeButton = document.createElement('button');
   closeButton.className = 'don-toast__close';
   closeButton.type = 'button';
+  // Safe: CLOSE_ICON is a static SVG string, not user input
   closeButton.innerHTML = CLOSE_ICON;
   closeButton.setAttribute('aria-label', 'Dismiss notification');
   closeButton.addEventListener('click', () => dismissToast(id));
@@ -417,9 +420,9 @@ function updateDepths(): void {
 /**
  * Attach swipe-to-dismiss handlers for mobile (adapted from frontend useSwipeDismiss)
  */
-function attachSwipeHandlers(element: HTMLDivElement, toastId: string): void {
+function attachSwipeHandlers(element: HTMLDivElement, toastId: string): (() => void) | undefined {
   if (!isMobile()) {
-    return; // Only for mobile
+    return undefined;
   }
 
   let startY = 0;
@@ -468,6 +471,13 @@ function attachSwipeHandlers(element: HTMLDivElement, toastId: string): void {
   element.addEventListener('touchmove', onTouchMove, { passive: true });
   element.addEventListener('touchend', onTouchEnd);
   element.addEventListener('touchcancel', onTouchCancel);
+
+  return () => {
+    element.removeEventListener('touchstart', onTouchStart);
+    element.removeEventListener('touchmove', onTouchMove);
+    element.removeEventListener('touchend', onTouchEnd);
+    element.removeEventListener('touchcancel', onTouchCancel);
+  };
 }
 
 /**
@@ -489,6 +499,11 @@ function removeToast(id: string): void {
     clearTimeout(toast.removeTimer);
   }
 
+  // Clean up event listeners
+  if (toast.cleanupListeners) {
+    toast.cleanupListeners();
+  }
+
   // Remove element from DOM
   if (toast.element.parentElement) {
     toast.element.remove();
@@ -500,9 +515,10 @@ function removeToast(id: string): void {
   // Update depths
   updateDepths();
 
-  // Remove container if empty
-  if (activeToasts.length === 0 && toastContainer) {
-    if (toastContainer.parentElement) {
+  // Remove container and reset counter if empty
+  if (activeToasts.length === 0) {
+    toastIdCounter = 0;
+    if (toastContainer?.parentElement) {
       toastContainer.remove();
     }
     toastContainer = null;
@@ -579,7 +595,7 @@ export function dispatchToast(text: string, type: LegacyToastType | ToastType): 
   updateDepths();
 
   // Attach swipe handlers for mobile
-  attachSwipeHandlers(element, toastId);
+  toastInstance.cleanupListeners = attachSwipeHandlers(element, toastId);
 
   // Schedule auto-dismiss
   const duration = isMobile() ? TOAST_CONFIG.DURATION_MOBILE : TOAST_CONFIG.DURATION_DESKTOP;
