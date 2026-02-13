@@ -12,7 +12,6 @@ import ClubCard from '@/partials/clubPage/clubCard';
 import { StrapiComponent } from '@/core/models/strapi-component';
 import TextImageSection from '@/partials/common/sections/textImageSection';
 import PartnersSection from '@/partials/common/sections/partnersSection';
-import NewslettersForm from '@/partials/common/newslettersForm';
 import { notFound } from 'next/navigation';
 import GetServerCookie from '@/core/helpers/getServerCookie';
 import { SITE_URL } from '@/core/services/endpoints';
@@ -170,16 +169,7 @@ export default async function Page() {
 							<PartnersSection list={hpResult?.data?.attributes?.partnerList} />
 						</div>
 					) : null}
-					<div
-						className={
-							'bg-black p-4 md:px-12 rounded-3xl flex flex-col items-center justify-center gap-6 text-white text-center mt-6 md:minMaxWidth w-full'
-						}
-					>
-						<p className={'font-semibold text-xl mt-4'}>Rejoignez la communauté Klubr</p>
-						<p>Abonnez-vous pour recevoir les dernières nouvelles de Klubr;</p>
-						<NewslettersForm />
 					</div>
-				</div>
 			</div>
 			<NeedHelp list={hpResult?.data?.attributes?.FAQ} />
 		</div>
