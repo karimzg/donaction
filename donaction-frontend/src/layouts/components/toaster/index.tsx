@@ -137,16 +137,19 @@ const Toaster = () => {
 
 	return (
 		<div className="toastContainer" role="status" aria-live="polite">
-			{toasts.map((toast) => {
+			{toasts.map((toast, index) => {
 				const Icon = ICON_MAP[toast.type];
 				const isDismissing = dismissing.has(toast.id);
 				const actions = actionsMap.get(toast.id) ?? [];
+				// Depth: newest toast (last in array) = 0, oldest = highest
+				const depth = toasts.length - 1 - index;
 
 				return (
 					<div
-						className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}`}
+						className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}${depth > 0 ? ` toastItem--depth-${depth}` : ''}`}
 						key={toast.id}
 						aria-label={ARIA_LABELS[toast.type]}
+						data-depth={depth}
 					>
 						{Icon && (
 							<span className="toastItem__icon">

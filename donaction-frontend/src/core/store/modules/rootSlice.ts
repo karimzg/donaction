@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 
+export const MAX_VISIBLE_TOASTS = 3;
+
 export interface IToast {
 	title: string;
 	type: 'info' | 'warn' | 'error' | 'success';
@@ -50,6 +52,12 @@ export const rootSlice = createSlice({
 				action.payload.id ??
 				crypto?.randomUUID?.() ??
 				`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+			// Evict oldest toasts when at capacity
+			while (state.toasts.length >= MAX_VISIBLE_TOASTS) {
+				state.toasts.shift();
+			}
+
 			state.toasts.push({ title, type, hasActions, id });
 		},
 		popToast: (state, action: PayloadAction<string>) => {

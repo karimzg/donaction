@@ -31,6 +31,10 @@
   color: #374151;
   border-left: 3px solid transparent;
 
+  // Smooth repositioning when toasts shift in the stack
+  transition: transform 0.3s cubic-bezier(0.21, 1.02, 0.73, 1),
+              opacity 0.3s ease;
+
   // Glassmorphism
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
@@ -47,6 +51,17 @@
 
   // Entry animation
   animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+
+  // Depth effect — toasts further back appear slightly receded
+  &--depth-1 {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+
+  &--depth-2 {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
 
   // Type-specific accents (BEM modifiers)
   &--success {
@@ -205,10 +220,22 @@
     animation: none;
     opacity: 1;
     transform: none;
+    transition: none;
 
     &--dismissing {
       animation: none;
       opacity: 0;
+    }
+
+    // Depth still shown statically (opacity only, no transform)
+    &--depth-1 {
+      opacity: 0.85;
+      transform: none;
+    }
+
+    &--depth-2 {
+      opacity: 0.7;
+      transform: none;
     }
 
     &__close,
