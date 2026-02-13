@@ -200,21 +200,21 @@ describe('Toast Element Structure', () => {
 
 describe('Type Mapping (Legacy Compatibility)', () => {
   it('maps DANGER to error', () => {
-    dispatchToast('Test message', 'DANGER' as any);
+    dispatchToast('Test message', 'DANGER');
 
     const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
     expect(toast.classList.contains('don-toast--error')).toBe(true);
   });
 
   it('maps WARNING to warn', () => {
-    dispatchToast('Test message', 'WARNING' as any);
+    dispatchToast('Test message', 'WARNING');
 
     const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
     expect(toast.classList.contains('don-toast--warn')).toBe(true);
   });
 
   it('maps SUCCESS to success', () => {
-    dispatchToast('Test message', 'SUCCESS' as any);
+    dispatchToast('Test message', 'SUCCESS');
 
     const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
     expect(toast.classList.contains('don-toast--success')).toBe(true);
@@ -450,7 +450,7 @@ describe('Stacking and Depth', () => {
     dispatchToast('Toast 3', 'warn');
 
     expect(__testing__.getActiveToasts().length).toBe(3);
-    const toast1Id = mockShadowRoot.querySelector('[data-toast-id="0"]');
+    expect(mockShadowRoot.querySelector('[data-toast-id="0"]')).not.toBeNull();
 
     dispatchToast('Toast 4', 'info');
 
@@ -522,14 +522,16 @@ describe('Swipe-to-Dismiss (Mobile)', () => {
 
   it('does NOT attach touch listeners on desktop', () => {
     setViewportWidth(1024);
+
+    const addEventListenerSpy = vi.spyOn(HTMLDivElement.prototype, 'addEventListener');
     dispatchToast('Test message', 'success');
 
-    const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
+    const touchCalls = addEventListenerSpy.mock.calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].startsWith('touch')
+    );
+    expect(touchCalls.length).toBe(0);
 
-    // Check that touch events are not attached
-    // (This is tricky to test without implementing listener tracking)
-    // We verify by checking viewport width detection works
-    expect(window.innerWidth).toBe(1024);
+    vi.restoreAllMocks();
   });
 
   it('swipe up beyond threshold dismisses toast', () => {
@@ -539,15 +541,13 @@ describe('Swipe-to-Dismiss (Mobile)', () => {
     const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
 
     // Simulate swipe up
-    const touchStartEvent = new TouchEvent('touchstart', {
-      touches: [{ clientY: 100 } as Touch],
-    } as TouchEventInit);
-    toast.dispatchEvent(touchStartEvent);
+    toast.dispatchEvent(new TouchEvent('touchstart', {
+      touches: [{ clientY: 100 } as unknown as Touch],
+    }));
 
-    const touchMoveEvent = new TouchEvent('touchmove', {
-      touches: [{ clientY: 30 } as Touch],
-    } as TouchEventInit);
-    toast.dispatchEvent(touchMoveEvent);
+    toast.dispatchEvent(new TouchEvent('touchmove', {
+      touches: [{ clientY: 30 } as unknown as Touch],
+    }));
 
     const touchEndEvent = new TouchEvent('touchend', {});
     toast.dispatchEvent(touchEndEvent);
@@ -562,15 +562,13 @@ describe('Swipe-to-Dismiss (Mobile)', () => {
     const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
 
     // Simulate small swipe up (below threshold)
-    const touchStartEvent = new TouchEvent('touchstart', {
-      touches: [{ clientY: 100 } as Touch],
-    } as TouchEventInit);
-    toast.dispatchEvent(touchStartEvent);
+    toast.dispatchEvent(new TouchEvent('touchstart', {
+      touches: [{ clientY: 100 } as unknown as Touch],
+    }));
 
-    const touchMoveEvent = new TouchEvent('touchmove', {
-      touches: [{ clientY: 80 } as Touch],
-    } as TouchEventInit);
-    toast.dispatchEvent(touchMoveEvent);
+    toast.dispatchEvent(new TouchEvent('touchmove', {
+      touches: [{ clientY: 80 } as unknown as Touch],
+    }));
 
     const touchEndEvent = new TouchEvent('touchend', {});
     toast.dispatchEvent(touchEndEvent);
@@ -604,7 +602,7 @@ describe('Swipe-to-Dismiss (Mobile)', () => {
 
 describe('Edge Cases', () => {
   it('handles null shadowRoot gracefully', () => {
-    vi.spyOn(document, 'querySelector').mockReturnValue(null as any);
+    vi.spyOn(document, 'querySelector').mockReturnValue(null);
 
     expect(() => {
       dispatchToast('Test message', 'success');
@@ -614,7 +612,7 @@ describe('Edge Cases', () => {
   });
 
   it('handles element with no shadowRoot', () => {
-    vi.spyOn(document, 'querySelector').mockReturnValue({} as any);
+    vi.spyOn(document, 'querySelector').mockReturnValue({} as unknown as Element);
 
     expect(() => {
       dispatchToast('Test message', 'success');
@@ -926,14 +924,14 @@ describe('Timer Management', () => {
     dispatchToast('Test message', 'success');
 
     const activeToasts = __testing__.getActiveToasts();
-    const originalTimer = activeToasts[0].autoDismissTimer;
+    expect(activeToasts[0].autoDismissTimer).not.toBeNull();
 
     const closeButton = mockShadowRoot.querySelector('.don-toast__close') as HTMLButtonElement;
     closeButton.click();
 
-    // After dismiss, timer should be cleared
-    // (We can't directly check this, but behavior should be correct)
-    expect(closeButton).not.toBeNull();
+    // After dismiss, the toast should have dismissing class
+    const toast = mockShadowRoot.querySelector('.don-toast') as HTMLDivElement;
+    expect(toast.classList.contains('don-toast--dismissing')).toBe(true);
   });
 
   it('schedules remove timer on dismiss', () => {
