@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import NewHomepageContent from '@/partials/newHomepage';
+import HomepageContent from '@/partials/homepage';
 import { getProjets } from '@/core/services/projet';
 import { getHp } from '@/core/services/cms';
 import { cookies } from 'next/headers';
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Nouvelle page d\'accueil Donaction',
 };
 
-export default async function NewHpPage() {
+export default async function HomePage() {
   const isPreview = await GetServerCookie('isPreviewMode');
   const cookieStr = cookies().toString();
 
@@ -20,7 +20,7 @@ export default async function NewHpPage() {
   ]);
 
   return (
-    <NewHomepageContent
+    <HomepageContent
       projets={projets}
       faq={hpResult?.data?.attributes?.FAQ}
     />
