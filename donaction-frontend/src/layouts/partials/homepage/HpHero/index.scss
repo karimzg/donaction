@@ -1,0 +1,169 @@
+.hp-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);
+
+  // Subtle dot pattern overlay
+  &__pattern {
+    background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.5;
+  }
+
+  // Illustration container with subtle entrance
+  &__illustration {
+    animation: illustration-entrance 0.8s ease-out;
+  }
+
+  // Float animations for SVG elements
+  &__float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  &__float-medium {
+    animation: float-medium 4s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  &__float-fast {
+    animation: float-fast 3s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  // Scroll indicator (decorative, no interaction)
+  &__scroll-indicator {
+    color: #9ca3af;
+    animation: fade-in 1s ease-out 0.5s both;
+  }
+
+  &__scroll-dot {
+    animation: scroll-bounce 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+}
+
+// Keyframe animations
+@keyframes illustration-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes float-medium {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes scroll-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(14px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Responsive adjustments
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hp-hero {
+    &__illustration svg {
+      max-width: 280px;
+    }
+  }
+}
+
+@media (max-width: 1023px) {
+  .hp-hero {
+    &__illustration {
+      margin-bottom: 1rem;
+
+      svg {
+        max-width: 320px;
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .hp-hero {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+
+    &__scroll-indicator {
+      display: none;
+    }
+
+    &__illustration {
+      margin-bottom: 0.5rem;
+
+      svg {
+        max-width: 260px;
+      }
+    }
+  }
+}
+
+@media (max-width: 639px) {
+  .hp-hero {
+    &__pattern {
+      background-size: 20px 20px;
+    }
+
+    &__illustration svg {
+      max-width: 240px;
+    }
+  }
+}
+
+// Reduced motion preference
+@media (prefers-reduced-motion: reduce) {
+  .hp-hero {
+    &__illustration,
+    &__float-slow,
+    &__float-medium,
+    &__float-fast,
+    &__scroll-dot {
+      animation: none;
+    }
+  }
+}

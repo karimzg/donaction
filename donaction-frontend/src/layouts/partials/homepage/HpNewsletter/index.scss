@@ -1,0 +1,294 @@
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+$color-primary: #73cfa8;
+$color-primary-dark: #3d8a6a;
+$color-primary-hover: #5bb892;
+
+$entrance-duration: 0.6s;
+$entrance-delay-base: 0.1s;
+$entrance-delay-step: 0.06s;
+$hover-duration: 0.25s;
+
+// ─── Section ─────────────────────────────────────────────────────────────────
+.hp-newsletter {
+  background: linear-gradient(180deg, #f3f4f6 0%, #f9fafb 50%, #f0fdf4 100%);
+}
+
+// ─── Content wrapper ─────────────────────────────────────────────────────────
+.hp-newsletter__content {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+}
+
+.hp-newsletter__wrapper.is-visible .hp-newsletter__content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+// ─── Icon ────────────────────────────────────────────────────────────────────
+.hp-newsletter__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  background: rgba(115, 207, 168, 0.1);
+  color: $color-primary-dark;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: $entrance-delay-base;
+
+  .hp-newsletter__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Title ───────────────────────────────────────────────────────────────────
+.hp-newsletter__title {
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: calc(#{$entrance-delay-base} + #{$entrance-delay-step});
+
+  .hp-newsletter__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Subtitle ────────────────────────────────────────────────────────────────
+.hp-newsletter__subtitle {
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: calc(#{$entrance-delay-base} + 2 * #{$entrance-delay-step});
+
+  .hp-newsletter__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Form ────────────────────────────────────────────────────────────────────
+.hp-newsletter__form {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: calc(#{$entrance-delay-base} + 3 * #{$entrance-delay-step});
+
+  .hp-newsletter__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Input Group (inline on md+, stacked on mobile) ─────────────────────────
+.hp-newsletter__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 480px;
+  margin: 0 auto;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    gap: 0;
+    position: relative;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.03);
+    padding: 0.3125rem;
+    transition: border-color $hover-duration ease, box-shadow $hover-duration ease;
+
+    &:focus-within {
+      border-color: rgba(115, 207, 168, 0.4);
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.03),
+        0 0 0 3px rgba(115, 207, 168, 0.12);
+    }
+  }
+}
+
+// ─── Input ───────────────────────────────────────────────────────────────────
+.hp-newsletter__input {
+  width: 100%;
+  height: 3.25rem;
+  padding: 0 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  color: #111827;
+  background: #ffffff;
+  transition: border-color $hover-duration ease, box-shadow $hover-duration ease;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    border-color: rgba(115, 207, 168, 0.4);
+    box-shadow: 0 0 0 3px rgba(115, 207, 168, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 640px) {
+    border: none;
+    box-shadow: none;
+    height: auto;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    background: transparent;
+
+    &:focus {
+      box-shadow: none;
+      border-color: transparent;
+    }
+  }
+}
+
+// ─── Submit Button ───────────────────────────────────────────────────────────
+.hp-newsletter__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.25rem;
+  padding: 0 1.75rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform $hover-duration ease, box-shadow $hover-duration ease, opacity $hover-duration ease;
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(115, 207, 168, 0.35);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 640px) {
+    flex-shrink: 0;
+    height: auto;
+    padding: 0.625rem 1.5rem;
+    border-radius: 10px;
+  }
+}
+
+// ─── Spinner ─────────────────────────────────────────────────────────────────
+.hp-newsletter__spinner {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: newsletter-spin 0.6s linear infinite;
+}
+
+@keyframes newsletter-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ─── Disclaimer ──────────────────────────────────────────────────────────────
+.hp-newsletter__disclaimer {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity $entrance-duration ease, transform $entrance-duration ease;
+  transition-delay: calc(#{$entrance-delay-base} + 4 * #{$entrance-delay-step});
+
+  .hp-newsletter__wrapper.is-visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Success State ───────────────────────────────────────────────────────────
+.hp-newsletter__success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(115, 207, 168, 0.08);
+  border: 1px solid rgba(115, 207, 168, 0.2);
+  border-radius: 14px;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: newsletter-fadeIn 0.4s ease;
+}
+
+.hp-newsletter__success-icon {
+  flex-shrink: 0;
+  color: $color-primary-dark;
+}
+
+@keyframes newsletter-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Reduced Motion ──────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .hp-newsletter__content,
+  .hp-newsletter__icon,
+  .hp-newsletter__title,
+  .hp-newsletter__subtitle,
+  .hp-newsletter__form,
+  .hp-newsletter__disclaimer {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hp-newsletter__spinner {
+    animation: none;
+  }
+
+  .hp-newsletter__success {
+    animation: none;
+  }
+}

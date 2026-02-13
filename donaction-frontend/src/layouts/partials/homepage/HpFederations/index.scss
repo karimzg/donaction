@@ -1,0 +1,321 @@
+// Design tokens
+$color-primary: #73cfa8;
+$color-dark-bg: #111827;
+
+// Animation timing variables
+$entrance-duration: 0.6s;
+$entrance-delay-base: 0.15s;
+$entrance-delay-step: 0.08s;
+$hover-duration: 0.3s;
+
+.hp-federations {
+  background: linear-gradient(135deg, #111827 0%, #1a202c 50%, #0f172a 100%);
+  position: relative;
+  overflow: hidden;
+
+  // Subtle accent elements for depth
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($color-primary, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -15%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($color-primary, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &__title {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    position: relative;
+    z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  &__subtitle {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc($entrance-delay-base * 0.5);
+    position: relative;
+    z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__subtitle {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  &__grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__card {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(
+      var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
+    );
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  &__card-content {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    height: 100%;
+    transition:
+      transform $hover-duration ease,
+      background $hover-duration ease,
+      border-color $hover-duration ease,
+      box-shadow $hover-duration ease;
+
+    @supports (backdrop-filter: blur(10px)) {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    &:hover {
+      transform: translateY(-6px);
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba($color-primary, 0.5);
+      box-shadow:
+        0 12px 32px -12px rgba($color-primary, 0.3),
+        0 6px 16px -6px rgba($color-primary, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba($color-primary, 0.2) 0%, rgba($color-primary, 0.1) 100%);
+    transition: background $hover-duration ease;
+    border: 1px solid rgba($color-primary, 0.3);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 20px;
+      background: radial-gradient(
+        circle,
+        rgba($color-primary, 0.3) 0%,
+        transparent 70%
+      );
+      opacity: 0;
+      transition: opacity $hover-duration ease;
+    }
+  }
+
+  &__card-content:hover &__icon-wrapper {
+    background: linear-gradient(135deg, rgba($color-primary, 0.35) 0%, rgba($color-primary, 0.2) 100%);
+    border-color: rgba($color-primary, 0.6);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    transition: transform $hover-duration ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__card-content:hover &__icon {
+    transform: scale(1.1);
+  }
+
+  &__cta {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__cta-button {
+    display: inline-block;
+    transition: all $hover-duration ease;
+    box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba($color-primary, 0.4);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &__cta-email {
+    display: inline-block;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1023px) {
+  .hp-federations {
+    &__card-content {
+      padding: 1.5rem 1.25rem;
+    }
+
+    &__icon-wrapper {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+
+      &::after {
+        inset: -3px;
+        border-radius: 18px;
+      }
+    }
+
+    &__icon {
+      width: 36px;
+      height: 36px;
+    }
+  }
+}
+
+@media (max-width: 639px) {
+  .hp-federations {
+    &__card-content {
+      padding: 1.25rem 1rem;
+    }
+
+    &__icon-wrapper {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+
+      &::after {
+        inset: -2px;
+        border-radius: 16px;
+      }
+    }
+
+    &__icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    &__cta {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    &__cta-button,
+    &__cta-email {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+// Reduced motion preference
+@media (prefers-reduced-motion: reduce) {
+  .hp-federations {
+    &__title,
+    &__subtitle,
+    &__card {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    &__card-content {
+      transition: none;
+      backdrop-filter: none;
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    &__icon-wrapper,
+    &__icon,
+    &__cta-button,
+    &__cta-email {
+      transition: none;
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: more) {
+  .hp-federations {
+    &__card-content {
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    &__icon-wrapper {
+      border-color: rgba($color-primary, 0.6);
+      background: linear-gradient(135deg, rgba($color-primary, 0.3) 0%, rgba($color-primary, 0.15) 100%);
+    }
+  }
+}
+
+// Devices that don't support hover
+@media (hover: none) {
+  .hp-federations {
+    &__card-content:active {
+      transform: translateY(-6px);
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba($color-primary, 0.5);
+      box-shadow:
+        0 12px 32px -12px rgba($color-primary, 0.3),
+        0 6px 16px -6px rgba($color-primary, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+
+    &__card-content:active &__icon-wrapper {
+      background: linear-gradient(135deg, rgba($color-primary, 0.35) 0%, rgba($color-primary, 0.2) 100%);
+      border-color: rgba($color-primary, 0.6);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &__card-content:active &__icon {
+      transform: scale(1.1);
+    }
+  }
+}
