@@ -1,0 +1,250 @@
+// Design tokens
+$color-primary: #73cfa8;
+$color-dark: #000;
+
+// Animation timing
+$entrance-duration: 0.6s;
+$entrance-delay-base: 0.15s;
+$entrance-delay-step: 0.1s;
+$hover-duration: 0.3s;
+
+.hp-projects {
+  background: linear-gradient(180deg, #f3f4f6 0%, #f9fafb 40%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+
+  // Decorative background blobs
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  &::before {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba($color-primary, 0.15) 0%, transparent 70%);
+    top: -100px;
+    right: -120px;
+  }
+
+  &::after {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba($color-primary, 0.1) 0%, transparent 70%);
+    bottom: -80px;
+    left: -80px;
+  }
+
+  &__title {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__title {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  &__subtitle {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: 0.1s;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__subtitle {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  // Card animations
+  &__card {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: calc(
+      var(--card-index) * #{$entrance-delay-step} + #{$entrance-delay-base}
+    );
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__card {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+
+  &__card-content {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    overflow: hidden;
+    height: 100%;
+    transition:
+      transform $hover-duration ease,
+      border-color $hover-duration ease,
+      box-shadow $hover-duration ease;
+
+    &:hover {
+      transform: translateY(-6px);
+      border-color: rgba($color-primary, 0.4);
+      box-shadow:
+        0 12px 32px -12px rgba($color-primary, 0.2),
+        0 6px 16px -6px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__card-image {
+    img {
+      transition: transform $hover-duration ease;
+    }
+  }
+
+  &__card-content:hover &__card-image img {
+    transform: scale(1.05);
+  }
+
+  // Progress bar
+  &__progress-fill {
+    background: linear-gradient(90deg, $color-primary 0%, #5cb893 100%);
+    transition: width 0.8s ease-out;
+  }
+
+  // Badges
+  &__badge,
+  &__status-badge,
+  &__deadline-badge {
+    transition:
+      background $hover-duration ease,
+      transform $hover-duration ease;
+  }
+
+  &__card-content:hover &__badge {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  // Social proof
+  &__social-proof {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    transition-delay: 0.6s;
+    will-change: opacity;
+  }
+
+  &__wrapper.is-visible &__social-proof {
+    opacity: 1;
+    will-change: auto;
+  }
+
+  // Carousel
+  &__carousel-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__carousel-slide {
+    .hp-projects__card {
+      opacity: 1;
+      animation: none;
+    }
+
+    .hp-projects__social-proof {
+      opacity: 1;
+      animation: none;
+    }
+  }
+
+  // Arrows
+  &__arrow {
+    flex-shrink: 0;
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+
+  // CTA
+  &__cta {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity $entrance-duration ease-out, transform $entrance-duration ease-out;
+    transition-delay: 0.5s;
+    will-change: opacity, transform;
+  }
+
+  &__wrapper.is-visible &__cta {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+  }
+}
+
+// Keyframes (keep nhp-fade-in for carousel if still needed)
+@keyframes nhp-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 767px) {
+  .hp-projects {
+    &__card-body {
+      padding: 1rem;
+    }
+
+    &::before {
+      width: 250px;
+      height: 250px;
+      top: -60px;
+      right: -80px;
+    }
+
+    &::after {
+      width: 200px;
+      height: 200px;
+      bottom: -50px;
+      left: -50px;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .hp-projects {
+    &__title,
+    &__subtitle,
+    &__card,
+    &__cta,
+    &__social-proof {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    &__card-content,
+    &__card-image img,
+    &__badge,
+    &__status-badge,
+    &__deadline-badge,
+    &__progress-fill {
+      transition: none;
+    }
+  }
+}
