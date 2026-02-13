@@ -175,4 +175,18 @@ describe('NewHpNewsletter', () => {
 		expect(liveRegion).toBeInTheDocument();
 		expect(liveRegion).toHaveAttribute('aria-live', 'polite');
 	});
+
+	it('trims whitespace from email before submission', async () => {
+		render(<NewHpNewsletter />);
+
+		const input = screen.getByPlaceholderText('Saisissez votre e-mail');
+		fireEvent.change(input, { target: { value: '  test@example.com  ' } });
+		fireEvent.submit(screen.getByRole('button', { name: /abonner/i }));
+
+		await waitFor(() => {
+			expect(mockPostNewsletters).toHaveBeenCalledWith({
+				data: { email: 'test@example.com', formToken: 'mock-token' },
+			});
+		});
+	});
 });

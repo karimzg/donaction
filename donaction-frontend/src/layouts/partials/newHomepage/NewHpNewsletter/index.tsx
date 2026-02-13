@@ -12,6 +12,12 @@ type ApiError = { error?: { status?: number; message?: string } };
 
 const ALREADY_SUBSCRIBED_STATUS = 400;
 const ALREADY_SUBSCRIBED_MESSAGE = 'This attribute must be unique';
+const SUCCESS_TEXT = 'Merci pour votre inscription !';
+const ALREADY_SUBSCRIBED_TEXT = 'Vous êtes déjà inscrit(e)';
+
+function isApiError(error: unknown): error is ApiError {
+	return typeof error === 'object' && error !== null && 'error' in error;
+}
 
 export default function NewHpNewsletter() {
 	const dispatch = useAppDispatch();
@@ -43,7 +49,7 @@ export default function NewHpNewsletter() {
 			const formToken = await createReCaptchaToken('CREATE_NEWSLETTER_FORM');
 			await postNewsletters({ data: { email: trimmed, formToken } });
 			if (!isMounted.current) return;
-			setSuccessMessage('Merci pour votre inscription !');
+			setSuccessMessage(SUCCESS_TEXT);
 			setEmail('');
 			setStatusMessage('Inscription réussie !');
 			dispatch(
@@ -51,12 +57,12 @@ export default function NewHpNewsletter() {
 			);
 		} catch (error: unknown) {
 			if (!isMounted.current) return;
-			const apiError = error as ApiError;
 			if (
-				apiError?.error?.status === ALREADY_SUBSCRIBED_STATUS &&
-				apiError.error?.message === ALREADY_SUBSCRIBED_MESSAGE
+				isApiError(error) &&
+				error.error?.status === ALREADY_SUBSCRIBED_STATUS &&
+				error.error?.message === ALREADY_SUBSCRIBED_MESSAGE
 			) {
-				setSuccessMessage('Vous êtes déjà inscrit(e)');
+				setSuccessMessage(ALREADY_SUBSCRIBED_TEXT);
 				setEmail('');
 				setStatusMessage('Déjà inscrit(e).');
 			} else {

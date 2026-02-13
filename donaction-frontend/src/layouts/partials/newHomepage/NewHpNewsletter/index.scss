@@ -137,6 +137,9 @@ $hover-duration: 0.25s;
 
   &:focus {
     outline: none;
+  }
+
+  &:focus-visible {
     border-color: rgba(115, 207, 168, 0.4);
     box-shadow: 0 0 0 3px rgba(115, 207, 168, 0.12);
   }
@@ -187,6 +190,11 @@ $hover-duration: 0.25s;
 
   &:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
   }
 
   &:disabled {
