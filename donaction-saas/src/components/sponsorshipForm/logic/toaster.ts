@@ -111,20 +111,23 @@ const TOAST_CSS = `
               opacity 0.3s ease;
 
   /* Glassmorphism */
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 
   /* Entry animation */
   animation: donToastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
 }
 
 /* Fallback for browsers without backdrop-filter */
-@supports not (backdrop-filter: blur(16px)) {
+@supports not (backdrop-filter: blur(20px)) {
   .don-toast {
-    background: rgba(255, 255, 255, 0.97);
+    background: rgba(255, 255, 255, 0.95);
   }
 }
 

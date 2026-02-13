@@ -290,8 +290,8 @@ describe('Style Injection', () => {
     const style = mockShadowRoot.querySelector('#don-toast-styles') as HTMLStyleElement;
     const content = style.textContent || '';
 
-    expect(content).toContain('backdrop-filter: blur(16px)');
-    expect(content).toContain('-webkit-backdrop-filter: blur(16px)');
+    expect(content).toContain('backdrop-filter: blur(20px) saturate(180%)');
+    expect(content).toContain('-webkit-backdrop-filter: blur(20px) saturate(180%)');
   });
 });
 
