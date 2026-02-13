@@ -17,7 +17,7 @@ export default function NewHpNewsletter() {
 	const dispatch = useAppDispatch();
 	const [email, setEmail] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
-	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [successMessage, setSuccessMessage] = useState('');
 	const [statusMessage, setStatusMessage] = useState('');
 	const isMounted = useRef(true);
 
@@ -43,7 +43,7 @@ export default function NewHpNewsletter() {
 			const formToken = await createReCaptchaToken('CREATE_NEWSLETTER_FORM');
 			await postNewsletters({ data: { email: trimmed, formToken } });
 			if (!isMounted.current) return;
-			setIsSubmitted(true);
+			setSuccessMessage('Merci pour votre inscription !');
 			setEmail('');
 			setStatusMessage('Inscription réussie !');
 			dispatch(
@@ -56,10 +56,9 @@ export default function NewHpNewsletter() {
 				apiError?.error?.status === ALREADY_SUBSCRIBED_STATUS &&
 				apiError.error?.message === ALREADY_SUBSCRIBED_MESSAGE
 			) {
-				setIsSubmitted(true);
+				setSuccessMessage('Vous êtes déjà inscrit(e)');
 				setEmail('');
-				setStatusMessage('Déjà abonné.');
-				dispatch(pushToast({ type: 'success', title: 'Vous êtes déjà abonné !' }));
+				setStatusMessage('Déjà inscrit(e).');
 			} else {
 				setStatusMessage('Erreur, veuillez réessayer.');
 				dispatch(pushToast({ type: 'error', title: 'Une erreur est survenue, réessayez.' }));
@@ -95,12 +94,12 @@ export default function NewHpNewsletter() {
 							{statusMessage}
 						</div>
 
-						{isSubmitted ? (
+						{successMessage ? (
 							<div className="new-hp-newsletter__success">
 								<svg className="new-hp-newsletter__success-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 									<path d="M20 6 9 17l-5-5" />
 								</svg>
-								<span className="text-gray-600 font-medium">Merci pour votre inscription !</span>
+								<span className="text-gray-600 font-medium">{successMessage}</span>
 							</div>
 						) : (
 							<form

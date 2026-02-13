@@ -102,7 +102,7 @@ describe('NewHpNewsletter', () => {
 		});
 	});
 
-	it('handles already-subscribed error gracefully', async () => {
+	it('shows already-subscribed message without toast when email exists', async () => {
 		mockPostNewsletters.mockRejectedValue({
 			error: { status: 400, message: 'This attribute must be unique' },
 		});
@@ -114,8 +114,14 @@ describe('NewHpNewsletter', () => {
 		fireEvent.submit(screen.getByRole('button', { name: /abonner/i }));
 
 		await waitFor(() => {
-			expect(screen.getByText('Merci pour votre inscription !')).toBeInTheDocument();
+			expect(screen.getByText('Vous êtes déjà inscrit(e)')).toBeInTheDocument();
 		});
+
+		// No toast dispatched for already-subscribed
+		const toastCalls = mockDispatch.mock.calls.filter(
+			([action]: any) => action?.type === 'root/pushToast',
+		);
+		expect(toastCalls).toHaveLength(0);
 	});
 
 	it('shows generic error toast on unexpected failure', async () => {
