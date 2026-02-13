@@ -45,10 +45,12 @@ export const rootSlice = createSlice({
 			state.popAuth = action.payload;
 		},
 		pushToast: (state, action: PayloadAction<IToast & { id?: string }>) => {
-			state.toasts.push({
-				...action.payload,
-				id: action.payload.id ?? crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
-			});
+			const { title, type, hasActions } = action.payload;
+			const id =
+				action.payload.id ??
+				crypto?.randomUUID?.() ??
+				`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+			state.toasts.push({ title, type, hasActions, id });
 		},
 		popToast: (state, action: PayloadAction<string>) => {
 			state.toasts = state.toasts.filter((_) => _.id !== action.payload);

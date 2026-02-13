@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks';
 import { popToast, selectToasts, type IToast } from '@/core/store/modules/rootSlice';
-import { getActions, clearActions, type ToastAction } from './actionRegistry';
+import { getActions, clearActions, clearAllActions, type ToastAction } from './actionRegistry';
 import SuccessIcon from './icons/SuccessIcon';
 import ErrorIcon from './icons/ErrorIcon';
 import InfoIcon from './icons/InfoIcon';
@@ -28,18 +28,21 @@ const ARIA_LABELS: Record<IToast['type'], string> = {
 	warn: 'Warning notification',
 };
 
+/** Build the timer key used for the removal phase of a toast. */
+const getRemoveTimerKey = (toastId: string) => `${toastId}-remove`;
+
 const Toaster = () => {
 	const dispatch = useAppDispatch();
 	const toasts = useAppSelector(selectToasts);
 	const [dismissing, setDismissing] = useState<Set<string>>(new Set());
-	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
 	const dismissToast = useCallback(
 		(toastId: string) => {
 			// Clear existing auto-dismiss timers
 			const existingTimer = timersRef.current.get(toastId);
 			if (existingTimer) clearTimeout(existingTimer);
-			const existingRemoveTimer = timersRef.current.get(toastId + '-remove');
+			const existingRemoveTimer = timersRef.current.get(getRemoveTimerKey(toastId));
 			if (existingRemoveTimer) clearTimeout(existingRemoveTimer);
 
 			// Start dismiss animation
@@ -55,10 +58,10 @@ const Toaster = () => {
 					return next;
 				});
 				timersRef.current.delete(toastId);
-				timersRef.current.delete(toastId + '-remove');
+				timersRef.current.delete(getRemoveTimerKey(toastId));
 			}, DISMISS_ANIMATION_DURATION);
 
-			timersRef.current.set(toastId + '-remove', removeTimer);
+			timersRef.current.set(getRemoveTimerKey(toastId), removeTimer);
 		},
 		[dispatch],
 	);
@@ -71,29 +74,15 @@ const Toaster = () => {
 		[dismissToast],
 	);
 
+	// Schedule auto-dismiss timers for new toasts
 	useEffect(() => {
-		// Schedule timers for new toasts
 		toasts.forEach((toast) => {
 			if (!timersRef.current.has(toast.id)) {
-				const dismissTimer = setTimeout(() => {
-					setDismissing((prev) => new Set(prev).add(toast.id));
-
-					const removeTimer = setTimeout(() => {
-						dispatch(popToast(toast.id));
-						clearActions(toast.id);
-						setDismissing((prev) => {
-							const next = new Set(prev);
-							next.delete(toast.id);
-							return next;
-						});
-						timersRef.current.delete(toast.id);
-						timersRef.current.delete(toast.id + '-remove');
-					}, DISMISS_ANIMATION_DURATION);
-
-					timersRef.current.set(toast.id + '-remove', removeTimer);
+				const autoDismissTimer = setTimeout(() => {
+					dismissToast(toast.id);
 				}, TOAST_DURATION);
 
-				timersRef.current.set(toast.id, dismissTimer);
+				timersRef.current.set(toast.id, autoDismissTimer);
 			}
 		});
 
@@ -127,15 +116,22 @@ const Toaster = () => {
 			});
 			return next;
 		});
-	}, [toasts, dispatch]);
+	}, [toasts, dismissToast]);
 
-	// Cleanup all timers on unmount
+	// Cleanup all timers and action registry on unmount
 	useEffect(() => {
 		return () => {
 			timersRef.current.forEach((timer) => clearTimeout(timer));
 			timersRef.current.clear();
+			clearAllActions();
 		};
 	}, []);
+
+	// Memoize actions lookup to avoid calling getActions on every render
+	const actionsMap = useMemo(
+		() => new Map(toasts.map((t) => [t.id, t.hasActions ? getActions(t.id) : []])),
+		[toasts],
+	);
 
 	if (toasts.length === 0) return null;
 
@@ -144,7 +140,7 @@ const Toaster = () => {
 			{toasts.map((toast) => {
 				const Icon = ICON_MAP[toast.type];
 				const isDismissing = dismissing.has(toast.id);
-				const actions = toast.hasActions ? getActions(toast.id) : [];
+				const actions = actionsMap.get(toast.id) ?? [];
 
 				return (
 					<div
@@ -161,9 +157,9 @@ const Toaster = () => {
 
 						{actions.length > 0 && (
 							<div className="toastItem__actions">
-								{actions.map((action, index) => (
+								{actions.map((action) => (
 									<button
-										key={index}
+										key={action.label}
 										className="toastItem__action"
 										onClick={() => handleAction(toast.id, action)}
 										type="button"

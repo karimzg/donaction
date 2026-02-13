@@ -20,6 +20,7 @@ vi.mock('@/core/store/modules/rootSlice', () => ({
 vi.mock('./actionRegistry', () => ({
 	getActions: vi.fn(() => []),
 	clearActions: vi.fn(),
+	clearAllActions: vi.fn(),
 }));
 
 import Toaster from './index';

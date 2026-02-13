@@ -6,6 +6,12 @@ import type { AppDispatch } from '@/core/store';
  * Dispatches a toast with contextual action buttons.
  * Pre-generates an ID so callbacks can be registered in the side-channel registry
  * before the toast enters Redux state.
+ *
+ * @example
+ * pushToastWithActions(dispatch,
+ *   { title: 'Item deleted', type: 'info' },
+ *   [{ label: 'Undo', callback: () => restoreItem() }],
+ * );
  */
 export const pushToastWithActions = (
 	dispatch: AppDispatch,
