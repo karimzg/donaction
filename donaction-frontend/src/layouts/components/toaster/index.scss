@@ -9,11 +9,15 @@
   gap: 0.75rem;
   pointer-events: none;
 
-  @media (max-width: 575px) {
+  // Mobile: top-positioned, full-width
+  &--mobile {
+    top: 0.75rem;
+    bottom: auto;
     right: 0;
     left: 0;
-    bottom: 1rem;
+    flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
   }
 }
 
@@ -183,13 +187,48 @@
       height: 14px;
     }
   }
+}
 
-  @media (max-width: 575px) {
-    max-width: calc(100vw - 2rem);
+// Mobile compact toast styles
+.toastContainer--mobile .toastItem {
+  padding: 10px 14px;
+  font-size: 13px;
+  gap: 0.5rem;
+  max-width: calc(100vw - 1.5rem);
+  border-radius: 10px;
+  touch-action: pan-x;
+  user-select: none;
+
+  // Entry animation from top
+  animation-name: toastSlideInFromTop;
+}
+
+.toastContainer--mobile .toastItem__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toastContainer--mobile .toastItem__close {
+  width: 20px;
+  height: 20px;
+
+  svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
-// Animations
+.toastContainer--mobile .toastItem__action {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+// Swipe dismiss animation (upward exit for mobile)
+.toastContainer--mobile .toastItem--dismissing {
+  animation-name: toastSwipeOut;
+}
+
+// Animations — desktop
 @keyframes toastSlideIn {
   0% {
     opacity: 0;
@@ -211,6 +250,31 @@
   100% {
     opacity: 0;
     transform: translateY(8px) scale(0.96);
+  }
+}
+
+// Animations — mobile (from top)
+@keyframes toastSlideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSwipeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.96);
   }
 }
 

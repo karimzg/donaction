@@ -24,10 +24,25 @@ vi.mock('./actionRegistry', () => ({
 	clearAllActions: vi.fn(),
 }));
 
+vi.mock('@/core/hooks/useIsMobile', () => ({
+	default: vi.fn(() => false),
+}));
+
+vi.mock('./useSwipeDismiss', () => ({
+	default: vi.fn(() => ({
+		onTouchStart: vi.fn(),
+		onTouchMove: vi.fn(),
+		onTouchEnd: vi.fn(),
+		onTouchCancel: vi.fn(),
+	})),
+}));
+
 import Toaster from './index';
 import * as storeHooks from '@/core/store/hooks';
 import type { IToast } from '@/core/store/modules/rootSlice';
 import { getActions } from './actionRegistry';
+import useIsMobile from '@/core/hooks/useIsMobile';
+import useSwipeDismiss from './useSwipeDismiss';
 
 type ToastWithId = IToast & { id: string };
 
@@ -42,6 +57,7 @@ describe('Toaster', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
+		vi.mocked(useIsMobile).mockReturnValue(false);
 	});
 
 	afterEach(() => {
@@ -101,8 +117,8 @@ describe('Toaster', () => {
 		});
 	});
 
-	describe('Auto-dismiss timing', () => {
-		it('adds dismissing class after TOAST_DURATION (5000ms)', () => {
+	describe('Auto-dismiss timing (desktop)', () => {
+		it('adds dismissing class after 5000ms', () => {
 			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
@@ -115,7 +131,7 @@ describe('Toaster', () => {
 			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
 		});
 
-		it('dispatches popToast after TOAST_DURATION + DISMISS_ANIMATION_DURATION', () => {
+		it('dispatches popToast after 5000ms + 400ms', () => {
 			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast({ id: 'xyz' })]);
 			render(<Toaster />);
 
@@ -361,6 +377,80 @@ describe('Toaster', () => {
 
 			const item = container.querySelector('.toastItem');
 			expect(item?.className).not.toContain('depth');
+		});
+	});
+
+	describe('Mobile behavior', () => {
+		beforeEach(() => {
+			vi.mocked(useIsMobile).mockReturnValue(true);
+		});
+
+		it('applies mobile modifier class to container', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			expect(container.querySelector('.toastContainer--mobile')).toBeInTheDocument();
+		});
+
+		it('does not apply mobile modifier on desktop', () => {
+			vi.mocked(useIsMobile).mockReturnValue(false);
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+			expect(container.querySelector('.toastContainer--mobile')).toBeNull();
+		});
+
+		it('auto-dismisses after 4000ms on mobile', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+
+			act(() => {
+				vi.advanceTimersByTime(4000);
+			});
+
+			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
+		});
+
+		it('does not dismiss before 4000ms on mobile', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+
+			act(() => {
+				vi.advanceTimersByTime(3999);
+			});
+
+			expect(container.querySelector('.toastItem--dismissing')).toBeNull();
+		});
+
+		it('dispatches popToast after 4000ms + 400ms on mobile', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast({ id: 'mobile-1' })]);
+			render(<Toaster />);
+
+			act(() => {
+				vi.advanceTimersByTime(4400);
+			});
+
+			expect(mockDispatch).toHaveBeenCalledWith({
+				type: 'root/popToast',
+				payload: 'mobile-1',
+			});
+		});
+
+		it('calls useSwipeDismiss with enabled=true on mobile', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			render(<Toaster />);
+
+			expect(vi.mocked(useSwipeDismiss)).toHaveBeenCalledWith(
+				expect.objectContaining({ enabled: true }),
+			);
+		});
+
+		it('calls useSwipeDismiss with enabled=false on desktop', () => {
+			vi.mocked(useIsMobile).mockReturnValue(false);
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			render(<Toaster />);
+
+			expect(vi.mocked(useSwipeDismiss)).toHaveBeenCalledWith(
+				expect.objectContaining({ enabled: false }),
+			);
 		});
 	});
 });
