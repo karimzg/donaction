@@ -15,6 +15,7 @@ vi.mock('@/core/store/hooks', () => ({
 vi.mock('@/core/store/modules/rootSlice', () => ({
 	popToast: (id: string) => ({ type: 'root/popToast', payload: id }),
 	selectToasts: (state: { root: { toasts: unknown[] } }) => state.root.toasts,
+	MAX_VISIBLE_TOASTS: 3,
 }));
 
 vi.mock('./actionRegistry', () => ({
@@ -312,6 +313,54 @@ describe('Toaster', () => {
 			});
 
 			expect(mockDispatch).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('Stacking & depth effect', () => {
+		it('assigns depth-0 to a single toast (newest)', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+
+			const item = container.querySelector('.toastItem');
+			expect(item).toHaveAttribute('data-depth', '0');
+			expect(item?.classList.contains('toastItem--depth-0')).toBe(false);
+		});
+
+		it('assigns increasing depth to older toasts', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ id: 'oldest', title: 'Oldest' }),
+				makeToast({ id: 'middle', title: 'Middle' }),
+				makeToast({ id: 'newest', title: 'Newest' }),
+			]);
+			const { container } = render(<Toaster />);
+
+			const items = container.querySelectorAll('.toastItem');
+			// Array order: oldest first, newest last
+			expect(items[0]).toHaveAttribute('data-depth', '2'); // oldest
+			expect(items[1]).toHaveAttribute('data-depth', '1'); // middle
+			expect(items[2]).toHaveAttribute('data-depth', '0'); // newest
+		});
+
+		it('applies depth modifier classes for non-zero depths', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ id: 'oldest', title: 'Oldest' }),
+				makeToast({ id: 'middle', title: 'Middle' }),
+				makeToast({ id: 'newest', title: 'Newest' }),
+			]);
+			const { container } = render(<Toaster />);
+
+			const items = container.querySelectorAll('.toastItem');
+			expect(items[0].classList.contains('toastItem--depth-2')).toBe(true);
+			expect(items[1].classList.contains('toastItem--depth-1')).toBe(true);
+			expect(items[2].classList.contains('toastItem--depth-0')).toBe(false);
+		});
+
+		it('does not apply depth class to single toast', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
+
+			const item = container.querySelector('.toastItem');
+			expect(item?.className).not.toContain('depth');
 		});
 	});
 });
