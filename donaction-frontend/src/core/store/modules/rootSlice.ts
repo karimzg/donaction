@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 
-interface IToast {
+export interface IToast {
 	title: string;
 	type: 'info' | 'warn' | 'error' | 'success';
 }
@@ -46,7 +46,7 @@ export const rootSlice = createSlice({
 		pushToast: (state, action: PayloadAction<IToast>) => {
 			state.toasts.push({
 				...action.payload,
-				id: Math.random().toString(36).slice(2, 10),
+				id: crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
 			});
 		},
 		popToast: (state, action: PayloadAction<string>) => {
