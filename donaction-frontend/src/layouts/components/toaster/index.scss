@@ -48,8 +48,8 @@
   // Entry animation
   animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
 
-  // Type-specific accents
-  &.success {
+  // Type-specific accents (BEM modifiers)
+  &--success {
     border-left-color: #73cfa8;
 
     .toastItem__icon {
@@ -57,7 +57,7 @@
     }
   }
 
-  &.error {
+  &--error {
     border-left-color: #fb9289;
 
     .toastItem__icon {
@@ -65,7 +65,7 @@
     }
   }
 
-  &.warn {
+  &--warn {
     border-left-color: #fde179;
 
     .toastItem__icon {
@@ -73,7 +73,7 @@
     }
   }
 
-  &.info {
+  &--info {
     border-left-color: #73b1ff;
 
     .toastItem__icon {

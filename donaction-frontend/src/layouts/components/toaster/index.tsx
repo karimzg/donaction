@@ -26,13 +26,12 @@ const Toaster = () => {
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
 	useEffect(() => {
+		// Schedule timers for new toasts
 		toasts.forEach((toast) => {
 			if (!timersRef.current.has(toast.id)) {
-				// Schedule dismiss animation
 				const dismissTimer = setTimeout(() => {
 					setDismissing((prev) => new Set(prev).add(toast.id));
 
-					// Schedule removal after animation
 					const removeTimer = setTimeout(() => {
 						dispatch(popToast(toast.id));
 						setDismissing((prev) => {
@@ -41,6 +40,7 @@ const Toaster = () => {
 							return next;
 						});
 						timersRef.current.delete(toast.id);
+						timersRef.current.delete(toast.id + '-remove');
 					}, DISMISS_ANIMATION_DURATION);
 
 					timersRef.current.set(toast.id + '-remove', removeTimer);
@@ -49,9 +49,30 @@ const Toaster = () => {
 				timersRef.current.set(toast.id, dismissTimer);
 			}
 		});
+
+		// Clean up timers for externally removed toasts
+		const activeIds = new Set(toasts.map((t) => t.id));
+		timersRef.current.forEach((timer, key) => {
+			const baseId = key.replace('-remove', '');
+			if (!activeIds.has(baseId)) {
+				clearTimeout(timer);
+				timersRef.current.delete(key);
+			}
+		});
+		setDismissing((prev) => {
+			const next = new Set(prev);
+			let changed = false;
+			next.forEach((id) => {
+				if (!activeIds.has(id)) {
+					next.delete(id);
+					changed = true;
+				}
+			});
+			return changed ? next : prev;
+		});
 	}, [toasts, dispatch]);
 
-	// Cleanup timers on unmount
+	// Cleanup all timers on unmount
 	useEffect(() => {
 		return () => {
 			timersRef.current.forEach((timer) => clearTimeout(timer));
@@ -69,7 +90,7 @@ const Toaster = () => {
 
 				return (
 					<div
-						className={`toastItem ${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}`}
+						className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}`}
 						key={toast.id}
 					>
 						{Icon && (

@@ -1,473 +1,186 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock SCSS
 vi.mock('./index.scss', () => ({}));
 
-// Mock Redux hooks before importing component
+// Stable dispatch mock (persists across renders)
+const mockDispatch = vi.fn();
+
 vi.mock('@/core/store/hooks', () => ({
-	useAppDispatch: () => vi.fn(),
+	useAppDispatch: () => mockDispatch,
 	useAppSelector: vi.fn(),
+}));
+
+vi.mock('@/core/store/modules/rootSlice', () => ({
+	popToast: (id: string) => ({ type: 'root/popToast', payload: id }),
+	selectToasts: (state: { root: { toasts: unknown[] } }) => state.root.toasts,
 }));
 
 import Toaster from './index';
 import * as storeHooks from '@/core/store/hooks';
 
+const makeToast = (
+	overrides: Partial<{ id: string; title: string; type: 'success' | 'error' | 'info' | 'warn' }> = {}
+) => ({
+	id: 'toast-1',
+	title: 'Test message',
+	type: 'success' as const,
+	...overrides,
+});
+
 describe('Toaster', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	describe('Rendering', () => {
 		it('renders nothing when no toasts', () => {
 			vi.mocked(storeHooks.useAppSelector).mockReturnValue([]);
-
 			const { container } = render(<Toaster />);
-
 			expect(container.firstChild).toBeNull();
 		});
 
-		it('renders toast with text', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Success message',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
+		it('renders toast with correct text and icon', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			const { container } = render(<Toaster />);
 
-			render(<Toaster />);
-
-			expect(screen.getByText('Success message')).toBeInTheDocument();
+			expect(screen.getByText('Test message')).toBeInTheDocument();
+			expect(container.querySelector('.toastItem__icon svg')).toBeInTheDocument();
 		});
 
-		it('renders multiple toasts', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'First message',
-					type: 'success' as const,
-				},
-				{
-					id: 'toast-2',
-					title: 'Second message',
-					type: 'error' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+		it('renders multiple toasts stacked', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ id: 'a', title: 'First' }),
+				makeToast({ id: 'b', title: 'Second', type: 'error' }),
+			]);
 			render(<Toaster />);
 
-			expect(screen.getByText('First message')).toBeInTheDocument();
-			expect(screen.getByText('Second message')).toBeInTheDocument();
+			expect(screen.getByText('First')).toBeInTheDocument();
+			expect(screen.getByText('Second')).toBeInTheDocument();
 		});
 	});
 
-	describe('Icons', () => {
-		it('renders correct icon for success type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Success',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+	describe('BEM type modifiers', () => {
+		it.each([
+			['success', '.toastItem--success'],
+			['error', '.toastItem--error'],
+			['info', '.toastItem--info'],
+			['warn', '.toastItem--warn'],
+		])('applies %s modifier class', (type, selector) => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ type: type as 'success' | 'error' | 'info' | 'warn' }),
+			]);
 			const { container } = render(<Toaster />);
-
-			const iconSpan = container.querySelector('.toastItem__icon');
-			expect(iconSpan).toBeInTheDocument();
-			expect(iconSpan?.querySelector('svg')).toBeInTheDocument();
+			expect(container.querySelector(selector)).toBeInTheDocument();
 		});
 
-		it('renders correct icon for error type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Error',
-					type: 'error' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+		it('renders all four types simultaneously', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([
+				makeToast({ id: '1', type: 'success' }),
+				makeToast({ id: '2', type: 'error' }),
+				makeToast({ id: '3', type: 'info' }),
+				makeToast({ id: '4', type: 'warn' }),
+			]);
 			const { container } = render(<Toaster />);
-
-			const iconSpan = container.querySelector('.toastItem__icon');
-			expect(iconSpan).toBeInTheDocument();
-			expect(iconSpan?.querySelector('svg')).toBeInTheDocument();
-		});
-
-		it('renders correct icon for info type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Info',
-					type: 'info' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const iconSpan = container.querySelector('.toastItem__icon');
-			expect(iconSpan).toBeInTheDocument();
-			expect(iconSpan?.querySelector('svg')).toBeInTheDocument();
-		});
-
-		it('renders correct icon for warn type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Warning',
-					type: 'warn' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const iconSpan = container.querySelector('.toastItem__icon');
-			expect(iconSpan).toBeInTheDocument();
-			expect(iconSpan?.querySelector('svg')).toBeInTheDocument();
+			expect(container.querySelectorAll('.toastItem')).toHaveLength(4);
 		});
 	});
 
-	describe('CSS Classes', () => {
-		it('applies correct CSS class for success type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Success',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+	describe('Auto-dismiss timing', () => {
+		it('adds dismissing class after TOAST_DURATION (3700ms)', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
-			const toastItem = container.querySelector('.toastItem.success');
-			expect(toastItem).toBeInTheDocument();
+			expect(container.querySelector('.toastItem--dismissing')).toBeNull();
+
+			act(() => {
+				vi.advanceTimersByTime(3700);
+			});
+
+			expect(container.querySelector('.toastItem--dismissing')).toBeInTheDocument();
 		});
 
-		it('applies correct CSS class for error type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Error',
-					type: 'error' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
+		it('dispatches popToast after TOAST_DURATION + DISMISS_ANIMATION_DURATION', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast({ id: 'xyz' })]);
+			render(<Toaster />);
 
-			const { container } = render(<Toaster />);
+			act(() => {
+				vi.advanceTimersByTime(3700 + 400);
+			});
 
-			const toastItem = container.querySelector('.toastItem.error');
-			expect(toastItem).toBeInTheDocument();
+			expect(mockDispatch).toHaveBeenCalledWith({
+				type: 'root/popToast',
+				payload: 'xyz',
+			});
 		});
 
-		it('applies correct CSS class for info type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Info',
-					type: 'info' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
+		it('does not dispatch popToast before full duration', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
+			render(<Toaster />);
 
-			const { container } = render(<Toaster />);
+			act(() => {
+				vi.advanceTimersByTime(3700);
+			});
 
-			const toastItem = container.querySelector('.toastItem.info');
-			expect(toastItem).toBeInTheDocument();
-		});
-
-		it('applies correct CSS class for warn type', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Warning',
-					type: 'warn' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastItem = container.querySelector('.toastItem.warn');
-			expect(toastItem).toBeInTheDocument();
-		});
-
-		it('applies toastItem--dismissing class when toast is dismissing', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastItem = container.querySelector('.toastItem');
-			expect(toastItem).not.toHaveClass('toastItem--dismissing');
+			expect(mockDispatch).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('Accessibility', () => {
-		it('has role="status" on container', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test message',
-					type: 'info' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			render(<Toaster />);
-
-			const container = screen.getByRole('status');
-			expect(container).toBeInTheDocument();
-		});
-
-		it('has aria-live="polite" on container', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test message',
-					type: 'info' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+		it('has role="status" and aria-live="polite" on container', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			render(<Toaster />);
 
 			const container = screen.getByRole('status');
 			expect(container).toHaveAttribute('aria-live', 'polite');
 		});
 
-		it('icon has aria-hidden="true"', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test message',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+		it('icons have aria-hidden="true"', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
-			const svgs = container.querySelectorAll('svg');
-			svgs.forEach((svg) => {
+			container.querySelectorAll('svg').forEach((svg) => {
 				expect(svg).toHaveAttribute('aria-hidden', 'true');
 			});
 		});
 	});
 
-	describe('Text Content', () => {
-		it('displays toast title text correctly', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Custom toast message',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			render(<Toaster />);
-
-			expect(screen.getByText('Custom toast message')).toBeInTheDocument();
-		});
-
-		it('displays multiple toast titles correctly', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'First toast',
-					type: 'success' as const,
-				},
-				{
-					id: 'toast-2',
-					title: 'Second toast',
-					type: 'error' as const,
-				},
-				{
-					id: 'toast-3',
-					title: 'Third toast',
-					type: 'warn' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			render(<Toaster />);
-
-			expect(screen.getByText('First toast')).toBeInTheDocument();
-			expect(screen.getByText('Second toast')).toBeInTheDocument();
-			expect(screen.getByText('Third toast')).toBeInTheDocument();
-		});
-
-		it('renders text in toastItem__text span', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test message',
-					type: 'info' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+	describe('DOM structure', () => {
+		it('renders toastContainer > toastItem > icon + text', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			const { container } = render(<Toaster />);
 
-			const textSpan = container.querySelector('.toastItem__text');
-			expect(textSpan).toBeInTheDocument();
-			expect(textSpan).toHaveTextContent('Test message');
+			const wrapper = container.querySelector('.toastContainer');
+			expect(wrapper).toBeInTheDocument();
+
+			const item = wrapper?.querySelector('.toastItem');
+			expect(item?.querySelector('.toastItem__icon')).toBeInTheDocument();
+			expect(item?.querySelector('.toastItem__text')).toHaveTextContent('Test message');
 		});
 	});
 
-	describe('DOM Structure', () => {
-		it('renders container with toastContainer class', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastContainer = container.querySelector('.toastContainer');
-			expect(toastContainer).toBeInTheDocument();
-		});
-
-		it('renders toastItem elements with correct class', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test 1',
-					type: 'success' as const,
-				},
-				{
-					id: 'toast-2',
-					title: 'Test 2',
-					type: 'error' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastItems = container.querySelectorAll('.toastItem');
-			expect(toastItems).toHaveLength(2);
-		});
-
-		it('renders icon span within each toast item', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastItem = container.querySelector('.toastItem');
-			const iconSpan = toastItem?.querySelector('.toastItem__icon');
-			expect(iconSpan).toBeInTheDocument();
-		});
-
-		it('renders text span within each toast item', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			const toastItem = container.querySelector('.toastItem');
-			const textSpan = toastItem?.querySelector('.toastItem__text');
-			expect(textSpan).toBeInTheDocument();
-		});
-	});
-
-	describe('Type Variations', () => {
-		it('handles all toast types: success, error, info, warn', () => {
-			const mockToasts = [
-				{
-					id: 'toast-success',
-					title: 'Success message',
-					type: 'success' as const,
-				},
-				{
-					id: 'toast-error',
-					title: 'Error message',
-					type: 'error' as const,
-				},
-				{
-					id: 'toast-info',
-					title: 'Info message',
-					type: 'info' as const,
-				},
-				{
-					id: 'toast-warn',
-					title: 'Warning message',
-					type: 'warn' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
-			const { container } = render(<Toaster />);
-
-			expect(container.querySelector('.toastItem.success')).toBeInTheDocument();
-			expect(container.querySelector('.toastItem.error')).toBeInTheDocument();
-			expect(container.querySelector('.toastItem.info')).toBeInTheDocument();
-			expect(container.querySelector('.toastItem.warn')).toBeInTheDocument();
-		});
-	});
-
-	describe('Redux Integration', () => {
-		it('uses useAppSelector to get toasts', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+	describe('Redux integration', () => {
+		it('calls useAppSelector with selectToasts', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([]);
 			render(<Toaster />);
-
 			expect(vi.mocked(storeHooks.useAppSelector)).toHaveBeenCalled();
 		});
 
-		it('uses useAppDispatch hook', () => {
-			const mockToasts = [
-				{
-					id: 'toast-1',
-					title: 'Test',
-					type: 'success' as const,
-				},
-			];
-			vi.mocked(storeHooks.useAppSelector).mockReturnValue(mockToasts);
-
+		it('uses stable dispatch reference for popToast', () => {
+			vi.mocked(storeHooks.useAppSelector).mockReturnValue([makeToast()]);
 			render(<Toaster />);
 
-			// Component initializes dispatch reference during render
-			// Verify component doesn't error with dispatch available
-			expect(vi.mocked(storeHooks.useAppDispatch)).toBeDefined();
+			act(() => {
+				vi.advanceTimersByTime(4100);
+			});
+
+			expect(mockDispatch).toHaveBeenCalledTimes(1);
 		});
 	});
 });
