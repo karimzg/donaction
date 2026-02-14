@@ -15,20 +15,21 @@ import { WebPage, WithContext } from 'schema-dts';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-	title: 'Des projets de clubs sportifs à soutenir',
+	title: 'Des projets associatifs à soutenir',
 	description:
-		'Découvrez tous les projets des clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets.',
+		'Découvrez les projets des associations inscrites sur Donaction et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets sportifs, humanitaires, sociaux et culturels.',
 	openGraph: {
-		title: `Des projets de clubs sportifs à soutenir`,
-		description: `Découvrez tous les projets des clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets.`,
+		title: 'Des projets associatifs à soutenir',
+		description:
+			'Découvrez les projets des associations inscrites sur Donaction et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets sportifs, humanitaires, sociaux et culturels.',
 		url: `${new URL(SITE_URL)}/projets`,
 		siteName: 'Donaction',
 		images: [
 			{
 				url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
-				width: 800,
-				height: 385,
-				alt: 'Des projets de clubs sportifs à soutenir',
+				width: 1200,
+				height: 628,
+				alt: 'Des projets associatifs à soutenir - Donaction',
 			},
 		],
 		locale: 'fr_FR',
@@ -48,9 +49,9 @@ export default async function page() {
 		'@context': 'https://schema.org',
 		'@type': 'WebPage',
 		url: `${SITE_URL}/projets`,
-		name: 'Des projets de clubs sportifs à soutenir',
+		name: 'Des projets associatifs à soutenir',
 		description:
-			'Découvrez tous les projets des clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets.',
+			'Découvrez les projets des associations inscrites sur Donaction et soutenez-les en faisant un don. Votre contribution permettra de concrétiser des projets sportifs, humanitaires, sociaux et culturels.',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',

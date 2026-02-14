@@ -16,11 +16,11 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
 	title: 'On ne se connait pas encore! Créez votre compte.',
 	description:
-		'Connectez-vous ou créez votre compte Donaction pour soutenir vos clubs sportifs préférés.',
+		'Connectez-vous ou créez votre compte Donaction pour soutenir vos associations préférées.',
 	openGraph: {
 		title: 'On ne se connait pas encore! Créez votre compte.',
 		description:
-			'Connectez-vous ou créez votre compte Donaction pour soutenir vos clubs sportifs préférés.',
+			'Connectez-vous ou créez votre compte Donaction pour soutenir vos associations préférées.',
 		url: `${new URL(SITE_URL)}/connexion`,
 		siteName: 'Donaction',
 		images: [

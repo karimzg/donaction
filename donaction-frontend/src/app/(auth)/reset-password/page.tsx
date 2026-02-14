@@ -7,16 +7,19 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-	title: 'Réinitialiser votre mot de passe.',
+	title: 'Réinitialiser votre mot de passe',
+	description: 'Réinitialisez votre mot de passe Donaction pour retrouver l\'accès à votre compte.',
 	openGraph: {
-		title: 'Réinitialiser votre mot de passe.',
+		title: 'Réinitialiser votre mot de passe',
+		description: 'Réinitialisez votre mot de passe Donaction pour retrouver l\'accès à votre compte.',
 		url: `${new URL(SITE_URL)}/reset-password`,
 		siteName: 'Donaction',
 		images: [
 			{
-				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,
-				width: 800,
-				height: 385,
+				url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+				width: 1200,
+				height: 628,
+				alt: 'Réinitialiser votre mot de passe - Donaction',
 			},
 		],
 		locale: 'fr_FR',

@@ -19,10 +19,10 @@ export async function generateMetadata(): Promise<Metadata> {
 		notFound();
 	}
 	return {
-		title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Politique de confidentialité'}`,
+		title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Le mécénat simplifié'}`,
 		description: `${res?.data?.attributes?.metaDescription || ''}`,
 		openGraph: {
-			title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Politique de confidentialité'}`,
+			title: `${res?.data?.attributes?.metaTitle || res?.data?.attributes?.titre || 'Le mécénat simplifié'}`,
 			description: `${res?.data?.attributes?.metaDescription || ''}`,
 			url: `${new URL(SITE_URL)}/mecenat`,
 			siteName: 'Donaction',
@@ -49,7 +49,7 @@ export default async function Page() {
 		'@context': 'https://schema.org',
 		'@type': 'WebPage',
 		url: `${SITE_URL}/mecenat`,
-		name: `${mecenatResult?.data?.attributes?.metaTitle || mecenatResult?.data?.attributes?.titre || 'Politique de confidentialité'}`,
+		name: `${mecenatResult?.data?.attributes?.metaTitle || mecenatResult?.data?.attributes?.titre || 'Le mécénat simplifié'}`,
 		description: `${mecenatResult?.data?.attributes?.metaDescription || ''}`,
 		publisher: {
 			'@type': 'Organization',

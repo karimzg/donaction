@@ -18,8 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 	const title = res?.data?.attributes?.metaTitle
 		|| res?.data?.attributes?.titre
-		|| 'Le sport unit, le don renforce!';
-	const description = res?.data?.attributes?.metaDescription || '';
+		|| 'Donaction - Soutenez les associations qui vous tiennent à cœur';
+	const description = res?.data?.attributes?.metaDescription
+		|| 'Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles.';
 
 	return {
 		title,
@@ -64,8 +65,9 @@ export default async function Page() {
 		url: SITE_URL,
 		name: hpResult?.data?.attributes?.metaTitle
 			|| hpResult?.data?.attributes?.titre
-			|| 'Le sport unit, le don renforce!',
-		description: hpResult?.data?.attributes?.metaDescription || '',
+			|| 'Donaction - Soutenez les associations qui vous tiennent à cœur',
+		description: hpResult?.data?.attributes?.metaDescription
+			|| 'Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles.',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',

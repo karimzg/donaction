@@ -224,7 +224,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 				url: `${SITE_URL}/${params.slug}?PAYEMENT_FORM=true`,
 				target: `${SITE_URL}/${params.slug}?PAYEMENT_FORM=true`,
 				recipient: {
-					'@type': 'SportsClub',
+					'@type': 'Organization',
 					name: klub.denomination,
 					url: `${SITE_URL}/${params.slug}`,
 					address: {
@@ -240,7 +240,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 		: [];
 	const jsonLd = {
 		'@context': 'https://schema.org',
-		'@type': 'SportsClub',
+		'@type': 'Organization',
 		name: klub.denomination,
 		description:
 			klubHouse.metaDescription || `${klub.denomination} - Soutenez nous grâce au mécénat!`,

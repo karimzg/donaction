@@ -14,16 +14,16 @@ import * as process from 'node:process';
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: {
-		template: '%s | Klubr',
-		default: 'Klubr', // a default is required when creating a template
+		template: '%s | Donaction',
+		default: 'Donaction',
 	},
 	description:
-		'Donaction - Plateforme de dons et mécénat pour les clubs sportifs. Soutenez vos clubs préférés et leurs projets.',
-	generator: 'Klubr Website',
-	applicationName: 'Klubr Website',
+		'Donaction - Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles. Soutenez vos associations préférées et leurs projets.',
+	generator: 'Donaction',
+	applicationName: 'Donaction',
 	// referrer: 'origin-when-cross-origin',
 	authors: [{ name: 'Karim Z.', url: 'https://nakaa.fr' }],
-	creator: 'Klubr',
+	creator: 'Donaction',
 	publisher: 'Karim Z.',
 	formatDetection: {
 		email: false,
@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 		'@context': 'https://schema.org',
 		'@type': 'WebSite',
 		url: SITE_URL,
-		name: 'Klubr website',
+		name: 'Donaction',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',

@@ -15,20 +15,21 @@ import { WebPage, WithContext } from 'schema-dts';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-	title: 'Des clubs sportifs à soutenir',
+	title: 'Des associations à soutenir',
 	description:
-		'Découvrez tous les clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution aide les clubs à grandir et à offrir de meilleures activités à leurs membres.',
+		'Découvrez les associations sportives, humanitaires, sociales et culturelles inscrites sur Donaction. Soutenez-les en faisant un don pour les aider à grandir et à mener leurs projets.',
 	openGraph: {
-		title: `Des clubs sportifs à soutenir`,
-		description: `Découvrez tous les clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution aide les clubs à grandir et à offrir de meilleures activités à leurs membres.`,
+		title: 'Des associations à soutenir',
+		description:
+			'Découvrez les associations sportives, humanitaires, sociales et culturelles inscrites sur Donaction. Soutenez-les en faisant un don pour les aider à grandir et à mener leurs projets.',
 		url: `${new URL(SITE_URL)}/clubs`,
 		siteName: 'Donaction',
 		images: [
 			{
 				url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
-				width: 800,
-				height: 385,
-				alt: 'Des clubs sportifs à soutenir',
+				width: 1200,
+				height: 628,
+				alt: 'Des associations à soutenir - Donaction',
 			},
 		],
 		locale: 'fr_FR',
@@ -48,9 +49,9 @@ export default async function page() {
 		'@context': 'https://schema.org',
 		'@type': 'WebPage',
 		url: `${SITE_URL}/clubs`,
-		name: `Des clubs sportifs à soutenir`,
+		name: 'Des associations à soutenir',
 		description:
-			'Découvrez tous les clubs sportifs inscrits sur Klubr et soutenez-les en faisant un don. Votre contribution aide les clubs à grandir et à offrir de meilleures activités à leurs membres.',
+			'Découvrez les associations sportives, humanitaires, sociales et culturelles inscrites sur Donaction. Soutenez-les en faisant un don pour les aider à grandir et à mener leurs projets.',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',
