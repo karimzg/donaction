@@ -6,6 +6,12 @@ import { format } from 'date-fns';
 import frLocale from 'date-fns/locale/fr';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Détails du don',
+	robots: { index: false, follow: false },
+};
 
 export default async function Page({ params }: { params: { uuid: string } }) {
 	const result = await getDon(params.uuid, cookies().toString());

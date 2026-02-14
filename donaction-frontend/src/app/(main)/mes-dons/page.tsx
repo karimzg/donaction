@@ -5,6 +5,12 @@ import MyDonations from '@/partials/myDonations';
 import { WebPage, WithContext } from 'schema-dts';
 import { SITE_URL } from '@/core/services/endpoints';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Mes dons',
+	robots: { index: false, follow: false },
+};
 
 export default async function Page() {
 	const content = await getMesDonsPage(cookies().toString());

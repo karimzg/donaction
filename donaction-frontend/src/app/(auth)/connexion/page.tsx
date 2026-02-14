@@ -15,16 +15,20 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'On ne se connait pas encore! Créez votre compte.',
+	description:
+		'Connectez-vous ou créez votre compte Donaction pour soutenir vos clubs sportifs préférés.',
 	openGraph: {
 		title: 'On ne se connait pas encore! Créez votre compte.',
+		description:
+			'Connectez-vous ou créez votre compte Donaction pour soutenir vos clubs sportifs préférés.',
 		url: `${new URL(SITE_URL)}/connexion`,
 		siteName: 'Donaction',
 		images: [
 			{
-				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,
-				width: 800,
-				height: 385,
-				alt: 'Se Connecter',
+				url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+				width: 1200,
+				height: 628,
+				alt: 'Se Connecter - Donaction',
 			},
 		],
 		locale: 'fr_FR',

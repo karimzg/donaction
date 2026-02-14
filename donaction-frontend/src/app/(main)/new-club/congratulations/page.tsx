@@ -1,6 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
 import congrats from '../../../../../public/images/icons/congrats.svg';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Félicitations',
+	robots: { index: false, follow: false },
+};
 
 type PageProps = {
 	searchParams: Promise<{ clubUuid?: string; emailSent?: string }>;

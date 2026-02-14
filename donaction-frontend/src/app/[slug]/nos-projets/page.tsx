@@ -44,8 +44,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 	});
 	return {
 		title: `${klub?.denomination || ''} | Nos projets`,
+		description: `Découvrez les projets de ${klub?.denomination || 'ce club'} et soutenez-les.`,
+		alternates: {
+			canonical: `/${params.slug}/nos-projets`,
+		},
 		openGraph: {
 			title: `${klub?.denomination || ''} | Nos projets`,
+			description: `Découvrez les projets de ${klub?.denomination || 'ce club'} et soutenez-les.`,
 			url: `${new URL(SITE_URL)}/${params.slug}/nos-projets`,
 			siteName: 'Donaction',
 			images: [

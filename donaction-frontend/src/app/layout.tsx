@@ -17,6 +17,8 @@ export const metadata: Metadata = {
 		template: '%s | Klubr',
 		default: 'Klubr', // a default is required when creating a template
 	},
+	description:
+		'Donaction - Plateforme de dons et mécénat pour les clubs sportifs. Soutenez vos clubs préférés et leurs projets.',
 	generator: 'Klubr Website',
 	applicationName: 'Klubr Website',
 	// referrer: 'origin-when-cross-origin',
@@ -28,7 +30,6 @@ export const metadata: Metadata = {
 		address: false,
 		telephone: false,
 	},
-	// viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
 	icons: {
 		icon: [
 			{
@@ -37,15 +38,19 @@ export const metadata: Metadata = {
 				sizes: '128x128',
 				url: config.site.favicon_png,
 			},
-			// {
-			// 	rel: "icon",
-			// 	type: "image/ico",
-			// 	url: config.site.favicon,
-			// },
 		],
 	},
-	// locale: 'fr_FR',
-	// type: 'website',
+	openGraph: {
+		locale: 'fr_FR',
+		type: 'website',
+		siteName: 'Donaction',
+	},
+	twitter: {
+		card: 'summary_large_image',
+	},
+	alternates: {
+		canonical: './',
+	},
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -95,6 +95,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 		title: klub.denomination,
 		description:
 			klubHouse.metaDescription || `${klub.denomination} - Soutenez nous grâce au mécénat!`,
+		alternates: {
+			canonical: `/${params.slug}`,
+		},
 		openGraph: {
 			title: klub.denomination,
 			description:

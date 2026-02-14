@@ -85,6 +85,9 @@ export async function generateMetadata(
 		description:
 			projet.metaDescription ||
 			`${projet.klubr.denomination} - Soutenez le projet "${projet.titre}"`,
+		alternates: {
+			canonical: `/${params.slug}/nos-projets/${params.projectSlug}`,
+		},
 		openGraph: {
 			title: `${klub.denomination} | ${projet.titre}`,
 			description:
