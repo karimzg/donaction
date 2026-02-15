@@ -9,6 +9,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Mes dons',
+	description: 'Consultez l\'historique de vos dons et téléchargez vos reçus fiscaux.',
 	robots: { index: false, follow: false },
 };
 

@@ -47,6 +47,7 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: 'summary_large_image',
+		images: ['https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg'],
 	},
 	alternates: {
 		canonical: './',

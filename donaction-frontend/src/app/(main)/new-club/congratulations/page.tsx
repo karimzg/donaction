@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Félicitations',
+	description: 'Votre demande d\'inscription a bien été envoyée sur Donaction.',
 	robots: { index: false, follow: false },
 };
 

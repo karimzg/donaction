@@ -10,6 +10,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Détails du don',
+	description: 'Détails et reçu fiscal de votre don sur Donaction.',
 	robots: { index: false, follow: false },
 };
 

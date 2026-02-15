@@ -11,6 +11,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Accès interdit',
+	description: 'Vous n\'avez pas les droits nécessaires pour accéder à cette page.',
 	robots: { index: false, follow: false },
 };
 

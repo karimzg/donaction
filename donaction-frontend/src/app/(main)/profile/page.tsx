@@ -8,6 +8,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Mon profil',
+	description: 'Gérez votre profil et vos préférences sur Donaction.',
 	robots: { index: false, follow: false },
 };
 

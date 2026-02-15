@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			url: `${SITE_URL}/mecenat`,
 			lastModified: new Date(),
 			changeFrequency: 'monthly',
-			priority: 0.7,
+			priority: 0.8,
 		},
 		{
 			url: `${SITE_URL}/contact`,
