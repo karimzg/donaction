@@ -27,7 +27,7 @@ import StatusIndicator from '@/partials/common/statusIndicator';
 import { getServerSession } from 'next-auth';
 import { SITE_URL } from '@/core/services/endpoints';
 import { getDonsByKlubOrProjet } from '@/core/services/don';
-import { SportsEvent, WithContext } from 'schema-dts';
+import { Event, WithContext } from 'schema-dts';
 import { endOfDay, format, isAfter } from 'date-fns';
 import frLocale from 'date-fns/locale/fr';
 import SponsorshipForm from '@/partials/_sponsorshipForm';
@@ -85,6 +85,9 @@ export async function generateMetadata(
 		description:
 			projet.metaDescription ||
 			`${projet.klubr.denomination} - Soutenez le projet "${projet.titre}"`,
+		alternates: {
+			canonical: `/${params.slug}/nos-projets/${params.projectSlug}`,
+		},
 		openGraph: {
 			title: `${klub.denomination} | ${projet.titre}`,
 			description:
@@ -208,9 +211,9 @@ export default async function ProjectPage({
 		(_) => _.__component === 'club-presentation.localisation',
 	);
 
-	const jsonLd: WithContext<SportsEvent> = {
+	const jsonLd: WithContext<Event> = {
 		'@context': 'https://schema.org',
-		'@type': 'SportsEvent',
+		'@type': 'Event',
 		name: `${klub.denomination} | ${projet.titre}`,
 		description:
 			projet.metaDescription ||
@@ -240,7 +243,6 @@ export default async function ProjectPage({
 			longitude: localisation?.googleMap?.lng,
 			latitude: localisation?.googleMap?.lat,
 		},
-		sport: projet.sportType,
 		organizer: [
 			{
 				'@type': 'Person',
@@ -253,7 +255,7 @@ export default async function ProjectPage({
 				},
 			},
 			{
-				'@type': 'SportsClub',
+				'@type': 'Organization',
 				name: klub.denomination,
 				description: klubHouse.metaDescription,
 				url: `${SITE_URL}/${params.slug}`,
@@ -291,7 +293,7 @@ export default async function ProjectPage({
 					url: `${SITE_URL}/${params.slug}/${params.projectSlug}`,
 				},
 				{
-					'@type': 'SportsClub',
+					'@type': 'Organization',
 					name: klub.denomination,
 					description: klubHouse.metaDescription,
 					url: `${SITE_URL}/${params.slug}`,

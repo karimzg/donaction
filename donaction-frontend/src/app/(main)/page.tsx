@@ -4,7 +4,7 @@ import { getProjets } from '@/core/services/projet';
 import { getHp } from '@/core/services/cms';
 import { cookies } from 'next/headers';
 import GetServerCookie from '@/core/helpers/getServerCookie';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 
 export const revalidate = 3600;
@@ -18,8 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 	const title = res?.data?.attributes?.metaTitle
 		|| res?.data?.attributes?.titre
-		|| 'Le sport unit, le don renforce!';
-	const description = res?.data?.attributes?.metaDescription || '';
+		|| 'Donaction - Soutenez les associations qui vous tiennent à cœur';
+	const description = res?.data?.attributes?.metaDescription
+		|| 'Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles.';
 
 	return {
 		title,
@@ -31,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+					url: OG_DEFAULT_IMAGE,
 					width: 800,
 					height: 385,
 					alt: 'Page home',
@@ -64,8 +65,9 @@ export default async function Page() {
 		url: SITE_URL,
 		name: hpResult?.data?.attributes?.metaTitle
 			|| hpResult?.data?.attributes?.titre
-			|| 'Le sport unit, le don renforce!',
-		description: hpResult?.data?.attributes?.metaDescription || '',
+			|| 'Donaction - Soutenez les associations qui vous tiennent à cœur',
+		description: hpResult?.data?.attributes?.metaDescription
+			|| 'Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles.',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',
@@ -80,7 +82,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},

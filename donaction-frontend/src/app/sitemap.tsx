@@ -16,14 +16,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			{
 				url: `${SITE_URL}/${klubSlugs.slug}`,
 				lastModified: klubSlugs.updatedAt,
-				// changeFrequency: 'monthly',
-				// priority: 1,
+				changeFrequency: 'monthly',
+				priority: 0.8,
 			},
 			{
 				url: `${SITE_URL}/${klubSlugs.slug}/nos-projets`,
 				lastModified: klubSlugs.updatedAt,
-				// changeFrequency: 'monthly',
-				// priority: 0.5,
+				changeFrequency: 'monthly',
+				priority: 0.5,
 			},
 		];
 	});
@@ -36,28 +36,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const projects: MetadataRoute.Sitemap = projectsSugs.map((projectSlugs) => ({
 		url: `${SITE_URL}/${projectSlugs.klubSlug}/nos-projets/${projectSlugs.slug}`,
 		lastModified: projectSlugs.updatedAt,
-		// changeFrequency: 'weekly',
-		// priority: 0.8,
+		changeFrequency: 'weekly',
+		priority: 0.8,
 	}));
 
 	return [
 		{
 			url: `${SITE_URL}`,
 			lastModified: new Date(),
-			// changeFrequency: 'yearly',
-			// priority: 1,
+			changeFrequency: 'weekly',
+			priority: 1,
+		},
+		{
+			url: `${SITE_URL}/clubs`,
+			lastModified: new Date(),
+			changeFrequency: 'daily',
+			priority: 0.9,
+		},
+		{
+			url: `${SITE_URL}/projets`,
+			lastModified: new Date(),
+			changeFrequency: 'daily',
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/mecenat`,
 			lastModified: new Date(),
-			// changeFrequency: 'monthly',
-			// priority: 1,
+			changeFrequency: 'monthly',
+			priority: 0.8,
 		},
 		{
 			url: `${SITE_URL}/contact`,
 			lastModified: new Date(),
-			// changeFrequency: 'yearly',
-			// priority: 1,
+			changeFrequency: 'yearly',
+			priority: 0.5,
+		},
+		{
+			url: `${SITE_URL}/politique-de-confidentialite`,
+			lastModified: new Date(),
+			changeFrequency: 'yearly',
+			priority: 0.3,
+		},
+		{
+			url: `${SITE_URL}/conditions-generales-d-utilisation`,
+			lastModified: new Date(),
+			changeFrequency: 'yearly',
+			priority: 0.3,
 		},
 		...klubs,
 		...projects,

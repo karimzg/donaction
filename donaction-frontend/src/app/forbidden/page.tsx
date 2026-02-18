@@ -7,6 +7,13 @@ import forbidden403 from '../../../public/animations/403.json';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Accès interdit',
+	description: 'Vous n\'avez pas les droits nécessaires pour accéder à cette page.',
+	robots: { index: false, follow: false },
+};
 
 export default async function page() {
 	const slugs = await getClubsSlugs(5, cookies().toString()).catch((error) => {

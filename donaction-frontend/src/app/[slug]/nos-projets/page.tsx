@@ -44,8 +44,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 	});
 	return {
 		title: `${klub?.denomination || ''} | Nos projets`,
+		description: `Découvrez les projets de ${klub?.denomination || 'ce club'} et soutenez-les.`,
+		alternates: {
+			canonical: `/${params.slug}/nos-projets`,
+		},
 		openGraph: {
 			title: `${klub?.denomination || ''} | Nos projets`,
+			description: `Découvrez les projets de ${klub?.denomination || 'ce club'} et soutenez-les.`,
 			url: `${new URL(SITE_URL)}/${params.slug}/nos-projets`,
 			siteName: 'Donaction',
 			images: [
@@ -121,7 +126,7 @@ export default async function OurProjectsPage({ params }: { params: { slug: stri
 					<Link href={`/${klub.slug}`} className='flex items-center gap-2 px-6 md:px-0'>
 						<Image src={arrowCircleLeft as string} alt='arrow-circle-left' />
 						<p className='font-bold md:text-3xl text-xl'>
-							{klub?.denomination || 'Klubr'}: Nos projets
+							{klub?.denomination || 'Association'}: Nos projets
 						</p>
 					</Link>
 					{result?.data?.length > 0 ? (

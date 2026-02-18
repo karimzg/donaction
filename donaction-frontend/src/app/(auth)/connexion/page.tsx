@@ -9,22 +9,26 @@ import { cookies } from 'next/headers';
 import ConnexionForm from '@/partials/authentication/connexionForm';
 import { getAvatars } from '@/core/services/auth';
 import { WebPage, WithContext } from 'schema-dts';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'On ne se connait pas encore! Créez votre compte.',
+	description:
+		'Connectez-vous ou créez votre compte Donaction pour soutenir vos associations préférées.',
 	openGraph: {
 		title: 'On ne se connait pas encore! Créez votre compte.',
+		description:
+			'Connectez-vous ou créez votre compte Donaction pour soutenir vos associations préférées.',
 		url: `${new URL(SITE_URL)}/connexion`,
 		siteName: 'Donaction',
 		images: [
 			{
-				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,
-				width: 800,
-				height: 385,
-				alt: 'Se Connecter',
+				url: OG_DEFAULT_IMAGE,
+				width: 1200,
+				height: 628,
+				alt: 'Se Connecter - Donaction',
 			},
 		],
 		locale: 'fr_FR',

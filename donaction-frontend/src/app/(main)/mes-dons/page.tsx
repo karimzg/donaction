@@ -3,8 +3,15 @@ import { getMesDonsPage } from '@/core/services/cms';
 import NeedHelp from '@/partials/mecenatPage/needHelp';
 import MyDonations from '@/partials/myDonations';
 import { WebPage, WithContext } from 'schema-dts';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Mes dons',
+	description: 'Consultez l\'historique de vos dons et téléchargez vos reçus fiscaux.',
+	robots: { index: false, follow: false },
+};
 
 export default async function Page() {
 	const content = await getMesDonsPage(cookies().toString());
@@ -27,7 +34,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},

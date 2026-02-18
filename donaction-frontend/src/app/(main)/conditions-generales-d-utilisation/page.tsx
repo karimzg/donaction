@@ -3,7 +3,7 @@ import { getCGU } from '@/core/services/cms';
 import RichTextBlock from '@/components/RichTextBlock';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 import { cookies } from 'next/headers';
 
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+					url: OG_DEFAULT_IMAGE,
 					width: 800,
 					height: 385,
 					alt: "Conditions Générales d'Utilisation",
@@ -60,7 +60,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},
