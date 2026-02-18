@@ -2,7 +2,7 @@ import Image from 'next/image';
 import loginSignIn from '../../../../public/images/auth/loginSignIn.svg';
 import ResetPasswordForm from '@/partials/authentication/resetPasswordForm';
 import { WebPage, WithContext } from 'schema-dts';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import React from 'react';
 import { Metadata } from 'next';
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 		siteName: 'Donaction',
 		images: [
 			{
-				url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+				url: OG_DEFAULT_IMAGE,
 				width: 1200,
 				height: 628,
 				alt: 'Réinitialiser votre mot de passe - Donaction',

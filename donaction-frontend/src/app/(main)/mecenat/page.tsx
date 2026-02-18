@@ -8,7 +8,7 @@ import NeedHelp from '@/partials/mecenatPage/needHelp';
 import { Metadata } from 'next';
 import { getMecenat } from '@/core/services/cms';
 import { notFound } from 'next/navigation';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_MECENAT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 import React from 'react';
 import { cookies } from 'next/headers';
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/mecenat-donaction.png',
+					url: OG_MECENAT_IMAGE,
 					width: 800,
 					height: 385,
 					alt: 'Le mécénat simplifié',
@@ -65,7 +65,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/mecenat-donaction.png',
+			url: OG_MECENAT_IMAGE,
 			width: '800',
 			height: '385',
 		},

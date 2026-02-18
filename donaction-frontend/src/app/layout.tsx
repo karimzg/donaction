@@ -3,7 +3,7 @@ import theme from '@/config/theme.json';
 import Providers from '@/app/Providers';
 import '@/styles/main.scss';
 import { Metadata } from 'next';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import PopAuth from '@/partials/authentication/popAuth';
 import Toaster from 'src/layouts/components/toaster';
 import React from 'react';
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: 'summary_large_image',
-		images: ['https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg'],
+		images: [OG_DEFAULT_IMAGE],
 	},
 	alternates: {
 		canonical: './',

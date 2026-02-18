@@ -1,5 +1,11 @@
 // ENDPOINTS LIST
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://notavailable';
+
+/* SEO */
+export const OG_DEFAULT_IMAGE =
+	'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg';
+export const OG_MECENAT_IMAGE =
+	'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/mecenat-donaction.png';
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const BASE_URL_SC_DEV = process.env.NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL; // SC; Server components
 export const BASE_URL_SC_PROD = process.env.NEXT_PUBLIC_SERVER_COMPONENTS_DEV_API_URL; // SC; Server components

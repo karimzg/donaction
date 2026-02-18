@@ -5,7 +5,7 @@ import NewClubForm from '@/partials/authentication/newClubForm';
 import LottieAnimation from '@/components/LottieAnimation';
 import Script from 'next/script';
 import { Metadata } from 'next';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+					url: OG_DEFAULT_IMAGE,
 					width: 1200,
 					height: 628,
 					alt: 'Inscrivez votre association - Donaction',
@@ -55,7 +55,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},

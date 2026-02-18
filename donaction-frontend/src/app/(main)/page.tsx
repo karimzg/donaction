@@ -4,7 +4,7 @@ import { getProjets } from '@/core/services/projet';
 import { getHp } from '@/core/services/cms';
 import { cookies } from 'next/headers';
 import GetServerCookie from '@/core/helpers/getServerCookie';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 
 export const revalidate = 3600;
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+					url: OG_DEFAULT_IMAGE,
 					width: 800,
 					height: 385,
 					alt: 'Page home',
@@ -82,7 +82,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},
