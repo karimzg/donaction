@@ -86,7 +86,8 @@ export class NewProjectComponent {
       shareReplay(1),
     ) : of([]);
     this.isLoaded$ = combineLatest([this.tmplLibraries$, this.tmplLibrariesAffiliates$, of(true).pipe(delay(1000))]).pipe(
-      map(([tmplLibraries, tmplLibrariesAffiliates]) => tmplLibraries.length > 0 || tmplLibrariesAffiliates.length > 0),
+      map(() => true),
+      // map(([tmplLibraries, tmplLibrariesAffiliates]) => tmplLibraries.length > 0 || tmplLibrariesAffiliates.length > 0),
     );
   }
 
