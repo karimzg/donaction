@@ -121,6 +121,11 @@ export default factories.createCoreService(
                 return res;
             } catch (e) {
                 GetAttNumber.unlock();
+                console.error(
+                    `❌ Erreur lors de la mise à jour du don ${donUuid}:`,
+                    e
+                );
+                throw e;
             }
         },
     }),
