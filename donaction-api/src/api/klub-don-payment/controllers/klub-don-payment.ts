@@ -49,6 +49,8 @@ export default factories.createCoreController(
         },
         async check() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
             try {
                 const { donUuid, clientSecret } = ctx.query;
 
@@ -84,6 +86,8 @@ export default factories.createCoreController(
         },
         async createPaymentIntent() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
             try {
                 const { price, metadata, idempotencyKey, donorPaysFee } =
                     ctx.request.body;

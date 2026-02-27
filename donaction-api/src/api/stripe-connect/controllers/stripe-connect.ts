@@ -14,6 +14,8 @@ export default factories.createCoreController(
          */
         async createAccount() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
 
             logBlock({
                 statusColor: COLORS.blue,
@@ -101,6 +103,8 @@ export default factories.createCoreController(
          */
         async generateOnboardingLink() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
 
             logBlock({
                 statusColor: COLORS.blue,
@@ -191,6 +195,8 @@ export default factories.createCoreController(
          */
         async syncAccount() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
 
             logBlock({
                 statusColor: COLORS.blue,
@@ -256,6 +262,8 @@ export default factories.createCoreController(
          */
         async getAccount() {
             const ctx = strapi.requestContext.get();
+            await this.validateQuery(ctx);
+            await this.sanitizeQuery(ctx);
 
             logBlock({
                 statusColor: COLORS.blue,
