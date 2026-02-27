@@ -18,6 +18,9 @@ export default {
                 auth: {
                     scope: ['authenticated'],
                 },
+                middlewares: [
+                    'api::stripe-connect.account-owner',
+                ],
             },
         },
         {
@@ -28,6 +31,9 @@ export default {
                 auth: {
                     scope: ['authenticated'],
                 },
+                middlewares: [
+                    'api::stripe-connect.account-owner',
+                ],
             },
         },
         {
@@ -38,6 +44,9 @@ export default {
                 auth: {
                     scope: ['authenticated'],
                 },
+                middlewares: [
+                    'api::stripe-connect.account-owner',
+                ],
             },
         },
         {
