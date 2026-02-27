@@ -112,10 +112,10 @@ export default factories.createCoreService(
                 );
             }
 
-            const updated = await strapi.db
-                .query('api::connected-account.connected-account')
+            const updated = await strapi
+                .documents('api::connected-account.connected-account')
                 .update({
-                    where: { id: account.id },
+                    documentId: account.documentId,
                     data: {
                         ...data,
                         last_sync: new Date(),

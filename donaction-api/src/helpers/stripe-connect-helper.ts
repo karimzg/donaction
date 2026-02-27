@@ -257,11 +257,11 @@ export async function syncAccountStatus(
         prefix: 'StripeConnect',
     });
 
-    // Update database
-    const updated = await strapiInstance.db
-        .query('api::connected-account.connected-account')
+    // Update database using Document Service API with documentId
+    const updated = await strapiInstance
+        .documents('api::connected-account.connected-account')
         .update({
-            where: { id: connectedAccount.id },
+            documentId: connectedAccount.documentId,
             data: {
                 account_status: accountStatus,
                 verification_status: verificationStatus,
