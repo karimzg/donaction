@@ -6,22 +6,21 @@
 import { Core } from '@strapi/strapi';
 import { KlubDonPaymentEntity } from '../_types';
 
-// Module-level strapi reference (injected at runtime)
-declare const strapi: Core.Strapi;
-
 /**
  * Finds an existing payment intent by idempotency key
+ * @param strapiInstance - Strapi instance (injected for testability)
  * @param idempotencyKey - Unique key for the payment request
  * @returns Existing payment record with client_secret or null
  */
 export async function findExistingPaymentByIdempotencyKey(
+    strapiInstance: Core.Strapi,
     idempotencyKey: string
 ): Promise<KlubDonPaymentEntity | null> {
     if (!idempotencyKey) {
         return null;
     }
 
-    const existingPayment = await strapi.db
+    const existingPayment = await strapiInstance.db
         .query('api::klub-don-payment.klub-don-payment')
         .findOne({
             where: { idempotency_key: idempotencyKey },

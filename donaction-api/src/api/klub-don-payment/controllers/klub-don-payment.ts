@@ -105,6 +105,7 @@ export default factories.createCoreController(
                 if (idempotencyKey) {
                     const existingPayment =
                         await findExistingPaymentByIdempotencyKey(
+                            strapi,
                             idempotencyKey
                         );
                     if (existingPayment?.client_secret) {
