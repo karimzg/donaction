@@ -365,19 +365,37 @@ export default factories.createCoreController(
                     prefix: 'StripeConnect',
                 });
 
-                // Log webhook event to database
-                const webhookLog = await strapi
-                    .documents('api::webhook-log.webhook-log')
-                    .create({
-                        data: {
-                            event_id: event.id,
-                            event_type: event.type,
-                            account_id: event.account || null,
-                            payload: event.data.object as any,
-                            processed: false,
-                            retry_count: 0,
-                        },
+                // Check for duplicate event before processing
+                const existingLog = await strapi.db
+                    .query('api::webhook-log.webhook-log')
+                    .findOne({
+                        where: { event_id: event.id },
                     });
+
+                if (existingLog?.processed) {
+                    logSimple({
+                        message: `Événement déjà traité: ${event.id}`,
+                        color: 'yellow',
+                        prefix: 'StripeConnect',
+                    });
+                    return { received: true };
+                }
+
+                // Log webhook event to database (or reuse existing unprocessed entry)
+                const webhookLog = existingLog
+                    ? existingLog
+                    : await strapi
+                          .documents('api::webhook-log.webhook-log')
+                          .create({
+                              data: {
+                                  event_id: event.id,
+                                  event_type: event.type,
+                                  account_id: event.account || null,
+                                  payload: event.data.object as any,
+                                  processed: false,
+                                  retry_count: 0,
+                              },
+                          });
 
                 logSimple({
                     message: `Webhook enregistré (documentId: ${webhookLog.documentId})`,
