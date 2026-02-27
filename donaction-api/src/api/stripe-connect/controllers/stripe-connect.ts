@@ -371,37 +371,44 @@ export default factories.createCoreController(
                     prefix: 'StripeConnect',
                 });
 
-                // Check for duplicate event before processing
-                const existingLog = await strapi.db
-                    .query('api::webhook-log.webhook-log')
-                    .findOne({
-                        where: { event_id: event.id },
-                    });
+                // Idempotency: try to create the webhook log entry first.
+                // If a concurrent request already created it (unique constraint on event_id),
+                // catch the error and re-fetch the existing entry.
+                let webhookLog;
+                try {
+                    webhookLog = await strapi
+                        .documents('api::webhook-log.webhook-log')
+                        .create({
+                            data: {
+                                event_id: event.id,
+                                event_type: event.type,
+                                account_id: event.account || null,
+                                payload: event.data.object as any,
+                                processed: false,
+                                retry_count: 0,
+                            },
+                        });
+                } catch (createError) {
+                    // Unique constraint violation — another request won the race
+                    webhookLog = await strapi.db
+                        .query('api::webhook-log.webhook-log')
+                        .findOne({
+                            where: { event_id: event.id },
+                        });
 
-                if (existingLog?.processed) {
-                    logSimple({
-                        message: `Événement déjà traité: ${event.id}`,
-                        color: 'yellow',
-                        prefix: 'StripeConnect',
-                    });
-                    return { received: true };
+                    if (!webhookLog) {
+                        throw createError; // Unexpected error, re-throw
+                    }
+
+                    if (webhookLog.processed) {
+                        logSimple({
+                            message: `Événement déjà traité: ${event.id}`,
+                            color: 'yellow',
+                            prefix: 'StripeConnect',
+                        });
+                        return { received: true };
+                    }
                 }
-
-                // Log webhook event to database (or reuse existing unprocessed entry)
-                const webhookLog = existingLog
-                    ? existingLog
-                    : await strapi
-                          .documents('api::webhook-log.webhook-log')
-                          .create({
-                              data: {
-                                  event_id: event.id,
-                                  event_type: event.type,
-                                  account_id: event.account || null,
-                                  payload: event.data.object as any,
-                                  processed: false,
-                                  retry_count: 0,
-                              },
-                          });
 
                 logSimple({
                     message: `Webhook enregistré (documentId: ${webhookLog.documentId})`,
