@@ -355,7 +355,10 @@ export default factories.createCoreController(
 
                 ctx.send({ received: true });
             } catch (e) {
-                console.log(e);
+                console.error('❌ Erreur webhook Stripe:', e);
+                return ctx.internalServerError(
+                    'Une erreur est survenue lors du traitement du webhook'
+                );
             }
         },
     }),
