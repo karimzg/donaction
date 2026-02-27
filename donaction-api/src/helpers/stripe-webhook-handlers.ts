@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
-import { syncAccountStatus } from './stripe-connect-helper';
+import { syncAccountStatus, stripe } from './stripe-connect-helper';
 import { logBlock, logSimple, COLORS } from './logger';
 
 /**
@@ -309,20 +309,15 @@ export async function retryFailedWebhooks(
                     prefix: 'StripeConnect',
                 });
 
-                // Reconstruct Stripe event from payload
-                const event: Stripe.Event = {
-                    id: log.event_id,
-                    type: log.event_type,
-                    data: { object: log.payload },
-                    account: log.account_id || undefined,
-                } as Stripe.Event;
+                // Re-fetch the authentic event from Stripe instead of reconstructing
+                const event = await stripe.events.retrieve(log.event_id);
 
                 await handleWebhookEvent(strapiInstance, event);
 
-                await strapiInstance.db
-                    .query('api::webhook-log.webhook-log')
+                await strapiInstance
+                    .documents('api::webhook-log.webhook-log')
                     .update({
-                        where: { id: log.id },
+                        documentId: log.documentId,
                         data: {
                             processed: true,
                             retry_count: log.retry_count + 1,
@@ -341,10 +336,10 @@ export async function retryFailedWebhooks(
                     error
                 );
 
-                await strapiInstance.db
-                    .query('api::webhook-log.webhook-log')
+                await strapiInstance
+                    .documents('api::webhook-log.webhook-log')
                     .update({
-                        where: { id: log.id },
+                        documentId: log.documentId,
                         data: {
                             retry_count: log.retry_count + 1,
                             error_message: error.message,

@@ -37,14 +37,20 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             let event: Stripe.Event;
 
             try {
-                // CRITICAL: Stripe signature verification requires the EXACT raw body bytes
-                const rawBody = ctx.request.rawBody;
+                // CRITICAL: Stripe signature verification requires the EXACT raw body bytes.
+                // Strapi's body parser with `includeUnparsed: true` and `patchKoa: true`
+                // exposes the raw body via `ctx.request.body[Symbol.for('unparsedBody')]`
+                // (koa-body internals). Fall back to ctx.request.rawBody for compatibility.
+                const rawBody =
+                    ctx.request.body?.[Symbol.for('unparsedBody')] ??
+                    (ctx.request as any).rawBody;
 
                 if (!rawBody) {
                     console.error(
                         'rawBody non disponible - la vérification de signature échouera',
-                        '\n   ctx.request.rawBody:', typeof ctx.request.rawBody,
-                        '\n   IMPORTANT: Configurez Strapi pour préserver le raw body sur cette route'
+                        '\n   Assurez-vous que config/middlewares.ts contient:',
+                        '\n     includeUnparsed: true',
+                        '\n     patchKoa: true',
                     );
 
                     // WARNING: Do NOT use JSON.stringify as fallback

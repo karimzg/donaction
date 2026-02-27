@@ -56,6 +56,9 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             );
         }
 
+        // Store validated klubr in state to avoid redundant DB lookup in controller
+        ctx.state.klubr = klubr;
+
         await next();
     };
 };

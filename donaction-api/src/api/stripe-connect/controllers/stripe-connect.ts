@@ -47,13 +47,8 @@ export default factories.createCoreController(
                     );
                 }
 
-                // Check if klubr exists (use uuid from client, not internal id)
-                const klubr = await strapi.db
-                    .query('api::klubr.klubr')
-                    .findOne({
-                        where: { uuid: klubrId },
-                    });
-
+                // Klubr already validated by klubr-owner middleware
+                const klubr = ctx.state.klubr;
                 if (!klubr) {
                     return ctx.notFound(`Klubr ${klubrId} introuvable`);
                 }
@@ -389,6 +384,16 @@ export default factories.createCoreController(
                             },
                         });
                 } catch (createError) {
+                    // Only handle PostgreSQL unique constraint violations (code 23505)
+                    // Rethrow any other DB errors (connection timeout, ORM bugs, etc.)
+                    const isUniqueViolation =
+                        createError?.code === '23505' ||
+                        createError?.detail?.includes('already exists');
+
+                    if (!isUniqueViolation) {
+                        throw createError;
+                    }
+
                     // Unique constraint violation — another request won the race
                     webhookLog = await strapi.db
                         .query('api::webhook-log.webhook-log')
@@ -397,7 +402,7 @@ export default factories.createCoreController(
                         });
 
                     if (!webhookLog) {
-                        throw createError; // Unexpected error, re-throw
+                        throw createError; // Unexpected state, re-throw
                     }
 
                     if (webhookLog.processed) {
@@ -406,7 +411,7 @@ export default factories.createCoreController(
                             color: 'yellow',
                             prefix: 'StripeConnect',
                         });
-                        return { received: true };
+                        return ctx.send({ received: true });
                     }
                 }
 
@@ -435,7 +440,7 @@ export default factories.createCoreController(
                         prefix: 'StripeConnect',
                     });
 
-                    return { received: true };
+                    return ctx.send({ received: true });
                 } catch (handlerError) {
                     console.error(
                         'Erreur lors du traitement du webhook:',
@@ -454,7 +459,7 @@ export default factories.createCoreController(
 
                     // Return 200 to Stripe to avoid retries
                     // Failed events will be retried by our own retry logic
-                    return { received: true, error: handlerError.message };
+                    return ctx.send({ received: true, error: handlerError.message });
                 }
             } catch (error) {
                 console.error(

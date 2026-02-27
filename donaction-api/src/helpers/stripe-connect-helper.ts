@@ -205,7 +205,7 @@ export async function generateAccountLink(
     });
 
     logSimple({
-        message: `Lien de compte généré: ${accountLink.url}`,
+        message: `Lien de compte généré pour ${accountId} (expire: ${new Date(accountLink.expires_at * 1000).toISOString()})`,
         color: 'green',
         prefix: 'StripeConnect',
     });
@@ -442,10 +442,10 @@ const determineAccountStatus = (
     if (account.charges_enabled && account.payouts_enabled) {
         return 'active';
     }
-    if (
-        account.requirements?.disabled_reason ||
-        account.requirements?.currently_due?.length > 0
-    ) {
+    if (account.requirements?.disabled_reason) {
+        return 'disabled';
+    }
+    if (account.requirements?.currently_due?.length > 0) {
         return 'restricted';
     }
     return 'pending';
