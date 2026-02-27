@@ -1,7 +1,7 @@
 import { Core, factories } from '@strapi/strapi';
 import { handleWebhookEvent } from '../../../helpers/stripe-webhook-handlers';
 import Stripe from 'stripe';
-import { logBlock, logSimple, COLORS } from '../../../helpers/logger';
+import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 import { removeId } from '../../../helpers/sanitizeHelpers';
 import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
 
@@ -82,7 +82,7 @@ export default factories.createCoreController(
                     },
                 });
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     'Erreur lors de la création du compte:',
                     error
                 );
@@ -174,7 +174,7 @@ export default factories.createCoreController(
                     },
                 });
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     'Erreur lors de la génération du lien:',
                     error
                 );
@@ -241,7 +241,7 @@ export default factories.createCoreController(
                     }),
                 });
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     'Erreur lors de la synchronisation:',
                     error
                 );
@@ -308,7 +308,7 @@ export default factories.createCoreController(
                     }),
                 });
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     'Erreur lors de la récupération du compte:',
                     error
                 );
@@ -442,7 +442,7 @@ export default factories.createCoreController(
 
                     return ctx.send({ received: true });
                 } catch (handlerError) {
-                    console.error(
+                    strapiLog.error(
                         'Erreur lors du traitement du webhook:',
                         handlerError
                     );
@@ -462,7 +462,7 @@ export default factories.createCoreController(
                     return ctx.send({ received: true, error: handlerError.message });
                 }
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     'Erreur lors du traitement du webhook:',
                     error
                 );

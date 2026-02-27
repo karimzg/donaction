@@ -1,6 +1,6 @@
 import { Core } from '@strapi/strapi';
 import { retryFailedWebhooks } from '../helpers/stripe-webhook-handlers';
-import { logBlock, logSimple, COLORS } from '../helpers/logger';
+import { logBlock, logSimple, strapiLog, COLORS } from '../helpers/logger';
 
 /**
  * Daily cron job to sync all active Stripe connected accounts
@@ -46,9 +46,8 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
                 successCount++;
             } catch (error) {
                 errorCount++;
-                console.error(
-                    `Échec synchronisation ${account.stripe_account_id}:`,
-                    error.message
+                strapiLog.error(
+                    `Échec synchronisation ${account.stripe_account_id}: ${error.message}`
                 );
             }
         }
@@ -81,7 +80,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur fatale lors du cron job de synchronisation:',
             error
         );

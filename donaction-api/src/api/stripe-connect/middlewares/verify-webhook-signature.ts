@@ -2,7 +2,7 @@ import { Core } from '@strapi/strapi';
 import { Context } from 'koa';
 import Stripe from 'stripe';
 import { stripe } from '../../../helpers/stripe-connect-helper';
-import { logBlock, logSimple, COLORS } from '../../../helpers/logger';
+import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 
 export default (config, { strapi }: { strapi: Core.Strapi }) => {
     return async (ctx: Context, next: () => Promise<void>) => {
@@ -17,7 +17,7 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
         const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_CONNECT;
 
         if (!webhookSecret) {
-            console.error(
+            strapiLog.error(
                 'STRIPE_WEBHOOK_SECRET_CONNECT manquant dans les variables d\'environnement'
             );
             return ctx.badRequest(
@@ -46,11 +46,8 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
                     (ctx.request as any).rawBody;
 
                 if (!rawBody) {
-                    console.error(
-                        'rawBody non disponible - la vérification de signature échouera',
-                        '\n   Assurez-vous que config/middlewares.ts contient:',
-                        '\n     includeUnparsed: true',
-                        '\n     patchKoa: true',
+                    strapiLog.error(
+                        'rawBody non disponible - vérifiez config/middlewares.ts (includeUnparsed: true, patchKoa: true)'
                     );
 
                     // WARNING: Do NOT use JSON.stringify as fallback
@@ -72,7 +69,7 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
                     prefix: 'StripeConnect',
                 });
             } catch (err) {
-                console.error(
+                strapiLog.error(
                     `Échec de la vérification de signature: ${err.message}`
                 );
                 return ctx.badRequest(
@@ -85,7 +82,7 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
 
             await next();
         } catch (error) {
-            console.error(
+            strapiLog.error(
                 'Erreur lors de la vérification de la signature:',
                 error
             );

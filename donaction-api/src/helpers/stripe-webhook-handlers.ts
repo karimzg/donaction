@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 import { syncAccountStatus, stripe } from './stripe-connect-helper';
-import { logBlock, logSimple, COLORS } from './logger';
+import { logBlock, logSimple, strapiLog, COLORS } from './logger';
 
 /**
  * Handles account.updated webhook event
@@ -31,7 +31,7 @@ export async function handleAccountUpdated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook account.updated:',
             error
         );
@@ -66,7 +66,7 @@ export async function handleExternalAccountCreated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook external_account.created:',
             error
         );
@@ -101,7 +101,7 @@ export async function handleExternalAccountUpdated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook external_account.updated:',
             error
         );
@@ -137,7 +137,7 @@ export async function handleCapabilityUpdated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook capability.updated:',
             error
         );
@@ -172,7 +172,7 @@ export async function handlePersonCreated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook person.created:',
             error
         );
@@ -207,7 +207,7 @@ export async function handlePersonUpdated(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du traitement du webhook person.updated:',
             error
         );
@@ -331,7 +331,7 @@ export async function retryFailedWebhooks(
                     prefix: 'StripeConnect',
                 });
             } catch (error) {
-                console.error(
+                strapiLog.error(
                     `Échec du retraitement du webhook ${log.event_id}:`,
                     error
                 );
@@ -354,7 +354,7 @@ export async function retryFailedWebhooks(
             prefix: 'StripeConnect',
         });
     } catch (error) {
-        console.error(
+        strapiLog.error(
             'Erreur lors du retraitement des webhooks:',
             error
         );

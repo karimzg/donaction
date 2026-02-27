@@ -71,6 +71,9 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             );
         }
 
+        // Store validated account in state to avoid redundant DB lookup in controller
+        ctx.state.connectedAccount = connectedAccount;
+
         await next();
     };
 };

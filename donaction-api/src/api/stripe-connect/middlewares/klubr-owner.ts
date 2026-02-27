@@ -19,10 +19,16 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             return ctx.unauthorized('Authentification requise');
         }
 
-        const { klubrId } = ctx.request.body;
+        const body = ctx.request.body;
 
-        if (!klubrId) {
-            return ctx.badRequest('Le champ klubrId est requis');
+        if (!body || typeof body !== 'object') {
+            return ctx.badRequest('Le corps de la requête est invalide');
+        }
+
+        const { klubrId } = body as Record<string, unknown>;
+
+        if (!klubrId || typeof klubrId !== 'string') {
+            return ctx.badRequest('Le champ klubrId est requis (string)');
         }
 
         // Find klubr by uuid

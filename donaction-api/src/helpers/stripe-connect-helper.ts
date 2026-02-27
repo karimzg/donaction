@@ -5,13 +5,18 @@ import {
     FinancialAuditLogEntity,
     TradePolicyEntity,
 } from '../_types';
-import { logBlock, logSimple, COLORS } from './logger';
+import { logBlock, logSimple, strapiLog, COLORS } from './logger';
 import { DEFAULT_CURRENCY } from '../constants';
 
-// Validate STRIPE_SECRET_KEY exists before initializing client
+// Validate required Stripe env vars at module load (fail fast at startup)
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error(
         'STRIPE_SECRET_KEY manquant dans les variables d\'environnement. Vérifiez votre fichier .env'
+    );
+}
+if (!process.env.STRIPE_WEBHOOK_SECRET_CONNECT) {
+    throw new Error(
+        'STRIPE_WEBHOOK_SECRET_CONNECT manquant dans les variables d\'environnement. Vérifiez votre fichier .env'
     );
 }
 
@@ -156,7 +161,7 @@ export async function createConnectedAccount(
                     prefix: 'StripeConnect',
                 });
             } catch (logError) {
-                console.error(
+                strapiLog.error(
                     `Échec de l'enregistrement du compte orphelin: ${logError.message}`
                 );
             }
@@ -167,7 +172,7 @@ export async function createConnectedAccount(
         return account;
     } catch (error) {
         if (!account) {
-            console.error(
+            strapiLog.error(
                 'Échec de la création du compte connecté:',
                 error
             );
