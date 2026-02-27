@@ -12,11 +12,16 @@ if (!process.env.STRIPE_SECRET_KEY) {
     );
 }
 
+/** Pinned Stripe API version for consistency across all usages */
+export const STRIPE_API_VERSION = '2025-02-24.acacia' as const;
+
 /**
  * Centralized Stripe client with validated API key.
  * Use this client everywhere instead of creating new Stripe instances.
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: STRIPE_API_VERSION,
+});
 
 /**
  * Business type for Stripe connected accounts
