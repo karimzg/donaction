@@ -99,9 +99,9 @@ export async function createConnectedAccount(
                         country: country,
                         created_at_stripe: new Date(account.created * 1000),
                         capabilities:
-                            account.capabilities as Stripe.Account.Capabilities,
+                            account.capabilities as any,
                         requirements:
-                            account.requirements as Stripe.Account.Requirements,
+                            account.requirements as any,
                         charges_enabled: account.charges_enabled ?? false,
                         payouts_enabled: account.payouts_enabled ?? false,
                     },
@@ -267,9 +267,9 @@ export async function syncAccountStatus(
                 verification_status: verificationStatus,
                 onboarding_completed: account.details_submitted,
                 capabilities:
-                    account.capabilities as Stripe.Account.Capabilities,
+                    account.capabilities as any,
                 requirements:
-                    account.requirements as Stripe.Account.Requirements,
+                    account.requirements as any,
                 charges_enabled: account.charges_enabled,
                 payouts_enabled: account.payouts_enabled,
                 last_sync: new Date(),
