@@ -306,8 +306,11 @@ export default factories.createCoreController(
 
                 let event;
                 try {
+                    // Use rawBody for signature verification (consistent with Connect webhook)
+                    const rawBody = ctx.request.rawBody
+                        || ctx.request.body[Symbol.for('unparsedBody')];
                     event = stripe.webhooks.constructEvent(
-                        ctx.request.body[Symbol.for('unparsedBody')],
+                        rawBody,
                         sig,
                         endpointSecret,
                     );
