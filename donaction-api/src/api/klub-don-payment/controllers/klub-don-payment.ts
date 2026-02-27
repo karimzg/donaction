@@ -141,7 +141,7 @@ export default factories.createCoreController(
                 const tradePolicy = klubr.trade_policy as TradePolicyEntity;
                 const connectedAccount =
                     klubr.connected_account as ConnectedAccountEntity;
-                const useStripeConnect = tradePolicy?.stripe_connect ?? true;
+                const useStripeConnect = tradePolicy?.stripe_connect ?? false;
 
                 // Calculate base amount in cents
                 let amountInCents = Number(price) * 100;
