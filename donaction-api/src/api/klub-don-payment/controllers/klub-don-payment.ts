@@ -52,8 +52,17 @@ export default factories.createCoreController(
             try {
                 const { donUuid, clientSecret } = ctx.query;
 
+                const match = (clientSecret as string)?.match(
+                    /^(pi_.*)_secret_/
+                );
+                if (!match) {
+                    return ctx.badRequest(
+                        'Format du client secret invalide'
+                    );
+                }
+
                 const paymentIntent = await stripe.paymentIntents.retrieve(
-                    (clientSecret as string).match(/^(pi_.*)_secret_/)[1],
+                    match[1],
                 );
 
                 return await strapi.services[
