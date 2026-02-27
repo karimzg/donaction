@@ -8,6 +8,9 @@ export default {
                 auth: {
                     scope: ['authenticated'],
                 },
+                middlewares: [
+                    'api::stripe-connect.klubr-owner',
+                ],
             },
         },
         {
