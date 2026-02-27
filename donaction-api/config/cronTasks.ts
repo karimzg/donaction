@@ -532,8 +532,8 @@ export default {
             );
 
             try {
-                const syncTask = require('../src/cron/sync-stripe-accounts');
-                await syncTask.default({ strapi });
+                const { default: syncTask } = await import('../src/cron/sync-stripe-accounts');
+                await syncTask({ strapi });
                 console.log('✅ [CRON] syncStripeAccounts - SUCCESS');
             } catch (err: any) {
                 console.error(

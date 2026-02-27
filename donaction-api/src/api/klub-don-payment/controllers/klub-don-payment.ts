@@ -222,6 +222,7 @@ export default factories.createCoreController(
 
                     // Log financial action for audit
                     await logFinancialAction(
+                        strapi,
                         'fee_calculated',
                         Number(klubr.id),
                         null,

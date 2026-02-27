@@ -26,7 +26,7 @@ export default factories.createCoreService(
                 prefix: 'StripeConnect',
             });
 
-            return createConnectedAccount(klubrId, businessType, country);
+            return createConnectedAccount(strapi, klubrId, businessType, country);
         },
 
         /**
@@ -58,7 +58,7 @@ export default factories.createCoreService(
                 prefix: 'StripeConnect',
             });
 
-            return syncAccountStatus(accountId);
+            return syncAccountStatus(strapi, accountId);
         },
 
         /**

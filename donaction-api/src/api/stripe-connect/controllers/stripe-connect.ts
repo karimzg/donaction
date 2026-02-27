@@ -387,7 +387,7 @@ export default factories.createCoreController(
 
                 // Process webhook event
                 try {
-                    await handleWebhookEvent(event);
+                    await handleWebhookEvent(strapi, event);
 
                     await strapi
                         .documents('api::webhook-log.webhook-log')

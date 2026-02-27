@@ -1,28 +1,38 @@
 import Stripe from 'stripe';
+import { Core } from '@strapi/strapi';
 import { syncAccountStatus } from './stripe-connect-helper';
+import { logBlock, logSimple, COLORS } from './logger';
 
 /**
  * Handles account.updated webhook event
  * Syncs account status from Stripe to database
  */
-export async function handleAccountUpdated(event: Stripe.Event): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: account.updated');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+export async function handleAccountUpdated(
+    strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'account.updated' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     const account = event.data.object as Stripe.Account;
 
     try {
-        // Sync account status using existing helper
-        await syncAccountStatus(account.id);
+        await syncAccountStatus(strapiInstance, account.id);
 
-        console.log(
-            `✅ Webhook traité: Compte ${account.id} synchronisé avec succès\n`
-        );
+        logSimple({
+            message: `Compte ${account.id} synchronisé avec succès`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook account.updated:`,
+            'Erreur lors du traitement du webhook account.updated:',
             error
         );
         throw error;
@@ -31,29 +41,33 @@ export async function handleAccountUpdated(event: Stripe.Event): Promise<void> {
 
 /**
  * Handles account.external_account.created webhook event
- * Updates connected account when external account (bank account) is added
  */
 export async function handleExternalAccountCreated(
+    strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: account.external_account.created');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'account.external_account.created' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
-    const externalAccount = event.data.object as Stripe.BankAccount;
     const accountId = event.account as string;
 
     try {
-        // Sync full account status to capture external account changes
-        await syncAccountStatus(accountId);
+        await syncAccountStatus(strapiInstance, accountId);
 
-        console.log(
-            `✅ Webhook traité: Compte externe ajouté pour ${accountId}\n`
-        );
+        logSimple({
+            message: `Compte externe ajouté pour ${accountId}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook external_account.created:`,
+            'Erreur lors du traitement du webhook external_account.created:',
             error
         );
         throw error;
@@ -62,29 +76,33 @@ export async function handleExternalAccountCreated(
 
 /**
  * Handles account.external_account.updated webhook event
- * Updates connected account when external account is modified
  */
 export async function handleExternalAccountUpdated(
+    strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: account.external_account.updated');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'account.external_account.updated' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
-    const externalAccount = event.data.object as Stripe.BankAccount;
     const accountId = event.account as string;
 
     try {
-        // Sync full account status to capture external account changes
-        await syncAccountStatus(accountId);
+        await syncAccountStatus(strapiInstance, accountId);
 
-        console.log(
-            `✅ Webhook traité: Compte externe mis à jour pour ${accountId}\n`
-        );
+        logSimple({
+            message: `Compte externe mis à jour pour ${accountId}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook external_account.updated:`,
+            'Erreur lors du traitement du webhook external_account.updated:',
             error
         );
         throw error;
@@ -93,29 +111,34 @@ export async function handleExternalAccountUpdated(
 
 /**
  * Handles capability.updated webhook event
- * Updates connected account when capabilities (card_payments, transfers) change
  */
 export async function handleCapabilityUpdated(
+    strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: capability.updated');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'capability.updated' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     const capability = event.data.object as Stripe.Capability;
     const accountId = event.account as string;
 
     try {
-        // Sync full account status to capture capability changes
-        await syncAccountStatus(accountId);
+        await syncAccountStatus(strapiInstance, accountId);
 
-        console.log(
-            `✅ Webhook traité: Capacité "${capability.id}" mise à jour pour ${accountId}\n`
-        );
+        logSimple({
+            message: `Capacité "${capability.id}" mise à jour pour ${accountId}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook capability.updated:`,
+            'Erreur lors du traitement du webhook capability.updated:',
             error
         );
         throw error;
@@ -124,27 +147,33 @@ export async function handleCapabilityUpdated(
 
 /**
  * Handles person.created webhook event
- * Updates connected account when person (representative) is added
  */
-export async function handlePersonCreated(event: Stripe.Event): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: person.created');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+export async function handlePersonCreated(
+    strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'person.created' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
-    const person = event.data.object as Stripe.Person;
     const accountId = event.account as string;
 
     try {
-        // Sync full account status to capture person addition
-        await syncAccountStatus(accountId);
+        await syncAccountStatus(strapiInstance, accountId);
 
-        console.log(
-            `✅ Webhook traité: Personne ajoutée pour ${accountId}\n`
-        );
+        logSimple({
+            message: `Personne ajoutée pour ${accountId}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook person.created:`,
+            'Erreur lors du traitement du webhook person.created:',
             error
         );
         throw error;
@@ -153,27 +182,33 @@ export async function handlePersonCreated(event: Stripe.Event): Promise<void> {
 
 /**
  * Handles person.updated webhook event
- * Updates connected account when person information is modified
  */
-export async function handlePersonUpdated(event: Stripe.Event): Promise<void> {
-    console.log('\n📬 ════════════════════════════════════════════════════════');
-    console.log('📬 WEBHOOK: person.updated');
-    console.log(`📬 Event ID: ${event.id}`);
-    console.log('📬 ════════════════════════════════════════════════════════\n');
+export async function handlePersonUpdated(
+    strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'person.updated' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
 
-    const person = event.data.object as Stripe.Person;
     const accountId = event.account as string;
 
     try {
-        // Sync full account status to capture person changes
-        await syncAccountStatus(accountId);
+        await syncAccountStatus(strapiInstance, accountId);
 
-        console.log(
-            `✅ Webhook traité: Personne mise à jour pour ${accountId}\n`
-        );
+        logSimple({
+            message: `Personne mise à jour pour ${accountId}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du traitement du webhook person.updated:`,
+            'Erreur lors du traitement du webhook person.updated:',
             error
         );
         throw error;
@@ -182,54 +217,74 @@ export async function handlePersonUpdated(event: Stripe.Event): Promise<void> {
 
 /**
  * Routes webhook event to appropriate handler
+ * @param strapiInstance - Strapi instance (injected for testability)
  * @param event - Stripe webhook event
  */
-export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
-    console.log(`\n🎯 Traitement du webhook: ${event.type}`);
+export async function handleWebhookEvent(
+    strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logSimple({
+        message: `Traitement du webhook: ${event.type}`,
+        color: 'blue',
+        prefix: 'StripeConnect',
+    });
 
     switch (event.type) {
         case 'account.updated':
-            await handleAccountUpdated(event);
+            await handleAccountUpdated(strapiInstance, event);
             break;
 
         case 'account.external_account.created':
-            await handleExternalAccountCreated(event);
+            await handleExternalAccountCreated(strapiInstance, event);
             break;
 
         case 'account.external_account.updated':
-            await handleExternalAccountUpdated(event);
+            await handleExternalAccountUpdated(strapiInstance, event);
             break;
 
         case 'capability.updated':
-            await handleCapabilityUpdated(event);
+            await handleCapabilityUpdated(strapiInstance, event);
             break;
 
         case 'person.created':
-            await handlePersonCreated(event);
+            await handlePersonCreated(strapiInstance, event);
             break;
 
         case 'person.updated':
-            await handlePersonUpdated(event);
+            await handlePersonUpdated(strapiInstance, event);
             break;
 
         default:
-            console.log(`⚠️ Type de webhook non géré: ${event.type}\n`);
+            logSimple({
+                message: `Type de webhook non géré: ${event.type}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
     }
 }
 
 /**
  * Retries failed webhook events
  * Queries webhook-log for unprocessed events and re-processes them
- * @param strapi - Strapi instance
+ * @param strapiInstance - Strapi instance (injected for testability)
  */
-export async function retryFailedWebhooks(strapi: any): Promise<void> {
-    console.log('\n🔁 ════════════════════════════════════════════════════════');
-    console.log('🔁 RETRY: Tentative de retraitement des webhooks échoués');
-    console.log('🔁 ════════════════════════════════════════════════════════\n');
+export async function retryFailedWebhooks(
+    strapiInstance: Core.Strapi
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            {
+                key: 'Action',
+                value: 'Retraitement des webhooks échoués',
+            },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     try {
-        // Query webhook-log for failed events
-        const failedLogs = await strapi.db
+        const failedLogs = await strapiInstance.db
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
@@ -240,15 +295,19 @@ export async function retryFailedWebhooks(strapi: any): Promise<void> {
                 orderBy: [{ createdAt: 'asc' }],
             });
 
-        console.log(
-            `📊 ${failedLogs.length} webhook(s) échoué(s) à retraiter\n`
-        );
+        logSimple({
+            message: `${failedLogs.length} webhook(s) échoué(s) à retraiter`,
+            color: 'blue',
+            prefix: 'StripeConnect',
+        });
 
         for (const log of failedLogs) {
             try {
-                console.log(
-                    `🔄 Retraitement du webhook ${log.event_id} (tentative ${log.retry_count + 1}/3)`
-                );
+                logSimple({
+                    message: `Retraitement ${log.event_id} (tentative ${log.retry_count + 1}/3)`,
+                    color: 'blue',
+                    prefix: 'StripeConnect',
+                });
 
                 // Reconstruct Stripe event from payload
                 const event: Stripe.Event = {
@@ -258,41 +317,50 @@ export async function retryFailedWebhooks(strapi: any): Promise<void> {
                     account: log.account_id || undefined,
                 } as Stripe.Event;
 
-                // Re-process event
-                await handleWebhookEvent(event);
+                await handleWebhookEvent(strapiInstance, event);
 
-                // Mark as processed
-                await strapi.db.query('api::webhook-log.webhook-log').update({
-                    where: { id: log.id },
-                    data: {
-                        processed: true,
-                        retry_count: log.retry_count + 1,
-                        error_message: null,
-                    },
+                await strapiInstance.db
+                    .query('api::webhook-log.webhook-log')
+                    .update({
+                        where: { id: log.id },
+                        data: {
+                            processed: true,
+                            retry_count: log.retry_count + 1,
+                            error_message: null,
+                        },
+                    });
+
+                logSimple({
+                    message: `Webhook ${log.event_id} retraité avec succès`,
+                    color: 'green',
+                    prefix: 'StripeConnect',
                 });
-
-                console.log(`✅ Webhook ${log.event_id} retraité avec succès\n`);
             } catch (error) {
                 console.error(
-                    `❌ Échec du retraitement du webhook ${log.event_id}:`,
+                    `Échec du retraitement du webhook ${log.event_id}:`,
                     error
                 );
 
-                // Update retry count and error message
-                await strapi.db.query('api::webhook-log.webhook-log').update({
-                    where: { id: log.id },
-                    data: {
-                        retry_count: log.retry_count + 1,
-                        error_message: error.message,
-                    },
-                });
+                await strapiInstance.db
+                    .query('api::webhook-log.webhook-log')
+                    .update({
+                        where: { id: log.id },
+                        data: {
+                            retry_count: log.retry_count + 1,
+                            error_message: error.message,
+                        },
+                    });
             }
         }
 
-        console.log(`✅ Retraitement terminé\n`);
+        logSimple({
+            message: 'Retraitement terminé',
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            `❌ Erreur lors du retraitement des webhooks:`,
+            'Erreur lors du retraitement des webhooks:',
             error
         );
         throw error;

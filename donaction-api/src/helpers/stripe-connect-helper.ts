@@ -1,9 +1,12 @@
 import Stripe from 'stripe';
+import { Core } from '@strapi/strapi';
 import {
     ConnectedAccountEntity,
     FinancialAuditLogEntity,
     TradePolicyEntity,
 } from '../_types';
+import { logBlock, logSimple, COLORS } from './logger';
+import { DEFAULT_CURRENCY } from '../constants';
 
 // Validate STRIPE_SECRET_KEY exists before initializing client
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -39,12 +42,14 @@ export type FinancialActionType =
 
 /**
  * Creates a Stripe connected account for a klubr
+ * @param strapiInstance - Strapi instance (injected for testability)
  * @param klubrId - The klubr database ID
  * @param businessType - Type of business entity
  * @param country - Country code (default: FR)
  * @returns Created Stripe account object
  */
 export async function createConnectedAccount(
+    strapiInstance: Core.Strapi,
     klubrId: number,
     businessType: BusinessType,
     country: string = 'FR'
@@ -52,10 +57,16 @@ export async function createConnectedAccount(
     let account: Stripe.Account | null = null;
 
     try {
-        console.log('\n🔵 ════════════════════════════════════════════════════════');
-        console.log('🔵 CRÉATION COMPTE STRIPE CONNECT');
-        console.log(`🔵 Klubr ID: ${klubrId} | Type: ${businessType} | Pays: ${country}`);
-        console.log('🔵 ════════════════════════════════════════════════════════\n');
+        logBlock({
+            statusColor: COLORS.blue,
+            entries: [
+                { key: 'Action', value: 'Création compte Stripe Connect' },
+                { key: 'Klubr ID', value: klubrId },
+                { key: 'Type', value: businessType },
+                { key: 'Pays', value: country },
+            ],
+            prefix: 'StripeConnect',
+        });
 
         account = await stripe.accounts.create({
             type: 'express',
@@ -67,61 +78,87 @@ export async function createConnectedAccount(
             business_type: businessType,
         });
 
-        console.log(`✅ Compte Stripe créé: ${account.id}`);
+        logSimple({
+            message: `Compte Stripe créé: ${account.id}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
 
         // Store connected account in database
         try {
-            await strapi.documents('api::connected-account.connected-account').create({
-                data: {
-                    stripe_account_id: account.id,
-                    klubr: klubrId,
-                    account_status: 'pending',
-                    verification_status: 'unverified',
-                    onboarding_completed: false,
-                    business_type: businessType,
-                    country: country,
-                    created_at_stripe: new Date(account.created * 1000),
-                    capabilities: account.capabilities as any,
-                    requirements: account.requirements as any,
-                    charges_enabled: account.charges_enabled ?? false,
-                    payouts_enabled: account.payouts_enabled ?? false,
-                },
-            });
+            await strapiInstance
+                .documents('api::connected-account.connected-account')
+                .create({
+                    data: {
+                        stripe_account_id: account.id,
+                        klubr: klubrId,
+                        account_status: 'pending',
+                        verification_status: 'unverified',
+                        onboarding_completed: false,
+                        business_type: businessType,
+                        country: country,
+                        created_at_stripe: new Date(account.created * 1000),
+                        capabilities:
+                            account.capabilities as Stripe.Account.Capabilities,
+                        requirements:
+                            account.requirements as Stripe.Account.Requirements,
+                        charges_enabled: account.charges_enabled ?? false,
+                        payouts_enabled: account.payouts_enabled ?? false,
+                    },
+                });
 
-            console.log(`✅ Compte connecté enregistré en base pour le klubr ${klubrId}\n`);
+            logSimple({
+                message: `Compte connecté enregistré en base pour le klubr ${klubrId}`,
+                color: 'green',
+                prefix: 'StripeConnect',
+            });
         } catch (dbError) {
             // Database insert failed after Stripe account creation succeeded
-            console.error('⚠️ ════════════════════════════════════════════════════════');
-            console.error('⚠️ COMPTE STRIPE ORPHELIN DÉTECTÉ');
-            console.error(`⚠️ ID Compte Stripe: ${account.id}`);
-            console.error(`⚠️ ID Klubr: ${klubrId}`);
-            console.error(`⚠️ Erreur: ${dbError.message}`);
-            console.error('⚠️ Action requise: nettoyage manuel ou réconciliation webhook');
-            console.error('⚠️ ════════════════════════════════════════════════════════\n');
+            logBlock({
+                statusColor: COLORS.red,
+                entries: [
+                    { key: 'ALERTE', value: 'COMPTE STRIPE ORPHELIN DÉTECTÉ' },
+                    { key: 'Stripe ID', value: account.id },
+                    { key: 'Klubr ID', value: klubrId },
+                    { key: 'Erreur', value: dbError.message },
+                    { key: 'Action', value: 'Nettoyage manuel requis' },
+                ],
+                prefix: 'StripeConnect',
+            });
 
             // Log orphaned account to webhook-log for manual cleanup
             try {
-                await strapi.documents('api::webhook-log.webhook-log').create({
-                    data: {
-                        event_id: `orphaned_account_${account.id}_${Date.now()}`,
-                        event_type: 'account.orphaned',
-                        account_id: account.id,
-                        payload: {
-                            klubrId,
-                            businessType,
-                            country,
-                            stripeAccountId: account.id,
-                            error: dbError.message,
-                            timestamp: new Date().toISOString(),
+                await strapiInstance
+                    .documents('api::webhook-log.webhook-log')
+                    .create({
+                        data: {
+                            event_id: `orphaned_account_${account.id}_${Date.now()}`,
+                            event_type: 'account.orphaned',
+                            account_id: account.id,
+                            payload: {
+                                klubrId,
+                                businessType,
+                                country,
+                                stripeAccountId: account.id,
+                                error: dbError.message,
+                                timestamp: new Date().toISOString(),
+                            },
+                            processed: false,
+                            error_message: `Database insert failed: ${dbError.message}`,
+                            retry_count: 0,
                         },
-                        processed: false,
-                        error_message: `Database insert failed: ${dbError.message}`,
-                        retry_count: 0,
-                    },
+                    });
+
+                logSimple({
+                    message:
+                        'Compte orphelin enregistré dans webhook-log pour nettoyage',
+                    color: 'yellow',
+                    prefix: 'StripeConnect',
                 });
-                console.log(`📝 Compte orphelin enregistré dans webhook-log pour nettoyage\n`);
             } catch (logError) {
-                console.error(`❌ Échec de l'enregistrement du compte orphelin: ${logError.message}\n`);
+                console.error(
+                    `Échec de l'enregistrement du compte orphelin: ${logError.message}`
+                );
             }
 
             throw dbError;
@@ -129,9 +166,11 @@ export async function createConnectedAccount(
 
         return account;
     } catch (error) {
-        // Only log if not already handled by inner catch
         if (!account) {
-            console.error('❌ Échec de la création du compte connecté:', error);
+            console.error(
+                'Échec de la création du compte connecté:',
+                error
+            );
         }
         throw error;
     }
@@ -149,10 +188,14 @@ export async function generateAccountLink(
     refreshUrl: string,
     returnUrl: string
 ): Promise<Stripe.AccountLink> {
-    console.log('\n🔗 ════════════════════════════════════════════════════════');
-    console.log('🔗 GÉNÉRATION LIEN ONBOARDING COMPTE');
-    console.log(`🔗 Compte: ${accountId}`);
-    console.log('🔗 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.blue,
+        entries: [
+            { key: 'Action', value: 'Génération lien onboarding' },
+            { key: 'Compte', value: accountId },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     const accountLink = await stripe.accountLinks.create({
         account: accountId,
@@ -161,28 +204,38 @@ export async function generateAccountLink(
         type: 'account_onboarding',
     });
 
-    console.log(`✅ Lien de compte généré: ${accountLink.url}\n`);
+    logSimple({
+        message: `Lien de compte généré: ${accountLink.url}`,
+        color: 'green',
+        prefix: 'StripeConnect',
+    });
 
     return accountLink;
 }
 
 /**
  * Syncs connected account status from Stripe to database
+ * @param strapiInstance - Strapi instance (injected for testability)
  * @param accountId - Stripe account ID
  * @returns Updated connected account entity
  */
 export async function syncAccountStatus(
+    strapiInstance: Core.Strapi,
     accountId: string
 ): Promise<ConnectedAccountEntity> {
-    console.log('\n🔄 ════════════════════════════════════════════════════════');
-    console.log('🔄 SYNCHRONISATION STATUT COMPTE DEPUIS STRIPE');
-    console.log(`🔄 Compte: ${accountId}`);
-    console.log('🔄 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.blue,
+        entries: [
+            { key: 'Action', value: 'Synchronisation statut compte' },
+            { key: 'Compte', value: accountId },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     const account = await stripe.accounts.retrieve(accountId);
 
     // Find connected account in database
-    const connectedAccount = await strapi.db
+    const connectedAccount = await strapiInstance.db
         .query('api::connected-account.connected-account')
         .findOne({
             where: { stripe_account_id: accountId },
@@ -195,35 +248,17 @@ export async function syncAccountStatus(
     }
 
     // Determine account status
-    let accountStatus: 'pending' | 'active' | 'restricted' | 'disabled' =
-        'pending';
-    if (account.charges_enabled && account.payouts_enabled) {
-        accountStatus = 'active';
-    } else if (
-        account.requirements?.disabled_reason ||
-        account.requirements?.currently_due?.length > 0
-    ) {
-        accountStatus = 'restricted';
-    }
+    const accountStatus = determineAccountStatus(account);
+    const verificationStatus = determineVerificationStatus(account);
 
-    // Determine verification status
-    let verificationStatus:
-        | 'unverified'
-        | 'pending'
-        | 'verified'
-        | 'rejected' = 'unverified';
-    if (account.details_submitted) {
-        if (account.charges_enabled && account.payouts_enabled) {
-            verificationStatus = 'verified';
-        } else {
-            verificationStatus = 'pending';
-        }
-    }
-
-    console.log(`📊 Statut: ${accountStatus} | Vérification: ${verificationStatus}`);
+    logSimple({
+        message: `Statut: ${accountStatus} | Vérification: ${verificationStatus}`,
+        color: 'blue',
+        prefix: 'StripeConnect',
+    });
 
     // Update database
-    const updated = await strapi.db
+    const updated = await strapiInstance.db
         .query('api::connected-account.connected-account')
         .update({
             where: { id: connectedAccount.id },
@@ -231,15 +266,21 @@ export async function syncAccountStatus(
                 account_status: accountStatus,
                 verification_status: verificationStatus,
                 onboarding_completed: account.details_submitted,
-                capabilities: account.capabilities as any,
-                requirements: account.requirements as any,
+                capabilities:
+                    account.capabilities as Stripe.Account.Capabilities,
+                requirements:
+                    account.requirements as Stripe.Account.Requirements,
                 charges_enabled: account.charges_enabled,
                 payouts_enabled: account.payouts_enabled,
                 last_sync: new Date(),
             },
         });
 
-    console.log(`✅ Statut du compte synchronisé avec succès\n`);
+    logSimple({
+        message: 'Statut du compte synchronisé avec succès',
+        color: 'green',
+        prefix: 'StripeConnect',
+    });
 
     return updated as ConnectedAccountEntity;
 }
@@ -259,21 +300,18 @@ export function calculateApplicationFee(
     const percentage = tradePolicy.commissionPercentage || 0;
     const fixedAmount = tradePolicy.fixed_amount || 0;
 
-    // Validate percentage is within 0-100 range
     if (percentage < 0 || percentage > 100) {
         throw new Error(
             `Pourcentage de commission invalide: ${percentage}. Doit être entre 0 et 100.`
         );
     }
 
-    // Validate fixed amount is non-negative
     if (fixedAmount < 0) {
         throw new Error(
             `Montant fixe invalide: ${fixedAmount}. Doit être >= 0.`
         );
     }
 
-    // Validate donation amount is positive
     if (amount <= 0) {
         throw new Error(
             `Montant de donation invalide: ${amount}. Doit être > 0.`
@@ -313,25 +351,35 @@ export async function createTransferToConnectedAccount(
     accountId: string,
     metadata: Record<string, string> = {}
 ): Promise<Stripe.Transfer> {
-    console.log('\n💸 ════════════════════════════════════════════════════════');
-    console.log('💸 CRÉATION TRANSFERT VERS COMPTE CONNECTÉ');
-    console.log(`💸 Montant: ${amount / 100}€ (${amount} centimes) → Compte: ${accountId}`);
-    console.log('💸 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.blue,
+        entries: [
+            { key: 'Action', value: 'Création transfert' },
+            { key: 'Montant', value: `${amount / 100}€ (${amount} centimes)` },
+            { key: 'Compte', value: accountId },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     const transfer = await stripe.transfers.create({
         amount: amount,
-        currency: 'eur',
+        currency: DEFAULT_CURRENCY,
         destination: accountId,
         metadata: metadata,
     });
 
-    console.log(`✅ Transfert créé: ${transfer.id}\n`);
+    logSimple({
+        message: `Transfert créé: ${transfer.id}`,
+        color: 'green',
+        prefix: 'StripeConnect',
+    });
 
     return transfer;
 }
 
 /**
  * Logs a financial action to the audit trail
+ * @param strapiInstance - Strapi instance (injected for testability)
  * @param actionType - Type of financial action
  * @param klubrId - Klubr database ID
  * @param klubDonId - Klub don database ID (optional)
@@ -341,6 +389,7 @@ export async function createTransferToConnectedAccount(
  * @returns Created financial audit log entity
  */
 export async function logFinancialAction(
+    strapiInstance: Core.Strapi,
     actionType: FinancialActionType,
     klubrId: number,
     klubDonId: number | null,
@@ -348,14 +397,19 @@ export async function logFinancialAction(
     stripeObjectId: string,
     metadata: Record<string, any> = {}
 ): Promise<FinancialAuditLogEntity> {
-    console.log('\n📝 ════════════════════════════════════════════════════════');
-    console.log('📝 ENREGISTREMENT ACTION FINANCIÈRE (AUDIT)');
-    console.log(`📝 Action: ${actionType.toUpperCase()}`);
-    console.log(`📝 Klubr: ${klubrId} | Don: ${klubDonId || 'N/A'} | Montant: ${amount / 100}€`);
-    console.log(`📝 Objet Stripe: ${stripeObjectId}`);
-    console.log('📝 ════════════════════════════════════════════════════════\n');
+    logBlock({
+        statusColor: COLORS.blue,
+        entries: [
+            { key: 'Action', value: `Audit: ${actionType.toUpperCase()}` },
+            { key: 'Klubr', value: klubrId },
+            { key: 'Don', value: klubDonId || 'N/A' },
+            { key: 'Montant', value: `${amount / 100}€` },
+            { key: 'Stripe', value: stripeObjectId },
+        ],
+        prefix: 'StripeConnect',
+    });
 
-    const auditLog = await strapi
+    const auditLog = await strapiInstance
         .documents('api::financial-audit-log.financial-audit-log')
         .create({
             data: {
@@ -363,14 +417,49 @@ export async function logFinancialAction(
                 klubr: klubrId,
                 klub_don: klubDonId,
                 amount: amount / 100, // Convert from cents to euros
-                currency: 'EUR',
+                currency: DEFAULT_CURRENCY.toUpperCase(),
                 stripe_object_id: stripeObjectId,
                 metadata: metadata,
                 performed_at: new Date(),
             },
         });
 
-    console.log(`✅ Journal d'audit financier créé avec succès\n`);
+    logSimple({
+        message: "Journal d'audit financier créé avec succès",
+        color: 'green',
+        prefix: 'StripeConnect',
+    });
 
     return auditLog as FinancialAuditLogEntity;
 }
+
+// --- Pure helper functions ---
+
+/** Determines account status from Stripe account data */
+const determineAccountStatus = (
+    account: Stripe.Account
+): 'pending' | 'active' | 'restricted' | 'disabled' => {
+    if (account.charges_enabled && account.payouts_enabled) {
+        return 'active';
+    }
+    if (
+        account.requirements?.disabled_reason ||
+        account.requirements?.currently_due?.length > 0
+    ) {
+        return 'restricted';
+    }
+    return 'pending';
+};
+
+/** Determines verification status from Stripe account data */
+const determineVerificationStatus = (
+    account: Stripe.Account
+): 'unverified' | 'pending' | 'verified' | 'rejected' => {
+    if (!account.details_submitted) {
+        return 'unverified';
+    }
+    if (account.charges_enabled && account.payouts_enabled) {
+        return 'verified';
+    }
+    return 'pending';
+};

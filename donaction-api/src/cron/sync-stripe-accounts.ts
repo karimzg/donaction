@@ -1,78 +1,88 @@
+import { Core } from '@strapi/strapi';
+import { retryFailedWebhooks } from '../helpers/stripe-webhook-handlers';
+import { logBlock, logSimple, COLORS } from '../helpers/logger';
+
 /**
  * Daily cron job to sync all active Stripe connected accounts
  * Runs at 2:00 AM daily
  */
-export default async ({ strapi }) => {
-    console.log('\n⏰ ════════════════════════════════════════════════════════');
-    console.log('⏰ CRON JOB: Synchronisation quotidienne des comptes Stripe');
-    console.log(`⏰ Heure d'exécution: ${new Date().toISOString()}`);
-    console.log('⏰ ════════════════════════════════════════════════════════\n');
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
+    logBlock({
+        statusColor: COLORS.blue,
+        entries: [
+            { key: 'Cron', value: 'Synchronisation quotidienne comptes Stripe' },
+            { key: 'Heure', value: new Date().toISOString() },
+        ],
+        prefix: 'StripeConnect',
+    });
 
     try {
         // Get all connected accounts except disabled ones
         const accounts = await strapi
             .service('api::stripe-connect.stripe-connect')
             .listAccounts({
-                account_status: undefined, // Get all statuses
+                account_status: undefined,
             });
 
-        // Filter out disabled accounts
         const activeAccounts = accounts.filter(
             (account) => account.account_status !== 'disabled'
         );
 
-        console.log(
-            `📊 ${activeAccounts.length} compte(s) actif(s) à synchroniser\n`
-        );
+        logSimple({
+            message: `${activeAccounts.length} compte(s) actif(s) à synchroniser`,
+            color: 'blue',
+            prefix: 'StripeConnect',
+        });
 
         let successCount = 0;
         let errorCount = 0;
 
         for (const account of activeAccounts) {
             try {
-                console.log(
-                    `🔄 Synchronisation du compte ${account.stripe_account_id}...`
-                );
-
                 await strapi
                     .service('api::stripe-connect.stripe-connect')
                     .syncAccountStatus(account.stripe_account_id);
 
                 successCount++;
-                console.log(
-                    `✅ Compte ${account.stripe_account_id} synchronisé\n`
-                );
             } catch (error) {
                 errorCount++;
                 console.error(
-                    `❌ Échec de la synchronisation pour ${account.stripe_account_id}:`,
+                    `Échec synchronisation ${account.stripe_account_id}:`,
                     error.message
                 );
-                console.error(`   Erreur:`, error, '\n');
             }
         }
 
-        console.log('⏰ ════════════════════════════════════════════════════════');
-        console.log('⏰ RÉSUMÉ DE LA SYNCHRONISATION');
-        console.log(`⏰ Total: ${activeAccounts.length}`);
-        console.log(`⏰ Réussis: ${successCount}`);
-        console.log(`⏰ Échecs: ${errorCount}`);
-        console.log('⏰ ════════════════════════════════════════════════════════\n');
+        logBlock({
+            statusColor: successCount === activeAccounts.length
+                ? COLORS.green
+                : COLORS.yellow,
+            entries: [
+                { key: 'Résumé', value: 'Synchronisation terminée' },
+                { key: 'Total', value: activeAccounts.length },
+                { key: 'Réussis', value: successCount },
+                { key: 'Échecs', value: errorCount },
+            ],
+            prefix: 'StripeConnect',
+        });
 
-        // Retry failed webhooks while we're at it
-        console.log(
-            '🔁 Tentative de retraitement des webhooks échoués...\n'
-        );
+        // Retry failed webhooks
+        logSimple({
+            message: 'Tentative de retraitement des webhooks échoués...',
+            color: 'blue',
+            prefix: 'StripeConnect',
+        });
 
-        const { retryFailedWebhooks } = require('../helpers/stripe-webhook-handlers');
         await retryFailedWebhooks(strapi);
 
-        console.log(
-            '✅ Cron job de synchronisation terminé avec succès\n'
-        );
+        logSimple({
+            message: 'Cron job de synchronisation terminé avec succès',
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
     } catch (error) {
         console.error(
-            '❌ Erreur fatale lors du cron job de synchronisation:',
+            'Erreur fatale lors du cron job de synchronisation:',
             error
         );
         throw error;
