@@ -3,6 +3,7 @@ import { handleWebhookEvent } from '../../../helpers/stripe-webhook-handlers';
 import Stripe from 'stripe';
 import { logBlock, logSimple, COLORS } from '../../../helpers/logger';
 import { removeId } from '../../../helpers/sanitizeHelpers';
+import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
 
 export default factories.createCoreController(
     'api::connected-account.connected-account',
@@ -125,18 +126,15 @@ export default factories.createCoreController(
                     );
                 }
 
-                // Validate URL domains
-                const allowedDomains = [
-                    'https://donaction.fr',
-                    'https://www.donaction.fr',
-                    'https://re7.donaction.fr',
-                    'http://localhost',
-                ];
-
-                const isAllowedUrl = (url: string): boolean =>
-                    allowedDomains.some((domain) =>
-                        url.startsWith(domain)
-                    );
+                // Validate URL domains using origin comparison (prevents subdomain bypass)
+                const isAllowedUrl = (url: string): boolean => {
+                    try {
+                        const { origin } = new URL(url);
+                        return ALLOWED_ONBOARDING_DOMAINS.includes(origin);
+                    } catch {
+                        return false;
+                    }
+                };
 
                 if (!isAllowedUrl(refreshUrl) || !isAllowedUrl(returnUrl)) {
                     return ctx.badRequest(
