@@ -76,6 +76,7 @@ jobs:
             node-version: 22
             working-directory: donaction-api
             # TODO: Add npm run lint
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.api }}
           - app: saas

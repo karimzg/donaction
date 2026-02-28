@@ -18,6 +18,7 @@
     "export-db": "strapi export --exclude files --file data/strapi-export --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
     "import-db": "strapi import  --exclude files --file data/strapi-export.tar.gz.enc --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
     "test": "vitest run",
+    "test:ci": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
