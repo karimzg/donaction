@@ -141,11 +141,8 @@ export default factories.createCoreController(
                     );
                 }
 
-                // Check if account exists
-                const connectedAccount = await strapi
-                    .service('api::stripe-connect.stripe-connect')
-                    .retrieveAccount(accountId);
-
+                // Use account already validated by account-owner middleware
+                const connectedAccount = ctx.state.connectedAccount;
                 if (!connectedAccount) {
                     return ctx.notFound(
                         `Compte connecté ${accountId} introuvable`
@@ -210,10 +207,8 @@ export default factories.createCoreController(
                     );
                 }
 
-                const connectedAccount = await strapi
-                    .service('api::stripe-connect.stripe-connect')
-                    .retrieveAccount(accountId);
-
+                // Use account already validated by account-owner middleware
+                const connectedAccount = ctx.state.connectedAccount;
                 if (!connectedAccount) {
                     return ctx.notFound(
                         `Compte connecté ${accountId} introuvable`
@@ -277,10 +272,8 @@ export default factories.createCoreController(
                     );
                 }
 
-                const account = await strapi
-                    .service('api::stripe-connect.stripe-connect')
-                    .retrieveAccount(accountId);
-
+                // Use account already validated by account-owner middleware
+                const account = ctx.state.connectedAccount;
                 if (!account) {
                     return ctx.notFound(
                         `Compte connecté ${accountId} introuvable`
