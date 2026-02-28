@@ -40,7 +40,10 @@ export type TemplateProjectsCategoryEntity =
 export type TemplateProjectsLibraryEntity =
     Data.ContentType<'api::template-projects-library.template-projects-library'>;
 export type TradePolicyEntity =
-    Data.ContentType<'api::trade-policy.trade-policy'>;
+    Data.ContentType<'api::trade-policy.trade-policy'> & {
+        stripe_fee_percentage?: number;
+        stripe_fee_fixed?: number;
+    };
 export type ConnectedAccountEntity =
     Data.ContentType<'api::connected-account.connected-account'>;
 export type FinancialAuditLogEntity =
