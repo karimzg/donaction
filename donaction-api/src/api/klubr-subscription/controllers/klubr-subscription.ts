@@ -239,6 +239,8 @@ export default factories.createCoreController(
                             'donor_pays_fee_project',
                             'donor_pays_fee_club',
                             'commissionPercentage',
+                            'stripe_fee_percentage',
+                            'stripe_fee_fixed',
                         ],
                     },
                 },

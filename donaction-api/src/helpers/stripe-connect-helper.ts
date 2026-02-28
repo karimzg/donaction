@@ -290,14 +290,18 @@ export async function syncAccountStatus(
     return updated as ConnectedAccountEntity;
 }
 
+/** Default Stripe processing fee rates for European cards (France) */
+const DEFAULT_STRIPE_FEE_PERCENTAGE = 1.5;
+const DEFAULT_STRIPE_FEE_FIXED = 0.25;
+
 /**
- * Calculates application fee based on trade policy fee model
+ * Calculates platform commission based on trade policy fee model
  * @param amount - Donation amount in cents
  * @param tradePolicy - Trade policy entity
- * @returns Calculated fee amount in cents
+ * @returns Platform commission in cents (excludes Stripe processing fees)
  * @throws Error if fee parameters are invalid
  */
-export function calculateApplicationFee(
+export function calculatePlatformCommission(
     amount: number,
     tradePolicy: TradePolicyEntity
 ): number {
@@ -342,6 +346,43 @@ export function calculateApplicationFee(
     }
 
     return fee;
+}
+
+/**
+ * Estimates Stripe processing fees for a given donation amount
+ * @param donationAmountCents - Donation amount in cents
+ * @param tradePolicy - Trade policy entity (contains stripe_fee_percentage and stripe_fee_fixed)
+ * @returns Estimated Stripe processing fees in cents
+ */
+export function estimateStripeFees(
+    donationAmountCents: number,
+    tradePolicy: TradePolicyEntity
+): number {
+    const percentage = tradePolicy.stripe_fee_percentage ?? DEFAULT_STRIPE_FEE_PERCENTAGE;
+    const fixed = tradePolicy.stripe_fee_fixed ?? DEFAULT_STRIPE_FEE_FIXED;
+    return Math.round((donationAmountCents * percentage) / 100 + fixed * 100);
+}
+
+/**
+ * Calculates total application fee (platform commission + estimated Stripe fees)
+ *
+ * The application_fee_amount covers both DONACTION's commission and Stripe's
+ * processing fees. This ensures the association receives the expected net amount:
+ * - Scenario A (donor pays): association gets 100% of donation
+ * - Scenario B (fees included): fees are transparently deducted
+ *
+ * @param donationAmountCents - Base donation amount in cents (excluding contribution)
+ * @param tradePolicy - Trade policy entity
+ * @returns Total application fee in cents
+ * @throws Error if fee parameters are invalid
+ */
+export function calculateApplicationFee(
+    donationAmountCents: number,
+    tradePolicy: TradePolicyEntity
+): number {
+    const platformCommission = calculatePlatformCommission(donationAmountCents, tradePolicy);
+    const stripeFees = estimateStripeFees(donationAmountCents, tradePolicy);
+    return platformCommission + stripeFees;
 }
 
 /**

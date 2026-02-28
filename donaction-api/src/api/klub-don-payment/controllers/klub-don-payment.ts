@@ -89,7 +89,7 @@ export default factories.createCoreController(
             await this.validateQuery(ctx);
             await this.sanitizeQuery(ctx);
             try {
-                const { price, metadata, idempotencyKey, donorPaysFee } =
+                const { price, metadata, idempotencyKey, donorPaysFee, donationAmount } =
                     ctx.request.body;
 
                 if (!price || !metadata || !metadata?.donUuid) {
@@ -143,9 +143,15 @@ export default factories.createCoreController(
                     klubr.connected_account as ConnectedAccountEntity;
                 const useStripeConnect = tradePolicy?.stripe_connect ?? false;
 
-                // Calculate base amount in cents
+                // Base amount = price (donation + contribution) in cents
                 let amountInCents = Number(price) * 100;
                 let applicationFeeAmount = 0;
+
+                // Use donationAmount for fee calculation (excludes contribution)
+                // Falls back to price for backward compatibility
+                const baseDonationCents = Math.round(
+                    Number(donationAmount || price) * 100
+                );
 
                 // Stripe Connect path
                 if (useStripeConnect) {
@@ -168,10 +174,11 @@ export default factories.createCoreController(
                         );
                     }
 
-                    // Calculate application fee
+                    // Calculate application fee on base donation amount
+                    // Includes platform commission + estimated Stripe processing fees
                     if (tradePolicy) {
                         applicationFeeAmount = calculateApplicationFee(
-                            amountInCents,
+                            baseDonationCents,
                             tradePolicy
                         );
 
