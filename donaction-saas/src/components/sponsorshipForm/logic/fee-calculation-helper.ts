@@ -3,8 +3,8 @@
  * Implements US-PAY-002 specification for fee model calculations
  */
 
-/** Stripe fees for European cards (France) */
-export const STRIPE_FEES = {
+/** Default Stripe fees for European cards (France) — used as fallback */
+export const STRIPE_FEES_DEFAULTS = {
   PERCENTAGE: 0.015, // 1.5% for European cards
   FIXED: 0.25, // 0.25€ per transaction
 } as const;
@@ -14,6 +14,8 @@ export interface FeeCalculationInput {
   contribution: number; // In euros (voluntary DONACTION contribution)
   donorPaysFee: boolean;
   commissionPercentage: number; // As decimal (0.04 = 4%)
+  stripeFeePercentage?: number; // As decimal (0.015 = 1.5%), defaults to STRIPE_FEES_DEFAULTS.PERCENTAGE
+  stripeFeeFixed?: number; // In euros (0.25€), defaults to STRIPE_FEES_DEFAULTS.FIXED
 }
 
 export interface FeeCalculationOutput {
@@ -37,6 +39,10 @@ export interface FeeCalculationOutput {
 export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput {
   const { montantDon, donorPaysFee, commissionPercentage } = input;
 
+  // Resolve Stripe fee parameters (API-driven with fallback defaults)
+  const stripeFeePercentage = input.stripeFeePercentage ?? STRIPE_FEES_DEFAULTS.PERCENTAGE;
+  const stripeFeeFixed = input.stripeFeeFixed ?? STRIPE_FEES_DEFAULTS.FIXED;
+
   // Validate and sanitize contribution (C4: validate contribution)
   const contribution = isNaN(input.contribution) || input.contribution < 0 ? 0 : input.contribution;
 
@@ -56,9 +62,9 @@ export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput 
   const commissionDonaction = roundToCents(montantDon * commissionPercentage);
 
   if (donorPaysFee) {
-    return calculateScenarioA(montantDon, contribution, commissionDonaction);
+    return calculateScenarioA(montantDon, contribution, commissionDonaction, stripeFeePercentage, stripeFeeFixed);
   } else {
-    return calculateScenarioB(montantDon, contribution, commissionDonaction);
+    return calculateScenarioB(montantDon, contribution, commissionDonaction, stripeFeePercentage, stripeFeeFixed);
   }
 }
 
@@ -71,12 +77,14 @@ function calculateScenarioA(
   montantDon: number,
   contribution: number,
   commissionDonaction: number,
+  stripeFeePercentage: number,
+  stripeFeeFixed: number,
 ): FeeCalculationOutput {
   // Subtotal before Stripe fees
   const subtotal = montantDon + commissionDonaction + contribution;
 
-  // Stripe fees on total charged amount
-  const fraisStripeEstimes = calculateStripeFees(montantDon);
+  // Stripe fees on donation amount
+  const fraisStripeEstimes = calculateStripeFees(montantDon, stripeFeePercentage, stripeFeeFixed);
 
   // Total donor pays
   const totalDonateur = roundToCents(subtotal + fraisStripeEstimes);
@@ -105,12 +113,14 @@ function calculateScenarioB(
   montantDon: number,
   contribution: number,
   commissionDonaction: number,
+  stripeFeePercentage: number,
+  stripeFeeFixed: number,
 ): FeeCalculationOutput {
   // Total charged to donor (no visible fees)
   const totalDonateur = roundToCents(montantDon + contribution);
 
-  // Stripe fees calculated on total charged
-  const fraisStripeEstimes = calculateStripeFees(montantDon);
+  // Stripe fees calculated on donation amount
+  const fraisStripeEstimes = calculateStripeFees(montantDon, stripeFeePercentage, stripeFeeFixed);
 
   // Application fee INCLUDES Stripe fees to ensure DONACTION maintains 4% net
   const applicationFee = roundToCents(commissionDonaction + fraisStripeEstimes);
@@ -130,10 +140,14 @@ function calculateScenarioB(
 
 /**
  * Calculate Stripe fees for a given amount
- * Formula: (amount × 1.5%) + 0.25€
+ * Uses dynamic fee parameters from trade_policy with fallback defaults
  */
-function calculateStripeFees(amount: number): number {
-  return roundToCents(amount * STRIPE_FEES.PERCENTAGE + STRIPE_FEES.FIXED);
+function calculateStripeFees(
+  amount: number,
+  stripeFeePercentage: number,
+  stripeFeeFixed: number,
+): number {
+  return roundToCents(amount * stripeFeePercentage + stripeFeeFixed);
 }
 
 /**

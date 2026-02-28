@@ -23,7 +23,6 @@
   import loader from '../../../../../../assets/animations/loader.json';
   import error from '../../../../../../assets/animations/error.json';
   import { sendGaEvent } from '../../../../../../utils/sendGaEvent';
-  import { calculateFeeAmount } from '../../../../logic/utils';
 
   let clientSecret: string | null = $state(null);
   let stripe: Stripe | null = $state(null);
@@ -46,20 +45,22 @@
       // Generate idempotency key for this payment session
       idempotencyKey = generateIdempotencyKey();
 
-      // Calculate fee if donor pays fee (Stripe Connect mode)
+      // Send base amounts only — backend handles fee calculation
+      // This avoids double-counting: SaaS sends donation + contribution,
+      // backend calculates application_fee and adjusts total if donorPaysFee
       const tradePolicy = SUBSCRIPTION.klubr?.trade_policy;
       const isStripeConnect = tradePolicy?.stripe_connect === true;
-      const commissionPercentage = tradePolicy?.commissionPercentage ?? 4;
-      const feeAmount =
-        isStripeConnect && DEFAULT_VALUES.donorPaysFee
-          ? calculateFeeAmount(DEFAULT_VALUES.montant, commissionPercentage)
-          : 0;
 
-      const totalAmount =
-        DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0) + feeAmount;
+      const baseAmount =
+        DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0);
       // Only send donorPaysFee for Stripe Connect mode (guard condition per US-FORM-003)
       const donorPaysFeeParam = isStripeConnect ? DEFAULT_VALUES.donorPaysFee : undefined;
-      const response = await createPaymentIntent(totalAmount, idempotencyKey, donorPaysFeeParam);
+      const response = await createPaymentIntent(
+        baseAmount,
+        idempotencyKey,
+        donorPaysFeeParam,
+        DEFAULT_VALUES.montant,
+      );
 
       clientSecret = response.intent;
 

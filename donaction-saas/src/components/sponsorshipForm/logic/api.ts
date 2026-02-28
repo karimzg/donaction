@@ -19,6 +19,7 @@ export const createPaymentIntent = (
   price: number,
   idempotencyKey?: string,
   donorPaysFee?: boolean,
+  donationAmount?: number,
 ): Promise<{ intent: string; reused: boolean }> =>
   Fetch({
     endpoint: CREATE_PAYMENT_INTENT,
@@ -27,6 +28,7 @@ export const createPaymentIntent = (
       price,
       idempotencyKey,
       donorPaysFee,
+      donationAmount,
       metadata: {
         donUuid: FORM_CONFIG.donUuid,
         klubUuid: SUBSCRIPTION.klubr.uuid,
