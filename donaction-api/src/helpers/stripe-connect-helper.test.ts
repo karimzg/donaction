@@ -175,7 +175,7 @@ describe('estimateStripeFees', () => {
         expect(fees).toBe(175);
     });
 
-    it('uses custom stripe_fee_percentage from policy', () => {
+    it('uses custom stripe_fee_percentage from policy (fixed fee falls back to default €0.25)', () => {
         const fees = estimateStripeFees(
             10000,
             makePolicy({ stripe_fee_percentage: 2.9 })
@@ -184,7 +184,7 @@ describe('estimateStripeFees', () => {
         expect(fees).toBe(315);
     });
 
-    it('uses custom stripe_fee_fixed from policy', () => {
+    it('uses custom stripe_fee_fixed from policy (percentage falls back to default 1.5%)', () => {
         const fees = estimateStripeFees(
             10000,
             makePolicy({ stripe_fee_fixed: 0.50 })
@@ -209,6 +209,24 @@ describe('estimateStripeFees', () => {
         );
         // (999 * 1.5 / 100) + 25 = 14.985 + 25 = 39.985 → 40
         expect(fees).toBe(40);
+    });
+
+    it('throws on negative stripe_fee_percentage', () => {
+        expect(() =>
+            estimateStripeFees(10000, makePolicy({ stripe_fee_percentage: -1 }))
+        ).toThrow('Pourcentage de frais Stripe invalide');
+    });
+
+    it('throws on stripe_fee_percentage > 100', () => {
+        expect(() =>
+            estimateStripeFees(10000, makePolicy({ stripe_fee_percentage: 101 }))
+        ).toThrow('Pourcentage de frais Stripe invalide');
+    });
+
+    it('throws on negative stripe_fee_fixed', () => {
+        expect(() =>
+            estimateStripeFees(10000, makePolicy({ stripe_fee_fixed: -0.5 }))
+        ).toThrow('Frais fixes Stripe invalides');
     });
 });
 

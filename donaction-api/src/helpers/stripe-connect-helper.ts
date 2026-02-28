@@ -360,6 +360,14 @@ export function estimateStripeFees(
 ): number {
     const percentage = tradePolicy.stripe_fee_percentage ?? DEFAULT_STRIPE_FEE_PERCENTAGE;
     const fixed = tradePolicy.stripe_fee_fixed ?? DEFAULT_STRIPE_FEE_FIXED;
+
+    if (percentage < 0 || percentage > 100) {
+        throw new Error('Pourcentage de frais Stripe invalide');
+    }
+    if (fixed < 0) {
+        throw new Error('Frais fixes Stripe invalides');
+    }
+
     return Math.round((donationAmountCents * percentage) / 100 + fixed * 100);
 }
 

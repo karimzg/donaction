@@ -41,7 +41,9 @@ export type TemplateProjectsLibraryEntity =
     Data.ContentType<'api::template-projects-library.template-projects-library'>;
 export type TradePolicyEntity =
     Data.ContentType<'api::trade-policy.trade-policy'> & {
+        /** Stripe processing fee rate, stored as percentage (e.g. 1.5 for 1.5%) */
         stripe_fee_percentage?: number;
+        /** Stripe fixed fee per transaction in euros (e.g. 0.25 for €0.25) */
         stripe_fee_fixed?: number;
     };
 export type ConnectedAccountEntity =

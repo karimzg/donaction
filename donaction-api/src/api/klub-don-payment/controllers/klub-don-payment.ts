@@ -149,8 +149,20 @@ export default factories.createCoreController(
 
                 // Use donationAmount for fee calculation (excludes contribution)
                 // Falls back to price for backward compatibility
+                // Validate: donationAmount must be positive and ≤ price
+                const rawDonation = donationAmount ?? price;
+                if (
+                    typeof rawDonation !== 'number' ||
+                    isNaN(rawDonation) ||
+                    rawDonation <= 0 ||
+                    rawDonation > Number(price)
+                ) {
+                    return ctx.badRequest(
+                        'Montant de donation invalide'
+                    );
+                }
                 const baseDonationCents = Math.round(
-                    Number(donationAmount || price) * 100
+                    Number(rawDonation) * 100
                 );
 
                 // Stripe Connect path
