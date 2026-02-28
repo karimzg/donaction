@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { calculateApplicationFee } from './stripe-connect-helper';
+import { describe, it, expect, vi } from 'vitest';
 import { TradePolicyEntity } from '../_types';
+
+// Stub env vars before importing module (top-level guard throws without them)
+vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
+vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
+
+const { calculateApplicationFee } = await import('./stripe-connect-helper');
 
 /** Helper to build a minimal TradePolicyEntity for tests */
 const makePolicy = (
