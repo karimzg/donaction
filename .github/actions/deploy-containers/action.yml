@@ -57,9 +57,14 @@ runs:
 
     - name: Backup current deployment
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_DIR: ${{ inputs.deploy-dir }}
       run: |
-        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << 'EOF'
-          cd ${{ inputs.deploy-dir }}
+        ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa "${SSH_USER}@${SSH_HOST}" "DEPLOY_DIR='${DEPLOY_DIR}' bash -s" << 'EOF'
+          cd "$DEPLOY_DIR"
           if docker compose ps -q 2>/dev/null | grep -q .; then
             echo "Backing up current deployment state..."
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -79,12 +84,19 @@ runs:
 
     - name: Pull Docker images
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_DIR: ${{ inputs.deploy-dir }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
+        SERVICES: ${{ inputs.services-list }}
       run: |
-        SERVICES="${{ inputs.services-list }}"
-        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
-          cd ${{ inputs.deploy-dir }}
-          export IMAGE_TAG="${{ inputs.image-tag }}"
-          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+        ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa "${SSH_USER}@${SSH_HOST}" << EOF
+          cd $DEPLOY_DIR
+          export IMAGE_TAG="$IMAGE_TAG"
+          export IMAGE_REGISTRY="$IMAGE_REGISTRY"
           echo "Pulling images for: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
           if [[ -n "$SERVICES" ]]; then
             docker compose pull $SERVICES
@@ -97,17 +109,25 @@ runs:
     - name: Run database migrations
       if: inputs.run-migrations == 'true'
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_DIR: ${{ inputs.deploy-dir }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
+        DB_READY_TIMEOUT: ${{ inputs.db-ready-timeout }}
       run: |
-        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
-          cd ${{ inputs.deploy-dir }}
-          export IMAGE_TAG="${{ inputs.image-tag }}"
-          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+        ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa "${SSH_USER}@${SSH_HOST}" << EOF
+          cd $DEPLOY_DIR
+          export IMAGE_TAG="$IMAGE_TAG"
+          export IMAGE_REGISTRY="$IMAGE_REGISTRY"
 
           echo "Ensuring PostgreSQL is running..."
           docker compose up -d postgres
 
-          echo "Waiting for PostgreSQL to be healthy (timeout: ${{ inputs.db-ready-timeout }}s)..."
-          timeout ${{ inputs.db-ready-timeout }} bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
+          echo "Waiting for PostgreSQL to be healthy (timeout: ${DB_READY_TIMEOUT}s)..."
+          timeout $DB_READY_TIMEOUT bash -c 'until docker compose exec -T postgres pg_isready; do sleep 2; done'
 
           echo "Running Strapi database migrations..."
           if docker compose run --rm --no-deps api npm run strapi -- database:migrate 2>&1 | tee /tmp/migration.log; then
@@ -121,15 +141,22 @@ runs:
     - name: Deploy containers
       id: deploy
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_DIR: ${{ inputs.deploy-dir }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
+        SERVICES: ${{ inputs.services-list }}
       run: |
-        SERVICES="${{ inputs.services-list }}"
         DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         echo "deployment_time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
 
-        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
-          cd ${{ inputs.deploy-dir }}
-          export IMAGE_TAG="${{ inputs.image-tag }}"
-          export IMAGE_REGISTRY="${{ inputs.image-registry }}"
+        ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa "${SSH_USER}@${SSH_HOST}" << EOF
+          cd $DEPLOY_DIR
+          export IMAGE_TAG="$IMAGE_TAG"
+          export IMAGE_REGISTRY="$IMAGE_REGISTRY"
 
           echo "Deploying: \${SERVICES:-all services} with tag: \${IMAGE_TAG}..."
 
