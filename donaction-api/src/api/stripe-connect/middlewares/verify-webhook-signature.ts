@@ -1,6 +1,6 @@
 import { Core } from '@strapi/strapi';
 import { Context } from 'koa';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { stripe } from '../../../helpers/stripe-connect-helper';
 import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 

@@ -17,16 +17,16 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     try {
-        // Get all connected accounts except disabled ones
-        const accounts = await strapi
-            .service('api::stripe-connect.stripe-connect')
-            .listAccounts({
-                account_status: undefined,
+        // Get all connected accounts except disabled ones (filtered at DB level)
+        const activeAccounts = await strapi.db
+            .query('api::connected-account.connected-account')
+            .findMany({
+                where: {
+                    account_status: { $ne: 'disabled' },
+                },
+                populate: { klubr: true },
+                orderBy: [{ createdAt: 'desc' }],
             });
-
-        const activeAccounts = accounts.filter(
-            (account) => account.account_status !== 'disabled'
-        );
 
         logSimple({
             message: `${activeAccounts.length} compte(s) actif(s) à synchroniser`,
@@ -37,18 +37,27 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
         let successCount = 0;
         let errorCount = 0;
 
-        for (const account of activeAccounts) {
-            try {
-                await strapi
-                    .service('api::stripe-connect.stripe-connect')
-                    .syncAccountStatus(account.stripe_account_id);
+        // Process in parallel batches of 10 to avoid Stripe rate limits
+        const BATCH_SIZE = 10;
+        for (let i = 0; i < activeAccounts.length; i += BATCH_SIZE) {
+            const batch = activeAccounts.slice(i, i + BATCH_SIZE);
+            const results = await Promise.allSettled(
+                batch.map((account) =>
+                    strapi
+                        .service('api::stripe-connect.stripe-connect')
+                        .syncAccountStatus(account.stripe_account_id)
+                )
+            );
 
-                successCount++;
-            } catch (error) {
-                errorCount++;
-                strapiLog.error(
-                    `Échec synchronisation ${account.stripe_account_id}: ${error.message}`
-                );
+            for (let j = 0; j < results.length; j++) {
+                if (results[j].status === 'fulfilled') {
+                    successCount++;
+                } else {
+                    errorCount++;
+                    strapiLog.error(
+                        `Échec synchronisation ${batch[j].stripe_account_id}: ${(results[j] as PromiseRejectedResult).reason?.message}`
+                    );
+                }
             }
         }
 

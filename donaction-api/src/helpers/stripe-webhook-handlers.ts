@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 import { syncAccountStatus, stripe } from './stripe-connect-helper';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
@@ -320,6 +320,7 @@ export async function retryFailedWebhooks(
                         documentId: log.documentId,
                         data: {
                             processed: true,
+                            processed_at: new Date(),
                             retry_count: log.retry_count + 1,
                             error_message: null,
                         },
@@ -331,6 +332,28 @@ export async function retryFailedWebhooks(
                     prefix: 'StripeConnect',
                 });
             } catch (error) {
+                // Stripe events expire after 30 days — mark as permanently failed
+                if (error?.statusCode === 404) {
+                    logSimple({
+                        message: `Événement ${log.event_id} expiré sur Stripe (>30 jours)`,
+                        color: 'yellow',
+                        prefix: 'StripeConnect',
+                    });
+
+                    await strapiInstance
+                        .documents('api::webhook-log.webhook-log')
+                        .update({
+                            documentId: log.documentId,
+                            data: {
+                                processed: true,
+                                processed_at: new Date(),
+                                retry_count: 3,
+                                error_message: 'Event expired on Stripe (>30 days)',
+                            },
+                        });
+                    continue;
+                }
+
                 strapiLog.error(
                     `Échec du retraitement du webhook ${log.event_id}:`,
                     error

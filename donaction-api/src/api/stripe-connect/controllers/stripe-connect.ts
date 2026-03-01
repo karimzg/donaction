@@ -1,6 +1,6 @@
 import { Core, factories } from '@strapi/strapi';
 import { handleWebhookEvent } from '../../../helpers/stripe-webhook-handlers';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 import { removeId } from '../../../helpers/sanitizeHelpers';
 import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
@@ -219,6 +219,8 @@ export default factories.createCoreController(
                     .service('api::stripe-connect.stripe-connect')
                     .syncAccountStatus(accountId);
 
+                const sanitizedUpdated = await this.sanitizeOutput(updated, ctx) as any;
+
                 logSimple({
                     message: 'Compte synchronisé avec succès',
                     color: 'green',
@@ -228,11 +230,11 @@ export default factories.createCoreController(
                 return ctx.send({
                     success: true,
                     data: removeId({
-                        accountId: updated.stripe_account_id,
-                        accountStatus: updated.account_status,
-                        verificationStatus: updated.verification_status,
-                        onboardingCompleted: updated.onboarding_completed,
-                        lastSync: updated.last_sync,
+                        accountId: sanitizedUpdated.stripe_account_id,
+                        accountStatus: sanitizedUpdated.account_status,
+                        verificationStatus: sanitizedUpdated.verification_status,
+                        onboardingCompleted: sanitizedUpdated.onboarding_completed,
+                        lastSync: sanitizedUpdated.last_sync,
                     }),
                 });
             } catch (error) {
@@ -280,6 +282,8 @@ export default factories.createCoreController(
                     );
                 }
 
+                const sanitizedAccount = await this.sanitizeOutput(account, ctx) as any;
+
                 logSimple({
                     message: 'Compte récupéré avec succès',
                     color: 'green',
@@ -289,15 +293,15 @@ export default factories.createCoreController(
                 return ctx.send({
                     success: true,
                     data: removeId({
-                        accountId: account.stripe_account_id,
-                        accountStatus: account.account_status,
-                        verificationStatus: account.verification_status,
-                        onboardingCompleted: account.onboarding_completed,
-                        businessType: account.business_type,
-                        country: account.country,
-                        capabilities: account.capabilities,
-                        requirements: account.requirements,
-                        lastSync: account.last_sync,
+                        accountId: sanitizedAccount.stripe_account_id,
+                        accountStatus: sanitizedAccount.account_status,
+                        verificationStatus: sanitizedAccount.verification_status,
+                        onboardingCompleted: sanitizedAccount.onboarding_completed,
+                        businessType: sanitizedAccount.business_type,
+                        country: sanitizedAccount.country,
+                        capabilities: sanitizedAccount.capabilities,
+                        requirements: sanitizedAccount.requirements,
+                        lastSync: sanitizedAccount.last_sync,
                     }),
                 });
             } catch (error) {
@@ -424,6 +428,7 @@ export default factories.createCoreController(
                             documentId: webhookLog.documentId,
                             data: {
                                 processed: true,
+                                processed_at: new Date(),
                             },
                         });
 
@@ -450,9 +455,9 @@ export default factories.createCoreController(
                             },
                         });
 
-                    // Return 200 to Stripe to avoid retries
+                    // Return 200 to Stripe to avoid retries (don't leak internal error details)
                     // Failed events will be retried by our own retry logic
-                    return ctx.send({ received: true, error: handlerError.message });
+                    return ctx.send({ received: true });
                 }
             } catch (error) {
                 strapiLog.error(

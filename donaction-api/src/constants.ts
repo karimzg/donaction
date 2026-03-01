@@ -8,8 +8,9 @@ const ALLOWED_ONBOARDING_DOMAINS = [
     'https://donaction.fr',
     'https://www.donaction.fr',
     'https://re7.donaction.fr',
-    'http://localhost:3100',
-    'http://localhost:3000',
+    ...(process.env.NODE_ENV === 'development'
+        ? ['http://localhost:3100', 'http://localhost:3000']
+        : []),
 ];
 
 export {

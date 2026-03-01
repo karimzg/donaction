@@ -1,5 +1,5 @@
 import { Data } from '@strapi/strapi';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export type BlogEntity = Data.ContentType<'api::blog.blog'>;
 export type CguEntity = Data.ContentType<'api::cgu.cgu'>;

@@ -5,7 +5,7 @@
 import { Core, factories } from '@strapi/strapi';
 import { KlubDonEntity } from '../../../_types';
 import GetAttNumber from '../../../helpers/getAttNumber';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export default factories.createCoreService(
     'api::klub-don-payment.klub-don-payment',

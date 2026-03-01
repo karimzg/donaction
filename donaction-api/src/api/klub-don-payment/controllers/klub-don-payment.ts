@@ -20,6 +20,7 @@ import {
     logFinancialAction,
     stripe,
 } from '../../../helpers/stripe-connect-helper';
+import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 
 export default factories.createCoreController(
     'api::klub-don-payment.klub-don-payment',
@@ -80,7 +81,7 @@ export default factories.createCoreController(
                     intent: paymentIntent,
                 });
             } catch (e) {
-                console.log(e);
+                strapiLog.error('Erreur check payment:', e);
                 return ctx.badRequest('Une erreur est survenue');
             }
         },
@@ -113,9 +114,11 @@ export default factories.createCoreController(
                             idempotencyKey
                         );
                     if (existingPayment?.client_secret) {
-                        console.log(
-                            `♻️ Réutilisation du payment intent existant pour la clé: ${idempotencyKey}`
-                        );
+                        logSimple({
+                            message: `Réutilisation du payment intent existant pour la clé: ${idempotencyKey}`,
+                            color: 'yellow',
+                            prefix: 'KlubDonPayment',
+                        });
                         return {
                             intent: existingPayment.client_secret,
                             reused: true,
@@ -161,8 +164,8 @@ export default factories.createCoreController(
 
                 // Cross-check client price against DB (tolerance: 1 cent)
                 if (Math.abs(Number(price) - expectedPrice) > 0.01) {
-                    console.error(
-                        `⚠️ Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
+                    strapiLog.error(
+                        `Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
                     );
                     return ctx.badRequest(
                         'Montant incohérent avec le don enregistré'
@@ -179,8 +182,8 @@ export default factories.createCoreController(
                 // Stripe Connect path
                 if (useStripeConnect) {
                     if (!connectedAccount?.stripe_account_id) {
-                        console.error(
-                            `❌ Compte Stripe Connect manquant pour le klub: ${klubr.uuid}`
+                        strapiLog.error(
+                            `Compte Stripe Connect manquant pour le klub: ${klubr.uuid}`
                         );
                         return ctx.badRequest(
                             'Ce klub n\'a pas de compte Stripe Connect configuré'
@@ -189,44 +192,53 @@ export default factories.createCoreController(
 
                     // Validate charges_enabled
                     if (!connectedAccount.charges_enabled) {
-                        console.error(
-                            `❌ Compte Stripe non activé pour les paiements: ${connectedAccount.stripe_account_id}`
+                        strapiLog.error(
+                            `Compte Stripe non activé pour les paiements: ${connectedAccount.stripe_account_id}`
                         );
                         return ctx.badRequest(
                             'Le compte de paiement de ce klub n\'est pas encore activé. Veuillez réessayer plus tard.'
                         );
                     }
 
+                    // Reject payment if trade_policy is missing (prevents silent zero-fee)
+                    if (!tradePolicy) {
+                        return ctx.badRequest(
+                            'Ce klubr n\'a pas de politique commerciale configurée'
+                        );
+                    }
+
                     // Calculate application fee on base donation amount
                     // Includes platform commission + estimated Stripe processing fees
-                    if (tradePolicy) {
-                        applicationFeeAmount = calculateApplicationFee(
-                            baseDonationCents,
-                            tradePolicy
-                        );
+                    applicationFeeAmount = calculateApplicationFee(
+                        baseDonationCents,
+                        tradePolicy
+                    );
 
-                        // Validate donorPaysFee against trade_policy setting
-                        // Use policy setting if client tries to bypass
-                        const shouldDonorPayFee =
-                            tradePolicy.donor_pays_fee && donorPaysFee;
+                    // Validate donorPaysFee against trade_policy setting (strict boolean)
+                    // Use policy setting if client tries to bypass
+                    const shouldDonorPayFee =
+                        tradePolicy.donor_pays_fee && donorPaysFee === true;
 
-                        // If donor pays fee, add it to total amount
-                        if (shouldDonorPayFee) {
-                            amountInCents += applicationFeeAmount;
-                        }
+                    // If donor pays fee, add it to total amount
+                    if (shouldDonorPayFee) {
+                        amountInCents += applicationFeeAmount;
                     }
 
                     // Determine actual donor pays fee value
                     const actualDonorPaysFee =
-                        tradePolicy?.donor_pays_fee && donorPaysFee;
+                        tradePolicy.donor_pays_fee && donorPaysFee === true;
 
-                    console.log('\n💳 ════════════════════════════════════════');
-                    console.log('💳 CRÉATION PAYMENT INTENT (STRIPE CONNECT)');
-                    console.log(`💳 Montant: ${amountInCents / 100}€`);
-                    console.log(`💳 Frais application: ${applicationFeeAmount / 100}€`);
-                    console.log(`💳 Donateur paie frais: ${actualDonorPaysFee}`);
-                    console.log(`💳 Compte connecté: ${connectedAccount.stripe_account_id}`);
-                    console.log('💳 ════════════════════════════════════════\n');
+                    logBlock({
+                        statusColor: COLORS.blue,
+                        entries: [
+                            { key: 'Action', value: 'Création Payment Intent (Stripe Connect)' },
+                            { key: 'Montant', value: `${amountInCents / 100}€` },
+                            { key: 'Frais app.', value: `${applicationFeeAmount / 100}€` },
+                            { key: 'Donor fees', value: String(actualDonorPaysFee) },
+                            { key: 'Compte', value: connectedAccount.stripe_account_id },
+                        ],
+                        prefix: 'KlubDonPayment',
+                    });
 
                     // Create PaymentIntent for Stripe Connect
                     const paymentIntentParams: Stripe.PaymentIntentCreateParams =
@@ -234,7 +246,10 @@ export default factories.createCoreController(
                             amount: amountInCents,
                             currency: 'eur',
                             metadata: {
-                                ...metadata,
+                                donUuid: metadata.donUuid,
+                                donorUuid: metadata.donorUuid,
+                                klubUuid: metadata.klubUuid,
+                                projectUuid: metadata.projectUuid,
                                 payment_method: 'stripe_connect',
                                 donor_pays_fee: String(actualDonorPaysFee),
                             },
@@ -287,17 +302,24 @@ export default factories.createCoreController(
                 }
 
                 // Classic Stripe path (stripeConnect = false)
-                console.log('\n💳 ════════════════════════════════════════');
-                console.log('💳 CRÉATION PAYMENT INTENT (STRIPE CLASSIQUE)');
-                console.log(`💳 Montant: ${amountInCents / 100}€`);
-                console.log('💳 ════════════════════════════════════════\n');
+                logBlock({
+                    statusColor: COLORS.blue,
+                    entries: [
+                        { key: 'Action', value: 'Création Payment Intent (Stripe Classique)' },
+                        { key: 'Montant', value: `${amountInCents / 100}€` },
+                    ],
+                    prefix: 'KlubDonPayment',
+                });
 
                 const paymentIntent = await stripe.paymentIntents.create(
                     {
                         amount: amountInCents,
                         currency: 'eur',
                         metadata: {
-                            ...metadata,
+                            donUuid: metadata.donUuid,
+                            donorUuid: metadata.donorUuid,
+                            klubUuid: metadata.klubUuid,
+                            projectUuid: metadata.projectUuid,
                             payment_method: 'stripe_classic',
                         },
                     },
@@ -322,7 +344,7 @@ export default factories.createCoreController(
                     reused: false,
                 };
             } catch (e) {
-                console.error('❌ Erreur création payment intent:', e);
+                strapiLog.error('Erreur création payment intent:', e);
                 return ctx.badRequest(
                     'Une erreur est survenue lors de la création du paiement'
                 );
@@ -345,9 +367,8 @@ export default factories.createCoreController(
                         endpointSecret,
                     );
                 } catch (err) {
-                    console.error(
-                        '⚠️ Webhook signature verification failed:',
-                        err.message,
+                    strapiLog.error(
+                        `Webhook signature verification failed: ${err.message}`
                     );
                     return ctx.badRequest(`Webhook Error: ${err.message}`);
                 }
@@ -358,10 +379,11 @@ export default factories.createCoreController(
                 // Handle events
                 switch (event.type) {
                     case 'payment_intent.created':
-                        console.info(
-                            '✅ Payment intent created:',
-                            event.data.object,
-                        );
+                        logSimple({
+                            message: `Payment intent created: ${event.data.object.id}`,
+                            color: 'green',
+                            prefix: 'KlubDonPayment',
+                        });
                         await strapi.services[
                             'api::klub-don-payment.klub-don-payment'
                         ].updateDonAndDonPayment({
@@ -371,10 +393,11 @@ export default factories.createCoreController(
                         });
                         break;
                     case 'payment_intent.succeeded':
-                        console.info(
-                            '✅ Payment successful:',
-                            event.data.object,
-                        );
+                        logSimple({
+                            message: `Payment successful: ${event.data.object.id}`,
+                            color: 'green',
+                            prefix: 'KlubDonPayment',
+                        });
                         await strapi.services[
                             'api::klub-don-payment.klub-don-payment'
                         ].updateDonAndDonPayment({
@@ -384,10 +407,11 @@ export default factories.createCoreController(
                         });
                         break;
                     case 'payment_intent.payment_failed':
-                        console.info(
-                            'Payment intent failed:',
-                            event.data.object,
-                        );
+                        logSimple({
+                            message: `Payment intent failed: ${event.data.object.id}`,
+                            color: 'red',
+                            prefix: 'KlubDonPayment',
+                        });
                         await strapi.services[
                             'api::klub-don-payment.klub-don-payment'
                         ].updateDonAndDonPayment({
@@ -397,12 +421,16 @@ export default factories.createCoreController(
                         });
                         break;
                     default:
-                        console.warn(`Unhandled event type: ${event.type}`);
+                        logSimple({
+                            message: `Unhandled event type: ${event.type}`,
+                            color: 'yellow',
+                            prefix: 'KlubDonPayment',
+                        });
                 }
 
                 ctx.send({ received: true });
             } catch (e) {
-                console.error('❌ Erreur webhook Stripe:', e);
+                strapiLog.error('Erreur webhook Stripe:', e);
                 return ctx.internalServerError(
                     'Une erreur est survenue lors du traitement du webhook'
                 );

@@ -1,5 +1,5 @@
 import { Core, factories } from '@strapi/strapi';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import {
     createConnectedAccount,
     generateAccountLink,

@@ -3,8 +3,8 @@
  */
 export async function up(knex) {
     // webhook_logs: index on processed for retry queries
-    const hasProcessedIndex = await knex.schema.hasTable('webhook_logs');
-    if (hasProcessedIndex) {
+    const hasWebhookLogsTable = await knex.schema.hasTable('webhook_logs');
+    if (hasWebhookLogsTable) {
         await knex.schema.alterTable('webhook_logs', (table) => {
             table.index(['processed', 'retry_count'], 'idx_webhook_logs_processed_retry');
         });
