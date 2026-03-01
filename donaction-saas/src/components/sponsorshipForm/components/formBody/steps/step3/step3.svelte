@@ -53,14 +53,22 @@
       : (tradePolicy?.donor_pays_fee_club ?? false),
   );
 
-  // Fee calculations using full helper
+  // Fee calculations using full helper with API-driven Stripe fee params
+  // API returns stripe_fee_percentage as decimal (e.g. 0.015 for 1.5%) — no conversion needed
   const commissionPercentage = $derived(tradePolicy?.commissionPercentage ?? 4);
+  const stripeFeePercentage = $derived(
+    tradePolicy?.stripe_fee_percentage ?? undefined,
+  );
+  // Convert null → undefined so downstream ?? fallback works correctly
+  const stripeFeeFixed = $derived(tradePolicy?.stripe_fee_fixed ?? undefined);
   const fees = $derived<FeeCalculationOutput>(
     calculateFees({
       montantDon: DEFAULT_VALUES.montant,
       contribution: DEFAULT_VALUES.contributionAKlubr || 0,
       donorPaysFee: DEFAULT_VALUES.donorPaysFee,
       commissionPercentage: (commissionPercentage || 4) / 100,
+      stripeFeePercentage,
+      stripeFeeFixed,
     }),
   );
 

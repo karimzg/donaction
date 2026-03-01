@@ -290,14 +290,18 @@ export async function syncAccountStatus(
     return updated as ConnectedAccountEntity;
 }
 
+/** Default Stripe processing fee rates for European cards (France) */
+const DEFAULT_STRIPE_FEE_PERCENTAGE = 1.5;
+const DEFAULT_STRIPE_FEE_FIXED = 0.25;
+
 /**
- * Calculates application fee based on trade policy fee model
+ * Calculates platform commission based on trade policy fee model
  * @param amount - Donation amount in cents
  * @param tradePolicy - Trade policy entity
- * @returns Calculated fee amount in cents
+ * @returns Platform commission in cents (excludes Stripe processing fees)
  * @throws Error if fee parameters are invalid
  */
-export function calculateApplicationFee(
+export function calculatePlatformCommission(
     amount: number,
     tradePolicy: TradePolicyEntity
 ): number {
@@ -342,6 +346,58 @@ export function calculateApplicationFee(
     }
 
     return fee;
+}
+
+/**
+ * Estimates Stripe processing fees for a given donation amount.
+ *
+ * IMPORTANT: This is an **estimate** based on standard European card rates.
+ * Actual Stripe fees vary by card type (EU vs non-EU, credit vs debit, AMEX)
+ * and may differ from this calculation. If the estimate is too low, the platform
+ * absorbs the difference. A misconfigured stripe_fee_percentage of 0 would
+ * silently zero out Stripe fee recovery — validate inputs accordingly.
+ *
+ * @param donationAmountCents - Donation amount in cents
+ * @param tradePolicy - Trade policy entity (stripe_fee_percentage stored as percentage, e.g. 1.5 for 1.5%)
+ * @returns Estimated Stripe processing fees in cents
+ */
+export function estimateStripeFees(
+    donationAmountCents: number,
+    tradePolicy: TradePolicyEntity
+): number {
+    const percentage = tradePolicy.stripe_fee_percentage ?? DEFAULT_STRIPE_FEE_PERCENTAGE;
+    const fixed = tradePolicy.stripe_fee_fixed ?? DEFAULT_STRIPE_FEE_FIXED;
+
+    if (percentage < 0 || percentage > 100) {
+        throw new Error('Pourcentage de frais Stripe invalide');
+    }
+    if (fixed < 0) {
+        throw new Error('Frais fixes Stripe invalides');
+    }
+
+    return Math.round((donationAmountCents * percentage) / 100 + fixed * 100);
+}
+
+/**
+ * Calculates total application fee (platform commission + estimated Stripe fees)
+ *
+ * The application_fee_amount covers both DONACTION's commission and Stripe's
+ * processing fees. This ensures the association receives the expected net amount:
+ * - Scenario A (donor pays): association gets 100% of donation
+ * - Scenario B (fees included): fees are transparently deducted
+ *
+ * @param donationAmountCents - Base donation amount in cents (excluding contribution)
+ * @param tradePolicy - Trade policy entity
+ * @returns Total application fee in cents
+ * @throws Error if fee parameters are invalid
+ */
+export function calculateApplicationFee(
+    donationAmountCents: number,
+    tradePolicy: TradePolicyEntity
+): number {
+    const platformCommission = calculatePlatformCommission(donationAmountCents, tradePolicy);
+    const stripeFees = estimateStripeFees(donationAmountCents, tradePolicy);
+    return platformCommission + stripeFees;
 }
 
 /**

@@ -106,6 +106,16 @@
       "type": "boolean",
       "default": true,
       "required": false
+    },
+    "stripe_fee_percentage": {
+      "type": "decimal",
+      "default": 1.5,
+      "required": false
+    },
+    "stripe_fee_fixed": {
+      "type": "decimal",
+      "default": 0.25,
+      "required": false
     }
   }
 }

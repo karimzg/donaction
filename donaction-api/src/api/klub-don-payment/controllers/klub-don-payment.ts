@@ -143,9 +143,38 @@ export default factories.createCoreController(
                     klubr.connected_account as ConnectedAccountEntity;
                 const useStripeConnect = tradePolicy?.stripe_connect ?? false;
 
-                // Calculate base amount in cents
-                let amountInCents = Number(price) * 100;
+                // Fetch don record to derive trusted donation amount from DB
+                // (never trust client-provided donationAmount for fee calculation)
+                const don: KlubDonEntity = await strapi.db
+                    .query('api::klub-don.klub-don')
+                    .findOne({
+                        where: { uuid: metadata.donUuid },
+                    });
+
+                if (!don) {
+                    return ctx.badRequest('Don introuvable');
+                }
+
+                const trustedDonation = Number(don.montant);
+                const trustedContribution = Number(don.contributionAKlubr || 0);
+                const expectedPrice = trustedDonation + trustedContribution;
+
+                // Cross-check client price against DB (tolerance: 1 cent)
+                if (Math.abs(Number(price) - expectedPrice) > 0.01) {
+                    console.error(
+                        `⚠️ Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
+                    );
+                    return ctx.badRequest(
+                        'Montant incohérent avec le don enregistré'
+                    );
+                }
+
+                // Base amount = total price (donation + contribution) in cents
+                let amountInCents = Math.round(expectedPrice * 100);
                 let applicationFeeAmount = 0;
+
+                // Fee base = donation amount only (excludes contribution)
+                const baseDonationCents = Math.round(trustedDonation * 100);
 
                 // Stripe Connect path
                 if (useStripeConnect) {
@@ -168,10 +197,11 @@ export default factories.createCoreController(
                         );
                     }
 
-                    // Calculate application fee
+                    // Calculate application fee on base donation amount
+                    // Includes platform commission + estimated Stripe processing fees
                     if (tradePolicy) {
                         applicationFeeAmount = calculateApplicationFee(
-                            amountInCents,
+                            baseDonationCents,
                             tradePolicy
                         );
 

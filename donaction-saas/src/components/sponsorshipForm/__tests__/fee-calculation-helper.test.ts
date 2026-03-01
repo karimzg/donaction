@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { STRIPE_FEES, calculateFees, FeeCalculationInput } from '../logic/fee-calculation-helper';
+import { STRIPE_FEES_DEFAULTS, calculateFees, FeeCalculationInput } from '../logic/fee-calculation-helper';
 
 describe('fee-calculation-helper test suite', () => {
-  describe('STRIPE_FEES constants', () => {
+  describe('STRIPE_FEES_DEFAULTS constants', () => {
     it('should have PERCENTAGE of 0.015 (1.5%)', () => {
-      expect(STRIPE_FEES.PERCENTAGE).toBe(0.015);
+      expect(STRIPE_FEES_DEFAULTS.PERCENTAGE).toBe(0.015);
     });
 
     it('should have FIXED fee of 0.25 euros', () => {
-      expect(STRIPE_FEES.FIXED).toBe(0.25);
+      expect(STRIPE_FEES_DEFAULTS.FIXED).toBe(0.25);
     });
   });
 
@@ -683,6 +683,127 @@ describe('fee-calculation-helper test suite', () => {
 
       expect(result.montantRecuFiscal).toBe(result.netAssociation);
       expect(result.montantRecuFiscal).toBe(input.montantDon);
+    });
+  });
+
+  describe('calculateFees - dynamic Stripe fee parameters', () => {
+    it('should use default Stripe fees when not provided', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+      };
+      const result = calculateFees(input);
+
+      // Default: 1.5% + €0.25
+      const expectedStripeFees = 100 * 0.015 + 0.25; // 1.75
+      expect(result.fraisStripeEstimes).toBe(expectedStripeFees);
+    });
+
+    it('should use custom Stripe fee percentage when provided', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: 0.029, // 2.9% (non-EU card rate)
+        stripeFeeFixed: 0.25,
+      };
+      const result = calculateFees(input);
+
+      // 100 * 0.029 + 0.25 = 3.15 (rounded to cents)
+      expect(result.fraisStripeEstimes).toBe(3.15);
+    });
+
+    it('should use custom Stripe fixed fee when provided', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: 0.015,
+        stripeFeeFixed: 0.50, // Custom fixed fee
+      };
+      const result = calculateFees(input);
+
+      const expectedStripeFees = 100 * 0.015 + 0.50; // 2.00
+      expect(result.fraisStripeEstimes).toBe(expectedStripeFees);
+    });
+
+    it('should calculate Scenario A correctly with custom Stripe fees', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 2,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: 0.029,
+        stripeFeeFixed: 0.30,
+      };
+      const result = calculateFees(input);
+
+      const expectedCommission = 4;
+      const expectedStripeFees = 100 * 0.029 + 0.30; // 3.20
+      const expectedApplicationFee = expectedCommission + expectedStripeFees; // 7.20
+      const expectedTotal = 100 + expectedCommission + 2 + expectedStripeFees;
+
+      expect(result.commissionDonaction).toBe(expectedCommission);
+      expect(result.fraisStripeEstimes).toBe(expectedStripeFees);
+      expect(result.applicationFee).toBe(expectedApplicationFee);
+      expect(result.totalDonateur).toBe(expectedTotal);
+      expect(result.netAssociation).toBe(100);
+    });
+
+    it('should calculate Scenario B correctly with custom Stripe fees', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: false,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: 0.029,
+        stripeFeeFixed: 0.30,
+      };
+      const result = calculateFees(input);
+
+      const expectedCommission = 4;
+      const expectedStripeFees = 100 * 0.029 + 0.30; // 3.20
+      const expectedApplicationFee = expectedCommission + expectedStripeFees; // 7.20
+      const expectedNetAssociation = 100 - expectedApplicationFee; // 92.80
+
+      expect(result.totalDonateur).toBe(100);
+      expect(result.netAssociation).toBe(expectedNetAssociation);
+      expect(result.montantRecuFiscal).toBe(expectedNetAssociation);
+    });
+
+    it('should fall back to defaults when only one param is undefined', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: undefined,
+        stripeFeeFixed: 0.50,
+      };
+      const result = calculateFees(input);
+
+      // stripeFeePercentage falls back to 0.015, stripeFeeFixed uses 0.50
+      const expectedStripeFees = 100 * 0.015 + 0.50; // 2.00
+      expect(result.fraisStripeEstimes).toBe(expectedStripeFees);
+    });
+
+    it('should handle zero Stripe fees', () => {
+      const input: FeeCalculationInput = {
+        montantDon: 100,
+        contribution: 0,
+        donorPaysFee: true,
+        commissionPercentage: 0.04,
+        stripeFeePercentage: 0,
+        stripeFeeFixed: 0,
+      };
+      const result = calculateFees(input);
+
+      expect(result.fraisStripeEstimes).toBe(0);
+      expect(result.applicationFee).toBe(result.commissionDonaction);
     });
   });
 });
