@@ -349,9 +349,16 @@ export function calculatePlatformCommission(
 }
 
 /**
- * Estimates Stripe processing fees for a given donation amount
+ * Estimates Stripe processing fees for a given donation amount.
+ *
+ * IMPORTANT: This is an **estimate** based on standard European card rates.
+ * Actual Stripe fees vary by card type (EU vs non-EU, credit vs debit, AMEX)
+ * and may differ from this calculation. If the estimate is too low, the platform
+ * absorbs the difference. A misconfigured stripe_fee_percentage of 0 would
+ * silently zero out Stripe fee recovery — validate inputs accordingly.
+ *
  * @param donationAmountCents - Donation amount in cents
- * @param tradePolicy - Trade policy entity (contains stripe_fee_percentage and stripe_fee_fixed)
+ * @param tradePolicy - Trade policy entity (stripe_fee_percentage stored as percentage, e.g. 1.5 for 1.5%)
  * @returns Estimated Stripe processing fees in cents
  */
 export function estimateStripeFees(

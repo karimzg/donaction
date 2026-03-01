@@ -89,7 +89,7 @@ export default factories.createCoreController(
             await this.validateQuery(ctx);
             await this.sanitizeQuery(ctx);
             try {
-                const { price, metadata, idempotencyKey, donorPaysFee, donationAmount } =
+                const { price, metadata, idempotencyKey, donorPaysFee } =
                     ctx.request.body;
 
                 if (!price || !metadata || !metadata?.donUuid) {
@@ -143,27 +143,38 @@ export default factories.createCoreController(
                     klubr.connected_account as ConnectedAccountEntity;
                 const useStripeConnect = tradePolicy?.stripe_connect ?? false;
 
-                // Base amount = price (donation + contribution) in cents
-                let amountInCents = Number(price) * 100;
-                let applicationFeeAmount = 0;
+                // Fetch don record to derive trusted donation amount from DB
+                // (never trust client-provided donationAmount for fee calculation)
+                const don: KlubDonEntity = await strapi.db
+                    .query('api::klub-don.klub-don')
+                    .findOne({
+                        where: { uuid: metadata.donUuid },
+                    });
 
-                // Use donationAmount for fee calculation (excludes contribution)
-                // Falls back to price for backward compatibility
-                // Validate: donationAmount must be positive and ≤ price
-                const rawDonation = donationAmount ?? price;
-                if (
-                    typeof rawDonation !== 'number' ||
-                    isNaN(rawDonation) ||
-                    rawDonation <= 0 ||
-                    rawDonation > Number(price)
-                ) {
+                if (!don) {
+                    return ctx.badRequest('Don introuvable');
+                }
+
+                const trustedDonation = Number(don.montant);
+                const trustedContribution = Number(don.contributionAKlubr || 0);
+                const expectedPrice = trustedDonation + trustedContribution;
+
+                // Cross-check client price against DB (tolerance: 1 cent)
+                if (Math.abs(Number(price) - expectedPrice) > 0.01) {
+                    console.error(
+                        `⚠️ Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
+                    );
                     return ctx.badRequest(
-                        'Montant de donation invalide'
+                        'Montant incohérent avec le don enregistré'
                     );
                 }
-                const baseDonationCents = Math.round(
-                    Number(rawDonation) * 100
-                );
+
+                // Base amount = total price (donation + contribution) in cents
+                let amountInCents = Math.round(expectedPrice * 100);
+                let applicationFeeAmount = 0;
+
+                // Fee base = donation amount only (excludes contribution)
+                const baseDonationCents = Math.round(trustedDonation * 100);
 
                 // Stripe Connect path
                 if (useStripeConnect) {

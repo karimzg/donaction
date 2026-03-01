@@ -59,7 +59,6 @@
         baseAmount,
         idempotencyKey,
         donorPaysFeeParam,
-        DEFAULT_VALUES.montant,
       );
 
       clientSecret = response.intent;

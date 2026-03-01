@@ -54,12 +54,10 @@
   );
 
   // Fee calculations using full helper with API-driven Stripe fee params
-  // trade_policy stores percentage as e.g. 1.5 (for 1.5%), convert to decimal (0.015) for helper
+  // API returns stripe_fee_percentage as decimal (e.g. 0.015 for 1.5%) — no conversion needed
   const commissionPercentage = $derived(tradePolicy?.commissionPercentage ?? 4);
   const stripeFeePercentage = $derived(
-    tradePolicy?.stripe_fee_percentage != null
-      ? tradePolicy.stripe_fee_percentage / 100
-      : undefined,
+    tradePolicy?.stripe_fee_percentage ?? undefined,
   );
   // Convert null → undefined so downstream ?? fallback works correctly
   const stripeFeeFixed = $derived(tradePolicy?.stripe_fee_fixed ?? undefined);

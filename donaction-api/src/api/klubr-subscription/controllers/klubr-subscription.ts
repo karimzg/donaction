@@ -294,6 +294,13 @@ export default factories.createCoreController(
                 res.project = project;
             }
 
+            // Normalize stripe_fee_percentage to decimal for API consumers
+            // DB stores as percentage (e.g. 1.5 for 1.5%), API returns decimal (0.015)
+            const tp = res.klubr?.trade_policy;
+            if (tp?.stripe_fee_percentage != null) {
+                tp.stripe_fee_percentage = tp.stripe_fee_percentage / 100;
+            }
+
             return res;
         },
     }),
