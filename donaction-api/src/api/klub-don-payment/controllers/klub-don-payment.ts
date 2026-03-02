@@ -162,10 +162,12 @@ export default factories.createCoreController(
                 const trustedContribution = Number(don.contributionAKlubr || 0);
                 const expectedPrice = trustedDonation + trustedContribution;
 
-                // Cross-check client price against DB (compare integer cents to avoid float precision issues)
+                // Cross-check client price against DB (integer cents comparison)
                 const priceCents = Math.round(Number(price) * 100);
                 const expectedCents = Math.round(expectedPrice * 100);
-                if (Math.abs(priceCents - expectedCents) > 1) {
+                // Tolerance: 0.1% or 1 cent, whichever is larger (prevents abuse on small amounts)
+                const tolerance = Math.max(1, Math.round(expectedCents * 0.001));
+                if (Math.abs(priceCents - expectedCents) > tolerance) {
                     strapiLog.error(
                         `Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
                     );
@@ -375,8 +377,15 @@ export default factories.createCoreController(
                     return ctx.badRequest(`Webhook Error: ${err.message}`);
                 }
 
-                const { donUuid, donorUuid, klubUuid, projectUuid } =
-                    event.data.object.metadata;
+                const metadata = event.data.object.metadata || {};
+                const { donUuid, donorUuid, klubUuid, projectUuid } = metadata;
+
+                if (!donUuid) {
+                    strapiLog.error(
+                        `Webhook missing required metadata.donUuid (event: ${event.id}, type: ${event.type})`
+                    );
+                    return ctx.badRequest('Webhook metadata missing donUuid');
+                }
 
                 // Handle events
                 switch (event.type) {

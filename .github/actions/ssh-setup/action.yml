@@ -16,9 +16,8 @@ inputs:
     required: false
     default: '63009'
   ssh-known-host-key:
-    description: 'Known host public key (e.g. from ssh-keyscan). If provided, skips ssh-keyscan to prevent MITM attacks.'
-    required: false
-    default: ''
+    description: 'Known host public key (e.g. from ssh-keyscan). Required to prevent MITM attacks.'
+    required: true
 
 runs:
   using: 'composite'
@@ -35,12 +34,11 @@ runs:
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
 
-        if [[ -n "$SSH_KNOWN_HOST_KEY" ]]; then
-          echo "$SSH_KNOWN_HOST_KEY" >> ~/.ssh/known_hosts
-        else
-          echo "::warning::ssh-known-host-key not provided — falling back to ssh-keyscan (MITM risk on first connect)"
-          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+        if [[ -z "$SSH_KNOWN_HOST_KEY" ]]; then
+          echo "::error::ssh-known-host-key is required. Run: ssh-keyscan -p PORT HOST and store result as a secret."
+          exit 1
         fi
+        echo "$SSH_KNOWN_HOST_KEY" >> ~/.ssh/known_hosts
 
     - name: Validate SSH connection
       shell: bash

@@ -290,6 +290,9 @@ export async function syncAccountStatus(
     return updated as ConnectedAccountEntity;
 }
 
+/** Valid fee model values — reject anything else */
+const VALID_FEE_MODELS = ['percentage_only', 'fixed_only', 'percentage_plus_fixed'] as const;
+
 /** Default Stripe processing fee rates for European cards (France) */
 const DEFAULT_STRIPE_FEE_PERCENTAGE = 1.5;
 const DEFAULT_STRIPE_FEE_FIXED = 0.25;
@@ -308,6 +311,12 @@ export function calculatePlatformCommission(
     const feeModel = tradePolicy.fee_model || 'percentage_only';
     const percentage = tradePolicy.commissionPercentage || 0;
     const fixedAmount = tradePolicy.fixed_amount || 0;
+
+    if (!VALID_FEE_MODELS.includes(feeModel as any)) {
+        throw new Error(
+            `Modèle de frais invalide: '${feeModel}'. Valeurs autorisées: ${VALID_FEE_MODELS.join(', ')}`
+        );
+    }
 
     if (percentage < 0 || percentage > 100) {
         throw new Error(
@@ -341,8 +350,6 @@ export function calculatePlatformCommission(
                 Math.round((amount * percentage) / 100) +
                 Math.round(fixedAmount * 100);
             break;
-        default:
-            fee = Math.round((amount * percentage) / 100);
     }
 
     return fee;

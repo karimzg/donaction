@@ -102,17 +102,18 @@ describe('calculatePlatformCommission', () => {
         });
     });
 
-    // --- default (unknown model) falls back to percentage ---
-    describe('unknown fee_model defaults to percentage', () => {
-        it('falls back to percentage calculation', () => {
-            const fee = calculatePlatformCommission(
-                10000,
-                makePolicy({
-                    fee_model: 'unknown_model' as any,
-                    commissionPercentage: 10,
-                })
-            );
-            expect(fee).toBe(1000);
+    // --- unknown fee_model is rejected ---
+    describe('unknown fee_model throws', () => {
+        it('throws on invalid fee model', () => {
+            expect(() =>
+                calculatePlatformCommission(
+                    10000,
+                    makePolicy({
+                        fee_model: 'unknown_model' as any,
+                        commissionPercentage: 10,
+                    })
+                )
+            ).toThrow('Modèle de frais invalide');
         });
     });
 
