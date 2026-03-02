@@ -112,6 +112,7 @@ jobs:
           ssh-host: ${{ vars.SSH_HOST }}
           ssh-user: ${{ vars.SSH_USER }}
           ssh-port: ${{ env.SSH_PORT }}
+          ssh-known-host-key: ${{ secrets.SSH_KNOWN_HOST_KEY }}
 
       - name: Validate secrets
         uses: ./.github/actions/validate-secrets
