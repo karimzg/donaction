@@ -418,6 +418,28 @@ export default factories.createCoreController(
                     prefix: 'StripeConnect',
                 });
 
+                // Optimistic lock: claim webhook for processing
+                // PostgreSQL re-evaluates WHERE after row lock, preventing concurrent double-processing
+                const errorFilter = webhookLog.error_message != null
+                    ? { error_message: { $eq: webhookLog.error_message } }
+                    : { error_message: { $null: true } };
+
+                const claimed = await strapi.db
+                    .query('api::webhook-log.webhook-log')
+                    .update({
+                        where: { id: webhookLog.id, processed: false, ...errorFilter },
+                        data: { error_message: '__processing__' },
+                    });
+
+                if (!claimed) {
+                    logSimple({
+                        message: `Webhook déjà en cours de traitement: ${event.id}`,
+                        color: 'yellow',
+                        prefix: 'StripeConnect',
+                    });
+                    return ctx.send({ received: true });
+                }
+
                 // Process webhook event
                 try {
                     await handleWebhookEvent(strapi, event);
@@ -429,6 +451,7 @@ export default factories.createCoreController(
                             data: {
                                 processed: true,
                                 processed_at: new Date(),
+                                error_message: null,
                             },
                         });
 
@@ -452,6 +475,7 @@ export default factories.createCoreController(
                             data: {
                                 processed: false,
                                 error_message: handlerError.message,
+                                retry_count: (webhookLog.retry_count || 0) + 1,
                             },
                         });
 

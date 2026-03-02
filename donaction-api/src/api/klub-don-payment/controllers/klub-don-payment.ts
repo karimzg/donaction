@@ -162,8 +162,10 @@ export default factories.createCoreController(
                 const trustedContribution = Number(don.contributionAKlubr || 0);
                 const expectedPrice = trustedDonation + trustedContribution;
 
-                // Cross-check client price against DB (tolerance: 1 cent)
-                if (Math.abs(Number(price) - expectedPrice) > 0.01) {
+                // Cross-check client price against DB (compare integer cents to avoid float precision issues)
+                const priceCents = Math.round(Number(price) * 100);
+                const expectedCents = Math.round(expectedPrice * 100);
+                if (Math.abs(priceCents - expectedCents) > 1) {
                     strapiLog.error(
                         `Price mismatch: client=${price}, expected=${expectedPrice} (don=${metadata.donUuid})`
                     );
@@ -283,7 +285,7 @@ export default factories.createCoreController(
                     await logFinancialAction(
                         strapi,
                         'fee_calculated',
-                        Number(klubr.id),
+                        klubr.documentId,
                         null,
                         applicationFeeAmount,
                         paymentIntent.id,

@@ -442,8 +442,8 @@ export async function createTransferToConnectedAccount(
  * Logs a financial action to the audit trail
  * @param strapiInstance - Strapi instance (injected for testability)
  * @param actionType - Type of financial action
- * @param klubrId - Klubr database ID
- * @param klubDonId - Klub don database ID (optional)
+ * @param klubrDocumentId - Klubr documentId (Strapi v5 identifier)
+ * @param klubDonDocumentId - Klub don documentId (optional)
  * @param amount - Amount involved in the action
  * @param stripeObjectId - Stripe object ID (payment intent, transfer, etc.)
  * @param metadata - Additional metadata
@@ -452,8 +452,8 @@ export async function createTransferToConnectedAccount(
 export async function logFinancialAction(
     strapiInstance: Core.Strapi,
     actionType: FinancialActionType,
-    klubrId: number,
-    klubDonId: number | null,
+    klubrDocumentId: string,
+    klubDonDocumentId: string | null,
     amount: number,
     stripeObjectId: string,
     metadata: Record<string, any> = {}
@@ -462,8 +462,8 @@ export async function logFinancialAction(
         statusColor: COLORS.blue,
         entries: [
             { key: 'Action', value: `Audit: ${actionType.toUpperCase()}` },
-            { key: 'Klubr', value: klubrId },
-            { key: 'Don', value: klubDonId || 'N/A' },
+            { key: 'Klubr', value: klubrDocumentId },
+            { key: 'Don', value: klubDonDocumentId || 'N/A' },
             { key: 'Montant', value: `${amount / 100}€` },
             { key: 'Stripe', value: stripeObjectId },
         ],
@@ -475,8 +475,8 @@ export async function logFinancialAction(
         .create({
             data: {
                 action_type: actionType,
-                klubr: klubrId,
-                klub_don: klubDonId,
+                klubr: klubrDocumentId,
+                klub_don: klubDonDocumentId,
                 amount: amount / 100, // Convert from cents to euros
                 currency: DEFAULT_CURRENCY.toUpperCase(),
                 stripe_object_id: stripeObjectId,
