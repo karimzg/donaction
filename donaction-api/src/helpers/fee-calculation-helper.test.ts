@@ -242,6 +242,17 @@ describe('Mode legacy (stripe_connect = false)', () => {
         expect(result.totalDonateur).toBe(5500);
         expect(result.netAssociation).toBe(5000);
     });
+
+    it('rejette montantDon <= 0 même en mode legacy', () => {
+        expect(() =>
+            calculateFees({
+                montantDon: 0,
+                contribution: 0,
+                donorPaysFee: false,
+                tradePolicy: makePolicy({ stripe_connect: false }),
+            })
+        ).toThrow('Montant de donation invalide');
+    });
 });
 
 // ---------------------------------------------------------------------------

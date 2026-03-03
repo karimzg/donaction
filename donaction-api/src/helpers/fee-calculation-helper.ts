@@ -54,6 +54,10 @@ export interface FeeCalculationOutput {
 export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput {
     const { montantDon, contribution, donorPaysFee, tradePolicy } = input;
 
+    if (montantDon <= 0) {
+        throw new Error('Montant de donation invalide : doit être > 0');
+    }
+
     if (contribution < 0) {
         throw new Error('Contribution invalide : ne peut pas être négative');
     }
