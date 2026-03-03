@@ -422,5 +422,17 @@ describe('determineDonorPaysFee', () => {
             });
             expect(result).toBe(false);
         });
+
+        it('ignores donor opt-out in legacy mode (policy enforced)', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: false,
+                    donor_pays_fee: true,
+                }),
+                isProjectDon: false,
+                donorChoice: false,
+            });
+            expect(result).toBe(true);
+        });
     });
 });

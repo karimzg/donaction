@@ -5,6 +5,8 @@ import {
     FinancialAuditLogEntity,
     TradePolicyEntity,
 } from '../_types';
+import { logBlock, logSimple, strapiLog, COLORS } from './logger';
+import { DEFAULT_CURRENCY } from '../constants';
 
 /**
  * Parameters for determining whether the donor pays the fee
@@ -22,7 +24,9 @@ export interface DonorPaysFeeParams {
  * Determines whether the donor pays the processing fees for a donation.
  *
  * Logic:
- * 1. Guard clause: if Stripe Connect is disabled, use legacy `donor_pays_fee` field
+ * 1. Guard clause: if Stripe Connect is disabled, use legacy `donor_pays_fee` field.
+ *    **Note:** In legacy mode, the policy value is enforced — `donorChoice` is intentionally
+ *    ignored because legacy clubs have no donor fee choice UI.
  * 2. Get context default: `donor_pays_fee_project` for project donations,
  *    `donor_pays_fee_club` for club donations
  * 3. If `allow_donor_fee_choice` is disabled, return the context default
@@ -58,8 +62,6 @@ export function determineDonorPaysFee(params: DonorPaysFeeParams): boolean {
     // No explicit choice: use context default
     return defaultValue;
 }
-import { logBlock, logSimple, strapiLog, COLORS } from './logger';
-import { DEFAULT_CURRENCY } from '../constants';
 
 // Validate required Stripe env vars at module load (fail fast at startup)
 if (!process.env.STRIPE_SECRET_KEY) {
