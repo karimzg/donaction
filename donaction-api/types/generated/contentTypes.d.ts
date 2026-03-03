@@ -1000,6 +1000,7 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
             Schema.Attribute.Private;
         datePaiment: Schema.Attribute.DateTime;
         deductionFiscale: Schema.Attribute.Decimal;
+        donorPaysFee: Schema.Attribute.Boolean;
         emailSent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
         estOrganisme: Schema.Attribute.Boolean;
         hasBeenRelaunched: Schema.Attribute.Boolean &
@@ -2478,7 +2479,7 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         billingDescription: Schema.Attribute.String;
         commissionPercentage: Schema.Attribute.Decimal &
             Schema.Attribute.Required &
-            Schema.Attribute.DefaultTo<6>;
+            Schema.Attribute.DefaultTo<4>;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
@@ -2516,6 +2517,10 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
         stripe_connect: Schema.Attribute.Boolean &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<true>;
+        stripe_fee_fixed: Schema.Attribute.Decimal &
+            Schema.Attribute.DefaultTo<0.25>;
+        stripe_fee_percentage: Schema.Attribute.Decimal &
+            Schema.Attribute.DefaultTo<1.5>;
         tradePolicyLabel: Schema.Attribute.String & Schema.Attribute.Required;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
