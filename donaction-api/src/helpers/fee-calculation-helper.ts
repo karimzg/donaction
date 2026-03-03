@@ -44,11 +44,19 @@ export interface FeeCalculationOutput {
  * - Scénario A (donorPaysFee = true) : le donateur paie les frais en supplément
  * - Scénario B (donorPaysFee = false) : les frais sont déduits du don
  *
+ * Note : le paramètre `donorPaysFee` est une décision déjà résolue en amont
+ * (via `determineDonorPaysFee()`). Il prévaut sur `tradePolicy.donor_pays_fee`
+ * qui est le champ legacy avant Stripe Connect.
+ *
  * @param input - Paramètres de calcul (montant, contribution, choix donateur, politique)
  * @returns Décomposition complète des frais et montants
  */
 export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput {
     const { montantDon, contribution, donorPaysFee, tradePolicy } = input;
+
+    if (contribution < 0) {
+        throw new Error('Contribution invalide : ne peut pas être négative');
+    }
 
     // Garde : mode legacy sans Stripe Connect
     if (!tradePolicy.stripe_connect) {

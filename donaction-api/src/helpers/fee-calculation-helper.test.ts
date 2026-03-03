@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TradePolicyEntity } from '../_types';
 
-// Stub env vars before importing (stripe-connect-helper has top-level guard)
+// Dynamic import required: stripe-connect-helper.ts validates STRIPE_SECRET_KEY
+// and STRIPE_WEBHOOK_SECRET_CONNECT at module load time (fail-fast guard).
+// We must stub these env vars BEFORE the module is imported.
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
 vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
 
@@ -420,5 +422,16 @@ describe('Cas limites', () => {
                 tradePolicy: makePolicy({ commissionPercentage: 4 }),
             })
         ).toThrow('Montant de donation invalide');
+    });
+
+    it('rejette une contribution négative', () => {
+        expect(() =>
+            calculateFees({
+                montantDon: 10000,
+                contribution: -500,
+                donorPaysFee: true,
+                tradePolicy: makePolicy({ commissionPercentage: 4 }),
+            })
+        ).toThrow('Contribution invalide');
     });
 });
