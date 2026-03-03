@@ -247,7 +247,7 @@ describe('Mode legacy (stripe_connect = false)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Vérification DONACTION 4% net (Scénario B)', () => {
-    it('DONACTION perçoit exactement contribution + commission sur plusieurs montants', () => {
+    it('la commission DONACTION représente exactement 4% du montant du don', () => {
         const testCases = [
             { montantDon: 5000, contribution: 500 },
             { montantDon: 10000, contribution: 1000 },
@@ -264,16 +264,14 @@ describe('Vérification DONACTION 4% net (Scénario B)', () => {
                 tradePolicy: policy,
             });
 
-            // Ce que DONACTION perçoit réellement :
-            // contribution (reversée intégralement) + applicationFee - fraisStripeEstimes
-            // = contribution + commissionDonaction + fraisStripeEstimes - fraisStripeEstimes
-            // = contribution + commissionDonaction
-            const netDonaction =
-                contribution + result.applicationFee - result.fraisStripeEstimes;
+            // La commission DONACTION doit être exactement 4% du don
+            expect(result.commissionDonaction).toBe(Math.round(montantDon * 4 / 100));
 
-            const expected = contribution + result.commissionDonaction;
+            // L'association reçoit : don - applicationFee
+            expect(result.netAssociation).toBe(montantDon - result.applicationFee);
 
-            expect(netDonaction).toBe(expected);
+            // Le total prélevé couvre exactement don + contribution
+            expect(result.totalDonateur).toBe(montantDon + contribution);
         }
     });
 });
@@ -369,5 +367,58 @@ describe('Cas limites', () => {
         expect(result.totalDonateur).toBe(105000);
         expect(result.netAssociation).toBe(94400);
         expect(result.montantRecuFiscal).toBe(94400);
+    });
+
+    it('netAssociation ne descend pas sous zéro en Scénario B avec petit montant', () => {
+        // Petit don avec frais élevés : commission + Stripe > don
+        const result = calculateFees({
+            montantDon: 100, // 1€
+            contribution: 0,
+            donorPaysFee: false,
+            tradePolicy: makePolicy({
+                fee_model: 'fixed_only',
+                fixed_amount: 5, // 5€ fixe > 1€ don
+            }),
+        });
+
+        expect(result.netAssociation).toBe(0);
+        expect(result.montantRecuFiscal).toBe(0);
+    });
+
+    it('fonctionne avec des frais Stripe personnalisés (taux US)', () => {
+        // Stripe US: 2.9% + $0.30
+        const result = calculateFees({
+            montantDon: 10000,
+            contribution: 1000,
+            donorPaysFee: true,
+            tradePolicy: makePolicy({
+                commissionPercentage: 4,
+                stripe_fee_percentage: 2.9,
+                stripe_fee_fixed: 0.30,
+            }),
+        });
+
+        // commissionDonaction = 400
+        // subtotal = 10000 + 400 + 1000 = 11400
+        // fraisStripeEstimes = Math.round(11400 * 2.9 / 100 + 0.30 * 100)
+        //                    = Math.round(330.6 + 30) = Math.round(360.6) = 361
+        // applicationFee = 400 + 361 = 761
+        // totalDonateur = 10000 + 400 + 361 + 1000 = 11761
+        expect(result.commissionDonaction).toBe(400);
+        expect(result.fraisStripeEstimes).toBe(361);
+        expect(result.applicationFee).toBe(761);
+        expect(result.totalDonateur).toBe(11761);
+        expect(result.netAssociation).toBe(10000);
+    });
+
+    it('propage l\'erreur de calculatePlatformCommission si montantDon <= 0', () => {
+        expect(() =>
+            calculateFees({
+                montantDon: 0,
+                contribution: 1000,
+                donorPaysFee: true,
+                tradePolicy: makePolicy({ commissionPercentage: 4 }),
+            })
+        ).toThrow('Montant de donation invalide');
     });
 });

@@ -106,6 +106,10 @@ const calculateScenarioA = (
  * Le donateur paie uniquement le montant du don (+ contribution éventuelle).
  * Les frais Stripe et la commission DONACTION sont prélevés sur la part de l'association.
  *
+ * Note : les frais Stripe sont estimés sur (montantDon + contribution), sans inclure
+ * la commission dans la base de calcul. C'est une simplification volontaire conforme
+ * à la spécification US-PAY-002 — la légère sous-estimation est absorbée par la plateforme.
+ *
  * @param montantDon - Montant du don en centimes
  * @param contribution - Contribution volontaire DONACTION en centimes
  * @param commissionDonaction - Commission DONACTION déjà calculée en centimes
@@ -122,7 +126,7 @@ const calculateScenarioB = (
     const fraisStripeEstimes = estimateStripeFees(totalDonateur, tradePolicy);
 
     const applicationFee = commissionDonaction + fraisStripeEstimes;
-    const netAssociation = montantDon - applicationFee;
+    const netAssociation = Math.max(0, montantDon - applicationFee);
     const montantRecuFiscal = netAssociation;
 
     return {
