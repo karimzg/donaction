@@ -385,6 +385,19 @@ describe('determineDonorPaysFee', () => {
             });
             expect(result).toBe(false);
         });
+
+        it('respects donor opt-in for club donation when allowed', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_club: false,
+                    allow_donor_fee_choice: true,
+                }),
+                isProjectDon: false,
+                donorChoice: true,
+            });
+            expect(result).toBe(true);
+        });
     });
 
     describe('Legacy mode (stripe_connect = false)', () => {
@@ -431,6 +444,17 @@ describe('determineDonorPaysFee', () => {
                 }),
                 isProjectDon: false,
                 donorChoice: false,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('falls back to legacy mode when stripe_connect is undefined', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    donor_pays_fee: true,
+                }),
+                isProjectDon: true,
+                donorChoice: null,
             });
             expect(result).toBe(true);
         });
