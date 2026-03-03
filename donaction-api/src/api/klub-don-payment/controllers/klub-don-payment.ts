@@ -17,6 +17,7 @@ import {
 } from '../../../helpers/idempotency-helper';
 import {
     calculateApplicationFee,
+    determineDonorPaysFee,
     logFinancialAction,
     stripe,
 } from '../../../helpers/stripe-connect-helper';
@@ -218,19 +219,18 @@ export default factories.createCoreController(
                         tradePolicy
                     );
 
-                    // Validate donorPaysFee against trade_policy setting (strict boolean)
-                    // Use policy setting if client tries to bypass
-                    const shouldDonorPayFee =
-                        tradePolicy.donor_pays_fee && donorPaysFee === true;
+                    // Determine if donor pays fees based on context and policy
+                    const isProjectDon = !!metadata.projectUuid;
+                    const actualDonorPaysFee = determineDonorPaysFee({
+                        tradePolicy,
+                        isProjectDon,
+                        donorChoice: donorPaysFee,
+                    });
 
                     // If donor pays fee, add it to total amount
-                    if (shouldDonorPayFee) {
+                    if (actualDonorPaysFee) {
                         amountInCents += applicationFeeAmount;
                     }
-
-                    // Determine actual donor pays fee value
-                    const actualDonorPaysFee =
-                        tradePolicy.donor_pays_fee && donorPaysFee === true;
 
                     logBlock({
                         statusColor: COLORS.blue,

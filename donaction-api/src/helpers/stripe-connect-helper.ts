@@ -8,6 +8,61 @@ import {
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
 import { DEFAULT_CURRENCY } from '../constants';
 
+/**
+ * Parameters for determining whether the donor pays the fee
+ */
+export interface DonorPaysFeeParams {
+    /** Trade policy of the klubr */
+    tradePolicy: TradePolicyEntity;
+    /** Whether this donation targets a project (true) or the club directly (false) */
+    isProjectDon: boolean;
+    /** Explicit donor choice, if any. null/undefined means no explicit choice. */
+    donorChoice?: boolean | null;
+}
+
+/**
+ * Determines whether the donor pays the processing fees for a donation.
+ *
+ * Logic:
+ * 1. Guard clause: if Stripe Connect is disabled, use legacy `donor_pays_fee` field.
+ *    **Note:** In legacy mode, the policy value is enforced — `donorChoice` is intentionally
+ *    ignored because legacy clubs have no donor fee choice UI.
+ * 2. Get context default: `donor_pays_fee_project` for project donations,
+ *    `donor_pays_fee_club` for club donations
+ * 3. If `allow_donor_fee_choice` is disabled, return the context default
+ * 4. If the donor made an explicit choice, respect it
+ * 5. Otherwise, return the context default
+ *
+ * @param params - Donor pays fee parameters
+ * @returns Whether the donor should pay the fees
+ */
+export function determineDonorPaysFee(params: DonorPaysFeeParams): boolean {
+    const { tradePolicy, isProjectDon, donorChoice } = params;
+
+    // Guard clause: Legacy mode when Stripe Connect is disabled
+    if (!tradePolicy.stripe_connect) {
+        return tradePolicy.donor_pays_fee ?? false;
+    }
+
+    // Context-based default
+    const defaultValue = isProjectDon
+        ? (tradePolicy.donor_pays_fee_project ?? true)
+        : (tradePolicy.donor_pays_fee_club ?? false);
+
+    // If donor choice is disabled, always use the default
+    if (!tradePolicy.allow_donor_fee_choice) {
+        return defaultValue;
+    }
+
+    // If donor made an explicit choice, respect it
+    if (donorChoice !== null && donorChoice !== undefined) {
+        return donorChoice;
+    }
+
+    // No explicit choice: use context default
+    return defaultValue;
+}
+
 // Validate required Stripe env vars at module load (fail fast at startup)
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error(
