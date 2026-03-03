@@ -49,6 +49,9 @@ argument-hint: N/A
 
 ### Donations
 - `POST /klub-don-payments/create-payment-intent` - Create Stripe payment intent
+  - Body: `{ price, idempotencyKey?, donorPaysFee?, metadata: { donUuid, klubUuid, projectUuid?, donorUuid? } }`
+  - Response: `{ intent: string, reused: boolean }`
+  - Dual path: Stripe Connect (if klubr has connected account) or Classic Stripe
 - `POST /klub-don-payments/stripe-web-hooks` - Stripe webhook handler (no auth)
 - `GET /klub-don-payments/check` - Check payment status
 
@@ -80,8 +83,14 @@ argument-hint: N/A
 
 ### Stripe
 - Payment processing via Stripe SDK
-- Webhook endpoint: `/klub-don-payments/stripe-web-hooks`
-- Secret key: `process.env.STRIPE_SECRET_KEY`
+- Dual payment paths:
+  - **Stripe Connect**: For klubrs with connected accounts (on_behalf_of, transfer_data, application_fee)
+  - **Classic Stripe**: For klubrs without connected accounts (direct payment to platform)
+- Path selection: Based on `klubr.trade_policy.stripe_connect` boolean (default: true)
+- Webhook endpoints:
+  - `/klub-don-payments/stripe-web-hooks` - Payment intents
+  - `/stripe-connect/webhooks` - Account events
+- Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`
 
 ### Brevo (Email)
 - Email provider: Brevo SMTP relay

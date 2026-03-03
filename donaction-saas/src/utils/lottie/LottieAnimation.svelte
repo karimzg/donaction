@@ -6,7 +6,7 @@
     segment,
     animation,
     goToFrame,
-    isControlled
+    isControlled,
   }: {
     animation: JSON;
     isControlled: boolean | undefined;
@@ -30,7 +30,7 @@
         renderer: 'svg',
         loop: !isControlled,
         autoplay: !isControlled,
-        animationData: animation
+        animationData: animation,
       });
 
       animationInstance?.addEventListener('DOMLoaded', () => {

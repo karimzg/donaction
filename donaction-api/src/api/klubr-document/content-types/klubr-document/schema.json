@@ -61,6 +61,12 @@
         "disable-regenerate": true,
         "disable-auto-fill": true
       }
+    },
+    "managerSignature": {
+      "type": "json"
+    },
+    "managerSignatureValide": {
+      "type": "boolean"
     }
   }
 }

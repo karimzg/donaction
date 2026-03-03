@@ -27,7 +27,7 @@ import StatusIndicator from '@/partials/common/statusIndicator';
 import { getServerSession } from 'next-auth';
 import { SITE_URL } from '@/core/services/endpoints';
 import { getDonsByKlubOrProjet } from '@/core/services/don';
-import { SportsEvent, WithContext } from 'schema-dts';
+import { Event, WithContext } from 'schema-dts';
 import { endOfDay, format, isAfter } from 'date-fns';
 import frLocale from 'date-fns/locale/fr';
 import SponsorshipForm from '@/partials/_sponsorshipForm';
@@ -85,6 +85,9 @@ export async function generateMetadata(
 		description:
 			projet.metaDescription ||
 			`${projet.klubr.denomination} - Soutenez le projet "${projet.titre}"`,
+		alternates: {
+			canonical: `/${params.slug}/nos-projets/${params.projectSlug}`,
+		},
 		openGraph: {
 			title: `${klub.denomination} | ${projet.titre}`,
 			description:
@@ -141,7 +144,6 @@ export default async function ProjectPage({
 	const primaryColor = klub?.klubr_house?.primary_color || '#FFFFFF';
 	const secondaryColor = klub?.klubr_house?.secondary_color || '#000000';
 	const textColor = klub?.klubr_house?.header_text_color || '#000000';
-	const footerTextColor = klub.klubr_house?.footer_text_color || '#FFFFFF';
 	const projets = await getProjetsByKlub(klub.uuid, 1, 3, projet.uuid, cookies().toString()).catch(
 		(error) => {
 			console.error('Error fetching last 3 projets', error?.config);
@@ -209,9 +211,9 @@ export default async function ProjectPage({
 		(_) => _.__component === 'club-presentation.localisation',
 	);
 
-	const jsonLd: WithContext<SportsEvent> = {
+	const jsonLd: WithContext<Event> = {
 		'@context': 'https://schema.org',
-		'@type': 'SportsEvent',
+		'@type': 'Event',
 		name: `${klub.denomination} | ${projet.titre}`,
 		description:
 			projet.metaDescription ||
@@ -241,7 +243,6 @@ export default async function ProjectPage({
 			longitude: localisation?.googleMap?.lng,
 			latitude: localisation?.googleMap?.lat,
 		},
-		sport: projet.sportType,
 		organizer: [
 			{
 				'@type': 'Person',
@@ -254,7 +255,7 @@ export default async function ProjectPage({
 				},
 			},
 			{
-				'@type': 'SportsClub',
+				'@type': 'Organization',
 				name: klub.denomination,
 				description: klubHouse.metaDescription,
 				url: `${SITE_URL}/${params.slug}`,
@@ -292,7 +293,7 @@ export default async function ProjectPage({
 					url: `${SITE_URL}/${params.slug}/${params.projectSlug}`,
 				},
 				{
-					'@type': 'SportsClub',
+					'@type': 'Organization',
 					name: klub.denomination,
 					description: klubHouse.metaDescription,
 					url: `${SITE_URL}/${params.slug}`,
@@ -322,7 +323,15 @@ export default async function ProjectPage({
 
 	return (
 		<>
-			<Header session={session} slugs={slugs} txtColor={'#000'} />
+			<Header
+				session={session}
+				slugs={slugs}
+				clubColors={{
+					primary: primaryColor,
+					secondary: secondaryColor,
+					headerText: textColor,
+				}}
+			/>
 			<script
 				type='application/ld+json'
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -471,7 +480,7 @@ export default async function ProjectPage({
 					</div>
 				) : null}
 			</div>
-			<Footer bg1={secondaryColor} bg2={primaryColor} textColor={footerTextColor} />
+			<Footer />
 		</>
 	);
 }

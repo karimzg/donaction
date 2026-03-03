@@ -1,0 +1,14 @@
+{
+  "/api/auth": {
+    "target": "http://donaction_frontend:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/revalidate": {
+    "target": "http://donaction_frontend:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

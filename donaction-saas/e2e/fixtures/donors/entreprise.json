@@ -1,0 +1,29 @@
+{
+  "data": {
+    "id": 2,
+    "documentId": "donor_entreprise_002",
+    "uuid": "750e8400-e29b-41d4-a716-446655440202",
+    "donateurType": "Organisme",
+    "raisonSocial": "TechCorp SARL",
+    "SIREN": "12345678901234",
+    "formeJuridique": "SARL",
+    "email": "contact@techcorp.fr",
+    "tel": "+33145678901",
+    "adresse": "456 Avenue des Champs",
+    "adresse2": "Suite 200",
+    "cp": "75008",
+    "ville": "Paris",
+    "pays": "France",
+    "logo": {
+      "id": 1,
+      "url": "/uploads/techcorp_logo.png",
+      "width": 200,
+      "height": 200,
+      "alternativeText": "TechCorp Logo"
+    },
+    "optInAffMontant": true,
+    "optInAffNom": true,
+    "anonymized": false
+  },
+  "meta": {}
+}

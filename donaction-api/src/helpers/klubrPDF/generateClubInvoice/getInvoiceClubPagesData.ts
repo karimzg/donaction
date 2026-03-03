@@ -467,17 +467,17 @@ export default async function getInvoiceClubPagesData({
                     font: fonts.mvnSemiBoldPdfFont,
                 }),
                 new TextDrawer({
-                    text: 'FONDS KLUBR',
+                    text: 'Donaction',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),
                 new TextDrawer({
-                    text: '10 clos du Golf du Sart',
+                    text: '679 avenue de la république',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),
                 new TextDrawer({
-                    text: '59491 VILLENEUVE D’ASCQ',
+                    text: '59800 LILLE',
                     size: 12,
                     font: fonts.mvnRegularPdfFont,
                 }),

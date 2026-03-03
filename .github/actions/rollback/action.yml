@@ -1,6 +1,23 @@
 name: 'Rollback Deployment'
 description: 'Rollback to previous deployment from backup'
 
+# ⚠️ LIMITATIONS
+# This rollback action only restores:
+# - Docker Compose configuration (docker-compose.yml)
+# - Environment variables (.env file)
+# - Docker images (pulls previous versions)
+#
+# NOT restored by this action:
+# - Database migrations (Strapi migrations are forward-only)
+# - Nginx configuration changes (requires manual intervention)
+# - External service state (Stripe webhooks, third-party integrations)
+# - Uploaded media files (stored in ImageKit, not affected)
+#
+# MANUAL INTERVENTION REQUIRED if:
+# - Database schema was modified (restore from PostgreSQL backup)
+# - Nginx config changed (restore /etc/nginx/sites-available manually)
+# - SSL certificates updated (no rollback needed, cert renewal is idempotent)
+
 inputs:
   ssh-user:
     description: 'SSH user'
@@ -24,11 +41,17 @@ runs:
   steps:
     - name: Rollback deployment
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_DIR: ${{ inputs.deploy-dir }}
+        GH_RUN_ID: ${{ inputs.github-run-id }}
       run: |
         echo "::warning::Deployment failed, attempting rollback..."
-        ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << 'EOF'
+        ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa "${SSH_USER}@${SSH_HOST}" "DEPLOY_DIR='${DEPLOY_DIR}' GH_RUN_ID='${GH_RUN_ID}' bash -s" << 'EOF'
           set -x
-          cd ${{ inputs.deploy-dir }}
+          cd "$DEPLOY_DIR"
 
           # Find most recent backup
           BACKUP_COMPOSE=$(ls -t backups/docker-compose-*.yml 2>/dev/null | head -1)
@@ -81,7 +104,7 @@ runs:
             echo "---" >> logs/deployments.log
             echo "timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> logs/deployments.log
             echo "action: ROLLBACK" >> logs/deployments.log
-            echo "from_run: ${{ inputs.github-run-id }}" >> logs/deployments.log
+            echo "from_run: $GH_RUN_ID" >> logs/deployments.log
             echo "backup_used: $BACKUP_COMPOSE" >> logs/deployments.log
           else
             echo "No backup available for rollback"

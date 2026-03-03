@@ -86,9 +86,10 @@
         return `<h${(block as RichTextBlockHeading).level}>${renderChildren(block.children)}</h${(block as RichTextBlockHeading).level}>`;
       case 'paragraph':
         return `<p class="m-0">${renderChildren(block.children)}</p>`;
-      case 'list':
+      case 'list': {
         const ListTag = (block as RichTextBlockList).format === 'unordered' ? 'ul' : 'ol';
         return `<${ListTag}>${renderChildren(block.children)}</${ListTag}>`;
+      }
       case 'list-item':
         return `<li>${renderChildren(block.children)}</li>`;
       case 'link':

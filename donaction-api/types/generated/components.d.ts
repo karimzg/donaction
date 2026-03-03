@@ -29,7 +29,6 @@ export interface ClubPresentationClubPresentation
     extends Struct.ComponentSchema {
     collectionName: 'components_club_presentation_club_presentations';
     info: {
-        description: '';
         displayName: 'Liens r\u00E9seaux sociaux';
         icon: 'address-card';
     };
@@ -96,7 +95,10 @@ export interface ClubPresentationSectionCitation
         icon: 'quote';
     };
     attributes: {
-        citations: Schema.Attribute.Component<'composant-atoms.citation', true> &
+        citations: Schema.Attribute.Component<
+            'composant-atoms.citation',
+            true
+        > &
             Schema.Attribute.Required &
             Schema.Attribute.SetMinMax<
                 {
@@ -172,7 +174,8 @@ export interface ComposantAtomsSectionTexteImage
     };
     attributes: {
         image: Schema.Attribute.Media<'images'>;
-        imgToTheLeft: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+        imgToTheLeft: Schema.Attribute.Boolean &
+            Schema.Attribute.DefaultTo<false>;
         texte: Schema.Attribute.Blocks & Schema.Attribute.Required;
         titre: Schema.Attribute.String;
     };
@@ -248,9 +251,13 @@ export interface NotUsedMedia extends Struct.ComponentSchema {
         icon: 'camera';
     };
     attributes: {
-        photo_src: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+        photo_src: Schema.Attribute.Media<
+            'images' | 'files' | 'videos' | 'audios'
+        >;
         title: Schema.Attribute.String;
-        video_src: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+        video_src: Schema.Attribute.Media<
+            'images' | 'files' | 'videos' | 'audios'
+        >;
     };
 }
 
@@ -328,7 +335,9 @@ export interface NotUsedVideoTeaser extends Struct.ComponentSchema {
     };
     attributes: {
         type: Schema.Attribute.Enumeration<['youtube', 'other']>;
-        video_src: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+        video_src: Schema.Attribute.Media<
+            'images' | 'files' | 'videos' | 'audios'
+        >;
         youtube_src: Schema.Attribute.String;
     };
 }

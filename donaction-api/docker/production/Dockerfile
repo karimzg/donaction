@@ -3,28 +3,9 @@ ARG NODE_VERSION=22
 FROM node:${NODE_VERSION}-alpine as base
 ARG NODE_ENV=production
 
-# Build-time secrets (passed via --build-arg)
-ARG DATABASE_PASSWORD
-ARG DATABASE_NAME
-ARG DATABASE_USERNAME
-ARG DATABASE_HOST
-ARG DATABASE_PORT
-ARG JWT_SECRET
-ARG ADMIN_JWT_SECRET
-ARG APP_KEYS
-ARG API_TOKEN_SALT
-ARG TRANSFER_TOKEN_SALT
-ARG STRIPE_SECRET_KEY
-ARG STRIPE_WEBHOOK_SECRET
-ARG STRIPE_WEBHOOK_SECRET_CONNECT
-ARG IMAGEKIT_PUBLIC_KEY
-ARG IMAGEKIT_PRIVATE_KEY
-ARG IMAGEKIT_URL_ENDPOINT
-ARG EMAIL_BREVO_API_KEY
-ARG NEXTAUTH_URL
+# Only non-secret config needed at build time
+# Secrets are injected at RUNTIME via docker-compose env_file / environment
 ARG ENVIRONMENT
-ARG GOOGLE_RECAPTCHA_SITE_KEY
-ARG KLUBR_UUID
 ARG STRAPI_PUBLIC_URL
 
 ENV NODE_ENV=${NODE_ENV}
@@ -41,36 +22,11 @@ WORKDIR /usr/src/app
 COPY ./donaction-api/ .
 RUN ls -l -a
 
-# NOTE: Secret validation removed from build time
-# Secrets are validated at runtime by entrypoint.sh
-# This allows building images without secrets (CI/CD best practice)
-
-# Generate .env file for build (will NOT be copied to final image)
-# Values are quoted to handle special characters and empty values
+# Minimal build-time .env (NO secrets — they are injected at runtime)
+# Strapi admin build only needs NODE_ENV and STRAPI_PUBLIC_URL
 RUN echo 'NODE_ENV="'"${NODE_ENV}"'"' > .env && \
-    echo 'DATABASE_PASSWORD="'"${DATABASE_PASSWORD}"'"' >> .env && \
-    echo 'DATABASE_NAME="'"${DATABASE_NAME}"'"' >> .env && \
-    echo 'DATABASE_USERNAME="'"${DATABASE_USERNAME}"'"' >> .env && \
-    echo 'DATABASE_HOST="'"${DATABASE_HOST}"'"' >> .env && \
-    echo 'DATABASE_PORT="'"${DATABASE_PORT}"'"' >> .env && \
-    echo 'JWT_SECRET="'"${JWT_SECRET}"'"' >> .env && \
-    echo 'ADMIN_JWT_SECRET="'"${ADMIN_JWT_SECRET}"'"' >> .env && \
-    echo 'APP_KEYS="'"${APP_KEYS}"'"' >> .env && \
-    echo 'API_TOKEN_SALT="'"${API_TOKEN_SALT}"'"' >> .env && \
-    echo 'TRANSFER_TOKEN_SALT="'"${TRANSFER_TOKEN_SALT}"'"' >> .env && \
-    echo 'STRIPE_SECRET_KEY="'"${STRIPE_SECRET_KEY}"'"' >> .env && \
-    echo 'STRIPE_WEBHOOK_SECRET="'"${STRIPE_WEBHOOK_SECRET}"'"' >> .env && \
-    echo 'STRIPE_WEBHOOK_SECRET_CONNECT="'"${STRIPE_WEBHOOK_SECRET_CONNECT}"'"' >> .env && \
-    echo 'IMAGEKIT_PUBLIC_KEY="'"${IMAGEKIT_PUBLIC_KEY}"'"' >> .env && \
-    echo 'IMAGEKIT_PRIVATE_KEY="'"${IMAGEKIT_PRIVATE_KEY}"'"' >> .env && \
-    echo 'IMAGEKIT_URL_ENDPOINT="'"${IMAGEKIT_URL_ENDPOINT}"'"' >> .env && \
-    echo 'EMAIL_BREVO_API_KEY="'"${EMAIL_BREVO_API_KEY}"'"' >> .env && \
-    echo 'NEXTAUTH_URL="'"${NEXTAUTH_URL}"'"' >> .env && \
     echo 'ENVIRONMENT="'"${ENVIRONMENT}"'"' >> .env && \
-    echo 'GOOGLE_RECAPTCHA_SITE_KEY="'"${GOOGLE_RECAPTCHA_SITE_KEY}"'"' >> .env && \
-    echo 'KLUBR_UUID="'"${KLUBR_UUID}"'"' >> .env && \
     echo 'STRAPI_PUBLIC_URL="'"${STRAPI_PUBLIC_URL}"'"' >> .env
-RUN cat .env
 RUN npm run build
 
 ## Compile config TypeScript files to JavaScript for production

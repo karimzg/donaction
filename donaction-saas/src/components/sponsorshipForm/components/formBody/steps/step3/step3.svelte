@@ -3,7 +3,7 @@
     DEFAULT_VALUES,
     isCguShown,
     isContributionShown,
-    SUBSCRIPTION
+    SUBSCRIPTION,
   } from '../../../../logic/useSponsorshipForm.svelte';
   import { validator, validateTrue } from '../../../../logic/validator';
   import { onMount } from 'svelte';
@@ -18,12 +18,59 @@
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
   import resendFiles from '../../../../../../assets/icons/resendFiles.svg';
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
-  import { calculateTaxReduction } from '../../../../logic/utils';
+  import { formatCurrency } from '../../../../logic/utils';
+  import {
+    calculateFees,
+    type FeeCalculationOutput,
+  } from '../../../../logic/fee-calculation-helper';
+  import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
+  import FormError from '../../../formError/FormError.svelte';
+  import TaxReductionSummary from '../../../taxReductionSummary/TaxReductionSummary.svelte';
 
   const cgu = $state({
     title: '',
-    content: []
+    content: [],
   });
+
+  // Fee details toggle
+  let showFeeDetails = $state(false);
+
+  // Trade policy derived values
+  const tradePolicy = $derived(SUBSCRIPTION.klubr?.trade_policy);
+  const isStripeConnect = $derived(tradePolicy?.stripe_connect === true);
+  const allowDonorFeeChoice = $derived(tradePolicy?.allow_donor_fee_choice ?? true);
+  const showFeeChoice = $derived(isStripeConnect && allowDonorFeeChoice);
+
+  // Determine if project or club donation
+  const isProjectDonation = $derived(
+    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid,
+  );
+
+  // Default value based on donation type
+  const defaultDonorPaysFee = $derived(
+    isProjectDonation
+      ? (tradePolicy?.donor_pays_fee_project ?? true)
+      : (tradePolicy?.donor_pays_fee_club ?? false),
+  );
+
+  // Fee calculations using full helper with API-driven Stripe fee params
+  // API returns stripe_fee_percentage as decimal (e.g. 0.015 for 1.5%) — no conversion needed
+  const commissionPercentage = $derived(tradePolicy?.commissionPercentage ?? 4);
+  const stripeFeePercentage = $derived(
+    tradePolicy?.stripe_fee_percentage ?? undefined,
+  );
+  // Convert null → undefined so downstream ?? fallback works correctly
+  const stripeFeeFixed = $derived(tradePolicy?.stripe_fee_fixed ?? undefined);
+  const fees = $derived<FeeCalculationOutput>(
+    calculateFees({
+      montantDon: DEFAULT_VALUES.montant,
+      contribution: DEFAULT_VALUES.contributionAKlubr || 0,
+      donorPaysFee: DEFAULT_VALUES.donorPaysFee,
+      commissionPercentage: (commissionPercentage || 4) / 100,
+      stripeFeePercentage,
+      stripeFeeFixed,
+    }),
+  );
 
   onMount(() => {
     if (isNaN(DEFAULT_VALUES.contributionAKlubr)) {
@@ -31,6 +78,12 @@
         ? Math.min(Math.floor(DEFAULT_VALUES.montant * 0.1), 25)
         : 0;
     }
+
+    // Initialize donorPaysFee with default value based on donation type
+    if (isStripeConnect) {
+      DEFAULT_VALUES.donorPaysFee = defaultDonorPaysFee;
+    }
+
     getKlubrCGU().then((res) => {
       cgu.title = res?.data?.attributes?.titre;
       cgu.content = res?.data?.attributes?.content;
@@ -39,6 +92,7 @@
 </script>
 
 {#if $isCguShown}
+  <!-- CGU - PRESERVED -->
   <div class="klubrCGU w-full flex flex-col gap-2">
     <div class="cguHeader">
       <img
@@ -64,148 +118,342 @@
 {:else if $isContributionShown && SUBSCRIPTION.allowKlubrContribution}
   <Contribution />
 {:else}
-  <div class="step3 flex flex-col items-center gap-2">
-    <p class="recap text-center w-full">Mon récapitulatif</p>
-    <div class="recapList flex flex-col gap-1">
-      <div class="flex justify-between items-center">
-        <div />
-        <p class="font-bold">Montant</p>
+  <div class="don-step3" data-testid="step3">
+    <!-- Header with amount -->
+    <header class="don-step3__header">
+      <div class="don-header-badge">
+        <span>🎁</span> Votre don
       </div>
-      <div class="flex justify-between items-center gap-1">
-        <p>Don à {SUBSCRIPTION.klubr?.denomination}</p>
-        <p class="font-bold">{DEFAULT_VALUES.montant} €</p>
+      <div class="don-header-amount" data-testid="recap-amount">
+        {formatCurrency(DEFAULT_VALUES.montant)}
       </div>
-      {#if SUBSCRIPTION.allowKlubrContribution}
-        <div class="separator w-full" style="background: #C1BFBF;" />
-        <div class="flex justify-between items-start gap-1">
-          <div class="flex flex-col" style="gap: 5px;">
-            <p>Soutien à la plateforme Klubr</p>
-            <small style="font-size: small; color: #5A5A5A; font-size: 11px;"
-              >Merci de votre soutien, qui rend nos services possibles.</small
-            >
-            <a
-              onclick={() => isContributionShown.set(true)}
-              style="text-decoration: underline; cursor: pointer;">Modifier le soutien</a
+      <div class="don-header-for">pour</div>
+      <div class="don-header-association" data-testid="recap-association">
+        {SUBSCRIPTION.klubr?.denomination}
+      </div>
+    </header>
+
+    <!-- Project highlight (compact for recap) -->
+    {#if SUBSCRIPTION.project && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid}
+      <ProjectHighlight
+        project={SUBSCRIPTION.project}
+        selectedAmount={DEFAULT_VALUES.montant}
+        variant="compact"
+        label="Vous soutenez le projet"
+      />
+    {/if}
+
+    <!-- Fee choice section -->
+    {#if showFeeChoice}
+      <section class="don-section" data-testid="fee-choice-section">
+        <h2 class="don-section__title">
+          <span class="don-section__icon">💡</span>
+          Comment maximiser votre impact ?
+        </h2>
+
+        <div class="don-options-grid">
+          <!-- Option 1: Donor pays fee -->
+          <label
+            class="don-option-card"
+            class:don-option-card--selected={DEFAULT_VALUES.donorPaysFee === true}
+            data-testid="fee-donor-pays"
+          >
+            <input
+              type="radio"
+              name="donorPaysFee"
+              checked={DEFAULT_VALUES.donorPaysFee === true}
+              onchange={() => (DEFAULT_VALUES.donorPaysFee = true)}
+              class="don-option-card__radio"
+            />
+            {#if DEFAULT_VALUES.donorPaysFee === true}
+              <div class="don-option-card__check">✓</div>
+            {/if}
+            <div class="don-option-card__badge" data-testid="fee-badge-recommended">
+              ✨ Recommandé
+            </div>
+            <h3 class="don-option-card__title">Je couvre les frais</h3>
+            <p class="don-option-card__desc">
+              L'association reçoit <strong>100%</strong> de votre don
+            </p>
+            <div class="don-option-card__metrics">
+              <div class="don-option-card__metric">
+                <span>Association reçoit</span>
+                <span class="don-metric--highlight">{formatCurrency(DEFAULT_VALUES.montant)}</span>
+              </div>
+              <div class="don-option-card__metric">
+                <span>Vous payez</span>
+                <span
+                  >{formatCurrency(
+                    DEFAULT_VALUES.montant + fees.commissionDonaction + fees.fraisStripeEstimes,
+                  )}</span
+                >
+              </div>
+              {#if DEFAULT_VALUES.withTaxReduction}
+                <div class="don-option-card__metric">
+                  <span>Reçu fiscal</span>
+                  <span>{formatCurrency(DEFAULT_VALUES.montant)}</span>
+                </div>
+              {/if}
+            </div>
+          </label>
+
+          <!-- Option 2: Fees included -->
+          <label
+            class="don-option-card"
+            class:don-option-card--selected={DEFAULT_VALUES.donorPaysFee === false}
+            data-testid="fee-included"
+          >
+            <input
+              type="radio"
+              name="donorPaysFee"
+              checked={DEFAULT_VALUES.donorPaysFee === false}
+              onchange={() => (DEFAULT_VALUES.donorPaysFee = false)}
+              class="don-option-card__radio"
+            />
+            {#if DEFAULT_VALUES.donorPaysFee === false}
+              <div class="don-option-card__check">✓</div>
+            {/if}
+            <h3 class="don-option-card__title">Frais inclus dans le don</h3>
+            <p class="don-option-card__desc">Les frais sont déduits du montant reçu</p>
+            <div class="don-option-card__metrics">
+              <div class="don-option-card__metric">
+                <span>Association reçoit</span>
+                <span>{formatCurrency(DEFAULT_VALUES.montant - fees.applicationFee)}</span>
+              </div>
+              <div class="don-option-card__metric">
+                <span>Vous payez</span>
+                <span>{formatCurrency(DEFAULT_VALUES.montant)}</span>
+              </div>
+              {#if DEFAULT_VALUES.withTaxReduction}
+                <div class="don-option-card__metric">
+                  <span>Reçu fiscal</span>
+                  <span>{formatCurrency(DEFAULT_VALUES.montant - fees.applicationFee)}</span>
+                </div>
+              {/if}
+            </div>
+          </label>
+        </div>
+
+        <!-- Fee details toggle -->
+        <button
+          type="button"
+          class="don-details-toggle"
+          data-testid="fee-details-toggle"
+          onclick={() => (showFeeDetails = !showFeeDetails)}
+        >
+          <span>{showFeeDetails ? '−' : '+'}</span>
+          En savoir plus sur les frais
+        </button>
+
+        {#if showFeeDetails}
+          <div class="don-fee-details" data-testid="fee-details-panel">
+            <p class="don-fee-details__title">
+              Détail des frais ({formatCurrency(fees.applicationFee)}) :
+            </p>
+            <div class="don-fee-details__line">
+              <span>Commission plateforme ({commissionPercentage}%)</span>
+              <span>{formatCurrency(fees.commissionDonaction)}</span>
+            </div>
+            <div class="don-fee-details__line">
+              <span>Frais de transaction</span>
+              <span>~{formatCurrency(fees.fraisStripeEstimes)}</span>
+            </div>
+            <p class="don-fee-details__note">
+              Ces frais permettent à DONACTION de fonctionner et garantissent la sécurité de votre
+              paiement.
+            </p>
+          </div>
+        {/if}
+      </section>
+    {/if}
+
+    <!-- Summary section -->
+    <section class="don-section">
+      <h2 class="don-section__title">
+        <span class="don-section__icon">📊</span>
+        Récapitulatif
+      </h2>
+
+      <div class="don-summary-layout">
+        <div class="don-summary-lines">
+          <!-- Main donation -->
+          <div class="don-summary-line">
+            <div class="don-summary-line__left">
+              <span class="don-summary-line__icon">🎁</span>
+              <span>Don à {SUBSCRIPTION.klubr?.denomination}</span>
+            </div>
+            <span class="don-summary-line__amount">{formatCurrency(DEFAULT_VALUES.montant)}</span>
+          </div>
+
+          <!-- Fees (if donor pays) -->
+          {#if isStripeConnect && DEFAULT_VALUES.donorPaysFee}
+            <div class="don-summary-line don-summary-line--fees" data-testid="recap-fees-line">
+              <div class="don-summary-line__left">
+                <span class="don-summary-line__icon">💳</span>
+                <span>Frais de traitement</span>
+              </div>
+              <span class="don-summary-line__amount--fees"
+                >+{formatCurrency(fees.commissionDonaction + fees.fraisStripeEstimes)}</span
+              >
+            </div>
+          {/if}
+
+          <!-- Platform support -->
+          {#if SUBSCRIPTION.allowKlubrContribution}
+            <div class="don-support-row">
+              <div class="don-support-row__left">
+                <span class="don-summary-line__icon">💛</span>
+                <div class="don-support-row__text">
+                  <span>Soutien à la plateforme</span>
+                  <span class="don-support-row__note">Non déductible des impôts</span>
+                </div>
+              </div>
+              <div class="don-support-row__right">
+                <span class="don-support-row__value"
+                  >{formatCurrency(DEFAULT_VALUES.contributionAKlubr)}</span
+                >
+                <button
+                  type="button"
+                  class="don-support-row__edit"
+                  data-testid="btn-modify-contribution"
+                  onclick={() => isContributionShown.set(true)}
+                >
+                  Modifier
+                </button>
+              </div>
+            </div>
+          {/if}
+
+          <div class="don-summary-divider"></div>
+
+          <!-- Total -->
+          <div class="don-summary-line don-summary-line--total">
+            <span>Total à payer</span>
+            <span class="don-summary-line__total" data-testid="recap-total"
+              >{formatCurrency(fees.totalDonateur)}</span
             >
           </div>
-          <p class="font-bold">{DEFAULT_VALUES.contributionAKlubr} €</p>
+        </div>
+
+        <!-- Impact card -->
+        <div class="don-impact-card" data-testid="impact-card">
+          <div class="don-impact-card__icon">🏆</div>
+          <div class="don-impact-card__label">L'association recevra</div>
+          <div class="don-impact-card__value" data-testid="impact-card-value">
+            {formatCurrency(fees.netAssociation)}
+          </div>
+          {#if DEFAULT_VALUES.donorPaysFee}
+            <div class="don-impact-card__badge" data-testid="impact-card-badge-100">
+              100% de votre don !
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Tax section - guard: stripe_connect + withTaxReduction -->
+      {#if DEFAULT_VALUES.withTaxReduction && isStripeConnect}
+        <div class="don-tax-section">
+          <TaxReductionSummary
+            taxReceiptAmount={fees.montantRecuFiscal}
+            isOrganization={DEFAULT_VALUES.estOrganisme}
+            platformContribution={DEFAULT_VALUES.contributionAKlubr}
+            showContributionNote={SUBSCRIPTION.allowKlubrContribution}
+          />
         </div>
       {/if}
-      <div class="separator w-full" />
-      <div class="flex justify-between items-center gap-1">
-        <p>Total</p>
-        <p class="font-bold">
-          {DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0)} €
-        </p>
+    </section>
+
+    <!-- Documents section -->
+    <section class="don-docs-section">
+      <h3 class="don-docs-title">📬 Vous recevrez immédiatement</h3>
+      <div class="don-docs-grid">
+        <div class="don-doc-card">
+          <span class="don-doc-card__icon">📋</span>
+          <span>Attestation de don</span>
+        </div>
+        {#if DEFAULT_VALUES.withTaxReduction}
+          <div class="don-doc-card">
+            <span class="don-doc-card__icon">🧾</span>
+            <span>Reçu fiscal Cerfa</span>
+          </div>
+        {/if}
       </div>
-      {#if DEFAULT_VALUES.withTaxReduction}
-        <div class="separator w-full" />
-        <div class="flex justify-between items-center gap-1">
-          <p>Coût après réduction d'impôts</p>
-          <p class="font-bold">
-            {calculateTaxReduction(
-              DEFAULT_VALUES.montant + (DEFAULT_VALUES.contributionAKlubr || 0),
-              DEFAULT_VALUES.estOrganisme
-            )} €
-          </p>
-        </div>
-      {/if}
-    </div>
-    <Tooltip>
-      <div
-        slot="trigger"
-        tabindex="0"
-        class={'flex items-center gap-1-2'}
-        data-tooltip-id={'Envoi'}
-      >
-        <p class="font-semibold">Envoi immédiat des justificatifs</p>
-        <img width={25} height={25} src={alertIcon} alt={'Envoi immédiat des justificatifs'} />
-      </div>
-      <div slot="tooltip">
-        <div class={'flex gap-1'}>
-          <img src={email} alt={'email'} />
-          <p>Réception immédiate de vos reçus et attestation par mail.</p>
-        </div>
-        <hr class={'w-full'} style="border-color: #808182" />
-        <div class={'flex gap-1'}>
-          <img src={userAvatar} alt={'email'} />
-          <p>Retrouvez à tout instant vos justificatifs dans votre espace.</p>
-        </div>
-        <hr class={'w-full'} style="border-color: #808182" />
-        <div class={'flex gap-1'}>
-          <img src={resendFiles} alt={'email'} />
-          <p>Envoi des justificatifs par mail pour rappel avant votre déclaration d'impôt.</p>
-        </div>
-      </div>
-    </Tooltip>
-    <img
-      src={DEFAULT_VALUES.withTaxReduction ? att_recu : att}
-      alt={'Envoi immédiat des justificatifs'}
-    />
-    <p class="disclaimer">
+    </section>
+
+    <!-- Disclaimer -->
+    <p class="don-disclaimer">
       Le fonds de dotation "<b>Fond Klubr</b>" est organisme de mécénat destiné à collecter des dons
       pour le compte d'autres organismes sportifs à but non lucratif, dont "<a href="#"
         >{SUBSCRIPTION.klubr?.denomination}</a
       >" et ainsi les aider à réaliser leurs oeuvres et missions d'intérêt général.
     </p>
-    <div class="flex flex-col w-full checkboxesContainer">
-      <div class="w-full" style="display: grid; grid-template-columns: 33px 1fr 1fr">
+
+    <!-- Checkboxes - PRESERVED structure -->
+    <div class="don-checkboxes">
+      <div class="don-checkbox-row">
         <input
           type="checkbox"
           id="displayName"
           name="displayName"
+          data-testid="checkbox-display-name"
           bind:checked={DEFAULT_VALUES.displayName}
         />
-        <label for="displayName" style="grid-column: span 2;"
-          >Je veux que mon nom apparaisse dans la liste des donateurs sur la page
+        <label for="displayName">
+          Je veux que mon nom apparaisse dans la liste des donateurs sur la page
         </label>
-        <small class="error" style="grid-column: span 3;" aria-live="polite"></small>
       </div>
       {#if DEFAULT_VALUES.displayName}
-        <div class="w-full" style="display: grid; grid-template-columns: 33px 1fr 1fr">
+        <div class="don-checkbox-row">
           <input
             type="checkbox"
             id="displayAmount"
             name="displayAmount"
+            data-testid="checkbox-display-amount"
             bind:checked={DEFAULT_VALUES.displayAmount}
           />
-          <label for="displayAmount" style="grid-column: span 2;"
-            >Je souhaite afficher le montant de mon don</label
-          >
-          <small class="error" style="grid-column: span 3;" aria-live="polite"></small>
+          <label for="displayAmount"> Je souhaite afficher le montant de mon don </label>
         </div>
       {/if}
-      <div class="w-full" style="display: grid; grid-template-columns: 33px 1fr 1fr">
-        <input
-          type="checkbox"
-          id="acceptCondition1"
-          name="acceptCondition1"
-          bind:checked={DEFAULT_VALUES.acceptConditions1}
-          use:validator={{
-            validateFunctions: [validateTrue]
-          }}
-        />
-        <label for="acceptCondition1" style="grid-column: span 2;"
-          >J'ai bien compris que Klubr est un fonds de dotation redistributeur.</label
-        >
-        <small class="error" style="grid-column: span 3;" aria-live="polite"></small>
-      </div>
-      <div class="w-full" style="display: grid; grid-template-columns: 33px 1fr 1fr">
+
+      {#if !isStripeConnect}
+        <div class="don-checkbox-row">
+          <input
+            type="checkbox"
+            id="acceptCondition1"
+            name="acceptCondition1"
+            data-testid="checkbox-accept-condition1"
+            bind:checked={DEFAULT_VALUES.acceptConditions1}
+            use:validator={{
+              validateFunctions: [validateTrue],
+            }}
+          />
+          <label for="acceptCondition1">
+            J'ai bien compris que Klubr est un fonds de dotation redistributeur.
+          </label>
+          <div class="error-msg-wrapper">
+            <FormError msgType="glassCard" inputId="acceptCondition1" />
+          </div>
+        </div>
+      {/if}
+      <div class="don-checkbox-row">
         <input
           type="checkbox"
           id="acceptCondition2"
           name="acceptCondition2"
+          data-testid="checkbox-cgu"
           bind:checked={DEFAULT_VALUES.acceptConditions2}
           use:validator={{
-            validateFunctions: [validateTrue]
+            validateFunctions: [validateTrue],
           }}
         />
-        <label style="grid-column: span 2;"
-          >J'accepte <b class="cursor-pointer" onclick={() => isCguShown.set(true)}
-            >les Conditions Générales d’Utilisation.</b
-          > *</label
-        >
-        <small class="error" style="grid-column: span 3;" aria-live="polite"></small>
+        <label>
+          J'accepte <b class="don-cgu-link cursor-pointer" onclick={() => isCguShown.set(true)}
+            >les Conditions Générales d'Utilisation.</b
+          > *
+        </label>
+        <div class="error-msg-wrapper">
+          <FormError msgType="glassCard" inputId="acceptCondition2" />
+        </div>
       </div>
     </div>
   </div>

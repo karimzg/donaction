@@ -1,0 +1,65 @@
+{
+  "kind": "collectionType",
+  "collectionName": "financial_audit_logs",
+  "info": {
+    "singularName": "financial-audit-log",
+    "pluralName": "financial-audit-logs",
+    "displayName": "Financial Audit Log",
+    "description": "Audit trail for financial transactions and operations"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "action_type": {
+      "type": "enumeration",
+      "enum": [
+        "transfer_created",
+        "payout_initiated",
+        "refund_processed",
+        "fee_calculated"
+      ],
+      "required": true
+    },
+    "klubr": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klubr.klubr"
+    },
+    "klub_don": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klub-don.klub-don"
+    },
+    "amount": {
+      "type": "decimal"
+    },
+    "currency": {
+      "type": "string",
+      "default": "EUR"
+    },
+    "stripe_object_id": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "performed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "performed_at": {
+      "type": "datetime"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

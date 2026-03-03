@@ -14,9 +14,9 @@ async function MainLayout(props: { children: React.ReactNode }) {
 
 	return (
 		<div className={'flex flex-col min-h-[100vh] justify-between'}>
-			<Header session={session} slugs={slugs} bg1='#FFF' bg2='#FFF' txtColor='#000' />
+			<Header session={session} slugs={slugs} />
 			{<main className='flex flex-col items-center'>{props.children}</main>}
-			<Footer bg1='#000000' bg2='#FFFFFF' />
+			<Footer />
 		</div>
 	);
 }

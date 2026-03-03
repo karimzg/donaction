@@ -2,8 +2,15 @@ import React from 'react';
 import { getAvatars } from '@/core/services/auth';
 import ProfilePage from '@/partials/profilePage';
 import { WebPage, WithContext } from 'schema-dts';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Mon profil',
+	description: 'Gérez votre profil et vos préférences sur Donaction.',
+	robots: { index: false, follow: false },
+};
 
 export default async function Page() {
 	const womenAvatars = await getAvatars('women', 1, 10, cookies().toString());
@@ -28,7 +35,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},

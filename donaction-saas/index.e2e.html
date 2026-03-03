@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Klubr Web Components - E2E</title>
+    <!-- E2E: Load Svelte source directly, Vite transforms it -->
+    <script src="/src/main.ts?apiToken=e2e-dummy-token" type="module"></script>
+</head>
+<body style="margin: unset;">
+<div style="margin: auto; width: 100%; height: 200vh;">
+    <klubr-sponsorship-form klubrUuid="5e4704b3-9ff8-4389-9716-09757f80910f">
+        <div slot="stripe-payment-form"></div>
+    </klubr-sponsorship-form>
+</div>
+</body>
+</html>

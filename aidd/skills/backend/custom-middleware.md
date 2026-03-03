@@ -1,11 +1,7 @@
 ---
-name: "strapi-custom-middleware"
-description: "Create custom Strapi permission middlewares with role checks and entity ownership validation"
-triggers: ["middleware", "strapi middleware", "permission", "authorization", "access control", "owner check"]
-tags: ["strapi", "middleware", "backend", "authorization", "security"]
-priority: high
-scope: module
-output: code
+name: skill:creating-strapi-middlewares
+description: Creates Strapi permission middlewares with role checks and ownership validation. Use when adding authorization to routes in donaction-api.
+model: claude-sonnet-4-5
 ---
 
 # Implementing Custom Strapi Middlewares

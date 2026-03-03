@@ -1,8 +1,8 @@
 'use server';
 import React from 'react';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { SITE_URL } from '@/core/services/endpoints';
+import getPathname from '@/core/helpers/getPathname';
 
 const getUnHyphenatedName = (str: string, capAll?: boolean) => {
 	return str
@@ -12,15 +12,6 @@ const getUnHyphenatedName = (str: string, capAll?: boolean) => {
 			return _;
 		})
 		.join(' ');
-};
-
-const getPathname = () => {
-	try {
-		const headersList = headers();
-		return headersList.get('x-custom-pathname') || '';
-	} catch (e: any) {
-		return typeof window !== 'undefined' ? document?.location.pathname : '';
-	}
 };
 
 const Breadcrumb: React.FC<{

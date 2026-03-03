@@ -13,7 +13,7 @@ export function initGTag() {
     }
 
     window.gtag = gtag;
-    // @ts-ignore
+    // @ts-expect-error gtag expects specific argument types
     window.gtag('js', new Date());
     window.gtag('config', import.meta.env.VITE_GOOGLE_GA_TRACKING_ID);
   };

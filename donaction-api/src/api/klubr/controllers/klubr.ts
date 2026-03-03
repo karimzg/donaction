@@ -2,7 +2,7 @@
  * klubr controller
  */
 
-import { Core, factories } from '@strapi/strapi';
+import { Core, factories, UID } from '@strapi/strapi';
 import { CLUB_STATUS } from '../../../helpers/clubStatus';
 import { COLORS, logBlock } from '../../../helpers/logger';
 import {
@@ -23,7 +23,7 @@ import {
  * Type for tracking created entities during klubr creation
  */
 type CreatedEntity = {
-    uid: string;
+    uid: UID.ContentType;
     documentId: string;
 };
 
@@ -39,11 +39,12 @@ const rollbackCreatedEntities = async (
     for (let i = entities.length - 1; i >= 0; i--) {
         const entity = entities[i];
         try {
-            await strapi.documents(entity.uid as any).delete({
+            await strapi.documents(entity.uid).delete({
                 documentId: entity.documentId,
             });
             results.push({ ...entity, status: 'deleted' });
         } catch (error) {
+            console.error(`❌ Rollback failed for ${entity.uid} (${entity.documentId}):`, error);
             results.push({ ...entity, status: 'failed' });
         }
     }
@@ -1049,11 +1050,13 @@ export default factories.createCoreController(
             try {
                 const memberUuid = ctx.params['memberUuid'];
 
-                if (!ctx.request.body?.data?.formToken) {
+                const { formToken, ...cleanData } = ctx.request.body?.data || {};
+                if (!formToken) {
                     return ctx.badRequest('Missing reCaptcha token.');
                 }
+                ctx.request.body.data = cleanData;
                 const result = await createAssessment({
-                    token: ctx.request.body?.data?.formToken,
+                    token: formToken,
                     recaptchaAction: 'CREATE_KLUBR_BY_MEMBER',
                 });
                 if (!result) {

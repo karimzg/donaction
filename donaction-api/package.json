@@ -16,7 +16,11 @@
     "gen:types": "strapi ts:generate-types --debug",
     "export-db-archive": "timestamp=$(date \"+%Y%m%d-%H%M%S\") && strapi export --exclude files --file data/$timestamp-strapi-export --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
     "export-db": "strapi export --exclude files --file data/strapi-export --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
-    "import-db": "strapi import  --exclude files --file data/strapi-export.tar.gz.enc --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM"
+    "import-db": "strapi import  --exclude files --file data/strapi-export.tar.gz.enc --key qaCvBq03urmg3gaYOZPeiNQ/+F1TWXw8ygOBc7jSvFU2GxgL4d+g/r/loigcGCLM",
+    "test": "vitest run",
+    "test:ci": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
@@ -52,7 +56,8 @@
     "@types/react-dom": "^18",
     "prettier": "^3.5.2",
     "source-map-support": "^0.5.21",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

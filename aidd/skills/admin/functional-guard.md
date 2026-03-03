@@ -1,11 +1,7 @@
 ---
-name: "angular-functional-guard"
-description: "Create Angular functional route guard with CanActivateFn for authentication, authorization, and navigation control"
-triggers: ["create guard", "route guard", "auth guard", "functional guard", "CanActivateFn", "protect route", "navigation guard", "can activate"]
-tags: ["angular", "routing", "guard", "security", "typescript"]
-priority: medium
-scope: file
-output: code
+name: skill:creating-angular-guards
+description: Creates Angular functional route guards with CanActivateFn for authentication and authorization. Use when protecting routes in donaction-admin.
+model: claude-haiku-4-5
 ---
 
 # Angular Functional Guard

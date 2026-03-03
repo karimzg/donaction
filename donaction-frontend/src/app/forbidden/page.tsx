@@ -6,27 +6,24 @@ import LottieAnimation from '@/components/LottieAnimation';
 import forbidden403 from '../../../public/animations/403.json';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
-import {cookies} from "next/headers";
+import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Accès interdit',
+	description: 'Vous n\'avez pas les droits nécessaires pour accéder à cette page.',
+	robots: { index: false, follow: false },
+};
 
 export default async function page() {
 	const slugs = await getClubsSlugs(5, cookies().toString()).catch((error) => {
 		console.error('Page NotFound : Error fetching clubs slugs', error?.config);
 		return [];
 	});
-	const primaryColor = '#FFFFFF';
-	const secondaryColor = '#000000';
-	const headerTextColor = '#000000';
-
 	const session = await getServerSession();
 	return (
 		<>
-			<Header
-				session={session}
-				slugs={slugs}
-				bg1={secondaryColor}
-				bg2={primaryColor}
-				txtColor={headerTextColor}
-			/>
+			<Header session={session} slugs={slugs} />
 			<main className='flex flex-col items-center w-full min-h-[25rem] bg-white z-0 mb-20'>
 				<div className={'mx-4 max-w-[300px]'}>
 					<LottieAnimation animation={forbidden403} />
@@ -37,7 +34,7 @@ export default async function page() {
 					Retour à la page d'accueil
 				</Link>
 			</main>
-			<Footer bg1={secondaryColor} bg2={primaryColor} />
+			<Footer />
 		</>
 	);
 }

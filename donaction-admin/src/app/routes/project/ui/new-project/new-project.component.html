@@ -104,6 +104,9 @@
           }
         }
       </p-accordion>
+     @if (!(tmplLibrariesAffiliates$ | async)?.length && !(tmplLibraries$ | async)?.length) {
+       <ng-container *ngTemplateOutlet="virginTmpl"></ng-container>
+     }
     } @else {
       <div class="flex justify-content-center">
         <ng-lottie

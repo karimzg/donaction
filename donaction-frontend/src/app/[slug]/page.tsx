@@ -95,6 +95,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 		title: klub.denomination,
 		description:
 			klubHouse.metaDescription || `${klub.denomination} - Soutenez nous grâce au mécénat!`,
+		alternates: {
+			canonical: `/${params.slug}`,
+		},
 		openGraph: {
 			title: klub.denomination,
 			description:
@@ -151,7 +154,6 @@ export default async function club({ params }: { params: { slug: string } }) {
 	const primaryColor = klub.klubr_house?.primary_color || '#F17424';
 	const secondaryColor = klub.klubr_house?.secondary_color || '#000000';
 	const textColor = klub.klubr_house?.header_text_color || '#000000';
-	const footerTextColor = klub.klubr_house?.footer_text_color || '#FFFFFF';
 
 	/* ClubIntroduction */
 	const category =
@@ -222,7 +224,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 				url: `${SITE_URL}/${params.slug}?PAYEMENT_FORM=true`,
 				target: `${SITE_URL}/${params.slug}?PAYEMENT_FORM=true`,
 				recipient: {
-					'@type': 'SportsClub',
+					'@type': 'Organization',
 					name: klub.denomination,
 					url: `${SITE_URL}/${params.slug}`,
 					address: {
@@ -238,7 +240,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 		: [];
 	const jsonLd = {
 		'@context': 'https://schema.org',
-		'@type': 'SportsClub',
+		'@type': 'Organization',
 		name: klub.denomination,
 		description:
 			klubHouse.metaDescription || `${klub.denomination} - Soutenez nous grâce au mécénat!`,
@@ -291,9 +293,11 @@ export default async function club({ params }: { params: { slug: string } }) {
 			<Header
 				session={session}
 				slugs={slugs}
-				bg1={secondaryColor}
-				bg2={primaryColor}
-				txtColor={textColor}
+				clubColors={{
+					primary: primaryColor,
+					secondary: secondaryColor,
+					headerText: textColor,
+				}}
 			/>
 			<StatusIndicator
 				status={klub.status || ''}
@@ -371,7 +375,7 @@ export default async function club({ params }: { params: { slug: string } }) {
 					displaySectionLocalisation(section, index),
 				)}
 			</div>
-			<Footer bg1={secondaryColor} bg2={primaryColor} textColor={footerTextColor} />
+			<Footer />
 		</>
 	);
 }

@@ -1,3 +1,38 @@
+/**
+ * Structured logger that delegates to strapi.log when available,
+ * falls back to console for startup/module-level logging.
+ */
+export const strapiLog = {
+    info: (message: string) => {
+        try {
+            const s = (globalThis as any).strapi;
+            s?.log?.info ? s.log.info(message) : console.log(message);
+        } catch {
+            console.log(message);
+        }
+    },
+    warn: (message: string) => {
+        try {
+            const s = (globalThis as any).strapi;
+            s?.log?.warn ? s.log.warn(message) : console.warn(message);
+        } catch {
+            console.warn(message);
+        }
+    },
+    error: (message: string, error?: unknown) => {
+        try {
+            const s = (globalThis as any).strapi;
+            if (s?.log?.error) {
+                s.log.error(error ? `${message} ${error}` : message);
+            } else {
+                console.error(message, error ?? '');
+            }
+        } catch {
+            console.error(message, error ?? '');
+        }
+    },
+};
+
 export const COLORS = {
     reset: '\x1b[0m',
     green: '\x1b[32m',
@@ -60,4 +95,27 @@ export const logBlock = ({
     });
 
     console.log(`${separatorColor}${separator}${COLORS.reset}`);
+};
+
+export type LogSimpleParams = {
+    message: string;
+    emoji?: string;
+    color?: ColorKey;
+    prefix?: string;
+};
+
+/**
+ * Logs a simple single-line message with optional emoji and color
+ */
+export const logSimple = ({
+    message,
+    emoji = '',
+    color = 'green',
+    prefix = 'Strapi',
+}: LogSimpleParams): void => {
+    const colorCode = COLORS[color] || COLORS.green;
+    const emojiPart = emoji ? `${emoji} ` : '';
+    console.log(
+        `${COLORS.gray}[${prefix}]${COLORS.reset} ${emojiPart}${colorCode}${message}${COLORS.reset}`,
+    );
 };

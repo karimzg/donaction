@@ -5,16 +5,17 @@ export default {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().split('T')[0];
+
             console.log(
-                '************ CRON: updateProjectStatus ************',
-                formattedDate,
+                '🔄 [CRON] updateProjectStatus - START',
+                `\n   📅 Date: ${formattedDate}`,
             );
+
             try {
-                await strapi.db
+                const result = await strapi.db
                     .query('api::klub-projet.klub-projet')
                     .updateMany({
                         where: {
-                            // id: 58
                             status: 'published',
                             dateLimiteFinancementProjet: {
                                 $lt: formattedDate,
@@ -24,19 +25,24 @@ export default {
                             status: 'closed',
                         },
                     });
-            } catch (err: any) {
+
                 console.log(
-                    'CRON: Erreur lors de la mise à jour des projets.',
-                    err,
+                    '✅ [CRON] updateProjectStatus - SUCCESS',
+                    `\n   📊 Projets mis à jour: ${result?.count || 0}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] updateProjectStatus - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la mise à jour des projets'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log(
-                '************ CRON END: updateProjectStatus ************',
-            );
+
+            console.log('🏁 [CRON] updateProjectStatus - END\n');
         },
-        // options: Every day at 1am
+        // options: Every day at 1am (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 1 0 * * *',
+            rule: '0 0 1 * * *',
         },
     },
     // generateInvoices: {
@@ -61,63 +67,78 @@ export default {
     // BreakingChanges
     updateDefaultTradePolicyForKlubs: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
-            console.log(
-                '************ CRON: updateDefaultTradePolicyForKlubs ************',
-            );
+            console.log('🔄 [CRON] updateDefaultTradePolicyForKlubs - START');
+
             try {
                 const defaultTradePolicyId: any = await strapi
                     .service('api::trade-policy.trade-policy')
                     .getDefaultTradePolicy();
-                console.log('defaultTradePolicy', defaultTradePolicyId);
-                if (defaultTradePolicyId) {
-                    const klubsToUpdate: Array<any> = await strapi.db
-                        .query('api::klubr.klubr')
-                        .findMany({
-                            where: {
-                                trade_policy: null,
+
+                if (!defaultTradePolicyId) {
+                    console.log(
+                        '⏭️  [CRON] updateDefaultTradePolicyForKlubs - SKIPPED',
+                        '\n   ℹ️  Aucune politique commerciale par défaut trouvée',
+                    );
+                    return;
+                }
+
+                console.log(
+                    `   📋 Politique par défaut: ${defaultTradePolicyId}`,
+                );
+
+                const klubsToUpdate: Array<any> = await strapi.db
+                    .query('api::klubr.klubr')
+                    .findMany({
+                        where: {
+                            trade_policy: null,
+                        },
+                    });
+
+                if (klubsToUpdate.length === 0) {
+                    console.log(
+                        '⏭️  [CRON] updateDefaultTradePolicyForKlubs - SKIPPED',
+                        '\n   ℹ️  Aucun klub sans politique commerciale',
+                    );
+                    return;
+                }
+
+                console.log(
+                    `   📊 Klubs à mettre à jour: ${klubsToUpdate.length}`,
+                );
+
+                await Promise.all(
+                    klubsToUpdate.map(async (klub) => {
+                        await strapi.db.query('api::klubr.klubr').update({
+                            where: { id: klub.id },
+                            data: {
+                                trade_policy: defaultTradePolicyId,
                             },
                         });
-                    if (klubsToUpdate.length) {
-                        console.log('klubsToUpdate', klubsToUpdate.length);
-                        await Promise.all(
-                            klubsToUpdate.map(async (klub) => {
-                                await strapi.db
-                                    .query('api::klubr.klubr')
-                                    .update({
-                                        where: { id: klub.id },
-                                        data: {
-                                            trade_policy: defaultTradePolicyId,
-                                        },
-                                    });
-                            }),
-                        );
-                    } else {
-                        console.log(
-                            'CRON: Aucun klub trouvé sans politique commerciale.',
-                        );
-                    }
-                } else {
-                    console.log(
-                        'CRON: Aucune politique commerciale par défaut trouvée.',
-                    );
-                }
-            } catch (err: any) {
+                    }),
+                );
+
                 console.log(
-                    'CRON: Erreur lors de la mise à jour des Politiques commerciales des klubs ',
-                    err,
+                    '✅ [CRON] updateDefaultTradePolicyForKlubs - SUCCESS',
+                    `\n   📊 Klubs mis à jour: ${klubsToUpdate.length}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] updateDefaultTradePolicyForKlubs - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la mise à jour des politiques commerciales'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log(
-                '************ CRON END: updateDefaultTradePolicyForKlubs ************',
-            );
+
+            console.log('🏁 [CRON] updateDefaultTradePolicyForKlubs - END\n');
         },
         options: new Date(Date.now() + 5000),
     },
     updateDefaultDocumentsAndInfosForKlubs: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             console.log(
-                '************ CRON: updateDefaultDocumentsAndInfosForKlubs ************',
+                '🔄 [CRON] updateDefaultDocumentsAndInfosForKlubs - START',
             );
+
             try {
                 /* INFOS */
                 const klubsToUpdateInfo: Array<any> = await strapi.db
@@ -132,12 +153,15 @@ export default {
                             federationLink: true,
                         },
                     });
-                if (klubsToUpdateInfo.length) {
-                    console.log('klubsToUpdateInfo', klubsToUpdateInfo.length);
+
+                if (klubsToUpdateInfo.length > 0) {
+                    console.log(
+                        `   📊 Klubs sans info: ${klubsToUpdateInfo.length}`,
+                    );
+
                     await Promise.all(
                         klubsToUpdateInfo.map(async (klub) => {
                             /* CREATE klubr-infos */
-                            /* UPDATE KLUBR INFOS */
                             const klubr_info1 = await strapi
                                 .service('api::klubr.klubr')
                                 .setKlubrInfosRequiredFieldsCompletion(
@@ -161,9 +185,14 @@ export default {
                                 });
                         }),
                     );
+
+                    console.log(
+                        `   ✅ Infos créées: ${klubsToUpdateInfo.length}`,
+                    );
                 } else {
-                    console.log('CRON: Aucun klub trouvé sans information.');
+                    console.log('   ℹ️  Aucun klub sans information');
                 }
+
                 /* DOCS */
                 const klubsToUpdateDoc: Array<any> = await strapi.db
                     .query('api::klubr.klubr')
@@ -174,8 +203,12 @@ export default {
                             },
                         },
                     });
-                if (klubsToUpdateDoc.length) {
-                    console.log('klubsToUpdateInfo', klubsToUpdateDoc.length);
+
+                if (klubsToUpdateDoc.length > 0) {
+                    console.log(
+                        `   📊 Klubs sans docs: ${klubsToUpdateDoc.length}`,
+                    );
+
                     await Promise.all(
                         klubsToUpdateDoc.map(async (klub) => {
                             await strapi.db
@@ -187,17 +220,27 @@ export default {
                                 });
                         }),
                     );
+
+                    console.log(
+                        `   ✅ Documents créés: ${klubsToUpdateDoc.length}`,
+                    );
                 } else {
-                    console.log('CRON: Aucun klub trouvé sans document.');
+                    console.log('   ℹ️  Aucun klub sans document');
                 }
-            } catch (err: any) {
+
                 console.log(
-                    'CRON: Erreur lors de la mise à jour des Documents et Informations des klubs ',
-                    err,
+                    '✅ [CRON] updateDefaultDocumentsAndInfosForKlubs - SUCCESS',
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] updateDefaultDocumentsAndInfosForKlubs - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la mise à jour des documents et informations'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
+
             console.log(
-                '************ CRON END: updateDefaultDocumentsAndInfosForKlubs ************',
+                '🏁 [CRON] updateDefaultDocumentsAndInfosForKlubs - END\n',
             );
         },
         options: new Date(Date.now() + 7000),
@@ -241,50 +284,58 @@ export default {
     updateClubStatusBreakingChange: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             console.log(
-                '************ CRON: updateClubStatusBreakingChange ************',
+                '🔄 [CRON] updateClubStatusBreakingChange - START',
+                '\n   🔧 Migration de données - Breaking changes',
             );
+
             try {
-                await strapi.db.query('api::klubr.klubr').updateMany({
-                    where: {
-                        status: 'valide',
-                    },
-                    data: {
-                        status: 'published',
-                    },
-                });
-                await strapi.db.query('api::klubr.klubr').updateMany({
-                    where: {
-                        status: 'supprime',
-                    },
-                    data: {
-                        status: 'deleted',
-                    },
-                });
-                await strapi.db.query('api::klubr.klubr').updateMany({
-                    where: {
-                        status: 'creation',
-                    },
-                    data: {
-                        status: 'draft',
-                    },
-                });
-                await strapi.db.query('api::klubr.klubr').updateMany({
-                    where: {
-                        donationEligible: null,
-                    },
-                    data: {
-                        donationEligible: false,
-                    },
-                });
-            } catch (err: any) {
+                const updates = [];
+
+                const valide = await strapi.db
+                    .query('api::klubr.klubr')
+                    .updateMany({
+                        where: { status: 'valide' },
+                        data: { status: 'published' },
+                    });
+                updates.push(`valide→published: ${valide?.count || 0}`);
+
+                const supprime = await strapi.db
+                    .query('api::klubr.klubr')
+                    .updateMany({
+                        where: { status: 'supprime' },
+                        data: { status: 'deleted' },
+                    });
+                updates.push(`supprime→deleted: ${supprime?.count || 0}`);
+
+                const creation = await strapi.db
+                    .query('api::klubr.klubr')
+                    .updateMany({
+                        where: { status: 'creation' },
+                        data: { status: 'draft' },
+                    });
+                updates.push(`creation→draft: ${creation?.count || 0}`);
+
+                const donation = await strapi.db
+                    .query('api::klubr.klubr')
+                    .updateMany({
+                        where: { donationEligible: null },
+                        data: { donationEligible: false },
+                    });
+                updates.push(`donationEligible null→false: ${donation?.count || 0}`);
+
                 console.log(
-                    'CRON: Erreur lors de la mise à jour des clubs (Breaking change).',
-                    err,
+                    '✅ [CRON] updateClubStatusBreakingChange - SUCCESS',
+                    `\n   📊 Migrations: ${updates.join(', ')}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] updateClubStatusBreakingChange - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la migration des clubs'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log(
-                '************ CRON END: updateClubStatusBreakingChange ************',
-            );
+
+            console.log('🏁 [CRON] updateClubStatusBreakingChange - END\n');
         },
         // Start 10 seconds after server start
         options: new Date(Date.now() + 20000),
@@ -292,26 +343,31 @@ export default {
     updateDonEmailSentBreakingChange: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             console.log(
-                '************ CRON: updateDonEmailSentBreakingChange ************',
+                '🔄 [CRON] updateDonEmailSentBreakingChange - START',
+                '\n   🔧 Migration emailSent null→true',
             );
+
             try {
-                await strapi.db.query('api::klub-don.klub-don').updateMany({
-                    where: {
-                        emailSent: null,
-                    },
-                    data: {
-                        emailSent: true,
-                    },
-                });
-            } catch (err: any) {
+                const result = await strapi.db
+                    .query('api::klub-don.klub-don')
+                    .updateMany({
+                        where: { emailSent: null },
+                        data: { emailSent: true },
+                    });
+
                 console.log(
-                    'CRON: Erreur lors de la mise à jour des status emailSent de dons (Breaking change).',
-                    err,
+                    '✅ [CRON] updateDonEmailSentBreakingChange - SUCCESS',
+                    `\n   📊 Dons mis à jour: ${result?.count || 0}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] updateDonEmailSentBreakingChange - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la migration emailSent'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log(
-                '************ CRON END: updateDonEmailSentBreakingChange ************',
-            );
+
+            console.log('🏁 [CRON] updateDonEmailSentBreakingChange - END\n');
         },
         // Start 10 seconds after server start
         options: new Date(Date.now() + 5000),
@@ -429,95 +485,229 @@ export default {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().split('T')[0];
+
             console.log(
-                '************ CRON: cleanAllKlubDons ************',
-                formattedDate,
+                '🔄 [CRON] cleanAllKlubDons - START',
+                `\n   📅 Date: ${formattedDate}`,
             );
+
             try {
                 await strapi.services['api::klub-don.klub-don'].cleanAll();
+                console.log('✅ [CRON] cleanAllKlubDons - SUCCESS');
             } catch (err: any) {
-                console.log(
-                    'CRON: Erreur lors de la mise à jour des klub dons.',
-                    err,
+                console.error(
+                    '❌ [CRON] cleanAllKlubDons - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors du nettoyage des dons'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
-            console.log('************ CRON END: cleanAllKlubDons ************');
+
+            console.log('🏁 [CRON] cleanAllKlubDons - END\n');
         },
+        // options: Every hour at minute 0 (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 * * * *',
+            rule: '0 0 * * * *',
+        },
+    },
+    syncStripeAccounts: {
+        task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            const env = process.env.NODE_ENV || 'development';
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString();
+
+            // Production guard: Skip in non-production environments
+            if (env !== 'production') {
+                console.log(
+                    '⏭️  [CRON] syncStripeAccounts - SKIPPED',
+                    `\n   📅 Date: ${formattedDate}`,
+                    `\n   🌍 Environment: ${env} (only runs in production)`,
+                );
+                return;
+            }
+
+            console.log(
+                '🔄 [CRON] syncStripeAccounts - START',
+                `\n   📅 Date: ${formattedDate}`,
+                `\n   🌍 Environment: ${env}`,
+            );
+
+            try {
+                const { default: syncTask } = await import('../src/cron/sync-stripe-accounts');
+                await syncTask({ strapi });
+                console.log('✅ [CRON] syncStripeAccounts - SUCCESS');
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] syncStripeAccounts - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la synchronisation des comptes Stripe'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
+                );
+            }
+
+            console.log(`🏁 [CRON] syncStripeAccounts - END\n`);
+        },
+        // options: Every day at 2am
+        options: {
+            rule: '0 0 2 * * *',
         },
     },
     relaunchPendingDonations: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            console.log('🔄 [CRON] relaunchPendingDonations - START');
+
             try {
                 await strapi.services[
                     'api::klub-don.klub-don'
                 ].relaunchPendingDonations();
+                console.log('✅ [CRON] relaunchPendingDonations - SUCCESS');
             } catch (err: any) {
-                console.log('CRON: Erreur lors de la relance des dons.', err);
+                console.error(
+                    '❌ [CRON] relaunchPendingDonations - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la relance des dons'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
+                );
             }
+
+            console.log('🏁 [CRON] relaunchPendingDonations - END\n');
         },
+        // options: Every 10 minutes (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '*/10 * * * *', // EVERY 10 minutes
+            rule: '0 */10 * * * *',
         },
     },
     relaunchClubCreation: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            console.log(
+                '🔄 [CRON] relaunchClubCreation - START',
+                '\n   📧 Relance des dirigeants orphelins',
+            );
+
             try {
                 await strapi.services[
                     'api::klubr-membre.klubr-membre'
                 ].relaunchOrphanMembers();
+                console.log('✅ [CRON] relaunchClubCreation - SUCCESS');
             } catch (err: any) {
-                console.log(
-                    'CRON: Erreur lors de la relance des dirigents.',
-                    err,
+                console.error(
+                    '❌ [CRON] relaunchClubCreation - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de la relance des dirigeants'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
                 );
             }
+
+            console.log('🏁 [CRON] relaunchClubCreation - END\n');
         },
+        // options: Each day at noon/12pm (cron: seconds minutes hours dayOfMonth month dayOfWeek)
         options: {
-            rule: '0 12 * * *', // Each day at noon (12pm)
+            rule: '0 0 12 * * *',
+        },
+    },
+    /* IDEMPOTENCY KEY CLEANUP */
+    cleanupStaleIdempotencyKeys: {
+        task: async ({ strapi }: { strapi: Core.Strapi }) => {
+            console.log('🔄 [CRON] cleanupStaleIdempotencyKeys - START');
+
+            try {
+                // Clean up idempotency keys older than 24 hours
+                // Stripe's idempotency keys expire after 24h, so we can safely clean up older records
+                const twentyFourHoursAgo = new Date(
+                    Date.now() - 24 * 60 * 60 * 1000,
+                );
+
+                const result = await strapi.db
+                    .query('api::klub-don-payment.klub-don-payment')
+                    .updateMany({
+                        where: {
+                            idempotency_key: { $notNull: true },
+                            createdAt: { $lt: twentyFourHoursAgo.toISOString() },
+                        },
+                        data: {
+                            idempotency_key: null,
+                        },
+                    });
+
+                console.log(
+                    '✅ [CRON] cleanupStaleIdempotencyKeys - SUCCESS',
+                    `\n   📊 Clés nettoyées: ${result?.count || 0}`,
+                );
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] cleanupStaleIdempotencyKeys - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors du nettoyage des clés'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
+                );
+            }
+
+            console.log('🏁 [CRON] cleanupStaleIdempotencyKeys - END\n');
+        },
+        // options: Every day at 3am (after Stripe sync)
+        options: {
+            rule: '0 0 3 * * *',
         },
     },
     /* DATA ANONYMIZATION */
     anonymizeData: {
         task: async ({ strapi }: { strapi: Core.Strapi }) => {
             const dataAnonymization = process.env.ENVIRONMENT !== 'production';
+            const env = process.env.ENVIRONMENT || 'unknown';
+
             console.log(
-                '************ CRON: anonymizeData ************',
-                dataAnonymization,
+                '🔄 [CRON] anonymizeData - START',
+                `\n   🌍 Environment: ${env}`,
+                `\n   🔒 Anonymisation: ${dataAnonymization ? 'ACTIVÉE' : 'DÉSACTIVÉE'}`,
             );
 
-            if (dataAnonymization) {
-                const emailListByPass = [
-                    'quentinleclerc@live.fr',
-                    'karim@donaction.fr',
-                    'k.zgoulli@gmail.com',
-                    'dev@nakaa.fr',
-                    'hamach78@gmail.com',
-                    'med@nakaa.fr',
-                    'iheb.samti1@gmail.com',
-                    'iheb.samti@gmail.com',
-                    'maxence.lombard@email.com',
-                    'aniskhalfaouiisi@gmail.com',
-                    'qleclerc@libero-avocats.fr',
-                ];
-                try {
-                    await strapi.services[
-                        'api::klubr-membre.klubr-membre'
-                    ].anonymizeData(emailListByPass);
-                    await strapi.services[
-                        'api::klubr-membre.klubr-membre'
-                    ].anonymizeUsersData(emailListByPass);
-                    await strapi.services[
-                        'api::klubr-donateur.klubr-donateur'
-                    ].anonymizeData(emailListByPass);
-                } catch (err: any) {
-                    console.log(
-                        "CRON: Erreur lors de l'anonymisation des données de membres.",
-                        err,
-                    );
-                }
+            if (!dataAnonymization) {
+                console.log(
+                    '⏭️  [CRON] anonymizeData - SKIPPED',
+                    '\n   ℹ️  Anonymisation uniquement en non-production',
+                );
+                return;
             }
+
+            const emailListByPass = [
+                'quentinleclerc@live.fr',
+                'karim@donaction.fr',
+                'k.zgoulli@gmail.com',
+                'dev@nakaa.fr',
+                'hamach78@gmail.com',
+                'med@nakaa.fr',
+                'iheb.samti1@gmail.com',
+                'iheb.samti@gmail.com',
+                'maxence.lombard@email.com',
+                'aniskhalfaouiisi@gmail.com',
+                'qleclerc@libero-avocats.fr',
+            ];
+
+            console.log(
+                `   📋 Emails protégés: ${emailListByPass.length} comptes`,
+            );
+
+            try {
+                await strapi.services[
+                    'api::klubr-membre.klubr-membre'
+                ].anonymizeData(emailListByPass);
+                console.log('   ✅ Membres anonymisés');
+
+                await strapi.services[
+                    'api::klubr-membre.klubr-membre'
+                ].anonymizeUsersData(emailListByPass);
+                console.log('   ✅ Utilisateurs anonymisés');
+
+                await strapi.services[
+                    'api::klubr-donateur.klubr-donateur'
+                ].anonymizeData(emailListByPass);
+                console.log('   ✅ Donateurs anonymisés');
+
+                console.log('✅ [CRON] anonymizeData - SUCCESS');
+            } catch (err: any) {
+                console.error(
+                    '❌ [CRON] anonymizeData - ERROR',
+                    `\n   ⚠️  Message: ${err.message || 'Erreur lors de l\'anonymisation'}`,
+                    `\n   📋 Stack: ${err.stack || 'Non disponible'}`,
+                );
+            }
+
+            console.log('🏁 [CRON] anonymizeData - END\n');
         },
         options: {
             rule: new Date(Date.now() + 10000),

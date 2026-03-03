@@ -1,11 +1,7 @@
 ---
-name: "svelte-custom-elements"
-description: "Create embeddable Svelte web components with custom elements for third-party sites"
-triggers: ["custom element", "web component", "embed widget", "shadow DOM", "customElement", "create widget", "embeddable component", "web component tag"]
-tags: ["svelte", "saas", "web-components", "typescript"]
-priority: high
-scope: file
-output: code
+name: skill:creating-web-components
+description: Creates embeddable Svelte web components with custom elements for third-party sites. Use when building widgets in donaction-saas.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Svelte Web Components (Custom Elements)

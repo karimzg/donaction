@@ -5,24 +5,26 @@ import NewClubForm from '@/partials/authentication/newClubForm';
 import LottieAnimation from '@/components/LottieAnimation';
 import Script from 'next/script';
 import { Metadata } from 'next';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import { WebPage, WithContext } from 'schema-dts';
 
 export async function generateMetadata(): Promise<Metadata> {
 	return {
-		title: `Créez le compte de votre Klub`,
-		description: `Laissez-nous vos coordonnées et nous vous recontacterons rapidement.`,
+		title: 'Inscrivez votre association',
+		description:
+			'Inscrivez votre association sur Donaction et commencez à recevoir des dons et du mécénat en quelques minutes.',
 		openGraph: {
-			title: `Créez le compte de votre Klub`,
-			description: `Laissez-nous vos coordonnées et nous vous recontacterons rapidement.`,
+			title: 'Inscrivez votre association',
+			description:
+				'Inscrivez votre association sur Donaction et commencez à recevoir des dons et du mécénat en quelques minutes.',
 			url: `${new URL(SITE_URL)}/new-club`,
 			siteName: 'Donaction',
 			images: [
 				{
-					url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
-					width: 800,
-					height: 385,
-					alt: 'Créer votre club',
+					url: OG_DEFAULT_IMAGE,
+					width: 1200,
+					height: 628,
+					alt: 'Inscrivez votre association - Donaction',
 				},
 			],
 			locale: 'fr_FR',
@@ -36,8 +38,9 @@ export default async function Page() {
 		'@context': 'https://schema.org',
 		'@type': 'WebPage',
 		url: `${SITE_URL}/new-club`,
-		name: `Créez le compte de votre Klub`,
-		description: `Laissez-nous vos coordonnées et nous vous recontacterons rapidement.`,
+		name: 'Inscrivez votre association',
+		description:
+			'Inscrivez votre association sur Donaction et commencez à recevoir des dons et du mécénat en quelques minutes.',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',
@@ -52,7 +55,7 @@ export default async function Page() {
 		datePublished: '2024-10-16',
 		image: {
 			'@type': 'ImageObject',
-			url: 'https://ik.imagekit.io/donaction/tr:w-1200,ar-1.91-1/Pages/donaction_home_page.jpg',
+			url: OG_DEFAULT_IMAGE,
 			width: '800',
 			height: '385',
 		},

@@ -150,6 +150,7 @@ jobs:
           ssh-host: ${{ vars.SSH_HOST }}
           ssh-user: ${{ vars.SSH_USER }}
           ssh-port: ${{ env.SSH_PORT }}
+          ssh-known-host-key: ${{ secrets.SSH_KNOWN_HOST_KEY }}
 
       - name: Validate secrets
         uses: ./.github/actions/validate-secrets
@@ -169,6 +170,9 @@ jobs:
             STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}
             NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}
             KLUBR_UUID:${{ vars.KLUBR_UUID }}
+            EMAIL_SMTP_USER:${{ secrets.EMAIL_SMTP_USER }}
+            EMAIL_SMTP_PASS:${{ secrets.EMAIL_SMTP_PASS }}
+            ADMIN_EMAIL_BCC:${{ secrets.ADMIN_EMAIL_BCC }}
 
       - name: Validate Docker Compose v2
         run: |
@@ -243,12 +247,18 @@ jobs:
           export STRIPE_PUBLIC_KEY="${{ secrets.STRIPE_PUBLIC_KEY }}"
           export VITE_ACTIVATE_ANALYTICS="${{ vars.VITE_ACTIVATE_ANALYTICS }}"
           export PLAUSIBLE_DATA_DOMAIN="${{ vars.PLAUSIBLE_DATA_DOMAIN }}"
+          export EMAIL_SMTP_USER="${{ secrets.EMAIL_SMTP_USER }}"
+          export EMAIL_SMTP_PASS="${{ secrets.EMAIL_SMTP_PASS }}"
+          export ADMIN_EMAIL_BCC="${{ secrets.ADMIN_EMAIL_BCC }}"
 
           envsubst < .github/templates/env.staging.template > /tmp/.env.staging
 
-          ENV_BASE64=$(cat /tmp/.env.staging | base64 -w 0)
+          scp -P ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa \
+            /tmp/.env.staging \
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ env.DEPLOY_DIR_STAGING }}/.env
           ssh -p ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
-            "echo '$ENV_BASE64' | base64 -d > ${{ env.DEPLOY_DIR_STAGING }}/.env && chmod 600 ${{ env.DEPLOY_DIR_STAGING }}/.env"
+            "chmod 600 ${{ env.DEPLOY_DIR_STAGING }}/.env"
+          rm -f /tmp/.env.staging
 
       - name: Login to GHCR on server
         run: |
@@ -336,6 +346,7 @@ jobs:
           ssh-host: ${{ vars.SSH_HOST }}
           ssh-user: ${{ vars.SSH_USER }}
           ssh-port: ${{ env.SSH_PORT }}
+          ssh-known-host-key: ${{ secrets.SSH_KNOWN_HOST_KEY }}
 
       - name: Validate secrets
         uses: ./.github/actions/validate-secrets
@@ -355,6 +366,9 @@ jobs:
             STRIPE_SECRET_KEY:${{ secrets.STRIPE_SECRET_KEY }}
             NEXTAUTH_SECRET:${{ secrets.NEXTAUTH_SECRET }}
             KLUBR_UUID:${{ vars.KLUBR_UUID }}
+            EMAIL_SMTP_USER:${{ secrets.EMAIL_SMTP_USER }}
+            EMAIL_SMTP_PASS:${{ secrets.EMAIL_SMTP_PASS }}
+            ADMIN_EMAIL_BCC:${{ secrets.ADMIN_EMAIL_BCC }}
 
       - name: Validate Docker Compose v2
         run: |
@@ -368,7 +382,7 @@ jobs:
       - name: Check port availability
         run: |
           ssh -p ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} << 'EOF'
-            PORTS="3100 1537 4300 5100 5532"
+            PORTS="3100 1537 4300 5100"
             BLOCKED=""
             for PORT in $PORTS; do
               PID=$(sudo lsof -t -i:$PORT 2>/dev/null | head -1)
@@ -486,12 +500,18 @@ jobs:
           export STRIPE_PUBLIC_KEY="${{ secrets.STRIPE_PUBLIC_KEY }}"
           export VITE_ACTIVATE_ANALYTICS="${{ vars.VITE_ACTIVATE_ANALYTICS }}"
           export PLAUSIBLE_DATA_DOMAIN="${{ vars.PLAUSIBLE_DATA_DOMAIN }}"
+          export EMAIL_SMTP_USER="${{ secrets.EMAIL_SMTP_USER }}"
+          export EMAIL_SMTP_PASS="${{ secrets.EMAIL_SMTP_PASS }}"
+          export ADMIN_EMAIL_BCC="${{ secrets.ADMIN_EMAIL_BCC }}"
 
           envsubst < .github/templates/env.production.template > /tmp/.env.production
 
-          ENV_BASE64=$(cat /tmp/.env.production | base64 -w 0)
+          scp -P ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa \
+            /tmp/.env.production \
+            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ env.DEPLOY_DIR_PROD }}/.env
           ssh -p ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
-            "echo '$ENV_BASE64' | base64 -d > ${{ env.DEPLOY_DIR_PROD }}/.env && chmod 600 ${{ env.DEPLOY_DIR_PROD }}/.env"
+            "chmod 600 ${{ env.DEPLOY_DIR_PROD }}/.env"
+          rm -f /tmp/.env.production
 
       - name: Login to GHCR on server
         run: |

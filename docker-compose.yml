@@ -87,7 +87,7 @@ services:
 
   postgres:
     image: postgres:16.0-alpine
-    container_name: ${PROJECT_SLUG}_postgres_v5
+    container_name: ${PROJECT_SLUG}_postgres
     platform: linux/amd64
     restart: unless-stopped
     env_file: .env
@@ -117,7 +117,7 @@ services:
     volumes:
       - donaction-pgadmin-data:/var/lib/pgadmin
     # to run postgresql server on pgAdmin, get the network ip address of the postgresql container with the command:
-    # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PROJECT_SLUG}_postgres_v5
+    # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PROJECT_SLUG}_postgres
 
 volumes:
   donaction-postgres-data-v5:

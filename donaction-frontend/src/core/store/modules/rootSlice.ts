@@ -1,9 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 
-interface IToast {
+export const MAX_VISIBLE_TOASTS = 3;
+
+export interface IToast {
 	title: string;
 	type: 'info' | 'warn' | 'error' | 'success';
+	hasActions?: boolean;
 }
 
 interface ID {
@@ -43,11 +46,19 @@ export const rootSlice = createSlice({
 		setPopAuth: (state, action: PayloadAction<string>) => {
 			state.popAuth = action.payload;
 		},
-		pushToast: (state, action: PayloadAction<IToast>) => {
-			state.toasts.push({
-				...action.payload,
-				id: Math.random().toString(36).slice(2, 10),
-			});
+		pushToast: (state, action: PayloadAction<IToast & { id?: string }>) => {
+			const { title, type, hasActions } = action.payload;
+			const id =
+				action.payload.id ??
+				crypto?.randomUUID?.() ??
+				`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+			// Evict oldest toasts when at capacity
+			while (state.toasts.length >= MAX_VISIBLE_TOASTS) {
+				state.toasts.shift();
+			}
+
+			state.toasts.push({ title, type, hasActions, id });
 		},
 		popToast: (state, action: PayloadAction<string>) => {
 			state.toasts = state.toasts.filter((_) => _.id !== action.payload);

@@ -3,7 +3,7 @@ import Header from '@/partials/common/header/index';
 import Footer from '@/partials/common/footer';
 import React from 'react';
 import { getServerSession } from 'next-auth';
-import {cookies} from "next/headers";
+import { cookies } from 'next/headers';
 
 const AuthLayout = async ({ children }: { children: React.ReactNode }) => {
 	const slugs = await getClubsSlugs(5, cookies().toString()).catch((error) => {
@@ -13,9 +13,9 @@ const AuthLayout = async ({ children }: { children: React.ReactNode }) => {
 	const session = await getServerSession();
 	return (
 		<>
-			<Header session={session} slugs={slugs} bg1='#FFF' bg2='#FFF' txtColor='#000' />
+			<Header session={session} slugs={slugs} />
 			{<main className='flex flex-col items-center'>{children}</main>}
-			<Footer bg1='#000000' bg2='#FFFFFF' />
+			<Footer />
 		</>
 	);
 };

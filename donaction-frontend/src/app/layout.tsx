@@ -3,7 +3,7 @@ import theme from '@/config/theme.json';
 import Providers from '@/app/Providers';
 import '@/styles/main.scss';
 import { Metadata } from 'next';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import PopAuth from '@/partials/authentication/popAuth';
 import Toaster from 'src/layouts/components/toaster';
 import React from 'react';
@@ -14,21 +14,22 @@ import * as process from 'node:process';
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: {
-		template: '%s | Klubr',
-		default: 'Klubr', // a default is required when creating a template
+		template: '%s | Donaction',
+		default: 'Donaction',
 	},
-	generator: 'Klubr Website',
-	applicationName: 'Klubr Website',
+	description:
+		'Donaction - Plateforme de dons et mécénat pour les associations sportives, humanitaires, sociales et culturelles. Soutenez vos associations préférées et leurs projets.',
+	generator: 'Donaction',
+	applicationName: 'Donaction',
 	// referrer: 'origin-when-cross-origin',
 	authors: [{ name: 'Karim Z.', url: 'https://nakaa.fr' }],
-	creator: 'Klubr',
+	creator: 'Donaction',
 	publisher: 'Karim Z.',
 	formatDetection: {
 		email: false,
 		address: false,
 		telephone: false,
 	},
-	// viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
 	icons: {
 		icon: [
 			{
@@ -37,15 +38,20 @@ export const metadata: Metadata = {
 				sizes: '128x128',
 				url: config.site.favicon_png,
 			},
-			// {
-			// 	rel: "icon",
-			// 	type: "image/ico",
-			// 	url: config.site.favicon,
-			// },
 		],
 	},
-	// locale: 'fr_FR',
-	// type: 'website',
+	openGraph: {
+		locale: 'fr_FR',
+		type: 'website',
+		siteName: 'Donaction',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		images: [OG_DEFAULT_IMAGE],
+	},
+	alternates: {
+		canonical: './',
+	},
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -55,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 		'@context': 'https://schema.org',
 		'@type': 'WebSite',
 		url: SITE_URL,
-		name: 'Klubr website',
+		name: 'Donaction',
 		publisher: {
 			'@type': 'Organization',
 			name: 'Nakaa',

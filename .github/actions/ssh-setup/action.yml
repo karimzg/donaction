@@ -15,22 +15,39 @@ inputs:
     description: 'SSH port'
     required: false
     default: '63009'
+  ssh-known-host-key:
+    description: 'Known host public key (e.g. from ssh-keyscan). Required to prevent MITM attacks.'
+    required: true
 
 runs:
   using: 'composite'
   steps:
     - name: Setup SSH
       shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh-private-key }}
+        SSH_KNOWN_HOST_KEY: ${{ inputs.ssh-known-host-key }}
+        SSH_HOST: ${{ inputs.ssh-host }}
+        SSH_PORT: ${{ inputs.ssh-port }}
       run: |
         mkdir -p ~/.ssh
-        echo "${{ inputs.ssh-private-key }}" > ~/.ssh/id_rsa
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p ${{ inputs.ssh-port }} -H ${{ inputs.ssh-host }} >> ~/.ssh/known_hosts
+
+        if [[ -z "$SSH_KNOWN_HOST_KEY" ]]; then
+          echo "::error::ssh-known-host-key is required. Run: ssh-keyscan -p PORT HOST and store result as a secret."
+          exit 1
+        fi
+        echo "$SSH_KNOWN_HOST_KEY" >> ~/.ssh/known_hosts
 
     - name: Validate SSH connection
       shell: bash
+      env:
+        SSH_PORT: ${{ inputs.ssh-port }}
+        SSH_USER: ${{ inputs.ssh-user }}
+        SSH_HOST: ${{ inputs.ssh-host }}
       run: |
-        if ! ssh -p ${{ inputs.ssh-port }} -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} "echo 'SSH connection successful'"; then
+        if ! ssh -p "$SSH_PORT" -i ~/.ssh/id_rsa -o ConnectTimeout=10 "${SSH_USER}@${SSH_HOST}" "echo 'SSH connection successful'"; then
           echo "::error::SSH connection failed"
           exit 1
         fi

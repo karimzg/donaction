@@ -4,9 +4,8 @@
     DEFAULT_VALUES,
     SUBSCRIPTION,
     isBeingFilled,
-    FORM_CONFIG
+    FORM_CONFIG,
   } from '../../../../logic/useSponsorshipForm.svelte';
-  import alertIcon from '../../../../../../assets/icons/alertIcon.svg';
   import pagination from '../../../../../../assets/icons/pagination.svg';
   import email from '../../../../../../assets/icons/email.svg';
   import userAvatar from '../../../../../../assets/icons/userAvatar.svg';
@@ -14,10 +13,17 @@
   import Tooltip from '../../../../../../utils/tooltip/Tooltip.svelte';
   import { onDestroy, onMount } from 'svelte';
   import { populateForm } from '../../../../logic/initListeners';
-  import { calculateTaxReduction } from '../../../../logic/utils';
+  import { calculateTaxReduction, calculateTaxSavings } from '../../../../logic/utils';
   import { register } from 'swiper/element/bundle';
+  import ProjectHighlight from '../../../projectHighlight/ProjectHighlight.svelte';
+  import FormError from '../../../formError/FormError.svelte';
 
   let { slides }: { slides: Array<any> } = $props();
+
+  // Check if this is a project donation (not general club)
+  const isProjectDonation = $derived(
+    SUBSCRIPTION.project?.uuid && SUBSCRIPTION.project.uuid !== SUBSCRIPTION.klubr?.uuid,
+  );
 
   let amounts = $derived(DEFAULT_VALUES.estOrganisme ? [100, 200, 500, 1000] : [10, 50, 100, 200]);
 
@@ -45,7 +51,7 @@
   let swiperEl = null;
   let paginateState = $state({
     left: false,
-    right: false
+    right: false,
   });
   const swiperInstaller = (node: any) => {
     register();
@@ -93,14 +99,37 @@
     swiperEl?.swiper[acc > 0 ? 'slideNext' : 'slidePrev']();
   };
 
+  // Scroll vers la section suivante après sélection du montant (utile mobile)
+  let taxSectionRef: HTMLElement;
+  let scrollTimeout: ReturnType<typeof setTimeout>;
+
+  const scrollToNextSection = () => {
+    setTimeout(() => {
+      taxSectionRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
+
+  const scheduleScroll = () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(scrollToNextSection, 2000);
+  };
+
+  const cancelScheduledScroll = () => {
+    clearTimeout(scrollTimeout);
+  };
+
   onDestroy(() => {
     populateForm();
   });
 </script>
 
-<form class="step1 flex flex-col" style="gap: 1rem">
+<form class="don-step1" data-testid="step1">
   {#if !SUBSCRIPTION.project && SUBSCRIPTION.allowProjectSelection}
-    <div class="projectSelectionContainer flex flex-col items-center gap-1">
+    <!-- Project selection with Swiper - PRESERVED -->
+    <div
+      class="projectSelectionContainer flex flex-col items-center gap-1"
+      data-testid="project-selection"
+    >
       <p class="text-center font-semibold">Quel projet souhaitez-vous soutenir ?</p>
       <div class="swiperContainer">
         {#if paginateState.left}
@@ -150,138 +179,219 @@
         Je ne souhaite pas soutenir un projet en particulier et préfère affecter mon don au
         financement des activités d'intérêt général du Klub
       </p>
-      <button onclick={saveSelection} class="primary-btn">
+      <button onclick={saveSelection} class="primary-btn" data-testid="btn-select-project">
         {FORM_CONFIG.projectUuid === SUBSCRIPTION.klubr.uuid ? 'Valider' : 'Selectionner ce projet'}
       </button>
     </div>
   {:else}
-    <div class="clubProjectContainer flex flex-col items-center gap-1-2">
-      <p class="text-center">
-        {!!SUBSCRIPTION.project && SUBSCRIPTION.project?.uuid !== SUBSCRIPTION.klubr.uuid
-          ? 'Contribuez au financement du projet'
-          : 'Contribuez au développement de'}
-      </p>
-      <p class="title text-center font-bold">
-        {!!SUBSCRIPTION.project && SUBSCRIPTION.project?.uuid !== SUBSCRIPTION.klubr.uuid
-          ? SUBSCRIPTION?.project?.titre
-          : SUBSCRIPTION.klubr.denomination}
-      </p>
-      <img
-        width={(SUBSCRIPTION.klubr?.logo?.width / SUBSCRIPTION.klubr?.logo?.height) * 70}
-        height={70}
-        src={SUBSCRIPTION.klubr?.logo?.url}
-        alt="logo club"
-      />
-    </div>
-    <div class="amountPicker flex flex-col items-center gap-1">
-      <p class="font-bold text-center">Je souhaite aider le projet à hauteur de :</p>
-      <div class="amounts flex items-center gap-1-2">
-        {#each amounts as amount, _index}
-          <div
-            class="amount font-bold {DEFAULT_VALUES.montant === amount}"
-            onclick={() => (DEFAULT_VALUES.montant = amount) && isBeingFilled.set(true)}
-          >
-            {amount} €
-          </div>
-        {/each}
-      </div>
-      <small class="error">
-        {$triggerValidation > 0
-          ? !DEFAULT_VALUES.montant
-            ? 'Veuillez choisir un montant'
-            : DEFAULT_VALUES.montant < 10
-              ? 'Veuillez choisir un montant supérieure à 10 €'
-              : DEFAULT_VALUES.montant > 100000
-                ? 'Veuillez choisir un montant inférieure à 100.000 €'
-                : ''
-          : ''}
-      </small>
-    </div>
-    <div class="freeAmount flex items-center justify-center flex-wrap gap-1 font-bold">
-      <p>Montant libre</p>
-      <div>
-        <input
-          min="10"
-          max="100000"
-          placeholder="--,--"
-          type="number"
-          bind:value={DEFAULT_VALUES.montant}
+    <!-- Header section (only for club donations, not project donations) -->
+    {#if !isProjectDonation}
+      <header class="don-step1__header">
+        <p class="don-step1__subtitle">Contribuez au développement de</p>
+        <h1 class="don-step1__title">{SUBSCRIPTION.klubr.denomination}</h1>
+        <img
+          class="don-step1__logo"
+          width={SUBSCRIPTION.klubr?.logo?.width && SUBSCRIPTION.klubr?.logo?.height
+            ? (SUBSCRIPTION.klubr.logo.width / SUBSCRIPTION.klubr.logo.height) * 70
+            : 70}
+          height={70}
+          src={SUBSCRIPTION.klubr?.logo?.url}
+          alt="logo club"
         />
-        <span>€</span>
-      </div>
-    </div>
+      </header>
+    {/if}
 
-    <Tooltip>
-      <div
-        slot="trigger"
-        tabindex="0"
-        class={'flex items-center gap-1-2'}
-        data-tooltip-id={'Envoi'}
-      >
-        <p class="font-semibold">Envoi immédiat des justificatifs</p>
-        <img width={25} height={25} src={alertIcon} alt={''} />
-      </div>
-      <div slot="tooltip">
-        <div class={'flex gap-1'}>
-          <img src={email} alt={'email'} />
-          <p>Réception immédiate de vos reçus et attestation par mail.</p>
-        </div>
-        <hr class={'w-full'} style="border-color: #808182" />
-        <div class={'flex gap-1'}>
-          <img src={userAvatar} alt={'email'} />
-          <p>Retrouvez à tout instant vos justificatifs dans votre espace.</p>
-        </div>
-        <hr class={'w-full'} style="border-color: #808182" />
-        <div class={'flex gap-1'}>
-          <img src={resendFiles} alt={'email'} />
-          <p>Envoi des justificatifs par mail pour rappel avant votre déclaration d'impôt.</p>
-        </div>
-      </div>
-    </Tooltip>
-
-    <div class="enTantQue flex flex-col items-center gap-1-2">
-      <p class="font-bold text-center">
-        Souhaitez-vous bénéficier d'une réduction d'impôt "mécénat" pour ce don ?
-      </p>
-      <div class="choice flex gap-3" onclick={checkWithTaxReduction}>
-        <span class={!DEFAULT_VALUES.withTaxReduction && 'font-bold'}>Non</span>
-        <span style="margin-right: 6px" class={!!DEFAULT_VALUES.withTaxReduction && 'font-bold'}
-          >Oui</span
-        >
-        <span class="{!!DEFAULT_VALUES.withTaxReduction} selector"></span>
-      </div>
-    </div>
-
-    {#if !!DEFAULT_VALUES.withTaxReduction}
-      <div class="enTantQue flex items-center gap-1-2">
-        <p class="font-bold">Je soutiens en tant que :</p>
-        <div class="choice flex gap-3" onclick={checkIsOrganization}>
-          <span class={!DEFAULT_VALUES.estOrganisme && 'font-bold'}>Particulier</span>
-          <span class={!!DEFAULT_VALUES.estOrganisme && 'font-bold'}>Entreprise</span>
-          <span class="{!!DEFAULT_VALUES.estOrganisme} selector"></span>
-        </div>
-      </div>
-
-      <div class="afterTax flex flex-col items-center gap-1-2 font-semibold">
-        <Tooltip>
-          <div slot="trigger" class="flex gap-1-2 items-center">
-            <p class="text-center">Coût après réduction d'impôts</p>
-            <img width={25} height={25} src={alertIcon} alt={''} />
-          </div>
-          <div slot="tooltip" class="flex flex-col gap-1">
-            <h1 style="margin: unset;">Réduction d'impôts</h1>
-            <p style="font-weight: normal">
-              Le don à <b>{SUBSCRIPTION.klubr.denomination}</b> ouvre droit à une réduction d'impôts
-              car il remplit les conditions générales prévues aux articles 200 et 238 bis du code général
-              des impôts.
-            </p>
-          </div>
-        </Tooltip>
-        <span class="flex items-center justify-center"
-          >{calculateTaxReduction(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)}&nbsp;€</span
-        >
+    <!-- Project highlight (only for project donations) -->
+    {#if isProjectDonation && SUBSCRIPTION.project}
+      <div class="don-step1__project-highlight">
+        <ProjectHighlight
+          project={SUBSCRIPTION.project}
+          selectedAmount={DEFAULT_VALUES.montant}
+          variant="default"
+          label="Contribuez au financement du projet"
+        />
       </div>
     {/if}
+
+    <!-- Amount section -->
+    <section class="don-section">
+      <h2 class="don-section__label">
+        Je souhaite aider {#if isProjectDonation && SUBSCRIPTION.project}le projet
+        {/if}à hauteur de :
+      </h2>
+
+      <div class="don-amount-grid" role="group" aria-label="Sélection du montant">
+        {#each amounts as amount}
+          <button
+            type="button"
+            class="don-btn-amount"
+            class:don-btn-amount--selected={DEFAULT_VALUES.montant === amount}
+            onclick={() => {
+              DEFAULT_VALUES.montant = amount;
+              isBeingFilled.set(true);
+              scrollToNextSection();
+            }}
+            aria-pressed={DEFAULT_VALUES.montant === amount}
+            aria-label="Faire un don de {amount} euros"
+            data-testid="amount-{amount}"
+          >
+            {amount} €
+          </button>
+        {/each}
+      </div>
+
+      <div class="don-custom-amount">
+        <label class="don-custom-amount__label" for="don-montant-libre">Montant libre</label>
+        <div class="don-custom-amount__input">
+          <input
+            id="don-montant-libre"
+            type="number"
+            min="10"
+            max="100000"
+            placeholder="--,--"
+            class="don-form-input don-form-input--with-addon"
+            bind:value={DEFAULT_VALUES.montant}
+            data-testid="amount-free"
+            oninput={(e) => {
+              if (e.target.value.length > 6) {
+                e.target.value = e.target.value.slice(0, 6);
+                DEFAULT_VALUES.montant = Number(e.target.value);
+              }
+              if (e.target.value.length >= 2) {
+                scheduleScroll();
+              }
+            }}
+            onblur={() => {
+              cancelScheduledScroll();
+              if (DEFAULT_VALUES.montant >= 10) scrollToNextSection();
+            }}
+            aria-describedby="don-montant-error"
+          />
+          <span class="don-custom-amount__currency" aria-hidden="true">€</span>
+        </div>
+      </div>
+
+      <!-- Message d'erreur avec le composant FormError -->
+      <div class="flex justify-center">
+        <FormError
+          msgType="glassCard"
+          message={$triggerValidation > 0
+            ? !DEFAULT_VALUES.montant
+              ? 'Veuillez choisir un montant'
+              : DEFAULT_VALUES.montant < 10
+                ? 'Veuillez choisir un montant supérieure à 10 €'
+                : DEFAULT_VALUES.montant > 100000
+                  ? 'Veuillez choisir un montant inférieure à 100.000 €'
+                  : ''
+            : ''}
+        />
+      </div>
+
+      <div class="don-info-row">
+        <Tooltip>
+          <div slot="trigger" class="don-info-trigger">
+            <span class="don-info-icon">📄</span>
+            <span class="don-info-text">Envoi immédiat des justificatifs</span>
+            <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
+          </div>
+          <div slot="tooltip">
+            <div class={'flex gap-1'}>
+              <img src={email} alt={'email'} />
+              <p>Réception immédiate de vos reçus et attestation par mail.</p>
+            </div>
+            <hr class={'w-full'} />
+            <div class={'flex gap-1'}>
+              <img src={userAvatar} alt={'email'} />
+              <p>Retrouvez à tout instant vos justificatifs dans votre espace.</p>
+            </div>
+            <hr class={'w-full'} />
+            <div class={'flex gap-1'}>
+              <img src={resendFiles} alt={'email'} />
+              <p>Envoi des justificatifs par mail pour rappel avant votre déclaration d'impôt.</p>
+            </div>
+          </div>
+        </Tooltip>
+      </div>
+    </section>
+
+    <!-- Tax reduction section -->
+    <section class="don-section" bind:this={taxSectionRef}>
+      <h2 class="don-section__label">
+        Souhaitez-vous bénéficier d'une réduction d'impôt "mécénat" pour ce don ?
+      </h2>
+
+      <div class="don-toggle-group" role="group" aria-label="Réduction d'impôt">
+        <button
+          type="button"
+          class="don-toggle-btn"
+          class:don-toggle-btn--selected={!DEFAULT_VALUES.withTaxReduction}
+          onclick={checkWithTaxReduction}
+          aria-pressed={!DEFAULT_VALUES.withTaxReduction}
+          data-testid="tax-no">Non</button
+        >
+        <button
+          type="button"
+          class="don-toggle-btn"
+          class:don-toggle-btn--selected={DEFAULT_VALUES.withTaxReduction}
+          onclick={checkWithTaxReduction}
+          aria-pressed={DEFAULT_VALUES.withTaxReduction}
+          data-testid="tax-yes">Oui</button
+        >
+      </div>
+
+      {#if DEFAULT_VALUES.withTaxReduction}
+        <div class="don-tax-options">
+          <h3 class="don-section__sublabel">Je soutiens en tant que :</h3>
+
+          <div class="don-toggle-group" role="group" aria-label="Type de donateur">
+            <button
+              type="button"
+              class="don-toggle-btn"
+              class:don-toggle-btn--selected={!DEFAULT_VALUES.estOrganisme}
+              onclick={checkIsOrganization}
+              aria-pressed={!DEFAULT_VALUES.estOrganisme}
+              data-testid="donor-type-particulier">Particulier</button
+            >
+            <button
+              type="button"
+              class="don-toggle-btn"
+              class:don-toggle-btn--selected={DEFAULT_VALUES.estOrganisme}
+              onclick={checkIsOrganization}
+              aria-pressed={DEFAULT_VALUES.estOrganisme}
+              data-testid="donor-type-entreprise">Entreprise</button
+            >
+          </div>
+
+          <div class="don-real-cost don-real-cost--vertical">
+            <Tooltip>
+              <div slot="trigger" class="don-real-cost__label-row">
+                <span class="don-real-cost__label">Coût après réduction d'impôts</span>
+                <span class="don-tooltip-trigger" aria-label="Plus d'informations">?</span>
+              </div>
+              <div slot="tooltip" class="flex flex-col gap-1">
+                <h1>Réduction d'impôts</h1>
+                <p>
+                  Le don à <b>{SUBSCRIPTION.klubr.denomination}</b> ouvre droit à une réduction d'impôts
+                  car il remplit les conditions générales prévues aux articles 200 et 238 bis du code
+                  général des impôts.
+                </p>
+              </div>
+            </Tooltip>
+            <div class="don-real-cost__value" data-testid="tax-reduction-value">
+              {calculateTaxReduction(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €
+            </div>
+            <div class="don-real-cost__savings" data-testid="tax-savings">
+              Vous économisez <strong
+                >{calculateTaxSavings(DEFAULT_VALUES.montant, DEFAULT_VALUES.estOrganisme)} €</strong
+              >
+            </div>
+            <div class="don-real-cost__detail" data-testid="tax-detail">
+              ({DEFAULT_VALUES.estOrganisme ? '60%' : '66%'} de réduction fiscale)
+            </div>
+          </div>
+        </div>
+      {/if}
+    </section>
   {/if}
 </form>
 

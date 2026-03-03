@@ -1,56 +1,232 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks';
-import { popToast, pushToast, selectToasts } from '@/core/store/modules/rootSlice';
+import { popToast, selectToasts, type IToast } from '@/core/store/modules/rootSlice';
+import { getActions, clearActions, clearAllActions, type ToastAction } from './actionRegistry';
+import useIsMobile from '@/core/hooks/useIsMobile';
+import useSwipeDismiss from './useSwipeDismiss';
+import SuccessIcon from './icons/SuccessIcon';
+import ErrorIcon from './icons/ErrorIcon';
+import InfoIcon from './icons/InfoIcon';
+import WarnIcon from './icons/WarnIcon';
+import CloseIcon from './icons/CloseIcon';
 import './index.scss';
+
+export const TOAST_DURATION_DESKTOP = 5000;
+export const TOAST_DURATION_MOBILE = 4000;
+export const DISMISS_ANIMATION_DURATION = 400;
+
+const ICON_MAP: Record<IToast['type'], React.FC<{ className?: string }>> = {
+	success: SuccessIcon,
+	error: ErrorIcon,
+	info: InfoIcon,
+	warn: WarnIcon,
+};
+
+const ARIA_LABELS: Record<IToast['type'], string> = {
+	success: 'Success notification',
+	error: 'Error notification',
+	info: 'Information notification',
+	warn: 'Warning notification',
+};
+
+/** Build the timer key used for the removal phase of a toast. */
+const getRemoveTimerKey = (toastId: string) => `${toastId}-remove`;
+
+/** Individual toast item with swipe support. */
+const ToastItem: React.FC<{
+	toast: IToast & { id: string };
+	depth: number;
+	isDismissing: boolean;
+	actions: ToastAction[];
+	isMobile: boolean;
+	onDismiss: (id: string) => void;
+	onAction: (id: string, action: ToastAction) => void;
+}> = ({ toast, depth, isDismissing, actions, isMobile, onDismiss, onAction }) => {
+	const Icon = ICON_MAP[toast.type];
+
+	const { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel } = useSwipeDismiss({
+		enabled: isMobile,
+		onDismiss: () => onDismiss(toast.id),
+	});
+
+	return (
+		<div
+			className={`toastItem toastItem--${toast.type}${isDismissing ? ' toastItem--dismissing' : ''}${depth > 0 ? ` toastItem--depth-${depth}` : ''}`}
+			aria-label={ARIA_LABELS[toast.type]}
+			data-depth={depth}
+			onTouchStart={onTouchStart}
+			onTouchMove={onTouchMove}
+			onTouchEnd={onTouchEnd}
+			onTouchCancel={onTouchCancel}
+		>
+			{Icon && (
+				<span className="toastItem__icon">
+					<Icon />
+				</span>
+			)}
+			<span className="toastItem__text">{toast.title}</span>
+
+			{actions.length > 0 && (
+				<div className="toastItem__actions">
+					{actions.map((action) => (
+						<button
+							key={action.label}
+							className="toastItem__action"
+							onClick={() => onAction(toast.id, action)}
+							type="button"
+						>
+							{action.label}
+						</button>
+					))}
+				</div>
+			)}
+
+			<button
+				className="toastItem__close"
+				onClick={() => onDismiss(toast.id)}
+				aria-label="Dismiss notification"
+				type="button"
+			>
+				<CloseIcon />
+			</button>
+		</div>
+	);
+};
 
 const Toaster = () => {
 	const dispatch = useAppDispatch();
-	const toastsSelector = useAppSelector(selectToasts);
-	const [toasts, setToasts] = useState<typeof toastsSelector>([]);
+	const toasts = useAppSelector(selectToasts);
+	const isMobile = useIsMobile();
+	const [dismissing, setDismissing] = useState<Set<string>>(new Set());
+	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-	// TODO: This is for testing
-	useEffect(() => {
-		// setTimeout(() => {
-		// 	dispatch(pushToast({ title: `Toast 1: info`, type: 'info' }));
-		// }, 1000);
-		// setTimeout(() => {
-		// 	dispatch(pushToast({ title: `Toast 2: error`, type: 'error' }));
-		// }, 2000);
-		// setTimeout(() => {
-		// 	dispatch(pushToast({ title: `Toast 3: success`, type: 'success' }));
-		// }, 3000);
-		// setTimeout(() => {
-		// 	dispatch(pushToast({ title: `Toast 4: warning`, type: 'warning' }));
-		// }, 4000);
-	}, []);
-	// /\ \\
+	const toastDuration = isMobile ? TOAST_DURATION_MOBILE : TOAST_DURATION_DESKTOP;
 
+	const dismissToast = useCallback(
+		(toastId: string) => {
+			// Clear existing auto-dismiss timers
+			const existingTimer = timersRef.current.get(toastId);
+			if (existingTimer) clearTimeout(existingTimer);
+			const existingRemoveTimer = timersRef.current.get(getRemoveTimerKey(toastId));
+			if (existingRemoveTimer) clearTimeout(existingRemoveTimer);
+
+			// Start dismiss animation
+			setDismissing((prev) => new Set(prev).add(toastId));
+
+			// Schedule removal after animation
+			const removeTimer = setTimeout(() => {
+				dispatch(popToast(toastId));
+				clearActions(toastId);
+				setDismissing((prev) => {
+					const next = new Set(prev);
+					next.delete(toastId);
+					return next;
+				});
+				timersRef.current.delete(toastId);
+				timersRef.current.delete(getRemoveTimerKey(toastId));
+			}, DISMISS_ANIMATION_DURATION);
+
+			timersRef.current.set(getRemoveTimerKey(toastId), removeTimer);
+		},
+		[dispatch],
+	);
+
+	const handleAction = useCallback(
+		(toastId: string, action: ToastAction) => {
+			action.callback();
+			dismissToast(toastId);
+		},
+		[dismissToast],
+	);
+
+	// Schedule auto-dismiss timers for new toasts
 	useEffect(() => {
-		toastsSelector.forEach((_) => {
-			if (!toasts.find((toast) => toast.id === _.id)) {
-				toasts.push(_);
-				setTimeout(() => {
-					dispatch(popToast(_.id));
-					toasts.filter((__) => __.id !== _.id);
-				}, 4100);
+		toasts.forEach((toast) => {
+			if (!timersRef.current.has(toast.id)) {
+				const autoDismissTimer = setTimeout(() => {
+					dismissToast(toast.id);
+				}, toastDuration);
+
+				timersRef.current.set(toast.id, autoDismissTimer);
 			}
 		});
-	}, [toastsSelector]);
+
+		// Clean up timers and dismissing state for externally removed toasts
+		const activeIds = new Set(toasts.map((t) => t.id));
+		const keysToDelete: string[] = [];
+		timersRef.current.forEach((timer, key) => {
+			const baseId = key.replace('-remove', '');
+			if (!activeIds.has(baseId)) {
+				clearTimeout(timer);
+				keysToDelete.push(key);
+			}
+		});
+		keysToDelete.forEach((key) => timersRef.current.delete(key));
+
+		// Clean up action registry for externally removed toasts
+		keysToDelete.forEach((key) => {
+			const baseId = key.replace('-remove', '');
+			clearActions(baseId);
+		});
+
+		setDismissing((prev) => {
+			let changed = false;
+			prev.forEach((id) => {
+				if (!activeIds.has(id)) changed = true;
+			});
+			if (!changed) return prev;
+			const next = new Set<string>();
+			prev.forEach((id) => {
+				if (activeIds.has(id)) next.add(id);
+			});
+			return next;
+		});
+	}, [toasts, dismissToast, toastDuration]);
+
+	// Cleanup all timers and action registry on unmount
+	useEffect(() => {
+		return () => {
+			timersRef.current.forEach((timer) => clearTimeout(timer));
+			timersRef.current.clear();
+			clearAllActions();
+		};
+	}, []);
+
+	// Memoize actions lookup to avoid calling getActions on every render
+	const actionsMap = useMemo(
+		() => new Map(toasts.map((t) => [t.id, t.hasActions ? getActions(t.id) : []])),
+		[toasts],
+	);
+
+	if (toasts.length === 0) return null;
 
 	return (
-		<>
-			{toastsSelector.map((toast, _index) => (
-				<div
-					className={`toastItem ${toast.type}`}
-					style={{ bottom: 2 + 4 * _index + `rem` }}
-					key={toast.id}
-				>
-					{toast.title}
-				</div>
-			))}
-		</>
+		<div
+			className={`toastContainer${isMobile ? ' toastContainer--mobile' : ''}`}
+			role="status"
+			aria-live="polite"
+		>
+			{toasts.map((toast, index) => {
+				const isDismissing = dismissing.has(toast.id);
+				const actions = actionsMap.get(toast.id) ?? [];
+				const depth = toasts.length - 1 - index;
+
+				return (
+					<ToastItem
+						key={toast.id}
+						toast={toast}
+						depth={depth}
+						isDismissing={isDismissing}
+						actions={actions}
+						isMobile={isMobile}
+						onDismiss={dismissToast}
+						onAction={handleAction}
+					/>
+				);
+			})}
+		</div>
 	);
 };
 

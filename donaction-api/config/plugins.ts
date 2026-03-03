@@ -38,11 +38,11 @@ export default ({ env }: { env: any }) => ({
             providerOptions: {
                 publicKey: env(
                     'IMAGEKIT_PUBLIC_KEY',
-                    'public_39Os8jG8bG+2EOLVjbelKMyUZ9w=',
+                    'public_RCyQUNInPm95n2AS1dPjEs/IUd8=',
                 ),
                 privateKey: env(
                     'IMAGEKIT_PRIVATE_KEY',
-                    'private_Eueq74m6M6Hu9TcwzlBtMguzwc0=',
+                    'private_eq9iVY+7xHjWAENqdbaE6CEWF2o=',
                 ),
                 urlEndpoint: env(
                     'IMAGEKIT_URL_ENDPOINT',

@@ -5,6 +5,7 @@
   import step4 from './steps/step4/step4.svelte';
   import step5 from './steps/step5/step5.svelte';
   import type { Component } from 'svelte';
+  import { autoScrollOnFocus } from '../../logic/autoScrollOnFocus';
 
   let { index, slides }: { index: number; slides: Array<any> } = $props();
 
@@ -26,7 +27,7 @@
   });
 </script>
 
-<div class="formBodyContainer" style="margin: auto 0">
+<div class="formBodyContainer" style="margin: auto 0" use:autoScrollOnFocus>
   {#if component}
     {#if !!$$slots['c-g-u']}
       <svelte:component this={component} {index}>

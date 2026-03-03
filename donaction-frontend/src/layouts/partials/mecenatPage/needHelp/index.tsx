@@ -2,17 +2,8 @@ import React from 'react';
 import FaqItems from '@/partials/common/faqItems';
 import { FaqI } from '@/core/models/hp';
 import { SITE_URL } from '@/core/services/endpoints';
-import { headers } from 'next/headers';
-import { RichTextBlockEl } from '@/components/RichTextBlock';
-
-const getPathname = () => {
-	try {
-		const headersList = headers();
-		return headersList.get('x-custom-pathname') || '';
-	} catch (e: any) {
-		return typeof window !== 'undefined' ? document?.location.pathname : '';
-	}
-};
+import getPathname from '@/core/helpers/getPathname';
+import richTextToPlainText from '@/core/helpers/richTextToPlainText';
 
 const NeedHelp: React.FC<{
 	// GETTER?: () => Promise<{ data: { attributes: { FAQ: FaqI } } }>;
@@ -31,18 +22,6 @@ const NeedHelp: React.FC<{
 	// 	}
 	// }
 
-	const getAnswer = (data: Array<RichTextBlockEl>) => {
-		let res = '';
-		data.forEach((_) => {
-			if (_.type === 'text') {
-				res += ' ' + _.text;
-				return;
-			}
-			res += ' ' + getAnswer(_.children);
-		});
-		return res;
-	};
-
 	const jsonLd = {
 		'@context': 'https://schema.org',
 		'@type': 'FAQPage',
@@ -53,7 +32,7 @@ const NeedHelp: React.FC<{
 				name: _.question,
 				acceptedAnswer: {
 					'@type': 'Answer',
-					text: getAnswer(_.answer),
+					text: richTextToPlainText(_.answer),
 				},
 			})) || []),
 		],

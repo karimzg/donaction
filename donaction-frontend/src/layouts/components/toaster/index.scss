@@ -1,49 +1,310 @@
-
-.toastItem {
+// Toast Container
+.toastContainer {
   position: fixed;
-  z-index: 999999999999;
-  max-width: min(400px, 80vw);
-  right: 2rem;
-  padding: 13px 28px;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  opacity: 0;
-  animation: opacityChange 4s ease-in-out;
-  transition: bottom ease-in-out .2s;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+  pointer-events: none;
 
-  color: #FFF;
+  // Mobile: top-positioned, full-width
+  &--mobile {
+    top: 0.75rem;
+    bottom: auto;
+    right: 0;
+    left: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
 
-  // TODO: bgColors to be changed
-  &.info {
-    background: #000;
-  }
-  &.warning {
-    background: darkorange;
-  }
-  &.success {
-    background: green;
-  }
-  &.error {
-    background: red;
+// Toast Item
+.toastItem {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 14px 20px;
+  border-radius: 12px;
+  max-width: min(420px, calc(100vw - 3rem));
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  border-left: 3px solid transparent;
+
+  // Smooth repositioning when toasts shift in the stack
+  transition: transform 0.3s cubic-bezier(0.21, 1.02, 0.73, 1),
+              opacity 0.3s ease;
+
+  // Glassmorphism
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+
+  // Fallback for browsers without backdrop-filter
+  @supports not (backdrop-filter: blur(16px)) {
+    background: rgba(255, 255, 255, 0.97);
   }
 
-  @keyframes opacityChange {
-    0% {
+  // Entry animation
+  animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+
+  // Depth effect — toasts further back appear slightly receded
+  &--depth-1 {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+
+  &--depth-2 {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+
+  // Type-specific accents (BEM modifiers)
+  &--success {
+    border-left-color: #73cfa8;
+
+    .toastItem__icon {
+      color: #059669;
+    }
+  }
+
+  &--error {
+    border-left-color: #fb9289;
+
+    .toastItem__icon {
+      color: #dc2626;
+    }
+  }
+
+  &--warn {
+    border-left-color: #fde179;
+
+    .toastItem__icon {
+      color: #d97706;
+    }
+  }
+
+  &--info {
+    border-left-color: #73b1ff;
+
+    .toastItem__icon {
+      color: #2563eb;
+    }
+  }
+
+  // Dismiss animation
+  &--dismissing {
+    animation: toastFadeOut 0.4s ease forwards;
+  }
+
+  // Icon
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Text
+  &__text {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  // Actions container
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  // Individual action button
+  &__action {
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.06);
+    color: #374151;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 1px;
+    }
+  }
+
+  // Close button
+  &__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    margin-left: 4px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: #374151;
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 1px;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// Mobile compact toast styles
+.toastContainer--mobile .toastItem {
+  padding: 10px 14px;
+  font-size: 13px;
+  gap: 0.5rem;
+  max-width: calc(100vw - 1.5rem);
+  border-radius: 10px;
+  touch-action: pan-x;
+  user-select: none;
+
+  // Entry animation from top
+  animation-name: toastSlideInFromTop;
+}
+
+.toastContainer--mobile .toastItem__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toastContainer--mobile .toastItem__close {
+  width: 20px;
+  height: 20px;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.toastContainer--mobile .toastItem__action {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+// Swipe dismiss animation (upward exit for mobile)
+.toastContainer--mobile .toastItem--dismissing {
+  animation-name: toastSwipeOut;
+}
+
+// Animations — desktop
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+// Animations — mobile (from top)
+@keyframes toastSlideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSwipeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.96);
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .toastItem {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+
+    &--dismissing {
+      animation: none;
       opacity: 0;
-      transform: translateX(100%);
     }
-    10% {
-      opacity: 1;
-      transform: translateX(0);
+
+    // Depth still shown statically (opacity only, no transform)
+    &--depth-1 {
+      opacity: 0.85;
+      transform: none;
     }
-    90% {
-      opacity: 1;
-      transform: translateX(0);
+
+    &--depth-2 {
+      opacity: 0.7;
+      transform: none;
     }
-    100% {
-      opacity: 0;
-      transform: translateX(100%);
+
+    &__close,
+    &__action {
+      transition: none;
     }
   }
 }

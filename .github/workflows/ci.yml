@@ -66,21 +66,24 @@ jobs:
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.admin }}
           - app: frontend
-            node-version: 18
+            node-version: 20
             working-directory: donaction-frontend
             # TODO: Add npm run lint
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.frontend }}
           - app: api
             node-version: 22
             working-directory: donaction-api
             # TODO: Add npm run lint
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.api }}
           - app: saas
             node-version: 20
             working-directory: donaction-saas
-            # TODO: Add npm run lint
+            lint-command: npm run lint
+            test-command: npm run test:ci
             command: npm run build
             changed: ${{ needs.detect-changes.outputs.saas }}
     steps:
@@ -105,7 +108,78 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         run: npm ci
 
+      - name: Run linter
+        if: matrix.changed == 'true' && matrix.lint-command
+        working-directory: ${{ matrix.working-directory }}
+        run: ${{ matrix.lint-command }}
+
+      - name: Run tests
+        if: matrix.changed == 'true' && matrix.test-command
+        working-directory: ${{ matrix.working-directory }}
+        run: ${{ matrix.test-command }}
+
+      - name: Upload coverage report
+        if: matrix.changed == 'true' && matrix.test-command && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-coverage-report
+          path: ${{ matrix.working-directory }}/coverage
+          retention-days: 7
+
       - name: Run ${{ matrix.command }}
         if: matrix.changed == 'true'
         working-directory: ${{ matrix.working-directory }}
         run: ${{ matrix.command }}
+        env:
+          # Dummy values for build-time validation (not used at runtime)
+          NEXT_PUBLIC_STRAPI_API_TOKEN: ${{ matrix.app == 'frontend' && 'build-placeholder' || '' }}
+
+  e2e-saas:
+    name: E2E Tests - SaaS
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.saas == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: donaction-saas/package-lock.json
+
+      - name: Install dependencies
+        working-directory: donaction-saas
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: donaction-saas
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: donaction-saas
+        # TODO: Re-enable step4 and smoke tests when Stripe payment is implemented
+        # Use --grep-invert to exclude step4 and smoke tests (Playwright doesn't have --ignore flag)
+        run: npx playwright test --project=chromium --grep-invert="Step 4|Smoke"
+        env:
+          CI: true
+          # Stripe test key (safe to expose - pk_test keys are public)
+          VITE_STRIPE_PUBLISHABLE_KEY: pk_test_51ORwXyFpTHuA1nWDdmLwlsei6DGppyL7mrXt1hcMp55vz9M3DX3MMw78THy9UnZzUVfVOhQrsoHY67HHDLmzPvz700EeWeN9c9
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: saas-playwright-report
+          path: donaction-saas/playwright-report
+          retention-days: 7
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: saas-e2e-results
+          path: donaction-saas/test-results
+          retention-days: 7

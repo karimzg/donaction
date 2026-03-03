@@ -1,0 +1,23 @@
+{
+  "data": {
+    "id": 1,
+    "documentId": "donor_particulier_001",
+    "uuid": "750e8400-e29b-41d4-a716-446655440201",
+    "donateurType": "Particulier",
+    "civilite": "Monsieur",
+    "prenom": "Jean",
+    "nom": "Dupont",
+    "email": "jean.dupont@example.com",
+    "tel": "+33612345678",
+    "adresse": "123 Rue de la Paix",
+    "adresse2": "Appartement 5B",
+    "cp": "75001",
+    "ville": "Paris",
+    "pays": "France",
+    "dateNaissance": "1985-05-15",
+    "optInAffMontant": true,
+    "optInAffNom": false,
+    "anonymized": false
+  },
+  "meta": {}
+}

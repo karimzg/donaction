@@ -1,0 +1,12 @@
+{
+  "error": {
+    "status": 400,
+    "name": "PaymentDeclinedError",
+    "message": "Your card was declined. Please try another payment method.",
+    "details": {
+      "code": "card_declined",
+      "decline_code": "generic_decline",
+      "chargeId": "ch_test_declined_001"
+    }
+  }
+}

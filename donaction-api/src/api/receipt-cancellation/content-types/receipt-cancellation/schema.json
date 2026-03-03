@@ -1,0 +1,76 @@
+{
+  "kind": "collectionType",
+  "collectionName": "receipt_cancellations",
+  "info": {
+    "singularName": "receipt-cancellation",
+    "pluralName": "receipt-cancellations",
+    "displayName": "Receipt Cancellation",
+    "description": "Donation receipt cancellation workflow"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "original_donation": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klub-don.klub-don"
+    },
+    "cancellation_reason": {
+      "type": "enumeration",
+      "enum": [
+        "donor_request",
+        "duplicate",
+        "error",
+        "fraud",
+        "other"
+      ],
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "completed"
+      ],
+      "default": "pending",
+      "required": true
+    },
+    "requested_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "requested_at": {
+      "type": "datetime"
+    },
+    "processed_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "processed_at": {
+      "type": "datetime"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "refund_amount": {
+      "type": "decimal"
+    },
+    "refund_stripe_id": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "customField",
+      "customField": "plugin::strapi-advanced-uuid.uuid",
+      "options": {
+        "disable-regenerate": true,
+        "disable-auto-fill": true
+      }
+    }
+  }
+}

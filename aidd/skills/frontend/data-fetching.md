@@ -1,11 +1,7 @@
 ---
-name: "nextjs-data-fetching"
-description: "Fetch data from Strapi API with caching, revalidation, and authentication handling"
-triggers: ["fetch data", "api call", "HttpService", "revalidate", "cache", "strapi fetch", "server component data", "get data", "load data", "api request"]
-tags: ["nextjs", "api", "frontend", "typescript", "fetch"]
-priority: high
-scope: file
-output: code
+name: skill:fetching-data
+description: Fetches data from Strapi API with caching and revalidation. Use when building data services in donaction-frontend.
+model: claude-sonnet-4-5
 ---
 
 # Skill: Next.js Data Fetching

@@ -12,7 +12,7 @@
   // Replace with your URL and message
   const urlToShare = encodeURIComponent(window.location.href);
   const message = encodeURIComponent(
-    `Découvrez la page web de ${SUBSCRIPTION.klubr?.denomination} !`
+    `Découvrez la page web de ${SUBSCRIPTION.klubr?.denomination} !`,
   );
   const subject = encodeURIComponent('Klubr');
 
@@ -34,7 +34,7 @@
         dispatchToast('Lien copié dans le presse-papiers !', 'SUCCESS');
         sendGaEvent({
           category: 'Social Share',
-          label: `Copied link: ${linkToShare}`
+          label: `Copied link: ${window.location.href}`,
         });
       })
       .catch((err) => {
@@ -45,7 +45,7 @@
   const shareFn = (destination: string, linkToShare: string) => {
     sendGaEvent({
       category: 'Social Share',
-      label: `Opened share modal in ${destination}, url to share: ${linkToShare}`
+      label: `Opened share modal in ${destination}, url to share: ${linkToShare}`,
     });
   };
 </script>

@@ -2,21 +2,24 @@ import Image from 'next/image';
 import loginSignIn from '../../../../public/images/auth/loginSignIn.svg';
 import ResetPasswordForm from '@/partials/authentication/resetPasswordForm';
 import { WebPage, WithContext } from 'schema-dts';
-import { SITE_URL } from '@/core/services/endpoints';
+import { SITE_URL, OG_DEFAULT_IMAGE } from '@/core/services/endpoints';
 import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-	title: 'Réinitialiser votre mot de passe.',
+	title: 'Réinitialiser votre mot de passe',
+	description: 'Réinitialisez votre mot de passe Donaction pour retrouver l\'accès à votre compte.',
 	openGraph: {
-		title: 'Réinitialiser votre mot de passe.',
+		title: 'Réinitialiser votre mot de passe',
+		description: 'Réinitialisez votre mot de passe Donaction pour retrouver l\'accès à votre compte.',
 		url: `${new URL(SITE_URL)}/reset-password`,
 		siteName: 'Donaction',
 		images: [
 			{
-				url: `${SITE_URL}/images/images/auth/loginSignIn.svg`,
-				width: 800,
-				height: 385,
+				url: OG_DEFAULT_IMAGE,
+				width: 1200,
+				height: 628,
+				alt: 'Réinitialiser votre mot de passe - Donaction',
 			},
 		],
 		locale: 'fr_FR',

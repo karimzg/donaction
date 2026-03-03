@@ -5,7 +5,7 @@
 import { Core, factories } from '@strapi/strapi';
 import { KlubDonEntity } from '../../../_types';
 import GetAttNumber from '../../../helpers/getAttNumber';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export default factories.createCoreService(
     'api::klub-don-payment.klub-don-payment',
@@ -14,10 +14,16 @@ export default factories.createCoreService(
             status,
             donUuid,
             intent,
+            idempotencyKey,
+            applicationFeeAmount,
+            paymentMethod,
         }: {
             status: string;
             donUuid: string;
             intent: Stripe.PaymentIntent;
+            idempotencyKey?: string;
+            applicationFeeAmount?: number;
+            paymentMethod?: 'stripe_classic' | 'stripe_connect';
         }) {
             try {
                 const klubrDon: KlubDonEntity = await strapi.db
@@ -35,6 +41,7 @@ export default factories.createCoreService(
                         client_secret: intent.client_secret,
                         currency: intent.currency,
                         payment_method:
+                            paymentMethod ||
                             intent.payment_method ||
                             intent?.last_payment_error?.payment_method?.id ||
                             '',
@@ -46,6 +53,10 @@ export default factories.createCoreService(
                             '',
                         status: intent.status,
                         klub_don: klubrDon.id,
+                        ...(idempotencyKey && { idempotency_key: idempotencyKey }),
+                        ...(applicationFeeAmount !== undefined && {
+                            application_fee_amount: applicationFeeAmount,
+                        }),
                     },
                 };
                 const payment = klubrDon.klub_don_payments.find(
@@ -110,6 +121,11 @@ export default factories.createCoreService(
                 return res;
             } catch (e) {
                 GetAttNumber.unlock();
+                console.error(
+                    `❌ Erreur lors de la mise à jour du don ${donUuid}:`,
+                    e
+                );
+                throw e;
             }
         },
     }),

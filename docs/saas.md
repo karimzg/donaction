@@ -1,329 +1,201 @@
-### Architecture
+### SaaS Widgets - Donaction
 
-- [Language/Framework](#languageframework)
-  - [Frontend](#frontend)
-- [Full project structure](#full-project-structure)
-- [Services communication](#services-communication)
-  - [Form Workflow](#form-workflow)
-  - [External Services](#external-services)
-    - [Stripe](#stripe)
-    - [Google Services](#google-services)
-    - [Analytics](#analytics)
+> **Version**: 2.1.0 | **Last Updated**: 2026-01-30
 
-#### Language/Framework
+#### Context
+Svelte 5 web components (custom elements) for embedding donation forms on third-party websites. Handles multi-step sponsorship flow, Stripe payments, fee calculations, and analytics.
 
-##### Frontend
+#### Stack
+- **Framework**: Svelte 5
+- **Build**: Vite 5
+- **Testing**: Vitest 4, Playwright (E2E)
+- **Payments**: Stripe JS 4
+- **Animations**: Lottie Web 5
+- **Analytics**: Google Analytics (gtag), Plausible
+- **External**: Google Maps Places API, reCAPTCHA Enterprise
 
-- **Framework**: Svelte 5 → @donaction-saas/package.json
-- **Component Type**: Web Components (Custom Elements)
-- **Routing**: N/A - Single component module
-- **Data Fetching**: Custom fetch util with event bus pattern
-- **Form Handling**: Multi-step form with reactive state
-- **Validation**: Custom validators with Svelte directives
-- **State Management**: Svelte stores (`writable`) + Svelte 5 `$state` reactivity
-- **Build Tool**: Vite with individual component builds
-- **Structure**: Component-based with logic separation
+#### Commands
+| Command | Description |
+|---------|-------------|
+| `npm run dev:serve` | Dev server on port 3101 |
+| `npm run dev:build` | Dev build |
+| `npm run dev:watch` | Dev build with watch |
+| `npm run build` | Production build (ESM individual components) |
+| `npm test` | Run Vitest tests |
+| `npm run test:coverage` | Tests with coverage |
+| `npm run test:e2e` | Playwright E2E tests |
+| `npm run lint` | ESLint check |
 
-#### Full project structure
-
-```text
-donaction-saas/
-├── src/
-│   ├── assets/           # Static assets
-│   │   ├── animations/   # Lottie JSON files
-│   │   ├── fonts/        # Custom fonts
-│   │   └── icons/        # SVG icons
-│   ├── components/       # Web components
-│   │   └── sponsorshipForm/
-│   │       ├── components/     # Sub-components (breadcrumb, formBanner, formBody, formNavigation, etc)
-│   │       ├── logic/          # Business logic (api, stripe, validator, state management)
-│   │       ├── index.svelte    # Main component entry
-│   │       └── index.scss      # Component styles
-│   ├── types/            # TypeScript type definitions
-│   ├── utils/            # Shared utilities (eventBus, fetch, analytics)
-│   └── main.ts           # Entry point
-├── build/                # Build output
-│   └── donaction-web-components/
-│       └── components/   # Individual component builds
-├── vite.config.ts              # Production build config
-└── vite.config.development.ts  # Development build config
-```
-
-#### Services communication
-
-##### Form Workflow
-
-```mermaid
-graph TD
-    A[Custom Element<br/>klubr-sponsorship-form] --> B[initComponent]
-    B --> C[API Token Validation]
-    C --> D[Fetch Klubr/Project Data]
-    D --> E[Form State Initialization]
-    E --> F[Multi-step Form]
-    F --> G{Step Navigation}
-    G --> H[Validation]
-    H --> I{Valid?}
-    I -->|No| J[Show Errors]
-    I -->|Yes| K[Next Step/Submit]
-    K --> L[handleSubmitStepTwo]
-    L --> M[Create ReCaptcha Token]
-    M --> N[Create Donator]
-    N --> O[Create Donation]
-    O --> P[Stripe Payment]
-    P --> Q[Update Status]
-    Q --> R[Event Bus Emit Result]
-```
-
-##### External Services
-
-###### Stripe
-
-- **Purpose**: Payment processing
-- **Integration**: `@stripe/stripe-js` library
-- **Flow**: Stripe Elements injected via slot → Payment creation → Confirmation
-- **Files**: `logic/stripe.ts`
-
-###### Google Services
-
-- **ReCAPTCHA Enterprise**: Bot protection for form submission
-- **Google Maps API**: Address autocomplete with Places library
-- **Integration**: Script tags loaded in main component
-- **Config**: Environment variables `VITE_GOOGLE_RECAPTCHA_SITE_KEY`, `VITE_GOOGLE_MAPS_KEY`
-
-###### Analytics
-
-- **Plausible**: Privacy-focused analytics tracking
-- **Google Analytics**: Event tracking via `sendGaEvent`
-- **Events**: Form navigation, open/close, step transitions
-- **Config**: `VITE_ACTIVATE_ANALYTICS` flag
-
-
----
-name: coding-assertions
-description: Code quality verification checklist
-argument-hint: N/A
----
-
-### Coding Guidelines
-
-> Those rules must be minimal because the MUST be checked after EVERY CODE GENERATION.
-
-#### Requirements to complete a feature
-
-**A feature is really completed if ALL of the above are satisfied: if not, iterate to fix all until all are green.**
-
-#### Steps to follow
-
-1. Check their is no duplication
-2. Ensure code is re-used
-3. Run all those commands, in order to ensure code is perfect:
-
-```markdown
-| Order | Command               | Description                  |
-|-------|-----------------------|------------------------------|
-| 1     | npm run build         | Vite production build        |
-| 2     | npm test              | Run Vitest tests             |
-```
-
-#### TypeScript Configuration
-
-Config: @donaction-saas/tsconfig.json
-
-- Extends `@tsconfig/svelte`
-- Target: ESNext
-- Module: ESNext
-- `checkJs: true` - typecheck JS files in `.svelte`
-- `isolatedModules: true`
-- `resolveJsonModule: true`
-- Types: `vitest`
-
-#### Component Structure
-
-- Web Components: Use `<svelte:options customElement={{tag: 'tag-name'}}/>` at top
-- Component files: Named `index.svelte` in component folders
-- Logic separation: Business logic in separate `.ts` files under `logic/` folder
-- Svelte 5 patterns: Use `$state`, `$derived`, `$effect`, `$props` runes
-- State management: Svelte stores (`writable`) for reactive cross-component state
-
-#### Naming Conventions
-
-- Components: PascalCase (e.g., `FormBanner`)
-- Files: PascalCase for Svelte components, camelCase for TS files
-- Folders: camelCase (e.g., `formBanner/`, `videoPlayer/`)
-- Functions: camelCase (e.g., `submitForm`, `initComponent`)
-- Constants: SCREAMING_SNAKE_CASE (e.g., `DEFAULT_VALUES`, `FORM_CONFIG`)
-
-#### TypeScript Patterns
-
-- Use `type` for object shapes and unions
-- Export types from `types/` folder by domain
-- Return `Promise<T>` for async functions with explicit return types
-- Use `Record<string, any>` for dynamic objects
-- Declare globals in `global.d.ts`
-- Use typed parameters in function signatures
-
-#### State Management
-
-- Svelte 5 runes: `$state` for reactive state, `$derived` for computed values
-- Svelte stores: `writable` from `svelte/store` for cross-component state
-- Store subscriptions: Use `.subscribe()` or `$` syntax in components
-- Local state: `$state()` for component-specific data
-- Event bus pattern: Custom event bus for cross-component communication
-
-#### Svelte Patterns
-
-- Script tags: Use `<script lang="ts">` for TypeScript
-- Props: Use `$props()` rune (Svelte 5)
-- Reactive declarations: Use `$derived` rune for computed values
-- Lifecycle: `onMount`, `onDestroy` from `svelte`
-- Effects: Use `$effect()` rune for side effects
-- Custom actions: `use:` directive pattern for DOM manipulation
-
-#### HTTP Services
-
-- Centralized `Fetch` function in `@/utils/fetch.ts`
-- Promises returned, rejection on non-ok responses
-- Authorization via `Bearer` token from env
-- FormData support via `isBlob` flag
-- Service functions in `logic/api.ts` files
-
-#### Error Handling
-
-- Services return rejected promises on error
-- Components use try/catch in async handlers
-- Custom toast notifications via `dispatchToast`
-- GA event tracking via `sendGaEvent`
-- Console logs allowed for development (not production)
-
-#### Forms & Validation
-
-- Custom validation pattern with `validator` action
-- Regular expressions for field validation (email, postal code, SIREN)
-- `triggerValidation` store to trigger revalidation across form
-- Error messages: Inline via `<small class="error">` elements
-- Form state: Tracked in `$state` objects (`DEFAULT_VALUES`, `FORM_CONFIG`)
-
-#### Vite Specifics
-
-Config: @donaction-saas/vite.config.ts
-
-- Plugin: `@sveltejs/vite-plugin-svelte`
-- Preprocess: `svelte-preprocess` with TypeScript
-- Custom elements: `customElement: true`
-- Build mode: `BUILD_MODE=INDIVIDUAL` for separate component builds
-- Output: ES modules to `build/donaction-web-components/components/`
-
-#### Styling
-
-Config: @donaction-saas/.prettierrc
-
-- Prettier for formatting
-- Tabs: 2 spaces (`"tabWidth": 2`)
-- Print width: 100
-- Single quotes for strings
-- Trailing commas: none
-- SCSS: Use `<style lang="scss">` with `@use` and `@forward`
-- Utility classes: Custom utility classes in `styles/main.scss`
-- BEM-like naming: `.sponsorFormParent`, `.mainContainer`, `.boxBoxShadow`
-
-#### Code Quality
-
-- No `console.log` in production code (development is OK)
-- Prefer early returns over nested conditionals
-- Extract complex logic into separate files under `logic/`
-- Keep components focused on rendering
-- Colocate related files (component + styles + logic)
-
-#### Dependencies
-
-Key libraries:
-- `svelte` (5)
-- `vite` (5)
-- `@sveltejs/vite-plugin-svelte` (4)
-- `vitest` (2) for testing
-- `typescript` (5)
-- `svelte-preprocess` (6)
-- `@stripe/stripe-js` (4) for payments
-- `swiper` (11) for carousels
-- `lottie-web` (5) for animations
-- `sass` (1) for styling
-
-#### File Organization
-
+#### Folder Structure
 ```
 src/
-├── assets/           # Static assets (icons, fonts, animations)
-├── components/       # Web components
+├── components/
 │   └── sponsorshipForm/
-│       ├── components/   # Sub-components
-│       ├── logic/        # Business logic (TS files)
-│       ├── __tests__/    # Component tests
-│       ├── index.svelte  # Main component
-│       └── index.scss    # Component styles
-├── types/            # TypeScript types by domain
-├── utils/            # Shared utilities
-├── styles/           # Global styles
-├── global.d.ts       # Global type declarations
-└── main.ts           # Entry point
+│       ├── __docs__/       # Component documentation
+│       ├── __tests__/      # Unit tests (Vitest)
+│       ├── components/     # Sub-components (breadcrumb, steps, etc.)
+│       ├── logic/          # Business logic (.ts & .svelte.ts)
+│       ├── index.svelte    # Main component
+│       └── index.scss      # Styles
+├── types/                  # TypeScript definitions
+├── utils/                  # Shared utilities (fetch, eventBus, analytics)
+├── styles/                 # Global SCSS (_design-tokens.scss)
+├── assets/                 # Fonts, icons, animations (Lottie JSON)
+└── main.ts                 # Entry point
+e2e/
+├── tests/                  # E2E specs (step1-5, smoke, edge-cases)
+├── pages/                  # Page objects (BasePage, Step1Page, etc.)
+├── helpers/                # Shadow DOM, API mocking, Stripe helpers
+└── fixtures/               # Test data factories
 ```
 
+#### Rules
 
-### Testing Guidelines
+##### Naming Conventions
+See @docs/rules/saas/naming-conventions.md
 
-Testing strategy and configuration for donaction-saas module.
-
-#### Tools and Frameworks
-
-- **Test Runner**: Vitest 2
-- **Test Environment**: Node (via Vite)
-- **Config**: Uses @vite.config.ts (no separate vitest config)
-- **Mocking**: Vitest native mocks (`vi.mock`, `vi.fn`, `vi.stubGlobal`)
-
-#### Test Execution Process
-
-- **Run tests**: `npm test`
-- **Single test file**: `vitest run path/to/test.test.ts`
-- **Watch mode**: `vitest` (default behavior)
-
-#### Testing Strategy
-
-- **Current Status**: Minimal test coverage
-- **Test Location**: `__tests__` directories alongside components
-- **File Pattern**: `*.test.ts`
-- **Focus**: Component initialization and API integration
-
-#### Test Patterns
-
-##### File Structure
-- Tests in `__tests__` subdirectories
-- Example: @donaction-saas/src/components/sponsorshipForm/__tests__/initComponent.test.ts
-
-##### Common Patterns
-- Mock external dependencies (`Fetch`, `document.querySelectorAll`)
-- Use `beforeEach` for setup, `afterEach` for cleanup
-- Mock environment variables via `import.meta.env`
-- Mock DOM APIs with `vi.stubGlobal`
-
-##### Test Organization
+##### Runes & Reactivity
+- [RUNE] Use `$state()` for reactive local state
+- [RUNE] Use `$derived()` for computed values
+- [RUNE] Use `$effect()` for side effects (cleanup in return)
+- [RUNE] Use `$props()` for component props with TypeScript
+- [RUNE] Declare runes at top level, never in conditionals
+- [RUNE] **Hybrid pattern**: `$state()` for local reactive objects, `writable()` for cross-component shared state
 ```typescript
-describe('ComponentName', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should handle success case', async () => {
-    // arrange, act, assert
-  });
-
-  it('should handle error case', async () => {
-    await expect(fn()).rejects.toThrow('error');
-  });
-});
+// Hybrid pattern used in useSponsorshipForm.svelte.ts
+const FORM_CONFIG = $state({ /* local reactive */ });
+const isLoading = writable<boolean>(false); // shared across components
 ```
 
-#### Mocking and Stubbing
+##### Web Components (Custom Elements)
+- [WC] Use `<svelte:options customElement={{tag: 'kebab-name'}} />`
+- [WC] Tag names must be kebab-case, no uppercase
+- [WC] Use `dispatchEvent(new CustomEvent())` for events
+- [WC] Set `bubbles: true, composed: true` for cross-shadow events
+- [WC] Inject fonts/styles into `document.head` (shadow DOM can't access host styles)
+- [WC] Toast notifications inject into `shadowRoot` directly
+- [WC] Reset all state in `onDestroy` to support re-mounting
 
-- **API Mocking**: Mock `Fetch` utility for API calls
-- **DOM Mocking**: Use `vi.stubGlobal` for global objects (`document`, `window`)
-- **Module Mocking**: Use `vi.mock()` for external modules
-- **Environment**: Mock `import.meta.env` for environment variables
+##### Component Structure
+- [COMP] Order: `<svelte:options>`, `<script>`, markup, `<style>`
+- [COMP] Use `<script lang="ts">` for TypeScript
+- [COMP] Keep logic in separate `logic/` folder
+- [COMP] Use `.svelte.ts` for shared reactive state
+
+##### Stores (Cross-Component State)
+- [STORE] Use `writable()` from `svelte/store` for shared state
+- [STORE] Subscribe with `$` prefix or `.subscribe()`
+- [STORE] Use `get()` to read without subscription
+- [STORE] Prefer runes over stores for local state
+
+##### Forms & Validation
+- [FORM] `validator` is a **Svelte action** (not a component) applied to input elements
+- [FORM] **Dual validation modes**: on-blur (full) + while-typing (clear errors only, debounced 150ms)
+- [FORM] Regex patterns for email, postal code, SIREN, phone (FR + DOM-TOM)
+- [FORM] `triggerValidation` store for form-wide validation
+- [FORM] Centralized `fieldErrors` reactive store (`fieldErrors.svelte.ts`) using `$state<Record<string, string>>({})`
+- [FORM] Error display: `setFieldError()` / `clearFieldError()` + CSS class on parent `.form-group`
+- [FORM] Dirty tracking via `dirtyKeys` array for "form modified" detection
+- [FORM] Phone validation: supports FR mainland + DOM-TOM, auto-formatting
+- [FORM] Step navigation: backward-only to completed steps, forward blocked if validation fails
+
+##### Fee Calculation
+- [FEE] Two scenarios in `fee-calculation-helper.ts`:
+  - **Scenario A** (`donorPaysFee=true`): donor pays donation + commission + Stripe fees + contribution
+  - **Scenario B** (`donorPaysFee=false`): donor pays donation + contribution, association absorbs fees
+- [FEE] Stripe constants: 1.5% EU cards + €0.25 fixed per transaction
+- [FEE] `montantRecuFiscal` computed for tax receipt generation
+
+##### Tax Calculations
+- [TAX] Individual: 66% deduction (`TAUX_DEDUCTION_FISCALE_PART = 0.66`)
+- [TAX] Organization: 60% deduction (`TAUX_DEDUCTION_FISCALE_PRO = 0.6`)
+- [TAX] `calculateTaxReduction()` and `calculateTaxSavings()` in `logic/utils.ts`
+
+##### Event Bus
+- [EVT] Use custom event bus for cross-component communication
+- [EVT] Prefix events with `EVENT_CONTEXT` constant to avoid collisions
+- [EVT] Exposed globally via `window.KLUBR_EVENT_BUS`
+- [EVT] Clean up subscriptions in `onDestroy`
+
+##### Dynamic Branding
+- [BRAND] Club colors injected as CSS custom properties: `--don-brand-primary`, `--don-brand-secondary`
+- [BRAND] Fallback to design tokens: `var(--don-brand-primary, var(--don-color-primary))`
+- [BRAND] Colors sourced from `klubr.klubr_house.primary_color` / `secondary_color`
+
+##### Accessibility
+- [A11Y] `autoScrollOnFocus`: scrolls input into view on mobile focus (below sticky header)
+- [A11Y] Respects `prefers-reduced-motion: reduce`
+- [A11Y] Mobile breakpoint check (`window.innerWidth > MOBILE_BREAKPOINT`)
+- [A11Y] Breadcrumb: `aria-label`, `aria-current="step"`, disabled dots for future steps
+
+##### Special Elements
+- [ELEM] `<svelte:component>` for dynamic components
+- [ELEM] `<svelte:element>` for dynamic HTML elements
+- [ELEM] `<svelte:window>` for window events
+- [ELEM] `<svelte:head>` for meta tags
+- [ELEM] Listeners auto-cleanup on destroy
+
+##### Styling
+- [STYLE] Use `<style lang="scss">`
+- [STYLE] Styles scoped by default, use `:global()` for global
+- [STYLE] CSS custom properties for theming (see Dynamic Branding)
+- [STYLE] Design tokens in `@src/styles/_design-tokens.scss`
+
+##### TypeScript
+- [TS] Always `lang="ts"` in script tags
+- [TS] Type props explicitly in `$props()`
+- [TS] Avoid `any`, use `Record<string, unknown>`
+- [TS] Export types from `.svelte.ts` files
+
+##### Testing
+- [TEST] Unit: Vitest 4 with jsdom environment
+- [TEST] E2E: Playwright with page objects pattern
+- [TEST] E2E projects: chromium, firefox, mobile (iPhone 14)
+- [TEST] Shadow DOM: Playwright auto-pierces; custom helpers for form interaction
+- [TEST] API mocking for external deps (Stripe, reCAPTCHA, backend)
+- [TEST] Test files colocated: `__tests__/` folders + `e2e/tests/` by step
+
+##### Performance
+- [PERF] Use `{#key}` for keyed each blocks
+- [PERF] Flatten state structure (avoid deep reactivity)
+- [PERF] Debounce expensive operations in `$effect`
+- [PERF] Lazy load with dynamic imports
+
+#### Anti-Patterns
+| Don't | Do | Why |
+|-------|-----|-----|
+| `let x = 0` (non-reactive) | `let x = $state(0)` | Reactivity |
+| Manual dependencies | `$derived()` | Auto-tracking |
+| Runes in conditionals | Declare at top level | Svelte limitation |
+| `$state.set()` | Direct reassignment | Simpler API |
+| Uppercase in tag name | `kebab-case` only | Custom element spec |
+| Missing `composed: true` | Always set for shadow DOM | Event propagation |
+| Business logic in components | Extract to `logic/` folder | Separation of concerns |
+| Forward step navigation | Backward-only to completed steps | UX validation flow |
+
+#### Key Files
+| Path | Purpose |
+|------|---------|
+| `vite.config.ts` | Build config with customElement |
+| `src/components/sponsorshipForm/index.svelte` | Main widget |
+| `src/components/sponsorshipForm/logic/api.ts` | API calls |
+| `src/components/sponsorshipForm/logic/stripe.ts` | Payment logic |
+| `src/components/sponsorshipForm/logic/validator.ts` | Svelte action for field validation |
+| `src/components/sponsorshipForm/logic/fieldErrors.svelte.ts` | Centralized error state |
+| `src/components/sponsorshipForm/logic/fee-calculation-helper.ts` | Fee scenarios A/B |
+| `src/components/sponsorshipForm/logic/useSponsorshipForm.svelte.ts` | Form state & config |
+| `src/components/sponsorshipForm/logic/utils.ts` | Tax calculations, helpers |
+| `src/components/sponsorshipForm/logic/autoScrollOnFocus.ts` | Mobile scroll a11y |
+| `src/utils/fetch.ts` | HTTP utility |
+| `src/utils/eventBus.ts` | Cross-component events |
+| `src/utils/initPlausible.ts` | Plausible analytics setup |
+| `e2e/pages/` | Playwright page objects |
+
+#### Reference Files
+- @donaction-saas/src/components/sponsorshipForm/__docs__/ — component documentation
+
+#### Skills
+Detailed patterns in `@aidd/skills/saas/`:
+- `runes.md` - $state, $derived, $effect
+- `custom-elements.md` - Web component setup
+- `stores.md` - Svelte stores patterns

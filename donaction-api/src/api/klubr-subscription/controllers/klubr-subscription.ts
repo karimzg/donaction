@@ -232,7 +232,16 @@ export default factories.createCoreController(
                     logo: true,
                     klubr_house: true,
                     trade_policy: {
-                        fields: ['allowKlubrContribution'],
+                        fields: [
+                            'allowKlubrContribution',
+                            'stripe_connect',
+                            'allow_donor_fee_choice',
+                            'donor_pays_fee_project',
+                            'donor_pays_fee_club',
+                            'commissionPercentage',
+                            'stripe_fee_percentage',
+                            'stripe_fee_fixed',
+                        ],
                     },
                 },
             };
@@ -273,6 +282,7 @@ export default factories.createCoreController(
                         where: { uuid: ctx.request.body?.projectUuid },
                         populate: {
                             klubr: klubrPopulate,
+                            couverture: true,
                         },
                     });
                 if (!project) {
@@ -282,6 +292,13 @@ export default factories.createCoreController(
                     return ctx.badRequest('Unknown project for this klub');
                 }
                 res.project = project;
+            }
+
+            // Normalize stripe_fee_percentage to decimal for API consumers
+            // DB stores as percentage (e.g. 1.5 for 1.5%), API returns decimal (0.015)
+            const tp = res.klubr?.trade_policy;
+            if (tp?.stripe_fee_percentage != null) {
+                tp.stripe_fee_percentage = tp.stripe_fee_percentage / 100;
             }
 
             return res;

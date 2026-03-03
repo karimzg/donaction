@@ -326,11 +326,13 @@ export default factories.createCoreController(
 
         async createForFront(ctx) {
             try {
-                if (!ctx.request.body?.data['formToken']) {
+                const { formToken, ...cleanData } = ctx.request.body?.data || {};
+                if (!formToken) {
                     return ctx.badRequest('Missing reCaptcha token.');
                 }
+                ctx.request.body.data = cleanData;
                 const result = await createAssessment({
-                    token: ctx.request.body?.data['formToken'],
+                    token: formToken,
                     recaptchaAction: 'CREATE_KLUBR_MEMBER',
                 });
 
@@ -361,11 +363,13 @@ export default factories.createCoreController(
         },
 
         async updateForFront(ctx) {
-            if (!ctx.request.body?.data['formToken']) {
+            const { formToken, ...cleanData } = ctx.request.body?.data || {};
+            if (!formToken) {
                 return ctx.badRequest('Missing reCaptcha token.');
             }
+            ctx.request.body.data = cleanData;
             const result = await createAssessment({
-                token: ctx.request.body?.data['formToken'],
+                token: formToken,
                 recaptchaAction: 'UPDATE_KLUBR_MEMBER',
             });
             if (!result) {
