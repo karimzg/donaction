@@ -9,6 +9,7 @@ const {
     calculateApplicationFee,
     calculatePlatformCommission,
     estimateStripeFees,
+    determineDonorPaysFee,
 } = await import('./stripe-connect-helper');
 
 /** Helper to build a minimal TradePolicyEntity for tests */
@@ -19,6 +20,11 @@ const makePolicy = (
         fixed_amount: number;
         stripe_fee_percentage: number;
         stripe_fee_fixed: number;
+        stripe_connect: boolean;
+        donor_pays_fee: boolean;
+        donor_pays_fee_project: boolean;
+        donor_pays_fee_club: boolean;
+        allow_donor_fee_choice: boolean;
     }> = {}
 ): TradePolicyEntity =>
     ({
@@ -27,6 +33,11 @@ const makePolicy = (
         fixed_amount: overrides.fixed_amount ?? 0,
         stripe_fee_percentage: overrides.stripe_fee_percentage,
         stripe_fee_fixed: overrides.stripe_fee_fixed,
+        stripe_connect: overrides.stripe_connect,
+        donor_pays_fee: overrides.donor_pays_fee,
+        donor_pays_fee_project: overrides.donor_pays_fee_project,
+        donor_pays_fee_club: overrides.donor_pays_fee_club,
+        allow_donor_fee_choice: overrides.allow_donor_fee_choice,
     }) as unknown as TradePolicyEntity;
 
 describe('calculatePlatformCommission', () => {
@@ -281,5 +292,135 @@ describe('calculateApplicationFee (combined)', () => {
         expect(() =>
             calculateApplicationFee(0, makePolicy({ commissionPercentage: 4 }))
         ).toThrow('Montant de donation invalide');
+    });
+});
+
+describe('determineDonorPaysFee', () => {
+    describe('Stripe Connect mode (stripe_connect = true)', () => {
+        it('uses project default for project donations', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_project: true,
+                    allow_donor_fee_choice: true,
+                }),
+                isProjectDon: true,
+                donorChoice: null,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('uses club default for club donations', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_club: false,
+                    allow_donor_fee_choice: true,
+                }),
+                isProjectDon: false,
+                donorChoice: null,
+            });
+            expect(result).toBe(false);
+        });
+
+        it('respects donor choice when allowed', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_project: true,
+                    allow_donor_fee_choice: true,
+                }),
+                isProjectDon: true,
+                donorChoice: false,
+            });
+            expect(result).toBe(false);
+        });
+
+        it('ignores donor choice when not allowed', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_project: true,
+                    allow_donor_fee_choice: false,
+                }),
+                isProjectDon: true,
+                donorChoice: false,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('returns default when donorChoice is undefined', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    donor_pays_fee_club: true,
+                    allow_donor_fee_choice: true,
+                }),
+                isProjectDon: false,
+                donorChoice: undefined,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('defaults donor_pays_fee_project to true when not set', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    allow_donor_fee_choice: false,
+                }),
+                isProjectDon: true,
+                donorChoice: null,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('defaults donor_pays_fee_club to false when not set', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: true,
+                    allow_donor_fee_choice: false,
+                }),
+                isProjectDon: false,
+                donorChoice: null,
+            });
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('Legacy mode (stripe_connect = false)', () => {
+        it('returns donor_pays_fee when set to true', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: false,
+                    donor_pays_fee: true,
+                }),
+                isProjectDon: true,
+                donorChoice: null,
+            });
+            expect(result).toBe(true);
+        });
+
+        it('returns donor_pays_fee when set to false', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: false,
+                    donor_pays_fee: false,
+                }),
+                isProjectDon: false,
+                donorChoice: true,
+            });
+            expect(result).toBe(false);
+        });
+
+        it('defaults to false when donor_pays_fee is undefined', () => {
+            const result = determineDonorPaysFee({
+                tradePolicy: makePolicy({
+                    stripe_connect: false,
+                }),
+                isProjectDon: true,
+                donorChoice: null,
+            });
+            expect(result).toBe(false);
+        });
     });
 });
