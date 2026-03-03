@@ -54,12 +54,12 @@ export interface FeeCalculationOutput {
 export function calculateFees(input: FeeCalculationInput): FeeCalculationOutput {
     const { montantDon, contribution, donorPaysFee, tradePolicy } = input;
 
-    if (montantDon <= 0) {
-        throw new Error('Montant de donation invalide : doit être > 0');
+    if (montantDon <= 0 || !Number.isInteger(montantDon)) {
+        throw new Error('Montant de donation invalide : doit être un entier > 0 (centimes)');
     }
 
-    if (contribution < 0) {
-        throw new Error('Contribution invalide : ne peut pas être négative');
+    if (contribution < 0 || !Number.isInteger(contribution)) {
+        throw new Error('Contribution invalide : doit être un entier >= 0 (centimes)');
     }
 
     // Garde : mode legacy sans Stripe Connect

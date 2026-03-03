@@ -445,4 +445,46 @@ describe('Cas limites', () => {
             })
         ).toThrow('Contribution invalide');
     });
+
+    it('rejette un montantDon non-entier (centimes décimaux)', () => {
+        expect(() =>
+            calculateFees({
+                montantDon: 100.5,
+                contribution: 0,
+                donorPaysFee: true,
+                tradePolicy: makePolicy({ commissionPercentage: 4 }),
+            })
+        ).toThrow('Montant de donation invalide');
+    });
+
+    it('rejette une contribution non-entière', () => {
+        expect(() =>
+            calculateFees({
+                montantDon: 10000,
+                contribution: 10.5,
+                donorPaysFee: true,
+                tradePolicy: makePolicy({ commissionPercentage: 4 }),
+            })
+        ).toThrow('Contribution invalide');
+    });
+
+    it('fonctionne avec commissionPercentage = 0 (association sans frais plateforme)', () => {
+        const result = calculateFees({
+            montantDon: 10000,
+            contribution: 1000,
+            donorPaysFee: false,
+            tradePolicy: makePolicy({ commissionPercentage: 0 }),
+        });
+
+        // commissionDonaction = 0
+        // totalDonateur = 10000 + 1000 = 11000
+        // fraisStripeEstimes = Math.round(11000 * 1.5 / 100 + 25) = 190
+        // applicationFee = 0 + 190 = 190
+        // netAssociation = 10000 - 190 = 9810
+        expect(result.commissionDonaction).toBe(0);
+        expect(result.fraisStripeEstimes).toBe(190);
+        expect(result.applicationFee).toBe(190);
+        expect(result.netAssociation).toBe(9810);
+        expect(result.montantRecuFiscal).toBe(9810);
+    });
 });
