@@ -1,0 +1,104 @@
+### 2.1 Create donation on Stripe Connect klubr - donor pays fees (PR #178)
+# @name createDonSC
+# Assert: donorPaysFee=true (stored), statusPaiment="notDone"
+POST {{BASE_URL}}/klub-dons
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "montant": 50,
+    "klubr": "{{KLUBR_SC_UUID}}",
+    "klubDonateur": "{{DONOR_UUID}}",
+    "donorPaysFee": true,
+    "withTaxReduction": true
+  },
+  "formToken": "test-token"
+}
+
+> {%
+  const d = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200 || response.status === 201);
+  });
+  client.test("donorPaysFee is true", function () {
+    client.assert(d.donorPaysFee === true, "donorPaysFee=" + d.donorPaysFee);
+  });
+  client.test("statusPaiment is notDone", function () {
+    client.assert(d.statusPaiment === "notDone", "statusPaiment=" + d.statusPaiment);
+  });
+  client.global.set("DON_SC_UUID", d.uuid);
+%}
+
+###
+
+### 2.2 Create donation on Legacy klubr - donorPaysFee forced null (PR #178)
+# @name createDonLegacy
+# Assert: donorPaysFee=null (Legacy guard overrides)
+POST {{BASE_URL}}/klub-dons
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "montant": 50,
+    "klubr": "{{KLUBR_LEGACY_UUID}}",
+    "klubDonateur": "{{DONOR_UUID}}",
+    "donorPaysFee": true,
+    "withTaxReduction": true
+  },
+  "formToken": "test-token"
+}
+
+> {%
+  const d = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200 || response.status === 201);
+  });
+  client.test("donorPaysFee is null (Legacy guard)", function () {
+    client.assert(d.donorPaysFee === null, "donorPaysFee=" + d.donorPaysFee);
+  });
+  client.global.set("LEGACY_DON_UUID", d.uuid);
+%}
+
+###
+
+### 2.3 Update donation on Legacy klubr - donorPaysFee forced null (PR #178)
+# @name updateDonLegacy
+# Assert: donorPaysFee=null even when explicitly set to true
+PUT {{BASE_URL}}/klub-dons/{{LEGACY_DON_UUID}}
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "donorPaysFee": true
+  },
+  "formToken": "test-token"
+}
+
+> {%
+  const d = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("donorPaysFee forced null on update", function () {
+    client.assert(d.donorPaysFee === null, "donorPaysFee=" + d.donorPaysFee);
+  });
+%}
+
+###
+
+### 2.4 Existing donations unaffected (PR #178)
+# @name getExistingDon
+# Replace DON_SC_UUID with a pre-existing donation UUID
+# Assert: donorPaysFee unchanged (no data migration)
+GET {{BASE_URL}}/klub-dons/{{DON_SC_UUID}}
+Authorization: Bearer {{JWT}}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.log("donorPaysFee = " + response.body.data.donorPaysFee);
+%}

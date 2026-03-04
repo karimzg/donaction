@@ -1,0 +1,99 @@
+### 1.1 Get Stripe Connect klubr's trade policy (PR #175)
+# @name getTradePolicySC
+# Assert: stripe_connect=true, stripe_fee_percentage exists, stripe_fee_fixed exists, fee_model valid
+GET {{BASE_URL}}/trade-policies?filters[klubr][uuid]={{KLUBR_SC_UUID}}&populate=*
+Authorization: Bearer {{JWT}}
+
+> {%
+  const data = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("Has results", function () {
+    client.assert(data && data.length > 0, "No trade policy found");
+  });
+  const tp = data[0];
+  client.test("stripe_connect is true", function () {
+    client.assert(tp.stripe_connect === true);
+  });
+  client.test("stripe_fee_percentage exists", function () {
+    client.assert(tp.stripe_fee_percentage !== undefined && tp.stripe_fee_percentage !== null);
+  });
+  client.test("stripe_fee_fixed exists", function () {
+    client.assert(tp.stripe_fee_fixed !== undefined && tp.stripe_fee_fixed !== null);
+  });
+  client.test("fee_model is valid", function () {
+    const valid = ["percentage_only", "fixed_only", "percentage_plus_fixed"];
+    client.assert(valid.includes(tp.fee_model), "fee_model=" + tp.fee_model);
+  });
+  client.global.set("TRADE_POLICY_DOC_ID", tp.documentId);
+%}
+
+###
+
+### 1.2 Get Legacy klubr's trade policy (PR #175)
+# @name getTradePolicyLegacy
+# Assert: stripe_connect=false
+GET {{BASE_URL}}/trade-policies?filters[klubr][uuid]={{KLUBR_LEGACY_UUID}}&populate=*
+Authorization: Bearer {{JWT}}
+
+> {%
+  const data = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("stripe_connect is false", function () {
+    client.assert(data[0].stripe_connect === false);
+  });
+%}
+
+###
+
+### 1.3 Update trade policy with custom Stripe fees (PR #175)
+# @name updateCustomFees
+# Assert: stripe_fee_percentage=5, stripe_fee_fixed=1
+# Then verify SaaS widget displays 5% + 1 EUR
+PUT {{BASE_URL}}/trade-policies/{{TRADE_POLICY_DOC_ID}}
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "stripe_fee_percentage": 5,
+    "stripe_fee_fixed": 1
+  }
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  const d = response.body.data;
+  client.test("stripe_fee_percentage updated to 5", function () {
+    client.assert(d.stripe_fee_percentage === 5);
+  });
+  client.test("stripe_fee_fixed updated to 1", function () {
+    client.assert(d.stripe_fee_fixed === 1);
+  });
+%}
+
+###
+
+### 1.3b Restore default Stripe fees
+# @name restoreDefaultFees
+PUT {{BASE_URL}}/trade-policies/{{TRADE_POLICY_DOC_ID}}
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "stripe_fee_percentage": 1.5,
+    "stripe_fee_fixed": 0.25
+  }
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+%}
