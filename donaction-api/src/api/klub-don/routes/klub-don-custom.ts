@@ -68,14 +68,6 @@ export default {
                 policies: [],
             },
         },
-        {
-            method: 'GET',
-            path: '/klub-dons/cleanAll',
-            handler: 'klub-don.cleanAll',
-            config: {
-                policies: [],
-            },
-        },
         // {
         //   method: 'GET',
         //   path: '/klub-dons/testMailDonateur',

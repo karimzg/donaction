@@ -916,18 +916,5 @@ export default factories.createCoreController(
             }
         },
 
-        async cleanAll() {
-            const ctx = strapi.requestContext.get();
-            return await sendBrevoTransacEmail({
-                subject: 'Donaction.fr: Réinitialiser votre mot de passe',
-                to: [{ email: 'user.email' }],
-                templateId: BREVO_TEMPLATES.FORGOT_PASSWORD,
-                params: {
-                    RESET_PASSWORD_URL: 'resetPasswordUrl',
-                },
-                tags: ['reset-password'],
-            });
-            // return await strapi.services['api::klub-don.klub-don'].cleanAll();
-        },
     }),
 );
