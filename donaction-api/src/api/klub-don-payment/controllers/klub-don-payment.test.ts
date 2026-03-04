@@ -197,17 +197,23 @@ const makeMockStrapi = () => {
 };
 
 describe('klub-don-payment controller - createPaymentIntent', () => {
-    let factoryFn: any;
     let mockStrapi: any;
     let ctx: any;
+    let controller: any;
 
     beforeEach(async () => {
-        // Re-import to get fresh module
         const { default: controllerModule } = await import('./klub-don-payment');
-        factoryFn = controllerModule.__factoryFn;
+        const factoryFn = controllerModule.__factoryFn;
 
         mockStrapi = makeMockStrapi();
         ctx = makeCtx();
+
+        const methods = factoryFn({ strapi: mockStrapi });
+        controller = {
+            validateQuery: vi.fn(),
+            sanitizeQuery: vi.fn(),
+            ...methods,
+        };
 
         vi.clearAllMocks();
     });
@@ -223,14 +229,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 metadata: { donUuid: 'don-123', klubUuid: 'klub-123' },
                 idempotencyKey: 'key-123',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Données de paiement manquantes');
@@ -245,14 +243,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 price: 100,
                 idempotencyKey: 'key-123',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Données de paiement manquantes');
@@ -265,14 +255,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 metadata: { klubUuid: 'klub-123' },
                 idempotencyKey: 'key-123',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Données de paiement manquantes');
@@ -285,14 +267,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 metadata: { donUuid: 'don-123' },
                 idempotencyKey: 'key-123',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('UUID du klub manquant');
@@ -307,14 +281,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 metadata: { donUuid: 'don-123', klubUuid: 'klub-123' },
                 idempotencyKey: 'invalid-format',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Clé d\'idempotence invalide');
@@ -334,14 +300,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValue({
                 findOne: vi.fn().mockResolvedValue(null), // klubr not found
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Klub introuvable');
@@ -366,14 +324,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(null), // don not found
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Don introuvable');
@@ -396,14 +346,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Montant incohérent avec le don enregistré');
@@ -427,14 +369,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                 metadata: { donUuid: 'don-uuid-123', klubUuid: 'klub-uuid-123' },
                 idempotencyKey: 'key-123',
             };
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toEqual({
@@ -479,14 +413,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // Assert PaymentIntent.create called with correct params
@@ -553,14 +479,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // Amount should NOT include fee since donor doesn't pay
@@ -606,14 +524,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe('Ce klub n\'a pas de compte Stripe Connect configuré');
@@ -646,14 +556,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe(
@@ -691,14 +593,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // Should succeed with legacy PaymentIntent
@@ -746,14 +640,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             expect(vi.mocked(logFinancialAction)).toHaveBeenCalledWith(
@@ -802,14 +688,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                     .fn()
                     .mockResolvedValue(makeDon({ montant: 100, contributionAKlubr: 50 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             // Fee calculated on donation amount only (10000 cents)
@@ -856,14 +734,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // PaymentIntent should NOT have on_behalf_of, transfer_data, or application_fee_amount
@@ -915,14 +785,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             expect(
@@ -960,14 +822,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             expect(vi.mocked(logFinancialAction)).not.toHaveBeenCalled();
@@ -1009,14 +863,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toBe(
@@ -1057,14 +903,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             expect(vi.mocked(strapiLog.error)).toHaveBeenCalledWith(
@@ -1107,14 +945,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100.99 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             expect(result).toEqual({
@@ -1153,14 +983,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             await controller.createPaymentIntent.call(controller);
 
             // determineDonorPaysFee should be called with isProjectDon = true
@@ -1198,14 +1020,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // Should still work, just without idempotency
@@ -1246,14 +1060,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 10 })), // DB has 10€
             });
-
-            const methods = factoryFn({ strapi: mockStrapi });
-            const controller = {
-                validateQuery: vi.fn(),
-                sanitizeQuery: vi.fn(),
-                ...methods,
-            };
-
             const result = await controller.createPaymentIntent.call(controller);
 
             // Should pass: 1001 cents vs 1000 cents = 1 cent difference, which equals tolerance
