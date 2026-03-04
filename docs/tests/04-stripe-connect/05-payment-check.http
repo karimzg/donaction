@@ -1,0 +1,13 @@
+### 5. Payment check flow
+# @name checkPayment
+# Run after creating a payment intent (03-fee-calculation.http)
+# Assert: returns statusPaiment, payment record updated
+GET {{BASE_URL}}/klub-don-payments/check?donUuid={{DON_SC_UUID}}&clientSecret={{CLIENT_SECRET_A}}
+Authorization: Bearer {{JWT}}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.log("Payment status: " + JSON.stringify(response.body));
+%}

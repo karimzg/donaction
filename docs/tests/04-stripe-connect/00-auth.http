@@ -1,0 +1,16 @@
+### Get JWT Token
+# @name login
+POST {{BASE_URL}}/auth/local
+Content-Type: application/json
+
+{
+  "identifier": "your-email@test.com",
+  "password": "your-password"
+}
+
+> {%
+  client.global.set("JWT", response.body.jwt);
+  client.test("JWT received", function () {
+    client.assert(response.body.jwt, "No JWT in response");
+  });
+%}

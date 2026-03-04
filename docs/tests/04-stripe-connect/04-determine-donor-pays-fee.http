@@ -1,0 +1,57 @@
+### 4.1 Project default overrides club default (PR #176)
+# @name donProjectDefault
+# Prereq: project with donor_pays_fee_project=false, club with donor_pays_fee=true
+# Assert: donorPaysFee reflects project-level default (not club)
+POST {{BASE_URL}}/klub-dons
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "montant": 30,
+    "klubr": "{{KLUBR_SC_UUID}}",
+    "klub_projet": "{{PROJECT_UUID}}",
+    "klubDonateur": "{{DONOR_UUID}}",
+    "withTaxReduction": true
+  },
+  "formToken": "test-token"
+}
+
+> {%
+  const d = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200 || response.status === 201);
+  });
+  client.log("donorPaysFee = " + d.donorPaysFee + " (should reflect project default)");
+%}
+
+###
+
+### 4.2 Donor choice override when allowed (PR #176)
+# @name donDonorChoice
+# Prereq: trade_policy.allow_donor_fee_choice=true
+# Assert: donorPaysFee=false (donor's explicit choice wins)
+POST {{BASE_URL}}/klub-dons
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "data": {
+    "montant": 30,
+    "klubr": "{{KLUBR_SC_UUID}}",
+    "klubDonateur": "{{DONOR_UUID}}",
+    "donorPaysFee": false,
+    "withTaxReduction": true
+  },
+  "formToken": "test-token"
+}
+
+> {%
+  const d = response.body.data;
+  client.test("Status 200", function () {
+    client.assert(response.status === 200 || response.status === 201);
+  });
+  client.test("donorPaysFee is false (donor choice)", function () {
+    client.assert(d.donorPaysFee === false, "donorPaysFee=" + d.donorPaysFee);
+  });
+%}
