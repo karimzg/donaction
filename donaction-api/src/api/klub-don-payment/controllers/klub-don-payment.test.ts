@@ -1065,5 +1065,105 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             // Should pass: 1001 cents vs 1000 cents = 1 cent difference, which equals tolerance
             expect(result).not.toBe('Montant incohérent avec le don enregistré');
         });
+
+        it('passes at exact tolerance boundary for 100€ (0.1% = 10 cents)', async () => {
+            // tolerance = max(1, round(10000 * 0.001)) = 10 cents
+            vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
+            vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
+            vi.mocked(stripe.paymentIntents.create).mockResolvedValue(makePaymentIntent());
+
+            mockStrapi.requestContext.get.mockReturnValue(ctx);
+            ctx.request.body = {
+                price: 100.10, // 10 cents over = exactly at tolerance
+                metadata: { donUuid: 'don-uuid-123', klubUuid: 'klub-uuid-123' },
+                idempotencyKey: 'key-123',
+            };
+
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({ trade_policy: makePolicy({ stripe_connect: false }) })
+                ),
+            });
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
+            });
+
+            const result = await controller.createPaymentIntent.call(controller);
+            expect(result).not.toBe('Montant incohérent avec le don enregistré');
+        });
+
+        it('fails just past tolerance boundary for 100€ (11 cents > 10 cent tolerance)', async () => {
+            vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
+            vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
+
+            mockStrapi.requestContext.get.mockReturnValue(ctx);
+            ctx.request.body = {
+                price: 100.11, // 11 cents over > 10 cent tolerance
+                metadata: { donUuid: 'don-uuid-123', klubUuid: 'klub-uuid-123' },
+                idempotencyKey: 'key-123',
+            };
+
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({ trade_policy: makePolicy({ stripe_connect: false }) })
+                ),
+            });
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
+            });
+
+            const result = await controller.createPaymentIntent.call(controller);
+            expect(result).toBe('Montant incohérent avec le don enregistré');
+        });
+
+        it('uses minimum 1 cent tolerance for small amounts (1€)', async () => {
+            // tolerance = max(1, round(100 * 0.001)) = max(1, 0) = 1 cent
+            vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
+            vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
+            vi.mocked(stripe.paymentIntents.create).mockResolvedValue(makePaymentIntent());
+
+            mockStrapi.requestContext.get.mockReturnValue(ctx);
+            ctx.request.body = {
+                price: 1.01, // 1 cent over = exactly at minimum tolerance
+                metadata: { donUuid: 'don-uuid-123', klubUuid: 'klub-uuid-123' },
+                idempotencyKey: 'key-123',
+            };
+
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({ trade_policy: makePolicy({ stripe_connect: false }) })
+                ),
+            });
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(makeDon({ montant: 1 })),
+            });
+
+            const result = await controller.createPaymentIntent.call(controller);
+            expect(result).not.toBe('Montant incohérent avec le don enregistré');
+        });
+
+        it('fails past minimum tolerance for small amounts (2 cents > 1 cent tolerance)', async () => {
+            vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
+            vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
+
+            mockStrapi.requestContext.get.mockReturnValue(ctx);
+            ctx.request.body = {
+                price: 1.02, // 2 cents over > 1 cent minimum tolerance
+                metadata: { donUuid: 'don-uuid-123', klubUuid: 'klub-uuid-123' },
+                idempotencyKey: 'key-123',
+            };
+
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({ trade_policy: makePolicy({ stripe_connect: false }) })
+                ),
+            });
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(makeDon({ montant: 1 })),
+            });
+
+            const result = await controller.createPaymentIntent.call(controller);
+            expect(result).toBe('Montant incohérent avec le don enregistré');
+        });
     });
 });
