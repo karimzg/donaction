@@ -66,12 +66,12 @@ export function determineDonorPaysFee(params: DonorPaysFeeParams): boolean {
 // Validate required Stripe env vars at module load (fail fast at startup)
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error(
-        'STRIPE_SECRET_KEY manquant dans les variables d\'environnement. Vérifiez votre fichier .env'
+        "STRIPE_SECRET_KEY manquant dans les variables d'environnement. Vérifiez votre fichier .env",
     );
 }
 if (!process.env.STRIPE_WEBHOOK_SECRET_CONNECT) {
     throw new Error(
-        'STRIPE_WEBHOOK_SECRET_CONNECT manquant dans les variables d\'environnement. Vérifiez votre fichier .env'
+        "STRIPE_WEBHOOK_SECRET_CONNECT manquant dans les variables d'environnement. Vérifiez votre fichier .env",
     );
 }
 
@@ -112,7 +112,7 @@ export async function createConnectedAccount(
     strapiInstance: Core.Strapi,
     klubrId: number,
     businessType: BusinessType,
-    country: string = 'FR'
+    country: string = 'FR',
 ): Promise<Stripe.Account> {
     let account: Stripe.Account | null = null;
 
@@ -158,10 +158,8 @@ export async function createConnectedAccount(
                         business_type: businessType,
                         country: country,
                         created_at_stripe: new Date(account.created * 1000),
-                        capabilities:
-                            account.capabilities as any,
-                        requirements:
-                            account.requirements as any,
+                        capabilities: account.capabilities as any,
+                        requirements: account.requirements as any,
                         charges_enabled: account.charges_enabled ?? false,
                         payouts_enabled: account.payouts_enabled ?? false,
                     },
@@ -217,7 +215,7 @@ export async function createConnectedAccount(
                 });
             } catch (logError) {
                 strapiLog.error(
-                    `Échec de l'enregistrement du compte orphelin: ${logError.message}`
+                    `Échec de l'enregistrement du compte orphelin: ${logError.message}`,
                 );
             }
 
@@ -227,10 +225,7 @@ export async function createConnectedAccount(
         return account;
     } catch (error) {
         if (!account) {
-            strapiLog.error(
-                'Échec de la création du compte connecté:',
-                error
-            );
+            strapiLog.error('Échec de la création du compte connecté:', error);
         }
         throw error;
     }
@@ -246,7 +241,7 @@ export async function createConnectedAccount(
 export async function generateAccountLink(
     accountId: string,
     refreshUrl: string,
-    returnUrl: string
+    returnUrl: string,
 ): Promise<Stripe.AccountLink> {
     logBlock({
         statusColor: COLORS.blue,
@@ -281,7 +276,7 @@ export async function generateAccountLink(
  */
 export async function syncAccountStatus(
     strapiInstance: Core.Strapi,
-    accountId: string
+    accountId: string,
 ): Promise<ConnectedAccountEntity> {
     logBlock({
         statusColor: COLORS.blue,
@@ -303,7 +298,7 @@ export async function syncAccountStatus(
 
     if (!connectedAccount) {
         throw new Error(
-            `Compte connecté introuvable pour le compte Stripe: ${accountId}`
+            `Compte connecté introuvable pour le compte Stripe: ${accountId}`,
         );
     }
 
@@ -326,10 +321,8 @@ export async function syncAccountStatus(
                 account_status: accountStatus,
                 verification_status: verificationStatus,
                 onboarding_completed: account.details_submitted,
-                capabilities:
-                    account.capabilities as any,
-                requirements:
-                    account.requirements as any,
+                capabilities: account.capabilities as any,
+                requirements: account.requirements as any,
                 charges_enabled: account.charges_enabled,
                 payouts_enabled: account.payouts_enabled,
                 last_sync: new Date(),
@@ -346,7 +339,11 @@ export async function syncAccountStatus(
 }
 
 /** Valid fee model values — reject anything else */
-const VALID_FEE_MODELS = ['percentage_only', 'fixed_only', 'percentage_plus_fixed'] as const;
+const VALID_FEE_MODELS = [
+    'percentage_only',
+    'fixed_only',
+    'percentage_plus_fixed',
+] as const;
 
 /** Default Stripe processing fee rates for European cards (France) */
 const DEFAULT_STRIPE_FEE_PERCENTAGE = 1.5;
@@ -361,7 +358,7 @@ const DEFAULT_STRIPE_FEE_FIXED = 0.25;
  */
 export function calculatePlatformCommission(
     amount: number,
-    tradePolicy: TradePolicyEntity
+    tradePolicy: TradePolicyEntity,
 ): number {
     const feeModel = tradePolicy.fee_model || 'percentage_only';
     const percentage = tradePolicy.commissionPercentage || 0;
@@ -369,25 +366,25 @@ export function calculatePlatformCommission(
 
     if (!VALID_FEE_MODELS.includes(feeModel as any)) {
         throw new Error(
-            `Modèle de frais invalide: '${feeModel}'. Valeurs autorisées: ${VALID_FEE_MODELS.join(', ')}`
+            `Modèle de frais invalide: '${feeModel}'. Valeurs autorisées: ${VALID_FEE_MODELS.join(', ')}`,
         );
     }
 
     if (percentage < 0 || percentage > 100) {
         throw new Error(
-            `Pourcentage de commission invalide: ${percentage}. Doit être entre 0 et 100.`
+            `Pourcentage de commission invalide: ${percentage}. Doit être entre 0 et 100.`,
         );
     }
 
     if (fixedAmount < 0) {
         throw new Error(
-            `Montant fixe invalide: ${fixedAmount}. Doit être >= 0.`
+            `Montant fixe invalide: ${fixedAmount}. Doit être >= 0.`,
         );
     }
 
     if (amount <= 0) {
         throw new Error(
-            `Montant de donation invalide: ${amount}. Doit être > 0.`
+            `Montant de donation invalide: ${amount}. Doit être > 0.`,
         );
     }
 
@@ -425,9 +422,10 @@ export function calculatePlatformCommission(
  */
 export function estimateStripeFees(
     donationAmountCents: number,
-    tradePolicy: TradePolicyEntity
+    tradePolicy: TradePolicyEntity,
 ): number {
-    const percentage = tradePolicy.stripe_fee_percentage ?? DEFAULT_STRIPE_FEE_PERCENTAGE;
+    const percentage =
+        tradePolicy.stripe_fee_percentage ?? DEFAULT_STRIPE_FEE_PERCENTAGE;
     const fixed = tradePolicy.stripe_fee_fixed ?? DEFAULT_STRIPE_FEE_FIXED;
 
     if (percentage < 0 || percentage > 100) {
@@ -455,9 +453,12 @@ export function estimateStripeFees(
  */
 export function calculateApplicationFee(
     donationAmountCents: number,
-    tradePolicy: TradePolicyEntity
+    tradePolicy: TradePolicyEntity,
 ): number {
-    const platformCommission = calculatePlatformCommission(donationAmountCents, tradePolicy);
+    const platformCommission = calculatePlatformCommission(
+        donationAmountCents,
+        tradePolicy,
+    );
     const stripeFees = estimateStripeFees(donationAmountCents, tradePolicy);
     return platformCommission + stripeFees;
 }
@@ -472,7 +473,7 @@ export function calculateApplicationFee(
 export async function createTransferToConnectedAccount(
     amount: number,
     accountId: string,
-    metadata: Record<string, string> = {}
+    metadata: Record<string, string> = {},
 ): Promise<Stripe.Transfer> {
     logBlock({
         statusColor: COLORS.blue,
@@ -518,7 +519,7 @@ export async function logFinancialAction(
     klubDonDocumentId: string | null,
     amount: number,
     stripeObjectId: string,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
 ): Promise<FinancialAuditLogEntity> {
     logBlock({
         statusColor: COLORS.blue,
@@ -560,7 +561,7 @@ export async function logFinancialAction(
 
 /** Determines account status from Stripe account data */
 const determineAccountStatus = (
-    account: Stripe.Account
+    account: Stripe.Account,
 ): 'pending' | 'active' | 'restricted' | 'disabled' => {
     if (account.charges_enabled && account.payouts_enabled) {
         return 'active';
@@ -576,7 +577,7 @@ const determineAccountStatus = (
 
 /** Determines verification status from Stripe account data */
 const determineVerificationStatus = (
-    account: Stripe.Account
+    account: Stripe.Account,
 ): 'unverified' | 'pending' | 'verified' | 'rejected' => {
     if (!account.details_submitted) {
         return 'unverified';
