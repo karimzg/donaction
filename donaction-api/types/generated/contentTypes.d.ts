@@ -2557,11 +2557,9 @@ export interface ApiWebhookLogWebhookLog extends Struct.CollectionTypeSchema {
         draftAndPublish: false;
     };
     attributes: {
-        account_id: Schema.Attribute.String;
         createdAt: Schema.Attribute.DateTime;
         createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        error_message: Schema.Attribute.Text;
         event_id: Schema.Attribute.String &
             Schema.Attribute.Required &
             Schema.Attribute.Unique;
@@ -2572,15 +2570,29 @@ export interface ApiWebhookLogWebhookLog extends Struct.CollectionTypeSchema {
             'api::webhook-log.webhook-log'
         > &
             Schema.Attribute.Private;
-        payload: Schema.Attribute.JSON;
-        processed: Schema.Attribute.Boolean &
-            Schema.Attribute.Required &
-            Schema.Attribute.DefaultTo<false>;
+        payload: Schema.Attribute.JSON & Schema.Attribute.Required;
         processed_at: Schema.Attribute.DateTime;
+        processing_error: Schema.Attribute.Text;
         publishedAt: Schema.Attribute.DateTime;
+        related_don: Schema.Attribute.Relation<
+            'manyToOne',
+            'api::klub-don.klub-don'
+        >;
+        related_klubr: Schema.Attribute.Relation<
+            'manyToOne',
+            'api::klubr.klubr'
+        >;
         retry_count: Schema.Attribute.Integer &
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<0>;
+        source: Schema.Attribute.Enumeration<['platform', 'connect']> &
+            Schema.Attribute.Required;
+        status: Schema.Attribute.Enumeration<
+            ['received', 'processing', 'processed', 'failed', 'ignored']
+        > &
+            Schema.Attribute.Required &
+            Schema.Attribute.DefaultTo<'received'>;
+        stripe_account_id: Schema.Attribute.String;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;

@@ -192,7 +192,8 @@ export async function createConnectedAccount(
                         data: {
                             event_id: `orphaned_account_${account.id}_${Date.now()}`,
                             event_type: 'account.orphaned',
-                            account_id: account.id,
+                            stripe_account_id: account.id,
+                            source: 'connect',
                             payload: {
                                 klubrId,
                                 businessType,
@@ -201,8 +202,8 @@ export async function createConnectedAccount(
                                 error: dbError.message,
                                 timestamp: new Date().toISOString(),
                             },
-                            processed: false,
-                            error_message: `Database insert failed: ${dbError.message}`,
+                            status: 'failed',
+                            processing_error: `Database insert failed: ${dbError.message}`,
                             retry_count: 0,
                         },
                     });

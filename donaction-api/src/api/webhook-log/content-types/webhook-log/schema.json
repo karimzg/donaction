@@ -21,18 +21,25 @@
       "type": "string",
       "required": true
     },
-    "account_id": {
+    "stripe_account_id": {
       "type": "string"
     },
-    "payload": {
-      "type": "json"
-    },
-    "processed": {
-      "type": "boolean",
-      "default": false,
+    "source": {
+      "type": "enumeration",
+      "enum": ["platform", "connect"],
       "required": true
     },
-    "error_message": {
+    "payload": {
+      "type": "json",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["received", "processing", "processed", "failed", "ignored"],
+      "default": "received",
+      "required": true
+    },
+    "processing_error": {
       "type": "text"
     },
     "retry_count": {
@@ -42,6 +49,16 @@
     },
     "processed_at": {
       "type": "datetime"
+    },
+    "related_don": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klub-don.klub-don"
+    },
+    "related_klubr": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::klubr.klubr"
     },
     "uuid": {
       "type": "customField",
