@@ -31,6 +31,7 @@ out/
 coverage/
 *.lcov
 .nyc_output
+http-client.env.json
 
 # Environment
 .env*

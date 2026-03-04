@@ -5,7 +5,7 @@
 ## Setup
 
 1. Lancer Strapi : `cd donaction-api && npm run develop`
-2. Remplir les `REPLACE_ME` dans `http-client.env.json`
+2. Copier `http-client.env.json.example` → `http-client.env.json` et remplir les `REPLACE_ME`
 3. Dans WebStorm, sélectionner l'environnement **dev**
 
 ## Exécution
