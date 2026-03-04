@@ -1,0 +1,138 @@
+### 3.1 Scenario A - Donor pays fees on top (PR #175, #177)
+# @name paymentIntentScenarioA
+# Assert: returns intent, total > 5000 cents, platform commission = 4% net
+# Requires: DON_SC_UUID from 02-donor-pays-fee.http
+POST {{BASE_URL}}/klub-don-payments/create-payment-intent
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "price": 50,
+  "metadata": {
+    "donUuid": "{{DON_SC_UUID}}",
+    "klubUuid": "{{KLUBR_SC_UUID}}"
+  },
+  "donorPaysFee": true
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("Returns client_secret", function () {
+    client.assert(response.body.intent, "No intent/client_secret returned");
+  });
+  client.global.set("CLIENT_SECRET_A", response.body.intent);
+  client.log("Intent: " + response.body.intent);
+%}
+
+###
+
+### 3.2 Scenario B - Fees deducted from donation (PR #175, #177)
+# @name paymentIntentScenarioB
+# Assert: returns intent, donor charged exactly 50 EUR, association receives less
+POST {{BASE_URL}}/klub-don-payments/create-payment-intent
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "price": 50,
+  "metadata": {
+    "donUuid": "{{DON_SC_UUID}}",
+    "klubUuid": "{{KLUBR_SC_UUID}}"
+  },
+  "donorPaysFee": false
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("Returns client_secret", function () {
+    client.assert(response.body.intent, "No intent/client_secret returned");
+  });
+%}
+
+###
+
+### 3.3 Legacy mode - zero fees pass-through (PR #177)
+# @name paymentIntentLegacy
+# Assert: no application fee, standard payment intent
+# Requires: LEGACY_DON_UUID from 02-donor-pays-fee.http
+POST {{BASE_URL}}/klub-don-payments/create-payment-intent
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "price": 50,
+  "metadata": {
+    "donUuid": "{{LEGACY_DON_UUID}}",
+    "klubUuid": "{{KLUBR_LEGACY_UUID}}"
+  }
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("Returns client_secret", function () {
+    client.assert(response.body.intent, "No intent/client_secret returned");
+  });
+%}
+
+###
+
+### 3.4 Backward compat - default fallback 1.5% + 0.25 EUR (PR #175)
+# Use a klubr with stripe_fee_percentage=null and stripe_fee_fixed=null
+# Assert: falls back to 1.5% + 0.25 EUR defaults
+# This is the same as 3.1/3.2 if the trade_policy has null fee fields
+POST {{BASE_URL}}/klub-don-payments/create-payment-intent
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "price": 100,
+  "metadata": {
+    "donUuid": "{{DON_SC_UUID}}",
+    "klubUuid": "{{KLUBR_SC_UUID}}"
+  },
+  "donorPaysFee": true
+}
+
+> {%
+  client.test("Status 200", function () {
+    client.assert(response.status === 200);
+  });
+  client.test("Returns client_secret", function () {
+    client.assert(response.body.intent);
+  });
+%}
+
+###
+
+### 3.5 Account not activated - blocked (Issue #60, Scenario 4)
+# @name paymentIntentAccountDisabled
+# Assert: 400 error when charges_enabled = false
+# Requires: A klubr with stripe_connect=true but charges_enabled=false
+POST {{BASE_URL}}/klub-don-payments/create-payment-intent
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "price": 50,
+  "metadata": {
+    "donUuid": "{{DON_SC_UUID}}",
+    "klubUuid": "{{KLUBR_SC_DISABLED_UUID}}"
+  },
+  "donorPaysFee": true
+}
+
+> {%
+  client.test("Status 400", function () {
+    client.assert(response.status === 400);
+  });
+  client.test("Error message mentions activation", function () {
+    const msg = response.body.error?.message || "";
+    client.assert(msg.includes("pas encore activé"), "Expected account not activated error");
+  });
+%}
