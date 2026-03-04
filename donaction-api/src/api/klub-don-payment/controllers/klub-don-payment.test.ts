@@ -1,16 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
 // Stub env vars before importing helpers
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
 vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
 
-// Dynamic import after env stubs
-const { stripe, calculateApplicationFee, determineDonorPaysFee, logFinancialAction } =
-    await import('../../../helpers/stripe-connect-helper');
-const { findExistingPaymentByIdempotencyKey, isValidIdempotencyKey } = await import(
-    '../../../helpers/idempotency-helper'
-);
-const { logBlock, logSimple } = await import('../../../helpers/logger');
+// Module references (populated in beforeAll after mocks are set up)
+let stripe: Awaited<typeof import('../../../helpers/stripe-connect-helper')>['stripe'];
+let calculateApplicationFee: Awaited<typeof import('../../../helpers/stripe-connect-helper')>['calculateApplicationFee'];
+let determineDonorPaysFee: Awaited<typeof import('../../../helpers/stripe-connect-helper')>['determineDonorPaysFee'];
+let logFinancialAction: Awaited<typeof import('../../../helpers/stripe-connect-helper')>['logFinancialAction'];
+let findExistingPaymentByIdempotencyKey: Awaited<typeof import('../../../helpers/idempotency-helper')>['findExistingPaymentByIdempotencyKey'];
+let isValidIdempotencyKey: Awaited<typeof import('../../../helpers/idempotency-helper')>['isValidIdempotencyKey'];
+let logBlock: Awaited<typeof import('../../../helpers/logger')>['logBlock'];
+let logSimple: Awaited<typeof import('../../../helpers/logger')>['logSimple'];
+let strapiLog: Awaited<typeof import('../../../helpers/logger')>['strapiLog'];
 
 // Mock dependencies
 vi.mock('@strapi/strapi', () => ({
@@ -200,11 +203,30 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
     let mockStrapi: any;
     let ctx: any;
     let controller: any;
+    let factoryFn: any;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
+        // Import mocked modules (vi.mock() calls are hoisted above this)
+        const stripeModule = await import('../../../helpers/stripe-connect-helper');
+        stripe = stripeModule.stripe;
+        calculateApplicationFee = stripeModule.calculateApplicationFee;
+        determineDonorPaysFee = stripeModule.determineDonorPaysFee;
+        logFinancialAction = stripeModule.logFinancialAction;
+
+        const idempotencyModule = await import('../../../helpers/idempotency-helper');
+        findExistingPaymentByIdempotencyKey = idempotencyModule.findExistingPaymentByIdempotencyKey;
+        isValidIdempotencyKey = idempotencyModule.isValidIdempotencyKey;
+
+        const loggerModule = await import('../../../helpers/logger');
+        logBlock = loggerModule.logBlock;
+        logSimple = loggerModule.logSimple;
+        strapiLog = loggerModule.strapiLog;
+
         const { default: controllerModule } = await import('./klub-don-payment');
-        const factoryFn = controllerModule.__factoryFn;
+        factoryFn = controllerModule.__factoryFn;
+    });
 
+    beforeEach(() => {
         mockStrapi = makeMockStrapi();
         ctx = makeCtx();
 
@@ -872,8 +894,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
         });
 
         it('logs error with strapiLog.error before returning error response', async () => {
-            const { strapiLog } = await import('../../../helpers/logger');
-
             vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
             vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
             vi.mocked(calculateApplicationFee).mockReturnValue(400);
