@@ -1,6 +1,5 @@
 import getAccessToken from "./getAccessToken";
 import {API_KEY_URL} from "./endpoints";
-import logger from "../../../config/logger";
 
 
 interface IResponseJSON {
