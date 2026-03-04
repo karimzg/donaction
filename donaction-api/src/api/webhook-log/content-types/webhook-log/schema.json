@@ -5,7 +5,7 @@
     "singularName": "webhook-log",
     "pluralName": "webhook-logs",
     "displayName": "Webhook Log",
-    "description": "Stripe webhook event logs"
+    "description": "Stripe webhook event logs for audit and idempotence"
   },
   "options": {
     "draftAndPublish": false
@@ -21,13 +21,13 @@
       "type": "string",
       "required": true
     },
-    "stripe_account_id": {
-      "type": "string"
-    },
     "source": {
       "type": "enumeration",
       "enum": ["platform", "connect"],
       "required": true
+    },
+    "stripe_account_id": {
+      "type": "string"
     },
     "payload": {
       "type": "json",
@@ -59,14 +59,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::klubr.klubr"
-    },
-    "uuid": {
-      "type": "customField",
-      "customField": "plugin::strapi-advanced-uuid.uuid",
-      "options": {
-        "disable-regenerate": true,
-        "disable-auto-fill": true
-      }
     }
   }
 }

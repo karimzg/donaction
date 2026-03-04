@@ -376,8 +376,8 @@ export default factories.createCoreController(
                             data: {
                                 event_id: event.id,
                                 event_type: event.type,
-                                stripe_account_id: event.account || null,
                                 source,
+                                stripe_account_id: event.account || null,
                                 payload: event.data.object as any,
                                 status: 'received',
                                 retry_count: 0,

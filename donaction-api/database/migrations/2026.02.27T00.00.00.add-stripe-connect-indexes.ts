@@ -2,11 +2,11 @@
  * Add performance indexes for Stripe Connect tables
  */
 export async function up(knex) {
-    // webhook_logs: index on processed for retry queries
+    // webhook_logs: index on status + retry_count for retry queries
     const hasWebhookLogsTable = await knex.schema.hasTable('webhook_logs');
     if (hasWebhookLogsTable) {
         await knex.schema.alterTable('webhook_logs', (table) => {
-            table.index(['processed', 'retry_count'], 'idx_webhook_logs_processed_retry');
+            table.index(['status', 'retry_count'], 'idx_webhook_logs_status_retry');
         });
     }
 
@@ -32,7 +32,7 @@ export async function down(knex) {
     const hasWebhookTable = await knex.schema.hasTable('webhook_logs');
     if (hasWebhookTable) {
         await knex.schema.alterTable('webhook_logs', (table) => {
-            table.dropIndex([], 'idx_webhook_logs_processed_retry');
+            table.dropIndex([], 'idx_webhook_logs_status_retry');
         });
     }
 

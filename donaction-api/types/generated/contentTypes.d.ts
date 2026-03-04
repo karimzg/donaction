@@ -2548,7 +2548,7 @@ export interface ApiTradePolicyTradePolicy extends Struct.CollectionTypeSchema {
 export interface ApiWebhookLogWebhookLog extends Struct.CollectionTypeSchema {
     collectionName: 'webhook_logs';
     info: {
-        description: 'Stripe webhook event logs';
+        description: 'Stripe webhook event logs for audit and idempotence';
         displayName: 'Webhook Log';
         pluralName: 'webhook-logs';
         singularName: 'webhook-log';
@@ -2596,20 +2596,6 @@ export interface ApiWebhookLogWebhookLog extends Struct.CollectionTypeSchema {
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
-        uuid: Schema.Attribute.UID<
-            undefined,
-            {
-                'disable-auto-fill': true;
-                'disable-regenerate': true;
-            }
-        > &
-            Schema.Attribute.CustomField<
-                'plugin::strapi-advanced-uuid.uuid',
-                {
-                    'disable-auto-fill': true;
-                    'disable-regenerate': true;
-                }
-            >;
     };
 }
 

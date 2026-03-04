@@ -288,7 +288,7 @@ export async function retryFailedWebhooks(
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
-                    status: { $in: ['failed', 'received'] },
+                    status: { $in: ['received', 'failed'] },
                     retry_count: { $lt: 3 },
                 },
                 limit: 50,
