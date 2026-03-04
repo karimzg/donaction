@@ -16,10 +16,13 @@ let logSimple: Awaited<typeof import('../../../helpers/logger')>['logSimple'];
 let strapiLog: Awaited<typeof import('../../../helpers/logger')>['strapiLog'];
 
 // Mock dependencies
+// Mock Strapi's createCoreController factory to capture the inner function.
+// In production, createCoreController(_uid, fn) returns a controller class.
+// Here we intercept `fn` via `__factoryFn` so tests can call it directly
+// with a mock strapi instance: `factoryFn({ strapi: mockStrapi })`.
 vi.mock('@strapi/strapi', () => ({
     factories: {
         createCoreController: (_uid: string, fn: Function) => {
-            // Capture the factory function so we can call it in tests
             return { __factoryFn: fn };
         },
     },
@@ -181,7 +184,12 @@ const makeCtx = () => {
 };
 
 /**
- * Helper to build a mock Strapi service
+ * Helper to build a mock Strapi instance.
+ *
+ * NOTE: Uses `strapi.services['...']` (property access) instead of `strapi.service('...')`
+ * (function call) because the actual controller implementation accesses services via property
+ * lookup. While `strapi.service()` is the Strapi v5 recommended pattern (see AGENTS.md),
+ * the controller has not been migrated yet. The mock matches the real access pattern.
  */
 const makeMockStrapi = () => {
     return {
@@ -227,6 +235,8 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
     });
 
     beforeEach(() => {
+        vi.clearAllMocks();
+
         mockStrapi = makeMockStrapi();
         ctx = makeCtx();
 
@@ -236,8 +246,6 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             sanitizeQuery: vi.fn(),
             ...methods,
         };
-
-        vi.clearAllMocks();
     });
 
     // ========================================================================
@@ -540,6 +548,38 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
                     makeKlubr({
                         trade_policy: makePolicy({ stripe_connect: true }),
                         connected_account: null,
+                    })
+                ),
+            });
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
+            });
+            const result = await controller.createPaymentIntent.call(controller);
+
+            expect(result).toBe('Ce klub n\'a pas de compte Stripe Connect configuré');
+        });
+
+        it('returns badRequest when connected_account has empty stripe_account_id', async () => {
+            vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
+            vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
+
+            mockStrapi.requestContext.get.mockReturnValue(ctx);
+            ctx.request.body = {
+                price: 100,
+                metadata: {
+                    donUuid: 'don-uuid-123',
+                    klubUuid: 'klub-uuid-123',
+                },
+                idempotencyKey: 'key-123',
+            };
+
+            mockStrapi.db.query.mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({
+                        trade_policy: makePolicy({ stripe_connect: true }),
+                        connected_account: makeConnectedAccount({
+                            stripe_account_id: '',
+                        }),
                     })
                 ),
             });
@@ -1054,7 +1094,7 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             });
         });
 
-        it('applies price tolerance correctly (0.1% or 1 cent threshold)', async () => {
+        it('passes within 1 cent tolerance for small amount (10.01€ vs 10€)', async () => {
             vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
             vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
 
