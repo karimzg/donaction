@@ -133,7 +133,6 @@
     },
     "donorPaysFee": {
       "type": "boolean",
-      "default": false,
       "required": false
     }
   }

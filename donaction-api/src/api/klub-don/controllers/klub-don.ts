@@ -23,6 +23,7 @@ import {
     BREVO_TEMPLATES,
     sendBrevoTransacEmail,
 } from '../../../helpers/emails/sendBrevoTransacEmail';
+import { resolveDonorPaysFee } from '../services/resolveDonorPaysFee';
 
 export default factories.createCoreController(
     'api::klub-don.klub-don',
@@ -370,7 +371,11 @@ export default factories.createCoreController(
                                 },
                             },
                             klub_projet: true,
-                            klubr: true,
+                            klubr: {
+                                populate: {
+                                    trade_policy: true,
+                                },
+                            },
                             klub_don_payments: true,
                         },
                     });
@@ -388,13 +393,19 @@ export default factories.createCoreController(
                     ...ctx.request.body,
                 };
 
+                let updateStripeConnect: boolean | null = null;
                 if (body?.data?.klubr) {
                     const klubr: KlubrEntity = await strapi.db
                         .query('api::klubr.klubr')
                         .findOne({
                             where: { uuid: ctx.request.body?.data?.klubr },
+                            populate: { trade_policy: true },
                         });
                     body.data.klubr = klubr.id;
+                    updateStripeConnect = klubr.trade_policy?.stripe_connect ?? null;
+                } else {
+                    // Use trade_policy from the already-populated existing klubr
+                    updateStripeConnect = entityWithUUID.klubr?.trade_policy?.stripe_connect ?? null;
                 }
                 if (body?.data?.klub_projet) {
                     const klubProjet: KlubProjetEntity = await strapi.db
@@ -409,6 +420,13 @@ export default factories.createCoreController(
                 body = strapi.services[
                     'api::klub-don.klub-don'
                 ].updateBodyWithDeductionFiscale(body, entityWithUUID);
+
+                // Resolve donorPaysFee based on klubr's trade policy (null in Legacy mode)
+                body.data.donorPaysFee = resolveDonorPaysFee(
+                    body.data?.donorPaysFee,
+                    updateStripeConnect,
+                );
+
                 const entity = await strapi
                     .documents('api::klub-don.klub-don')
                     .update({
@@ -472,13 +490,16 @@ export default factories.createCoreController(
                 if (!result) {
                     return ctx.badRequest('Captcha verification failed');
                 }
+                let klubrStripeConnect: boolean | null = null;
                 if (ctx.request.body?.data?.klubr) {
                     const klubr: KlubrEntity = await strapi.db
                         .query('api::klubr.klubr')
                         .findOne({
                             where: { uuid: ctx.request.body?.data?.klubr },
+                            populate: { trade_policy: true },
                         });
                     ctx.request.body.data.klubr = klubr.id;
+                    klubrStripeConnect = klubr.trade_policy?.stripe_connect ?? null;
                 }
                 if (ctx.request.body?.data?.klub_projet) {
                     const klubProjet: KlubProjetEntity = await strapi.db
@@ -504,6 +525,13 @@ export default factories.createCoreController(
                 ctx.request.body.data.relaunchCode = Math.floor(
                     1000 + Math.random() * 9000,
                 );
+
+                // Resolve donorPaysFee based on klubr's trade policy (null in Legacy mode)
+                ctx.request.body.data.donorPaysFee = resolveDonorPaysFee(
+                    ctx.request.body.data.donorPaysFee,
+                    klubrStripeConnect,
+                );
+
                 const entity = await super.create(ctx);
                 // prevent returning ids
                 const sanitizedResult = await this.sanitizeOutput(
