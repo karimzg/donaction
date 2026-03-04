@@ -110,7 +110,10 @@ const makeKlubr = (
     uuid: overrides.uuid ?? 'klub-uuid-123',
     documentId: overrides.documentId ?? 'dok123abc',
     trade_policy: overrides.trade_policy ?? makePolicy(),
-    connected_account: overrides.connected_account ?? makeConnectedAccount(),
+    connected_account:
+        'connected_account' in overrides
+            ? overrides.connected_account
+            : makeConnectedAccount(),
 });
 
 /**
@@ -578,11 +581,7 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             });
         });
 
-        it.skip('returns badRequest when connected_account.stripe_account_id is missing', async () => {
-            // Skip this test for now - the mock setup is complex and needs refinement
-            // The actual controller behavior is tested via integration/E2E tests
-            // This test documents the expected error case but requires deeper mocking
-
+        it('returns badRequest when connected_account is missing (null)', async () => {
             vi.mocked(isValidIdempotencyKey).mockReturnValue(true);
             vi.mocked(findExistingPaymentByIdempotencyKey).mockResolvedValue(null);
 
@@ -597,11 +596,12 @@ describe('klub-don-payment controller - createPaymentIntent', () => {
             };
 
             mockStrapi.db.query.mockReturnValueOnce({
-                findOne: vi.fn().mockResolvedValue({
-                    ...makeKlubr(),
-                    trade_policy: { stripe_connect: true },
-                    connected_account: null, // Missing connected account
-                }),
+                findOne: vi.fn().mockResolvedValue(
+                    makeKlubr({
+                        trade_policy: makePolicy({ stripe_connect: true }),
+                        connected_account: null,
+                    })
+                ),
             });
             mockStrapi.db.query.mockReturnValueOnce({
                 findOne: vi.fn().mockResolvedValue(makeDon({ montant: 100 })),
