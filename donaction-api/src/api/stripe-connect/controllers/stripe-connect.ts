@@ -4,6 +4,7 @@ import type Stripe from 'stripe';
 import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger';
 import { removeId } from '../../../helpers/sanitizeHelpers';
 import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
+import { isDuplicateStatus } from '../../webhook-log/services/webhook-log-helpers';
 
 export default factories.createCoreController(
     'api::connected-account.connected-account',
@@ -403,7 +404,7 @@ export default factories.createCoreController(
                         throw createError; // Unexpected state, re-throw
                     }
 
-                    if (webhookLog.status === 'processed' || webhookLog.status === 'ignored') {
+                    if (isDuplicateStatus(webhookLog.status)) {
                         logSimple({
                             message: `Événement déjà traité: ${event.id}`,
                             color: 'yellow',

@@ -40,9 +40,11 @@ export async function up(knex) {
         .whereNull('stripe_account_id')
         .update({ source: 'platform' });
 
-    // Now drop the old processed column and add constraints
+    // Now drop the old processed column and enforce NOT NULL on new columns
     await knex.schema.alterTable('webhook_logs', (table) => {
         table.dropColumn('processed');
+        table.string('source').notNullable().alter();
+        table.string('status').notNullable().defaultTo('received').alter();
     });
 
     // Add indexes (event_id already has unique constraint → implicit index)

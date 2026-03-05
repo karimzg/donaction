@@ -332,7 +332,7 @@ export async function retryFailedWebhooks(
                     prefix: 'StripeConnect',
                 });
             } catch (error) {
-                // Stripe events expire after 30 days — mark as permanently failed
+                // Stripe events expire after 30 days — mark as ignored (not retryable)
                 if (error?.statusCode === 404) {
                     logSimple({
                         message: `Événement ${log.event_id} expiré sur Stripe (>30 jours)`,
@@ -345,7 +345,7 @@ export async function retryFailedWebhooks(
                         .update({
                             documentId: log.documentId,
                             data: {
-                                status: 'failed',
+                                status: 'ignored',
                                 retry_count: 3,
                                 processing_error: 'Event expired on Stripe (>30 days)',
                             },

@@ -1,12 +1,14 @@
 import { Core, factories } from '@strapi/strapi';
-import { isDuplicateStatus } from './webhook-log-helpers';
+
+// TODO: Populate related_don and related_klubr relations when processing
+// payment and account webhooks respectively (follow-up to US-WH-001)
 
 export default factories.createCoreService(
     'api::webhook-log.webhook-log',
     ({ strapi }: { strapi: Core.Strapi }) => ({
         /**
-         * Check if an event has already been logged (idempotence check).
-         * Returns the existing log entry or null.
+         * Find a webhook log entry by Stripe event ID.
+         * Used for idempotence checks and audit lookups.
          */
         async findByEventId(eventId: string) {
             return strapi.db
@@ -14,16 +16,6 @@ export default factories.createCoreService(
                 .findOne({
                     where: { event_id: eventId },
                 });
-        },
-
-        /**
-         * Check if an event should be ignored (already processed or being processed).
-         * Returns true if the event is a duplicate that should be skipped.
-         */
-        async isDuplicate(eventId: string): Promise<boolean> {
-            const existing = await this.findByEventId(eventId);
-            if (!existing) return false;
-            return isDuplicateStatus(existing.status);
         },
     })
 );
