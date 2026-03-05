@@ -53,16 +53,13 @@ export async function up(knex) {
         table.index(['source'], 'idx_webhook_logs_source');
     });
 
-    // Drop obsolete index from previous migration
-    const hasOldIndex = await knex.schema.hasTable('webhook_logs');
-    if (hasOldIndex) {
-        try {
-            await knex.schema.alterTable('webhook_logs', (table) => {
-                table.dropIndex([], 'idx_webhook_logs_processed_retry');
-            });
-        } catch {
-            // Index may not exist if previous migration was not run
-        }
+    // Drop obsolete index from previous migration (may not exist)
+    try {
+        await knex.schema.alterTable('webhook_logs', (table) => {
+            table.dropIndex([], 'idx_webhook_logs_processed_retry');
+        });
+    } catch {
+        // Index may not exist if previous migration was not run
     }
 }
 

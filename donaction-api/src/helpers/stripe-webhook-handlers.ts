@@ -346,7 +346,6 @@ export async function retryFailedWebhooks(
                             documentId: log.documentId,
                             data: {
                                 status: 'failed',
-                                processed_at: new Date(),
                                 retry_count: 3,
                                 processing_error: 'Event expired on Stripe (>30 days)',
                             },

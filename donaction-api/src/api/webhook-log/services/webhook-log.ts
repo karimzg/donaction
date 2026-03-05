@@ -1,4 +1,5 @@
 import { Core, factories } from '@strapi/strapi';
+import { isDuplicateStatus } from './webhook-log-helpers';
 
 export default factories.createCoreService(
     'api::webhook-log.webhook-log',
@@ -22,9 +23,7 @@ export default factories.createCoreService(
         async isDuplicate(eventId: string): Promise<boolean> {
             const existing = await this.findByEventId(eventId);
             if (!existing) return false;
-            return ['processed', 'processing', 'ignored'].includes(
-                existing.status
-            );
+            return isDuplicateStatus(existing.status);
         },
     })
 );
