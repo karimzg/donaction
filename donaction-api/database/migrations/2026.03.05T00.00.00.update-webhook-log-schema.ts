@@ -48,12 +48,17 @@ export async function up(knex) {
     });
 
     // Add indexes (event_id already has unique constraint → implicit index)
-    await knex.schema.alterTable('webhook_logs', (table) => {
-        table.index(['event_type'], 'idx_webhook_logs_event_type');
-        table.index(['status'], 'idx_webhook_logs_status');
-        table.index(['created_at'], 'idx_webhook_logs_created_at');
-        table.index(['source'], 'idx_webhook_logs_source');
-    });
+    // Wrapped in try/catch for idempotency if up() is partially re-run
+    try {
+        await knex.schema.alterTable('webhook_logs', (table) => {
+            table.index(['event_type'], 'idx_webhook_logs_event_type');
+            table.index(['status'], 'idx_webhook_logs_status');
+            table.index(['created_at'], 'idx_webhook_logs_created_at');
+            table.index(['source'], 'idx_webhook_logs_source');
+        });
+    } catch {
+        // Indexes may already exist from a previous partial run
+    }
 
     // Drop obsolete index from previous migration (may not exist)
     try {
@@ -94,7 +99,11 @@ export async function down(knex) {
         .whereIn('status', ['processed', 'ignored'])
         .update({ processed: true });
 
-    // Clear processed_at for ignored events (originally didn't have it)
+    // Clear processed_at for ignored events.
+    // Note: this is slightly inconsistent — ignored events did have processed_at set
+    // by the retry handler, and the old schema had this column too. We clear it here
+    // because in the old flow, expired events were never explicitly timestamped.
+    // This is a minor data fidelity trade-off in an already-lossy rollback.
     await knex('webhook_logs')
         .where('status', 'ignored')
         .update({ processed_at: null });

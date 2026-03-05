@@ -21,12 +21,14 @@ export default factories.createCoreController(
             await this.validateQuery(ctx);
             const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-            const result = await strapi.db
-                .query('api::webhook-log.webhook-log')
-                .findOne({
-                    where: { uuid },
-                    populate: sanitizedQuery.populate,
+            const results = await strapi
+                .documents('api::webhook-log.webhook-log')
+                .findMany({
+                    filters: { uuid: { $eq: uuid } },
+                    ...sanitizedQuery,
+                    limit: 1,
                 });
+            const result = results[0] ?? null;
 
             if (!result) {
                 return ctx.notFound('Webhook log introuvable');
