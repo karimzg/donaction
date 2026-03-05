@@ -284,12 +284,23 @@ export async function retryFailedWebhooks(
     });
 
     try {
+        // Age threshold: only retry 'processing' events older than 5 minutes
+        // to avoid racing with the main handler's optimistic lock
+        const stuckThreshold = new Date(Date.now() - 5 * 60 * 1000);
+
         const failedLogs = await strapiInstance.db
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
-                    // Include 'processing' to recover events stuck after a crash
-                    status: { $in: ['failed', 'received', 'processing'] },
+                    $or: [
+                        // Failed or received: always eligible for retry
+                        { status: { $in: ['failed', 'received'] } },
+                        // Processing: only if stuck (older than 5 min)
+                        {
+                            status: 'processing',
+                            updatedAt: { $lt: stuckThreshold.toISOString() },
+                        },
+                    ],
                     retry_count: { $lt: 3 },
                 },
                 limit: 50,

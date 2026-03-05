@@ -14,7 +14,7 @@ export default {
         },
         {
             method: 'GET',
-            path: '/webhook-logs/:id',
+            path: '/webhook-logs/:uuid',
             handler: 'webhook-log.findOne',
             config: {
                 middlewares: ['api::webhook-log.admin-only'],

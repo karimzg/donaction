@@ -91,6 +91,11 @@ export async function down(knex) {
         .whereIn('status', ['processed', 'ignored'])
         .update({ processed: true });
 
+    // Clear processed_at for ignored events (originally didn't have it)
+    await knex('webhook_logs')
+        .where('status', 'ignored')
+        .update({ processed_at: null });
+
     // Drop new columns and rename back
     await knex.schema.alterTable('webhook_logs', (table) => {
         table.dropColumn('status');

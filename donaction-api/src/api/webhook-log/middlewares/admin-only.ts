@@ -1,5 +1,6 @@
 import { Core } from '@strapi/strapi';
 import { Context } from 'koa';
+import { isAdmin } from '../../../helpers/permissions';
 
 /**
  * Restricts access to authenticated users with the Admin role.
@@ -13,7 +14,7 @@ export default (config, { strapi }: { strapi: Core.Strapi }) => {
             return ctx.unauthorized('Authentification requise');
         }
 
-        if (user.role?.type !== 'admin') {
+        if (!isAdmin(user)) {
             return ctx.forbidden('Accès réservé aux administrateurs');
         }
 
