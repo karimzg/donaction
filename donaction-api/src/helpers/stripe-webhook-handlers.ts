@@ -316,6 +316,27 @@ export async function retryFailedWebhooks(
 
         for (const log of failedLogs) {
             try {
+                // Optimistic lock: claim the event before processing to prevent
+                // concurrent cron runs from double-processing the same event
+                const claimed = await strapiInstance.db
+                    .query('api::webhook-log.webhook-log')
+                    .update({
+                        where: {
+                            id: log.id,
+                            status: { $in: ['failed', 'received', 'processing'] },
+                        },
+                        data: { status: 'processing' },
+                    });
+
+                if (!claimed) {
+                    logSimple({
+                        message: `Webhook ${log.event_id} déjà réclamé, ignoré`,
+                        color: 'yellow',
+                        prefix: 'StripeConnect',
+                    });
+                    continue;
+                }
+
                 logSimple({
                     message: `Retraitement ${log.event_id} (tentative ${log.retry_count + 1}/3)`,
                     color: 'blue',
