@@ -5,6 +5,7 @@ import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger'
 import { removeId } from '../../../helpers/sanitizeHelpers';
 import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
 import { isDuplicateStatus } from '../../webhook-log/services/webhook-log-helpers';
+import type { WebhookLogStatus } from '../../../_types';
 
 export default factories.createCoreController(
     'api::connected-account.connected-account',
@@ -404,7 +405,7 @@ export default factories.createCoreController(
                         throw createError; // Unexpected state, re-throw
                     }
 
-                    if (isDuplicateStatus(webhookLog.status)) {
+                    if (isDuplicateStatus(webhookLog.status as WebhookLogStatus)) {
                         logSimple({
                             message: `Événement déjà traité: ${event.id}`,
                             color: 'yellow',
