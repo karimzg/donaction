@@ -73,8 +73,9 @@ export const validateWebhookEventParams = (
 
     if (!params.eventId) errors.push('eventId is required');
     if (!params.eventType) errors.push('eventType is required');
-    if (!params.source) errors.push('source is required');
-    if (!['platform', 'connect'].includes(params.source || '')) {
+    if (!params.source) {
+        errors.push('source is required');
+    } else if (!['platform', 'connect'].includes(params.source)) {
         errors.push('source must be "platform" or "connect"');
     }
     if (!params.payload) errors.push('payload is required');

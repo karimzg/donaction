@@ -364,6 +364,7 @@ export async function retryFailedWebhooks(
                     .update({
                         documentId: log.documentId,
                         data: {
+                            status: 'failed',
                             retry_count: log.retry_count + 1,
                             processing_error: error.message,
                         },

@@ -22,10 +22,10 @@ export default factories.createCoreController(
         async findOne(ctx) {
             await this.validateQuery(ctx);
             const sanitizedQuery = await this.sanitizeQuery(ctx);
-            const { id } = ctx.params;
+            const { id: documentId } = ctx.params;
             const entity = await strapi
                 .service('api::webhook-log.webhook-log')
-                .findOne(id, sanitizedQuery);
+                .findOne(documentId, sanitizedQuery);
             if (!entity) {
                 return ctx.notFound('Webhook log not found');
             }
