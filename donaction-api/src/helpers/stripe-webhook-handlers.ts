@@ -284,7 +284,7 @@ export async function retryFailedWebhooks(
     });
 
     try {
-        // Age threshold: only retry 'processing' events older than 5 minutes
+        // Age threshold: only retry 'received'/'processing' events older than 5 minutes
         // to avoid racing with the main handler's optimistic lock
         const stuckThreshold = new Date(Date.now() - 5 * 60 * 1000);
 
@@ -293,11 +293,12 @@ export async function retryFailedWebhooks(
             .findMany({
                 where: {
                     $or: [
-                        // Failed or received: always eligible for retry
-                        { status: { $in: ['failed', 'received'] } },
-                        // Processing: only if stuck (older than 5 min)
+                        // Failed: always eligible for retry
+                        { status: 'failed' },
+                        // Received or processing: only if stuck (older than 5 min)
+                        // to avoid racing with the main handler's optimistic lock
                         {
-                            status: 'processing',
+                            status: { $in: ['received', 'processing'] },
                             updatedAt: { $lt: stuckThreshold.toISOString() },
                         },
                     ],

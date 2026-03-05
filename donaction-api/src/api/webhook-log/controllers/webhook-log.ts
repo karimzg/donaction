@@ -21,10 +21,10 @@ export default factories.createCoreController(
             await this.validateQuery(ctx);
             const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-            const results = await strapi.db
-                .query('api::webhook-log.webhook-log')
+            const results = await strapi
+                .documents('api::webhook-log.webhook-log')
                 .findMany({
-                    where: { uuid },
+                    filters: { uuid: { $eq: uuid } },
                     ...sanitizedQuery,
                     limit: 1,
                 });
