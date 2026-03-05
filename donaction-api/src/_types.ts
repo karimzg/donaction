@@ -92,14 +92,26 @@ export type StripeWebhookPayload =
 /**
  * Webhook log entity for storing Stripe webhook events
  */
+export type WebhookLogSource = 'platform' | 'connect';
+export type WebhookLogStatus =
+    | 'received'
+    | 'processing'
+    | 'processed'
+    | 'failed'
+    | 'ignored';
+
 export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log'> & {
     id?: number;
     documentId?: string;
     event_id: string;
     event_type: string;
-    account_id?: string;
+    source: WebhookLogSource;
+    stripe_account_id?: string;
     payload: StripeWebhookPayload;
-    processed: boolean;
+    status: WebhookLogStatus;
+    processing_error?: string;
     retry_count: number;
-    error_message?: string;
+    processed_at?: string;
+    related_don?: KlubDonEntity;
+    related_klubr?: KlubrEntity;
 };

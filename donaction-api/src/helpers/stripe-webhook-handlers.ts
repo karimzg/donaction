@@ -288,7 +288,7 @@ export async function retryFailedWebhooks(
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
-                    processed: false,
+                    status: { $in: ['failed', 'received'] },
                     retry_count: { $lt: 3 },
                 },
                 limit: 50,
@@ -319,10 +319,10 @@ export async function retryFailedWebhooks(
                     .update({
                         documentId: log.documentId,
                         data: {
-                            processed: true,
+                            status: 'processed',
                             processed_at: new Date(),
                             retry_count: log.retry_count + 1,
-                            error_message: null,
+                            processing_error: null,
                         },
                     });
 
@@ -345,10 +345,10 @@ export async function retryFailedWebhooks(
                         .update({
                             documentId: log.documentId,
                             data: {
-                                processed: true,
+                                status: 'failed',
                                 processed_at: new Date(),
                                 retry_count: 3,
-                                error_message: 'Event expired on Stripe (>30 days)',
+                                processing_error: 'Event expired on Stripe (>30 days)',
                             },
                         });
                     continue;
@@ -364,8 +364,9 @@ export async function retryFailedWebhooks(
                     .update({
                         documentId: log.documentId,
                         data: {
+                            status: 'failed',
                             retry_count: log.retry_count + 1,
-                            error_message: error.message,
+                            processing_error: error.message,
                         },
                     });
             }

@@ -374,9 +374,10 @@ export default factories.createCoreController(
                             data: {
                                 event_id: event.id,
                                 event_type: event.type,
-                                account_id: event.account || null,
+                                source: event.account ? 'connect' : 'platform',
+                                stripe_account_id: event.account || null,
                                 payload: event.data.object as any,
-                                processed: false,
+                                status: 'received',
                                 retry_count: 0,
                             },
                         });
@@ -402,7 +403,7 @@ export default factories.createCoreController(
                         throw createError; // Unexpected state, re-throw
                     }
 
-                    if (webhookLog.processed) {
+                    if (webhookLog.status === 'processed' || webhookLog.status === 'ignored') {
                         logSimple({
                             message: `Événement déjà traité: ${event.id}`,
                             color: 'yellow',
@@ -420,15 +421,15 @@ export default factories.createCoreController(
 
                 // Optimistic lock: claim webhook for processing
                 // PostgreSQL re-evaluates WHERE after row lock, preventing concurrent double-processing
-                const errorFilter = webhookLog.error_message != null
-                    ? { error_message: { $eq: webhookLog.error_message } }
-                    : { error_message: { $null: true } };
+                const errorFilter = webhookLog.processing_error != null
+                    ? { processing_error: { $eq: webhookLog.processing_error } }
+                    : { processing_error: { $null: true } };
 
                 const claimed = await strapi.db
                     .query('api::webhook-log.webhook-log')
                     .update({
-                        where: { id: webhookLog.id, processed: false, ...errorFilter },
-                        data: { error_message: '__processing__' },
+                        where: { id: webhookLog.id, status: 'received', ...errorFilter },
+                        data: { status: 'processing' },
                     });
 
                 if (!claimed) {
@@ -449,9 +450,9 @@ export default factories.createCoreController(
                         .update({
                             documentId: webhookLog.documentId,
                             data: {
-                                processed: true,
+                                status: 'processed',
                                 processed_at: new Date(),
-                                error_message: null,
+                                processing_error: null,
                             },
                         });
 
@@ -473,8 +474,8 @@ export default factories.createCoreController(
                         .update({
                             documentId: webhookLog.documentId,
                             data: {
-                                processed: false,
-                                error_message: handlerError.message,
+                                status: 'failed',
+                                processing_error: handlerError.message,
                                 retry_count: (webhookLog.retry_count || 0) + 1,
                             },
                         });
