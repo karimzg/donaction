@@ -69,22 +69,26 @@ export async function down(knex) {
     const hasTable = await knex.schema.hasTable('webhook_logs');
     if (!hasTable) return;
 
-    // Drop new indexes
-    await knex.schema.alterTable('webhook_logs', (table) => {
-        table.dropIndex([], 'idx_webhook_logs_event_type');
-        table.dropIndex([], 'idx_webhook_logs_status');
-        table.dropIndex([], 'idx_webhook_logs_created_at');
-        table.dropIndex([], 'idx_webhook_logs_source');
-    });
+    // Drop new indexes (try/catch for safety during partial rollbacks)
+    try {
+        await knex.schema.alterTable('webhook_logs', (table) => {
+            table.dropIndex([], 'idx_webhook_logs_event_type');
+            table.dropIndex([], 'idx_webhook_logs_status');
+            table.dropIndex([], 'idx_webhook_logs_created_at');
+            table.dropIndex([], 'idx_webhook_logs_source');
+        });
+    } catch {
+        // Indexes may not exist if up() was partially applied
+    }
 
     // Re-add processed column
     await knex.schema.alterTable('webhook_logs', (table) => {
         table.boolean('processed').defaultTo(false).notNullable();
     });
 
-    // Migrate status → processed
+    // Migrate status → processed (both 'processed' and 'ignored' were originally true)
     await knex('webhook_logs')
-        .where('status', 'processed')
+        .whereIn('status', ['processed', 'ignored'])
         .update({ processed: true });
 
     // Drop new columns and rename back

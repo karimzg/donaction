@@ -1,10 +1,24 @@
-import { factories } from '@strapi/strapi';
-
 /**
- * Webhook log routes — read-only via REST API.
- * Write operations happen internally (webhook handler, not via API).
- * Permissions should be restricted to admin role in Strapi admin panel.
+ * Webhook log routes — read-only, admin-only.
+ * Write operations happen internally (webhook handler, not via REST API).
  */
-export default factories.createCoreRouter('api::webhook-log.webhook-log', {
-    only: ['find', 'findOne'],
-});
+export default {
+    routes: [
+        {
+            method: 'GET',
+            path: '/webhook-logs',
+            handler: 'webhook-log.find',
+            config: {
+                middlewares: ['api::webhook-log.admin-only'],
+            },
+        },
+        {
+            method: 'GET',
+            path: '/webhook-logs/:id',
+            handler: 'webhook-log.findOne',
+            config: {
+                middlewares: ['api::webhook-log.admin-only'],
+            },
+        },
+    ],
+};

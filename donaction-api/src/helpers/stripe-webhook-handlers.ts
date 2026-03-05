@@ -288,7 +288,8 @@ export async function retryFailedWebhooks(
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
-                    status: { $in: ['failed', 'received'] },
+                    // Include 'processing' to recover events stuck after a crash
+                    status: { $in: ['failed', 'received', 'processing'] },
                     retry_count: { $lt: 3 },
                 },
                 limit: 50,
@@ -346,6 +347,7 @@ export async function retryFailedWebhooks(
                             documentId: log.documentId,
                             data: {
                                 status: 'ignored',
+                                processed_at: new Date(),
                                 retry_count: 3,
                                 processing_error: 'Event expired on Stripe (>30 days)',
                             },

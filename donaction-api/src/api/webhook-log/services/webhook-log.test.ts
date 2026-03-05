@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { isDuplicateStatus, DUPLICATE_STATUSES } from './webhook-log-helpers';
+import type { WebhookLogStatus } from '../../../_types';
 
 /**
  * Unit tests for webhook-log idempotence logic (US-WH-001)
@@ -28,9 +29,19 @@ describe('isDuplicateStatus', () => {
         expect(isDuplicateStatus('failed')).toBe(false);
     });
 
-    it('returns false for unknown statuses', () => {
-        expect(isDuplicateStatus('unknown')).toBe(false);
-        expect(isDuplicateStatus('')).toBe(false);
+    it('covers all WebhookLogStatus values', () => {
+        const allStatuses: WebhookLogStatus[] = [
+            'received',
+            'processing',
+            'processed',
+            'failed',
+            'ignored',
+        ];
+        const duplicates = allStatuses.filter(isDuplicateStatus);
+        const retryable = allStatuses.filter((s) => !isDuplicateStatus(s));
+
+        expect(duplicates).toEqual(['processing', 'processed', 'ignored']);
+        expect(retryable).toEqual(['received', 'failed']);
     });
 });
 
