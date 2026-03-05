@@ -191,6 +191,8 @@ describe('handleWebhook — idempotency', () => {
 
         expect(mockSend).toHaveBeenCalledWith({ received: true });
         expect(handleWebhookEvent).not.toHaveBeenCalled();
+        // Audit trail preserved — status NOT overwritten to 'ignored'
+        expect(mockDbQueryUpdate).not.toHaveBeenCalled();
     });
 
     it('handles concurrent duplicate via PostgreSQL unique constraint', async () => {

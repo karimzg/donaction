@@ -405,23 +405,14 @@ export default factories.createCoreController(
                         throw createError; // Unexpected state, re-throw
                     }
 
-                    if (webhookLog.status === 'processed' || webhookLog.status === 'ignored') {
+                    if (['processed', 'processing', 'ignored'].includes(webhookLog.status)) {
                         logSimple({
-                            message: `Événement déjà traité: ${event.id}`,
+                            message: `Événement déjà traité ou en cours: ${event.id} (status: ${webhookLog.status})`,
                             color: 'yellow',
                             prefix: 'StripeConnect',
                         });
 
-                        // Mark as ignored if not already
-                        if (webhookLog.status !== 'ignored') {
-                            await strapi.db
-                                .query('api::webhook-log.webhook-log')
-                                .update({
-                                    where: { id: webhookLog.id },
-                                    data: { status: 'ignored' },
-                                });
-                        }
-
+                        // Don't overwrite existing status — preserve audit trail
                         return ctx.send({ received: true });
                     }
                 }
