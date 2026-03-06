@@ -149,20 +149,34 @@ describe('handleWebhookEvent', () => {
         );
     });
 
-    it('routes charge.dispute.funds_withdrawn to dispute handler', async () => {
+    it('routes charge.dispute.funds_withdrawn and logs dispute info', async () => {
         const event = makeEvent('charge.dispute.funds_withdrawn');
         await expect(
             handleWebhookEvent(mockStrapi, event)
         ).resolves.toBeUndefined();
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining(
+                    'charge.dispute.funds_withdrawn'
+                ),
+            })
+        );
     });
 
-    it('routes charge.dispute.funds_reinstated to dispute handler', async () => {
+    it('routes charge.dispute.funds_reinstated and logs dispute info', async () => {
         const event = makeEvent('charge.dispute.funds_reinstated');
         await expect(
             handleWebhookEvent(mockStrapi, event)
         ).resolves.toBeUndefined();
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining(
+                    'charge.dispute.funds_reinstated'
+                ),
+            })
+        );
     });
 
     it('routes payout.paid and logs payout info', async () => {

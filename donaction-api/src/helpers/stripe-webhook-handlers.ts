@@ -232,7 +232,7 @@ export async function handleAccountDeauthorized(
         prefix: 'StripeConnect',
     });
 
-    const accountId = event.account as string;
+    const accountId = event.account ?? 'unknown';
 
     try {
         await syncAccountStatus(strapiInstance, accountId);
@@ -269,7 +269,7 @@ export async function handleDispute(
     });
 
     const dispute = event.data.object as Stripe.Dispute;
-    const accountId = event.account as string;
+    const accountId = event.account ?? 'unknown';
 
     logSimple({
         message: `Dispute ${dispute.id} (${event.type}) pour compte ${accountId}`,
@@ -298,7 +298,7 @@ export async function handlePayoutPaid(
     });
 
     const payout = event.data.object as Stripe.Payout;
-    const accountId = event.account as string;
+    const accountId = event.account ?? 'unknown';
 
     logSimple({
         message: `Payout ${payout.id} payé pour compte ${accountId}`,
@@ -327,7 +327,7 @@ export async function handlePayoutFailed(
     });
 
     const payout = event.data.object as Stripe.Payout;
-    const accountId = event.account as string;
+    const accountId = event.account ?? 'unknown';
 
     strapiLog.error(
         `Payout ${payout.id} échoué pour compte ${accountId}`

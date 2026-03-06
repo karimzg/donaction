@@ -251,13 +251,19 @@ describe('stripe-connect handleWebhook controller', () => {
         );
         mockStrapi.requestContext.get.mockReturnValue(ctx);
 
+        // Capture mock before invoking handler to avoid extra documents() call
+        const createMock = vi.fn().mockResolvedValue(makeWebhookLog());
+        mockStrapi.documents.mockReturnValue({
+            create: createMock,
+            update: vi.fn().mockResolvedValue(makeWebhookLog()),
+        });
+
         await controller.handleWebhook();
 
         expect(mockStrapi.documents).toHaveBeenCalledWith(
             'api::webhook-log.webhook-log'
         );
-        const createCall = mockStrapi.documents().create;
-        expect(createCall).toHaveBeenCalledWith(
+        expect(createMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({
                     source: 'connect',
@@ -272,13 +278,19 @@ describe('stripe-connect handleWebhook controller', () => {
         );
         mockStrapi.requestContext.get.mockReturnValue(ctx);
 
+        // Capture mock before invoking handler to avoid extra documents() call
+        const createMock = vi.fn().mockResolvedValue(makeWebhookLog());
+        mockStrapi.documents.mockReturnValue({
+            create: createMock,
+            update: vi.fn().mockResolvedValue(makeWebhookLog()),
+        });
+
         await controller.handleWebhook();
 
         expect(mockStrapi.documents).toHaveBeenCalledWith(
             'api::webhook-log.webhook-log'
         );
-        const createCall = mockStrapi.documents().create;
-        expect(createCall).toHaveBeenCalledWith(
+        expect(createMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({
                     source: 'platform',
