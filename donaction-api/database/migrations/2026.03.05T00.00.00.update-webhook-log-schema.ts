@@ -21,8 +21,8 @@ export async function up(knex) {
     });
 }
 
-async function migrateUp(knex) {
-    await knex.schema.alterTable('webhook_logs', (table) => {
+async function migrateUp(trx) {
+    await trx.schema.alterTable('webhook_logs', (table) => {
         // Rename columns
         table.renameColumn('account_id', 'stripe_account_id');
         table.renameColumn('error_message', 'processing_error');
@@ -33,23 +33,23 @@ async function migrateUp(knex) {
     });
 
     // Migrate data: processed → status
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .where('processed', true)
         .update({ status: 'processed' });
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .where('processed', false)
         .update({ status: 'received' });
 
     // Backfill source: rows with stripe_account_id → 'connect', others → 'platform'
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .whereNotNull('stripe_account_id')
         .update({ source: 'connect' });
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .whereNull('stripe_account_id')
         .update({ source: 'platform' });
 
     // Now drop the old processed column and enforce NOT NULL on new columns
-    await knex.schema.alterTable('webhook_logs', (table) => {
+    await trx.schema.alterTable('webhook_logs', (table) => {
         table.dropColumn('processed');
         table.string('source').notNullable().alter();
         table.string('status').notNullable().defaultTo('received').alter();
@@ -58,7 +58,7 @@ async function migrateUp(knex) {
     // Add indexes (event_id already has unique constraint → implicit index)
     // Wrapped in try/catch for idempotency if up() is partially re-run
     try {
-        await knex.schema.alterTable('webhook_logs', (table) => {
+        await trx.schema.alterTable('webhook_logs', (table) => {
             table.index(['event_type'], 'idx_webhook_logs_event_type');
             table.index(['status'], 'idx_webhook_logs_status');
             table.index(['created_at'], 'idx_webhook_logs_created_at');
@@ -70,7 +70,7 @@ async function migrateUp(knex) {
 
     // Drop obsolete index from previous migration (may not exist)
     try {
-        await knex.schema.alterTable('webhook_logs', (table) => {
+        await trx.schema.alterTable('webhook_logs', (table) => {
             table.dropIndex([], 'idx_webhook_logs_processed_retry');
         });
     } catch {
@@ -87,10 +87,10 @@ export async function down(knex) {
     });
 }
 
-async function migrateDown(knex) {
+async function migrateDown(trx) {
     // Drop new indexes (try/catch for safety during partial rollbacks)
     try {
-        await knex.schema.alterTable('webhook_logs', (table) => {
+        await trx.schema.alterTable('webhook_logs', (table) => {
             table.dropIndex([], 'idx_webhook_logs_event_type');
             table.dropIndex([], 'idx_webhook_logs_status');
             table.dropIndex([], 'idx_webhook_logs_created_at');
@@ -101,7 +101,7 @@ async function migrateDown(knex) {
     }
 
     // Re-add processed column
-    await knex.schema.alterTable('webhook_logs', (table) => {
+    await trx.schema.alterTable('webhook_logs', (table) => {
         table.boolean('processed').defaultTo(false).notNullable();
     });
 
@@ -110,7 +110,7 @@ async function migrateDown(knex) {
     // The old schema had no 'ignored' concept — expired events were simply marked processed:true.
     // 'processing' events (stuck mid-flight) are also mapped to processed:true to prevent
     // the old retry logic from re-processing them. This is lossy but acceptable for rollback.
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .whereIn('status', ['processed', 'ignored', 'processing'])
         .update({ processed: true });
 
@@ -119,12 +119,12 @@ async function migrateDown(knex) {
     // by the retry handler, and the old schema had this column too. We clear it here
     // because in the old flow, expired events were never explicitly timestamped.
     // This is a minor data fidelity trade-off in an already-lossy rollback.
-    await knex('webhook_logs')
+    await trx('webhook_logs')
         .where('status', 'ignored')
         .update({ processed_at: null });
 
     // Drop new columns and rename back
-    await knex.schema.alterTable('webhook_logs', (table) => {
+    await trx.schema.alterTable('webhook_logs', (table) => {
         table.dropColumn('status');
         table.dropColumn('source');
         table.renameColumn('stripe_account_id', 'account_id');
@@ -132,7 +132,7 @@ async function migrateDown(knex) {
     });
 
     // Re-add old index
-    await knex.schema.alterTable('webhook_logs', (table) => {
+    await trx.schema.alterTable('webhook_logs', (table) => {
         table.index(['processed', 'retry_count'], 'idx_webhook_logs_processed_retry');
     });
 }
