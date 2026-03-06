@@ -349,8 +349,7 @@ export async function syncAccountStatus(
         statusChanged &&
         (accountStatus === 'restricted' || accountStatus === 'disabled')
     ) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        sendAccountRestrictedAlert(
+        void sendAccountRestrictedAlert(
             strapiInstance,
             accountId,
             accountStatus,
@@ -601,9 +600,13 @@ export async function sendAccountRestrictedAlert(
     accountId: string,
     accountStatus: 'restricted' | 'disabled',
     stripeAccount: Stripe.Account,
+    // Inline type instead of ConnectedAccountEntity because the klubr field
+    // shape depends on whether the caller populated the relation (object) or not (number).
+    // Strapi's generated ContentType doesn't model this populate-dependent variance.
     connectedAccount: {
         id: number;
         documentId: string;
+        account_status?: string;
         klubr?: KlubrEntity | number | null;
     },
 ): Promise<void> {
@@ -658,6 +661,7 @@ export async function sendAccountRestrictedAlert(
                 ACCOUNT_STATUS: accountStatus,
                 DISABLED_REASON: disabledReason,
                 CURRENTLY_DUE: currentlyDue,
+                // Stringified: Brevo template params must be strings
                 CHARGES_ENABLED: String(stripeAccount.charges_enabled),
                 PAYOUTS_ENABLED: String(stripeAccount.payouts_enabled),
             },

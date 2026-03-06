@@ -715,7 +715,9 @@ describe('syncAccountStatus', () => {
         // Connected account was previously 'pending' → now 'restricted' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
-        // Flush fire-and-forget promise
+        // Flush fire-and-forget promise (single microtask tick).
+        // This works because sendAccountRestrictedAlert resolves in one tick
+        // when mocked. If the internal chain gains extra awaits, increase ticks.
         await new Promise((r) => setTimeout(r, 0));
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
@@ -752,7 +754,9 @@ describe('syncAccountStatus', () => {
         // Connected account was previously 'pending' → now 'disabled' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
-        // Flush fire-and-forget promise
+        // Flush fire-and-forget promise (single microtask tick).
+        // This works because sendAccountRestrictedAlert resolves in one tick
+        // when mocked. If the internal chain gains extra awaits, increase ticks.
         await new Promise((r) => setTimeout(r, 0));
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
@@ -784,6 +788,35 @@ describe('syncAccountStatus', () => {
                 requirements: {
                     disabled_reason: null,
                     currently_due: ['individual.verification.document'],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        // Status unchanged → no alert
+        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
+    });
+
+    it('does not send alert when status remains disabled (deduplication)', async () => {
+        // Account is already disabled in DB
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi
+                .fn()
+                .mockResolvedValue(
+                    makeConnectedAccount({ account_status: 'disabled' })
+                ),
+        } as any);
+
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: 'requirements.past_due',
+                    currently_due: [],
                     pending_verification: [],
                 } as any,
             })
