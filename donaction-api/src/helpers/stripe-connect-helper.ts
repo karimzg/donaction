@@ -3,6 +3,7 @@ import { Core } from '@strapi/strapi';
 import {
     ConnectedAccountEntity,
     FinancialAuditLogEntity,
+    KlubrEntity,
     TradePolicyEntity,
 } from '../_types';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
@@ -341,8 +342,12 @@ export async function syncAccountStatus(
         prefix: 'StripeConnect',
     });
 
-    // Send admin alert for restricted or disabled accounts
-    if (accountStatus === 'restricted' || accountStatus === 'disabled') {
+    // Send admin alert only when status transitions to restricted or disabled
+    const statusChanged = connectedAccount.account_status !== accountStatus;
+    if (
+        statusChanged &&
+        (accountStatus === 'restricted' || accountStatus === 'disabled')
+    ) {
         await sendAccountRestrictedAlert(
             strapiInstance,
             accountId,
@@ -578,40 +583,62 @@ export async function logFinancialAction(
  * Sends an admin alert when a connected account becomes restricted or disabled.
  * Non-blocking: email failure is logged but does not propagate.
  *
+ * Expects `connectedAccount.klubr` to be pre-populated (object with denomination/uuid).
+ * When called from `syncAccountStatus`, the klubr relation is already populated via
+ * `populate: { klubr: true }`. If klubr is a numeric ID (not populated), falls back
+ * to a DB query.
+ *
  * @param strapiInstance - Strapi instance
  * @param accountId - Stripe account ID
  * @param accountStatus - Determined account status
  * @param stripeAccount - Stripe account object
- * @param connectedAccount - Database connected account record
+ * @param connectedAccount - Database connected account record (klubr should be populated)
  */
 export async function sendAccountRestrictedAlert(
     strapiInstance: Core.Strapi,
     accountId: string,
     accountStatus: 'restricted' | 'disabled',
     stripeAccount: Stripe.Account,
-    connectedAccount: { id: number; documentId: string; klubr?: any },
+    connectedAccount: {
+        id: number;
+        documentId: string;
+        klubr?: KlubrEntity | number | null;
+    },
 ): Promise<void> {
     try {
-        // Fetch klubr info for alert context
+        const adminEmail = process.env.SUPER_ADMIN_EMAIL;
+        if (!adminEmail) {
+            strapiLog.error(
+                'SUPER_ADMIN_EMAIL env var not set — admin alert not sent',
+            );
+            return;
+        }
+
+        // Extract klubr info from pre-populated relation or fallback to DB query
         let klubrName = 'Inconnu';
         let klubrUuid = 'N/A';
 
         if (connectedAccount.klubr) {
-            const klubrId =
-                typeof connectedAccount.klubr === 'object'
-                    ? connectedAccount.klubr.id
-                    : connectedAccount.klubr;
+            if (
+                typeof connectedAccount.klubr === 'object' &&
+                connectedAccount.klubr !== null
+            ) {
+                // Already populated — use directly
+                klubrName = connectedAccount.klubr.denomination || 'Inconnu';
+                klubrUuid = connectedAccount.klubr.uuid || 'N/A';
+            } else {
+                // Numeric ID fallback — fetch from DB
+                const klubr = await strapiInstance.db
+                    .query('api::klubr.klubr')
+                    .findOne({
+                        where: { id: connectedAccount.klubr },
+                        select: ['denomination', 'uuid'],
+                    });
 
-            const klubr = await strapiInstance.db
-                .query('api::klubr.klubr')
-                .findOne({
-                    where: { id: klubrId },
-                    select: ['denomination', 'uuid'],
-                });
-
-            if (klubr) {
-                klubrName = klubr.denomination || 'Inconnu';
-                klubrUuid = klubr.uuid || 'N/A';
+                if (klubr) {
+                    klubrName = klubr.denomination || 'Inconnu';
+                    klubrUuid = klubr.uuid || 'N/A';
+                }
             }
         }
 
@@ -623,12 +650,7 @@ export async function sendAccountRestrictedAlert(
         await sendBrevoTransacEmail({
             subject: `[ALERTE] Compte Stripe ${accountStatus}: ${klubrName}`,
             templateId: BREVO_TEMPLATES.ADMIN_ALERT,
-            to: [
-                {
-                    email:
-                        process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr',
-                },
-            ],
+            to: [{ email: adminEmail, name: 'Admin Donaction' }],
             params: {
                 ALERT_TYPE: `Compte Stripe Connect ${accountStatus}`,
                 CLUB_NAME: klubrName,

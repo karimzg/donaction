@@ -6,6 +6,7 @@ import { TradePolicyEntity } from '../_types';
 // Stub env vars before importing module (top-level guard throws without them)
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
 vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
+vi.stubEnv('SUPER_ADMIN_EMAIL', 'admin-test@donaction.fr');
 
 // Mock Stripe client as a class (Stripe SDK uses `new Stripe(...)`)
 vi.mock('stripe', () => {
@@ -529,6 +530,7 @@ const makeConnectedAccount = (overrides: Record<string, any> = {}) => ({
     id: 1,
     documentId: 'doc_abc123',
     stripe_account_id: 'acct_test_123',
+    account_status: 'pending',
     klubr: { id: 42, denomination: 'Club Test', uuid: 'klubr-uuid-123' },
     ...overrides,
 });
@@ -696,7 +698,7 @@ describe('syncAccountStatus', () => {
         expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
     });
 
-    it('sends admin alert for restricted accounts', async () => {
+    it('sends admin alert for restricted accounts (status transition)', async () => {
         vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
             makeStripeAccount({
                 charges_enabled: false,
@@ -710,21 +712,7 @@ describe('syncAccountStatus', () => {
             })
         );
 
-        // Mock klubr query for alert
-        const klubrQuery = vi.fn().mockResolvedValue({
-            denomination: 'Club Test',
-            uuid: 'klubr-uuid-123',
-        });
-        vi.mocked(mockStrapiInstance.db.query)
-            .mockReturnValueOnce({
-                findOne: vi
-                    .fn()
-                    .mockResolvedValue(makeConnectedAccount()),
-            } as any)
-            .mockReturnValueOnce({
-                findOne: klubrQuery,
-            } as any);
-
+        // Connected account was previously 'pending' → now 'restricted' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
@@ -744,7 +732,7 @@ describe('syncAccountStatus', () => {
         );
     });
 
-    it('sends admin alert for disabled accounts', async () => {
+    it('sends admin alert for disabled accounts (status transition)', async () => {
         vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
             makeStripeAccount({
                 charges_enabled: false,
@@ -758,20 +746,7 @@ describe('syncAccountStatus', () => {
             })
         );
 
-        // Mock klubr query for alert
-        vi.mocked(mockStrapiInstance.db.query)
-            .mockReturnValueOnce({
-                findOne: vi
-                    .fn()
-                    .mockResolvedValue(makeConnectedAccount()),
-            } as any)
-            .mockReturnValueOnce({
-                findOne: vi.fn().mockResolvedValue({
-                    denomination: 'Club Test',
-                    uuid: 'klubr-uuid-123',
-                }),
-            } as any);
-
+        // Connected account was previously 'pending' → now 'disabled' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
@@ -783,6 +758,53 @@ describe('syncAccountStatus', () => {
                 tags: expect.arrayContaining(['account-disabled']),
             })
         );
+    });
+
+    it('does not send alert when status remains restricted (deduplication)', async () => {
+        // Account is already restricted in DB
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi
+                .fn()
+                .mockResolvedValue(
+                    makeConnectedAccount({ account_status: 'restricted' })
+                ),
+        } as any);
+
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: null,
+                    currently_due: ['individual.verification.document'],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        // Status unchanged → no alert
+        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
+    });
+
+    it('does not send alert for pending accounts', async () => {
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: false,
+                requirements: {
+                    disabled_reason: null,
+                    currently_due: [],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
     });
 
     it('throws when connected account not found in database', async () => {
@@ -820,7 +842,7 @@ describe('sendAccountRestrictedAlert', () => {
         vi.clearAllMocks();
         mockStrapiInstance = makeMockStrapi();
 
-        // Mock klubr query for alert context
+        // Mock klubr query for fallback (numeric ID) case
         vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
             findOne: vi.fn().mockResolvedValue({
                 denomination: 'Club Test',
@@ -829,7 +851,7 @@ describe('sendAccountRestrictedAlert', () => {
         } as any);
     });
 
-    it('sends email with correct parameters', async () => {
+    it('sends email with correct parameters using pre-populated klubr', async () => {
         const stripeAccount = makeStripeAccount({
             charges_enabled: false,
             payouts_enabled: false,
@@ -852,7 +874,7 @@ describe('sendAccountRestrictedAlert', () => {
             expect.objectContaining({
                 subject: '[ALERTE] Compte Stripe disabled: Club Test',
                 templateId: 27,
-                to: [{ email: expect.any(String) }],
+                to: [{ email: 'admin-test@donaction.fr', name: 'Admin Donaction' }],
                 params: expect.objectContaining({
                     ALERT_TYPE: 'Compte Stripe Connect disabled',
                     CLUB_NAME: 'Club Test',
@@ -864,9 +886,14 @@ describe('sendAccountRestrictedAlert', () => {
                 }),
             })
         );
+
+        // Should NOT query DB since klubr is already a populated object
+        expect(mockStrapiInstance.db.query).not.toHaveBeenCalledWith(
+            'api::klubr.klubr'
+        );
     });
 
-    it('handles klubr as numeric ID (not populated object)', async () => {
+    it('falls back to DB query when klubr is numeric ID and uses result in email', async () => {
         await sendAccountRestrictedAlert(
             mockStrapiInstance,
             'acct_test_123',
@@ -878,6 +905,15 @@ describe('sendAccountRestrictedAlert', () => {
         // Should have queried for klubr by id
         expect(mockStrapiInstance.db.query).toHaveBeenCalledWith(
             'api::klubr.klubr'
+        );
+        // And used the result in the email
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    CLUB_NAME: 'Club Test',
+                    KLUBR_UUID: 'klubr-uuid-123',
+                }),
+            })
         );
     });
 
@@ -898,6 +934,27 @@ describe('sendAccountRestrictedAlert', () => {
                 }),
             })
         );
+    });
+
+    it('does not send when SUPER_ADMIN_EMAIL env var is missing', async () => {
+        const originalEmail = process.env.SUPER_ADMIN_EMAIL;
+        delete process.env.SUPER_ADMIN_EMAIL;
+
+        await sendAccountRestrictedAlert(
+            mockStrapiInstance,
+            'acct_test_123',
+            'restricted',
+            makeStripeAccount(),
+            makeConnectedAccount()
+        );
+
+        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('SUPER_ADMIN_EMAIL')
+        );
+
+        // Restore env
+        process.env.SUPER_ADMIN_EMAIL = originalEmail;
     });
 
     it('does not throw when email sending fails', async () => {
