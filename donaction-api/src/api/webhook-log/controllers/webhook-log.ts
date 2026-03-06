@@ -25,7 +25,7 @@ export default factories.createCoreController(
                 .documents('api::webhook-log.webhook-log')
                 .findMany({
                     ...sanitizedQuery,
-                    filters: { ...(sanitizedQuery.filters ?? {}), uuid: { $eq: uuid } },
+                    filters: { ...((sanitizedQuery.filters as Record<string, unknown>) ?? {}), uuid: { $eq: uuid } },
                     limit: 1,
                 });
             const result = results[0] ?? null;

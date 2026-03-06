@@ -14,6 +14,14 @@ export async function up(knex) {
     const hasTable = await knex.schema.hasTable('webhook_logs');
     if (!hasTable) return;
 
+    // Wrap in transaction: if any step fails, all changes are rolled back
+    // to avoid leaving the schema in an inconsistent state on re-run.
+    await knex.transaction(async (trx) => {
+        await migrateUp(trx);
+    });
+}
+
+async function migrateUp(knex) {
     await knex.schema.alterTable('webhook_logs', (table) => {
         // Rename columns
         table.renameColumn('account_id', 'stripe_account_id');
@@ -74,6 +82,12 @@ export async function down(knex) {
     const hasTable = await knex.schema.hasTable('webhook_logs');
     if (!hasTable) return;
 
+    await knex.transaction(async (trx) => {
+        await migrateDown(trx);
+    });
+}
+
+async function migrateDown(knex) {
     // Drop new indexes (try/catch for safety during partial rollbacks)
     try {
         await knex.schema.alterTable('webhook_logs', (table) => {

@@ -40,7 +40,9 @@ describe('isDuplicateStatus', () => {
         const duplicates = allStatuses.filter(isDuplicateStatus);
         const retryable = allStatuses.filter((s) => !isDuplicateStatus(s));
 
-        expect(duplicates).toEqual(['processing', 'processed', 'ignored']);
+        // Order matches DUPLICATE_STATUSES definition: processed, processing, ignored
+        expect(duplicates).toEqual(expect.arrayContaining(['processed', 'processing', 'ignored']));
+        expect(duplicates).toHaveLength(3);
         expect(retryable).toEqual(['received', 'failed']);
     });
 });

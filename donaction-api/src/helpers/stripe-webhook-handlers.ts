@@ -318,16 +318,14 @@ export async function retryFailedWebhooks(
             try {
                 // Optimistic lock: claim the event before processing to prevent
                 // concurrent cron runs from double-processing the same event.
-                // Note: 'processing' is excluded from the claim — if the main handler
-                // is legitimately processing a slow event (>5 min), we don't reclaim it.
-                // The findMany age filter already limits which 'processing' events we see,
-                // but the claim adds a second safety layer against concurrent retries.
+                // Includes 'processing' to reclaim stuck events (already age-filtered
+                // by findMany to >5 min, so legitimate in-flight processing is safe).
                 const claimed = await strapiInstance.db
                     .query('api::webhook-log.webhook-log')
                     .update({
                         where: {
                             id: log.id,
-                            status: { $in: ['failed', 'received'] },
+                            status: { $in: ['failed', 'received', 'processing'] },
                         },
                         data: { status: 'processing' },
                     });
