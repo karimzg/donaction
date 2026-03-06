@@ -715,10 +715,8 @@ describe('syncAccountStatus', () => {
         // Connected account was previously 'pending' → now 'restricted' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
-        // Flush fire-and-forget promise (single microtask tick).
-        // This works because sendAccountRestrictedAlert resolves in one tick
-        // when mocked. If the internal chain gains extra awaits, increase ticks.
-        await new Promise((r) => setTimeout(r, 0));
+        // Wait for fire-and-forget alert to resolve (robust against extra awaits)
+        await vi.waitFor(() => expect(sendBrevoTransacEmail).toHaveBeenCalled());
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -754,10 +752,8 @@ describe('syncAccountStatus', () => {
         // Connected account was previously 'pending' → now 'disabled' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
-        // Flush fire-and-forget promise (single microtask tick).
-        // This works because sendAccountRestrictedAlert resolves in one tick
-        // when mocked. If the internal chain gains extra awaits, increase ticks.
-        await new Promise((r) => setTimeout(r, 0));
+        // Wait for fire-and-forget alert to resolve (robust against extra awaits)
+        await vi.waitFor(() => expect(sendBrevoTransacEmail).toHaveBeenCalled());
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -853,13 +849,50 @@ describe('syncAccountStatus', () => {
 
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
-        // Wait for fire-and-forget alert to complete
-        await new Promise((r) => setTimeout(r, 0));
+        // Wait for fire-and-forget alert to resolve (robust against extra awaits)
+        await vi.waitFor(() =>
+            expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    params: expect.objectContaining({
+                        ACCOUNT_STATUS: 'disabled',
+                    }),
+                })
+            )
+        );
+    });
+
+    it('sends alert when active account becomes restricted', async () => {
+        // Previously active account now restricted (most critical real-world case)
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi
+                .fn()
+                .mockResolvedValue(
+                    makeConnectedAccount({ account_status: 'active' })
+                ),
+        } as any);
+
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: null,
+                    currently_due: ['individual.verification.document'],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        // Wait for fire-and-forget alert to resolve (robust against extra awaits)
+        await vi.waitFor(() => expect(sendBrevoTransacEmail).toHaveBeenCalled());
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 params: expect.objectContaining({
-                    ACCOUNT_STATUS: 'disabled',
+                    ACCOUNT_STATUS: 'restricted',
                 }),
             })
         );
@@ -970,6 +1003,13 @@ describe('sendAccountRestrictedAlert', () => {
     });
 
     it('falls back to DB query when klubr is numeric ID and uses result in email', async () => {
+        // Mock: re-populate via connected-account query with klubr relation
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi.fn().mockResolvedValue({
+                klubr: { denomination: 'Club Fallback', uuid: 'klubr-fallback-uuid' },
+            }),
+        } as any);
+
         await sendAccountRestrictedAlert(
             mockStrapiInstance,
             'acct_test_123',
@@ -978,16 +1018,16 @@ describe('sendAccountRestrictedAlert', () => {
             makeConnectedAccount({ klubr: 42 })
         );
 
-        // Should have queried for klubr by id
+        // Should have queried connected-account to populate klubr relation
         expect(mockStrapiInstance.db.query).toHaveBeenCalledWith(
-            'api::klubr.klubr'
+            'api::connected-account.connected-account'
         );
-        // And used the result in the email
+        // And used the populated result in the email
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 params: expect.objectContaining({
-                    CLUB_NAME: 'Club Test',
-                    KLUBR_UUID: 'klubr-uuid-123',
+                    CLUB_NAME: 'Club Fallback',
+                    KLUBR_UUID: 'klubr-fallback-uuid',
                 }),
             })
         );

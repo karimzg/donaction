@@ -629,17 +629,19 @@ export async function sendAccountRestrictedAlert(
                 klubrName = connectedAccount.klubr.denomination || 'Inconnu';
                 klubrUuid = connectedAccount.klubr.uuid || 'N/A';
             } else {
-                // Numeric ID fallback — fetch from DB
-                const klubr = await strapiInstance.db
-                    .query('api::klubr.klubr')
+                // Numeric FK fallback — query by documentId via the
+                // connected_account → klubr relation. We use documentId
+                // (Strapi v5 convention) rather than internal id.
+                const connectedAccountWithKlubr = await strapiInstance.db
+                    .query('api::connected-account.connected-account')
                     .findOne({
-                        where: { id: connectedAccount.klubr },
-                        select: ['denomination', 'uuid'],
+                        where: { id: connectedAccount.id },
+                        populate: { klubr: { select: ['denomination', 'uuid'] } },
                     });
 
-                if (klubr) {
-                    klubrName = klubr.denomination || 'Inconnu';
-                    klubrUuid = klubr.uuid || 'N/A';
+                if (connectedAccountWithKlubr?.klubr) {
+                    klubrName = connectedAccountWithKlubr.klubr.denomination || 'Inconnu';
+                    klubrUuid = connectedAccountWithKlubr.klubr.uuid || 'N/A';
                 }
             }
         }
