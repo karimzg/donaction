@@ -6,6 +6,10 @@ import {
     TradePolicyEntity,
 } from '../_types';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
+import {
+    sendBrevoTransacEmail,
+    BREVO_TEMPLATES,
+} from './emails/sendBrevoTransacEmail';
 import { DEFAULT_CURRENCY } from '../constants';
 
 /**
@@ -290,11 +294,12 @@ export async function syncAccountStatus(
 
     const account = await stripe.accounts.retrieve(accountId);
 
-    // Find connected account in database
+    // Find connected account in database (populate klubr for admin alert context)
     const connectedAccount = await strapiInstance.db
         .query('api::connected-account.connected-account')
         .findOne({
             where: { stripe_account_id: accountId },
+            populate: { klubr: true },
         });
 
     if (!connectedAccount) {
@@ -335,6 +340,17 @@ export async function syncAccountStatus(
         color: 'green',
         prefix: 'StripeConnect',
     });
+
+    // Send admin alert for restricted or disabled accounts
+    if (accountStatus === 'restricted' || accountStatus === 'disabled') {
+        await sendAccountRestrictedAlert(
+            strapiInstance,
+            accountId,
+            accountStatus,
+            account,
+            connectedAccount,
+        );
+    }
 
     return updated as ConnectedAccountEntity;
 }
@@ -558,10 +574,92 @@ export async function logFinancialAction(
     return auditLog as FinancialAuditLogEntity;
 }
 
+/**
+ * Sends an admin alert when a connected account becomes restricted or disabled.
+ * Non-blocking: email failure is logged but does not propagate.
+ *
+ * @param strapiInstance - Strapi instance
+ * @param accountId - Stripe account ID
+ * @param accountStatus - Determined account status
+ * @param stripeAccount - Stripe account object
+ * @param connectedAccount - Database connected account record
+ */
+export async function sendAccountRestrictedAlert(
+    strapiInstance: Core.Strapi,
+    accountId: string,
+    accountStatus: 'restricted' | 'disabled',
+    stripeAccount: Stripe.Account,
+    connectedAccount: { id: number; documentId: string; klubr?: any },
+): Promise<void> {
+    try {
+        // Fetch klubr info for alert context
+        let klubrName = 'Inconnu';
+        let klubrUuid = 'N/A';
+
+        if (connectedAccount.klubr) {
+            const klubrId =
+                typeof connectedAccount.klubr === 'object'
+                    ? connectedAccount.klubr.id
+                    : connectedAccount.klubr;
+
+            const klubr = await strapiInstance.db
+                .query('api::klubr.klubr')
+                .findOne({
+                    where: { id: klubrId },
+                    select: ['denomination', 'uuid'],
+                });
+
+            if (klubr) {
+                klubrName = klubr.denomination || 'Inconnu';
+                klubrUuid = klubr.uuid || 'N/A';
+            }
+        }
+
+        const disabledReason =
+            stripeAccount.requirements?.disabled_reason || 'Non spécifié';
+        const currentlyDue =
+            stripeAccount.requirements?.currently_due?.join(', ') || 'Aucun';
+
+        await sendBrevoTransacEmail({
+            subject: `[ALERTE] Compte Stripe ${accountStatus}: ${klubrName}`,
+            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            to: [
+                {
+                    email:
+                        process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr',
+                },
+            ],
+            params: {
+                ALERT_TYPE: `Compte Stripe Connect ${accountStatus}`,
+                CLUB_NAME: klubrName,
+                KLUBR_UUID: klubrUuid,
+                STRIPE_ACCOUNT_ID: accountId,
+                ACCOUNT_STATUS: accountStatus,
+                DISABLED_REASON: disabledReason,
+                CURRENTLY_DUE: currentlyDue,
+                CHARGES_ENABLED: String(stripeAccount.charges_enabled),
+                PAYOUTS_ENABLED: String(stripeAccount.payouts_enabled),
+            },
+            tags: ['admin-alert', 'stripe-connect', `account-${accountStatus}`],
+        });
+
+        logSimple({
+            message: `Alerte admin envoyée pour compte ${accountStatus}: ${accountId}`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (alertError) {
+        strapiLog.error(
+            `Echec de l'envoi de l'alerte admin pour le compte ${accountId}:`,
+            alertError,
+        );
+    }
+}
+
 // --- Pure helper functions ---
 
 /** Determines account status from Stripe account data */
-const determineAccountStatus = (
+export const determineAccountStatus = (
     account: Stripe.Account,
 ): 'pending' | 'active' | 'restricted' | 'disabled' => {
     if (account.charges_enabled && account.payouts_enabled) {
@@ -577,7 +675,7 @@ const determineAccountStatus = (
 };
 
 /** Determines verification status from Stripe account data */
-const determineVerificationStatus = (
+export const determineVerificationStatus = (
     account: Stripe.Account,
 ): 'unverified' | 'pending' | 'verified' | 'rejected' => {
     if (!account.details_submitted) {

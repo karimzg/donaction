@@ -1,16 +1,57 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type Stripe from 'stripe';
+import type { Core } from '@strapi/strapi';
 import { TradePolicyEntity } from '../_types';
 
 // Stub env vars before importing module (top-level guard throws without them)
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
 vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
 
+// Mock Stripe client as a class (Stripe SDK uses `new Stripe(...)`)
+vi.mock('stripe', () => {
+    return {
+        default: class MockStripe {
+            accounts = {
+                create: vi.fn(),
+                retrieve: vi.fn(),
+            };
+            accountLinks = { create: vi.fn() };
+            transfers = { create: vi.fn() };
+            events = { retrieve: vi.fn() };
+        },
+    };
+});
+
+// Mock logger to suppress output
+vi.mock('./logger', () => ({
+    logBlock: vi.fn(),
+    logSimple: vi.fn(),
+    strapiLog: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+    COLORS: { reset: '', green: '', blue: '', yellow: '', red: '', gray: '' },
+}));
+
+// Mock Brevo email
+vi.mock('./emails/sendBrevoTransacEmail', () => ({
+    sendBrevoTransacEmail: vi.fn().mockResolvedValue({}),
+    BREVO_TEMPLATES: { ADMIN_ALERT: 27 },
+}));
+
 const {
     calculateApplicationFee,
     calculatePlatformCommission,
     estimateStripeFees,
     determineDonorPaysFee,
+    determineAccountStatus,
+    determineVerificationStatus,
+    syncAccountStatus,
+    sendAccountRestrictedAlert,
+    stripe,
 } = await import('./stripe-connect-helper');
+
+const { sendBrevoTransacEmail } = await import(
+    './emails/sendBrevoTransacEmail'
+);
+const { strapiLog } = await import('./logger');
 
 /** Helper to build a minimal TradePolicyEntity for tests */
 const makePolicy = (
@@ -458,5 +499,426 @@ describe('determineDonorPaysFee', () => {
             });
             expect(result).toBe(true);
         });
+    });
+});
+
+// ============================
+// Test helpers for account status tests
+// ============================
+
+/** Build a partial Stripe.Account for testing */
+const makeStripeAccount = (
+    overrides: Partial<Stripe.Account> = {}
+): Stripe.Account =>
+    ({
+        id: 'acct_test_123',
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        capabilities: {},
+        requirements: {
+            currently_due: [],
+            disabled_reason: null,
+            pending_verification: [],
+        },
+        ...overrides,
+    }) as unknown as Stripe.Account;
+
+/** Build a mock connected account DB record */
+const makeConnectedAccount = (overrides: Record<string, any> = {}) => ({
+    id: 1,
+    documentId: 'doc_abc123',
+    stripe_account_id: 'acct_test_123',
+    klubr: { id: 42, denomination: 'Club Test', uuid: 'klubr-uuid-123' },
+    ...overrides,
+});
+
+/** Build a mock Strapi instance */
+const makeMockStrapi = (overrides: Record<string, any> = {}) => {
+    const mockStrapiInstance = {
+        db: {
+            query: vi.fn().mockReturnValue({
+                findOne: vi.fn().mockResolvedValue(makeConnectedAccount()),
+            }),
+        },
+        documents: vi.fn().mockReturnValue({
+            update: vi.fn().mockResolvedValue({}),
+            create: vi.fn().mockResolvedValue({}),
+        }),
+        ...overrides,
+    };
+    return mockStrapiInstance as unknown as Core.Strapi;
+};
+
+// ============================
+// determineAccountStatus
+// ============================
+
+describe('determineAccountStatus', () => {
+    it('returns "active" when charges and payouts are enabled', () => {
+        const account = makeStripeAccount({
+            charges_enabled: true,
+            payouts_enabled: true,
+        });
+        expect(determineAccountStatus(account)).toBe('active');
+    });
+
+    it('returns "disabled" when disabled_reason exists', () => {
+        const account = makeStripeAccount({
+            charges_enabled: false,
+            payouts_enabled: false,
+            requirements: {
+                disabled_reason: 'requirements.past_due',
+                currently_due: ['individual.verification.document'],
+                pending_verification: [],
+            } as any,
+        });
+        expect(determineAccountStatus(account)).toBe('disabled');
+    });
+
+    it('returns "restricted" when currently_due has items but no disabled_reason', () => {
+        const account = makeStripeAccount({
+            charges_enabled: false,
+            payouts_enabled: false,
+            requirements: {
+                disabled_reason: null,
+                currently_due: ['individual.verification.document'],
+                pending_verification: [],
+            } as any,
+        });
+        expect(determineAccountStatus(account)).toBe('restricted');
+    });
+
+    it('returns "pending" when no special conditions', () => {
+        const account = makeStripeAccount({
+            charges_enabled: false,
+            payouts_enabled: false,
+            requirements: {
+                disabled_reason: null,
+                currently_due: [],
+                pending_verification: [],
+            } as any,
+        });
+        expect(determineAccountStatus(account)).toBe('pending');
+    });
+
+    it('returns "active" even when currently_due has items if both are enabled', () => {
+        const account = makeStripeAccount({
+            charges_enabled: true,
+            payouts_enabled: true,
+            requirements: {
+                disabled_reason: null,
+                currently_due: ['some_field'],
+                pending_verification: [],
+            } as any,
+        });
+        expect(determineAccountStatus(account)).toBe('active');
+    });
+});
+
+// ============================
+// determineVerificationStatus
+// ============================
+
+describe('determineVerificationStatus', () => {
+    it('returns "unverified" when details not submitted', () => {
+        const account = makeStripeAccount({ details_submitted: false });
+        expect(determineVerificationStatus(account)).toBe('unverified');
+    });
+
+    it('returns "verified" when details submitted and both enabled', () => {
+        const account = makeStripeAccount({
+            details_submitted: true,
+            charges_enabled: true,
+            payouts_enabled: true,
+        });
+        expect(determineVerificationStatus(account)).toBe('verified');
+    });
+
+    it('returns "pending" when details submitted but not fully enabled', () => {
+        const account = makeStripeAccount({
+            details_submitted: true,
+            charges_enabled: true,
+            payouts_enabled: false,
+        });
+        expect(determineVerificationStatus(account)).toBe('pending');
+    });
+});
+
+// ============================
+// syncAccountStatus
+// ============================
+
+describe('syncAccountStatus', () => {
+    let mockStrapiInstance: Core.Strapi;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockStrapiInstance = makeMockStrapi();
+
+        // Mock stripe.accounts.retrieve
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: true,
+                payouts_enabled: true,
+                details_submitted: true,
+                capabilities: { card_payments: 'active' } as any,
+                requirements: {
+                    currently_due: [],
+                    disabled_reason: null,
+                    pending_verification: [],
+                } as any,
+            })
+        );
+    });
+
+    it('syncs active account with correct fields', async () => {
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        const updateCall = vi.mocked(mockStrapiInstance.documents).mock
+            .results[0].value.update;
+        expect(updateCall).toHaveBeenCalledWith(
+            expect.objectContaining({
+                documentId: 'doc_abc123',
+                data: expect.objectContaining({
+                    account_status: 'active',
+                    verification_status: 'verified',
+                    onboarding_completed: true,
+                    charges_enabled: true,
+                    payouts_enabled: true,
+                }),
+            })
+        );
+    });
+
+    it('does not send admin alert for active accounts', async () => {
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
+    });
+
+    it('sends admin alert for restricted accounts', async () => {
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: null,
+                    currently_due: ['individual.verification.document'],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        // Mock klubr query for alert
+        const klubrQuery = vi.fn().mockResolvedValue({
+            denomination: 'Club Test',
+            uuid: 'klubr-uuid-123',
+        });
+        vi.mocked(mockStrapiInstance.db.query)
+            .mockReturnValueOnce({
+                findOne: vi
+                    .fn()
+                    .mockResolvedValue(makeConnectedAccount()),
+            } as any)
+            .mockReturnValueOnce({
+                findOne: klubrQuery,
+            } as any);
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining('restricted'),
+                params: expect.objectContaining({
+                    ACCOUNT_STATUS: 'restricted',
+                    STRIPE_ACCOUNT_ID: 'acct_test_123',
+                    CLUB_NAME: 'Club Test',
+                }),
+                tags: expect.arrayContaining([
+                    'admin-alert',
+                    'stripe-connect',
+                    'account-restricted',
+                ]),
+            })
+        );
+    });
+
+    it('sends admin alert for disabled accounts', async () => {
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: 'requirements.past_due',
+                    currently_due: [],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        // Mock klubr query for alert
+        vi.mocked(mockStrapiInstance.db.query)
+            .mockReturnValueOnce({
+                findOne: vi
+                    .fn()
+                    .mockResolvedValue(makeConnectedAccount()),
+            } as any)
+            .mockReturnValueOnce({
+                findOne: vi.fn().mockResolvedValue({
+                    denomination: 'Club Test',
+                    uuid: 'klubr-uuid-123',
+                }),
+            } as any);
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    ACCOUNT_STATUS: 'disabled',
+                    DISABLED_REASON: 'requirements.past_due',
+                }),
+                tags: expect.arrayContaining(['account-disabled']),
+            })
+        );
+    });
+
+    it('throws when connected account not found in database', async () => {
+        const strapiNoAccount = makeMockStrapi();
+        vi.mocked(strapiNoAccount.db.query).mockReturnValue({
+            findOne: vi.fn().mockResolvedValue(null),
+        } as any);
+
+        await expect(
+            syncAccountStatus(strapiNoAccount, 'acct_missing')
+        ).rejects.toThrow('Compte connecté introuvable');
+    });
+
+    it('updates last_sync timestamp', async () => {
+        const before = new Date();
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+        const after = new Date();
+
+        const updateCall = vi.mocked(mockStrapiInstance.documents).mock
+            .results[0].value.update;
+        const lastSync = updateCall.mock.calls[0][0].data.last_sync as Date;
+        expect(lastSync.getTime()).toBeGreaterThanOrEqual(before.getTime());
+        expect(lastSync.getTime()).toBeLessThanOrEqual(after.getTime());
+    });
+});
+
+// ============================
+// sendAccountRestrictedAlert
+// ============================
+
+describe('sendAccountRestrictedAlert', () => {
+    let mockStrapiInstance: Core.Strapi;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockStrapiInstance = makeMockStrapi();
+
+        // Mock klubr query for alert context
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi.fn().mockResolvedValue({
+                denomination: 'Club Test',
+                uuid: 'klubr-uuid-123',
+            }),
+        } as any);
+    });
+
+    it('sends email with correct parameters', async () => {
+        const stripeAccount = makeStripeAccount({
+            charges_enabled: false,
+            payouts_enabled: false,
+            requirements: {
+                disabled_reason: 'requirements.past_due',
+                currently_due: ['identity_document', 'bank_account'],
+                pending_verification: [],
+            } as any,
+        });
+
+        await sendAccountRestrictedAlert(
+            mockStrapiInstance,
+            'acct_test_123',
+            'disabled',
+            stripeAccount,
+            makeConnectedAccount()
+        );
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: '[ALERTE] Compte Stripe disabled: Club Test',
+                templateId: 27,
+                to: [{ email: expect.any(String) }],
+                params: expect.objectContaining({
+                    ALERT_TYPE: 'Compte Stripe Connect disabled',
+                    CLUB_NAME: 'Club Test',
+                    KLUBR_UUID: 'klubr-uuid-123',
+                    STRIPE_ACCOUNT_ID: 'acct_test_123',
+                    ACCOUNT_STATUS: 'disabled',
+                    DISABLED_REASON: 'requirements.past_due',
+                    CURRENTLY_DUE: 'identity_document, bank_account',
+                }),
+            })
+        );
+    });
+
+    it('handles klubr as numeric ID (not populated object)', async () => {
+        await sendAccountRestrictedAlert(
+            mockStrapiInstance,
+            'acct_test_123',
+            'restricted',
+            makeStripeAccount(),
+            makeConnectedAccount({ klubr: 42 })
+        );
+
+        // Should have queried for klubr by id
+        expect(mockStrapiInstance.db.query).toHaveBeenCalledWith(
+            'api::klubr.klubr'
+        );
+    });
+
+    it('handles missing klubr gracefully', async () => {
+        await sendAccountRestrictedAlert(
+            mockStrapiInstance,
+            'acct_test_123',
+            'restricted',
+            makeStripeAccount(),
+            makeConnectedAccount({ klubr: null })
+        );
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    CLUB_NAME: 'Inconnu',
+                    KLUBR_UUID: 'N/A',
+                }),
+            })
+        );
+    });
+
+    it('does not throw when email sending fails', async () => {
+        vi.mocked(sendBrevoTransacEmail).mockRejectedValueOnce(
+            new Error('Email service down')
+        );
+
+        await expect(
+            sendAccountRestrictedAlert(
+                mockStrapiInstance,
+                'acct_test_123',
+                'restricted',
+                makeStripeAccount(),
+                makeConnectedAccount()
+            )
+        ).resolves.toBeUndefined();
+
+        // Should log the error
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('acct_test_123'),
+            expect.any(Error)
+        );
     });
 });
