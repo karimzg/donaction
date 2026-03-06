@@ -15,7 +15,7 @@ let isDuplicateStatus: Awaited<
 // Mock Strapi's createCoreController factory to capture the inner function.
 vi.mock('@strapi/strapi', () => ({
     factories: {
-        createCoreController: (_uid: string, fn: Function) => {
+        createCoreController: (_uid: string, fn: (...args: any[]) => any) => {
             return { __factoryFn: fn };
         },
     },
@@ -305,6 +305,13 @@ describe('stripe-connect handleWebhook controller', () => {
         const ctx = makeCtx();
         mockStrapi.requestContext.get.mockReturnValue(ctx);
 
+        // Capture mock before handler invocation to avoid extra documents() call
+        const updateMock = vi.fn().mockResolvedValue(makeWebhookLog());
+        mockStrapi.documents.mockReturnValue({
+            create: vi.fn().mockResolvedValue(makeWebhookLog()),
+            update: updateMock,
+        });
+
         vi.mocked(handleWebhookEvent).mockRejectedValueOnce(
             new Error('handler crash')
         );
@@ -314,8 +321,7 @@ describe('stripe-connect handleWebhook controller', () => {
         // Should still return 200 to Stripe
         expect(ctx.send).toHaveBeenCalledWith({ received: true });
         // Status should be updated to 'failed'
-        const updateCall = mockStrapi.documents().update;
-        expect(updateCall).toHaveBeenCalledWith(
+        expect(updateMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({
                     status: 'failed',

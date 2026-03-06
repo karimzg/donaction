@@ -232,7 +232,14 @@ export async function handleAccountDeauthorized(
         prefix: 'StripeConnect',
     });
 
-    const accountId = event.account ?? 'unknown';
+    const accountId = event.account;
+
+    if (!accountId) {
+        strapiLog.error(
+            'account.application.deauthorized reçu sans account id'
+        );
+        return;
+    }
 
     try {
         await syncAccountStatus(strapiInstance, accountId);
