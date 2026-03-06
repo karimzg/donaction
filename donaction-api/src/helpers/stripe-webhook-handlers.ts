@@ -216,6 +216,134 @@ export async function handlePersonUpdated(
 }
 
 /**
+ * Handles account.application.deauthorized webhook event
+ * Triggered when a connected account disconnects from the platform
+ */
+export async function handleAccountDeauthorized(
+    strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'account.application.deauthorized' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
+
+    const accountId = event.account;
+
+    if (!accountId) {
+        strapiLog.error(
+            'account.application.deauthorized reçu sans account id'
+        );
+        return;
+    }
+
+    try {
+        await syncAccountStatus(strapiInstance, accountId);
+
+        logSimple({
+            message: `Compte ${accountId} déautorisé de la plateforme`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (error) {
+        strapiLog.error(
+            'Erreur lors du traitement du webhook account.application.deauthorized:',
+            error
+        );
+        throw error;
+    }
+}
+
+/**
+ * Handles charge.dispute.* webhook events
+ * Stub handler - detailed dispute logic in follow-up US-WH-005
+ */
+export async function handleDispute(
+    _strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: event.type },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
+
+    const dispute = event.data.object as Stripe.Dispute;
+    const accountId = event.account ?? 'unknown';
+
+    logSimple({
+        message: `Dispute ${dispute.id} (${event.type}) pour compte ${accountId}`,
+        color: 'yellow',
+        prefix: 'StripeConnect',
+    });
+
+    // TODO: Implement dispute handling logic in US-WH-005
+}
+
+/**
+ * Handles payout.paid webhook event
+ * Stub handler - detailed payout logic in follow-up US
+ */
+export async function handlePayoutPaid(
+    _strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'payout.paid' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
+
+    const payout = event.data.object as Stripe.Payout;
+    const accountId = event.account ?? 'unknown';
+
+    logSimple({
+        message: `Payout ${payout.id} payé pour compte ${accountId}`,
+        color: 'green',
+        prefix: 'StripeConnect',
+    });
+
+    // TODO: Implement payout tracking logic in follow-up US
+}
+
+/**
+ * Handles payout.failed webhook event
+ * Stub handler - detailed payout logic in follow-up US
+ */
+export async function handlePayoutFailed(
+    _strapiInstance: Core.Strapi,
+    event: Stripe.Event
+): Promise<void> {
+    logBlock({
+        statusColor: COLORS.yellow,
+        entries: [
+            { key: 'Webhook', value: 'payout.failed' },
+            { key: 'Event ID', value: event.id },
+        ],
+        prefix: 'StripeConnect',
+    });
+
+    const payout = event.data.object as Stripe.Payout;
+    const accountId = event.account ?? 'unknown';
+
+    strapiLog.error(
+        `Payout ${payout.id} échoué pour compte ${accountId}`
+    );
+
+    // TODO: Implement payout failure handling + notification in follow-up US
+}
+
+/**
  * Routes webhook event to appropriate handler
  * @param strapiInstance - Strapi instance (injected for testability)
  * @param event - Stripe webhook event
@@ -233,6 +361,10 @@ export async function handleWebhookEvent(
     switch (event.type) {
         case 'account.updated':
             await handleAccountUpdated(strapiInstance, event);
+            break;
+
+        case 'account.application.deauthorized':
+            await handleAccountDeauthorized(strapiInstance, event);
             break;
 
         case 'account.external_account.created':
@@ -253,6 +385,22 @@ export async function handleWebhookEvent(
 
         case 'person.updated':
             await handlePersonUpdated(strapiInstance, event);
+            break;
+
+        case 'charge.dispute.created':
+        case 'charge.dispute.updated':
+        case 'charge.dispute.closed':
+        case 'charge.dispute.funds_withdrawn':
+        case 'charge.dispute.funds_reinstated':
+            await handleDispute(strapiInstance, event);
+            break;
+
+        case 'payout.paid':
+            await handlePayoutPaid(strapiInstance, event);
+            break;
+
+        case 'payout.failed':
+            await handlePayoutFailed(strapiInstance, event);
             break;
 
         default:

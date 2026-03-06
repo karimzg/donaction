@@ -18,6 +18,7 @@ vi.mock('./logger', () => ({
 
 import { handleWebhookEvent } from './stripe-webhook-handlers';
 import { syncAccountStatus } from './stripe-connect-helper';
+import { logSimple, strapiLog } from './logger';
 import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 
@@ -95,6 +96,110 @@ describe('handleWebhookEvent', () => {
         expect(syncAccountStatus).toHaveBeenCalledWith(
             mockStrapi,
             'acct_test'
+        );
+    });
+
+    it('routes account.application.deauthorized to syncAccountStatus', async () => {
+        await handleWebhookEvent(
+            mockStrapi,
+            makeEvent('account.application.deauthorized')
+        );
+        expect(syncAccountStatus).toHaveBeenCalledWith(
+            mockStrapi,
+            'acct_test'
+        );
+    });
+
+    it('routes charge.dispute.created and logs dispute info', async () => {
+        const event = makeEvent('charge.dispute.created');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining('charge.dispute.created'),
+            })
+        );
+    });
+
+    it('routes charge.dispute.updated and logs dispute info', async () => {
+        const event = makeEvent('charge.dispute.updated');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining('charge.dispute.updated'),
+            })
+        );
+    });
+
+    it('routes charge.dispute.closed and logs dispute info', async () => {
+        const event = makeEvent('charge.dispute.closed');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining('charge.dispute.closed'),
+            })
+        );
+    });
+
+    it('routes charge.dispute.funds_withdrawn and logs dispute info', async () => {
+        const event = makeEvent('charge.dispute.funds_withdrawn');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining(
+                    'charge.dispute.funds_withdrawn'
+                ),
+            })
+        );
+    });
+
+    it('routes charge.dispute.funds_reinstated and logs dispute info', async () => {
+        const event = makeEvent('charge.dispute.funds_reinstated');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining(
+                    'charge.dispute.funds_reinstated'
+                ),
+            })
+        );
+    });
+
+    it('routes payout.paid and logs payout info', async () => {
+        const event = makeEvent('payout.paid');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(logSimple).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: expect.stringContaining('payé'),
+            })
+        );
+    });
+
+    it('routes payout.failed and logs error', async () => {
+        const event = makeEvent('payout.failed');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('échoué')
         );
     });
 
