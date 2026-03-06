@@ -18,9 +18,14 @@ const DonactionLogo: React.FC<DonactionLogoProps> = ({
 	className = '',
 	context = 'header',
 }) => {
+	const src =
+		context === 'footer'
+			? '/images/donaction-logo.svg'
+			: '/images/donaction-logo-animated.svg';
+
 	return (
 		<Image
-			src='/images/donaction-logo-animated.svg'
+			src={src}
 			alt='Donaction'
 			width={width}
 			height={height}
