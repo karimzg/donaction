@@ -24,8 +24,8 @@ export default factories.createCoreController(
             const results = await strapi
                 .documents('api::webhook-log.webhook-log')
                 .findMany({
-                    filters: { uuid: { $eq: uuid } },
                     ...sanitizedQuery,
+                    filters: { ...(sanitizedQuery.filters ?? {}), uuid: { $eq: uuid } },
                     limit: 1,
                 });
             const result = results[0] ?? null;

@@ -92,11 +92,12 @@ export async function down(knex) {
     });
 
     // Migrate status → processed
-    // Note: 'ignored' maps to processed:true as a best-effort rollback.
-    // The old schema had no 'ignored' concept — expired events were simply
-    // marked processed:true. This is lossy but acceptable for rollback.
+    // Note: 'ignored' and 'processing' map to processed:true as a best-effort rollback.
+    // The old schema had no 'ignored' concept — expired events were simply marked processed:true.
+    // 'processing' events (stuck mid-flight) are also mapped to processed:true to prevent
+    // the old retry logic from re-processing them. This is lossy but acceptable for rollback.
     await knex('webhook_logs')
-        .whereIn('status', ['processed', 'ignored'])
+        .whereIn('status', ['processed', 'ignored', 'processing'])
         .update({ processed: true });
 
     // Clear processed_at for ignored events.
