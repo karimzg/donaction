@@ -64,8 +64,9 @@ async function migrateUp(trx) {
             table.index(['created_at'], 'idx_webhook_logs_created_at');
             table.index(['source'], 'idx_webhook_logs_source');
         });
-    } catch {
-        // Indexes may already exist from a previous partial run
+    } catch (err: any) {
+        if (!err.message?.includes('already exists')) throw err;
+        // Indexes already exist from a previous partial run — safe to continue
     }
 
     // Drop obsolete index from previous migration (may not exist)
@@ -73,8 +74,9 @@ async function migrateUp(trx) {
         await trx.schema.alterTable('webhook_logs', (table) => {
             table.dropIndex([], 'idx_webhook_logs_processed_retry');
         });
-    } catch {
-        // Index may not exist if previous migration was not run
+    } catch (err: any) {
+        if (!err.message?.includes('does not exist') && !err.message?.includes('not found')) throw err;
+        // Index does not exist — safe to continue
     }
 }
 
@@ -96,7 +98,8 @@ async function migrateDown(trx) {
             table.dropIndex([], 'idx_webhook_logs_created_at');
             table.dropIndex([], 'idx_webhook_logs_source');
         });
-    } catch {
+    } catch (err: any) {
+        if (!err.message?.includes('does not exist') && !err.message?.includes('not found')) throw err;
         // Indexes may not exist if up() was partially applied
     }
 

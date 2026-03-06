@@ -5,7 +5,7 @@ import { logBlock, logSimple, strapiLog, COLORS } from '../../../helpers/logger'
 import { removeId } from '../../../helpers/sanitizeHelpers';
 import { ALLOWED_ONBOARDING_DOMAINS } from '../../../constants';
 import { isDuplicateStatus } from '../../webhook-log/services/webhook-log-helpers';
-import type { WebhookLogStatus } from '../../../_types';
+import type { WebhookLogEntity } from '../../../_types';
 
 export default factories.createCoreController(
     'api::connected-account.connected-account',
@@ -368,7 +368,7 @@ export default factories.createCoreController(
                 // Idempotency: try to create the webhook log entry first.
                 // If a concurrent request already created it (unique constraint on event_id),
                 // catch the error and re-fetch the existing entry.
-                let webhookLog;
+                let webhookLog: WebhookLogEntity | null = null;
                 try {
                     webhookLog = await strapi
                         .documents('api::webhook-log.webhook-log')
@@ -405,7 +405,7 @@ export default factories.createCoreController(
                         throw createError; // Unexpected state, re-throw
                     }
 
-                    if (isDuplicateStatus(webhookLog.status as WebhookLogStatus)) {
+                    if (isDuplicateStatus(webhookLog.status)) {
                         logSimple({
                             message: `Événement déjà traité: ${event.id}`,
                             color: 'yellow',
@@ -423,14 +423,10 @@ export default factories.createCoreController(
 
                 // Optimistic lock: claim webhook for processing
                 // PostgreSQL re-evaluates WHERE after row lock, preventing concurrent double-processing
-                const errorFilter = webhookLog.processing_error != null
-                    ? { processing_error: { $eq: webhookLog.processing_error } }
-                    : { processing_error: { $null: true } };
-
                 const claimed = await strapi.db
                     .query('api::webhook-log.webhook-log')
                     .update({
-                        where: { id: webhookLog.id, status: 'received', ...errorFilter },
+                        where: { id: webhookLog.id, status: 'received' },
                         data: { status: 'processing' },
                     });
 
