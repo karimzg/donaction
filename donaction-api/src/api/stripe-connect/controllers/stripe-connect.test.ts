@@ -253,6 +253,9 @@ describe('stripe-connect handleWebhook controller', () => {
 
         await controller.handleWebhook();
 
+        expect(mockStrapi.documents).toHaveBeenCalledWith(
+            'api::webhook-log.webhook-log'
+        );
         const createCall = mockStrapi.documents().create;
         expect(createCall).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -271,6 +274,9 @@ describe('stripe-connect handleWebhook controller', () => {
 
         await controller.handleWebhook();
 
+        expect(mockStrapi.documents).toHaveBeenCalledWith(
+            'api::webhook-log.webhook-log'
+        );
         const createCall = mockStrapi.documents().create;
         expect(createCall).toHaveBeenCalledWith(
             expect.objectContaining({

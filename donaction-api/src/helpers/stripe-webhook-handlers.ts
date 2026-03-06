@@ -256,7 +256,7 @@ export async function handleAccountDeauthorized(
  * Stub handler - detailed dispute logic in follow-up US-WH-005
  */
 export async function handleDispute(
-    strapiInstance: Core.Strapi,
+    _strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
     logBlock({
@@ -285,7 +285,7 @@ export async function handleDispute(
  * Stub handler - detailed payout logic in follow-up US
  */
 export async function handlePayoutPaid(
-    strapiInstance: Core.Strapi,
+    _strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
     logBlock({
@@ -314,7 +314,7 @@ export async function handlePayoutPaid(
  * Stub handler - detailed payout logic in follow-up US
  */
 export async function handlePayoutFailed(
-    strapiInstance: Core.Strapi,
+    _strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
     logBlock({
@@ -332,12 +332,6 @@ export async function handlePayoutFailed(
     strapiLog.error(
         `Payout ${payout.id} échoué pour compte ${accountId}`
     );
-
-    logSimple({
-        message: `Payout ${payout.id} échoué pour compte ${accountId}`,
-        color: 'red',
-        prefix: 'StripeConnect',
-    });
 
     // TODO: Implement payout failure handling + notification in follow-up US
 }
@@ -389,6 +383,8 @@ export async function handleWebhookEvent(
         case 'charge.dispute.created':
         case 'charge.dispute.updated':
         case 'charge.dispute.closed':
+        case 'charge.dispute.funds_withdrawn':
+        case 'charge.dispute.funds_reinstated':
             await handleDispute(strapiInstance, event);
             break;
 
