@@ -1,16 +1,16 @@
 {
   "site": {
-    "title": "Klubr.",
+    "title": "Donaction.",
     "base_url": "https://www.donaction.fr",
     "base_path": "/",
     "trailing_slash": false,
     "favicon": "https://www.donaction.fr/images/favicon.ico",
     "favicon_png": "https://www.donaction.fr/images/favicon.png",
-    "logo": "https://www.donaction.fr/images/logo-klubr-black.png",
-    "logo_darkmode": "https://www.donaction.fr/images/logo-klubr-white.png",
+    "logo": "/images/donaction-logo-animated.svg",
+    "logo_darkmode": "/images/donaction-logo-animated.svg",
     "logo_width": "158",
-    "logo_height": "36",
-    "logo_text": "Klubr."
+    "logo_height": "38",
+    "logo_text": "Donaction."
   },
   "media_breakpoints": {
     "xs": 480,
@@ -56,8 +56,8 @@
   },
 
   "metadata": {
-    "meta_author": "Klubr",
+    "meta_author": "Donaction",
     "meta_image": "/images/og-image.png",
-    "meta_description": "Klubr description"
+    "meta_description": "Donaction simplifie le mécénat sportif et associatif. Faites un don à votre club, recevez votre reçu fiscal et soutenez les projets qui comptent."
   }
 }

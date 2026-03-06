@@ -20,7 +20,7 @@ const DonactionLogo: React.FC<DonactionLogoProps> = ({
 }) => {
 	return (
 		<Image
-			src='/images/donaction-logo.png'
+			src='/images/donaction-logo-animated.svg'
 			alt='Donaction'
 			width={width}
 			height={height}
