@@ -342,13 +342,15 @@ export async function syncAccountStatus(
         prefix: 'StripeConnect',
     });
 
-    // Send admin alert only when status transitions to restricted or disabled
+    // Fire-and-forget admin alert on status transition to restricted/disabled.
+    // sendAccountRestrictedAlert has internal try/catch so it never throws.
     const statusChanged = connectedAccount.account_status !== accountStatus;
     if (
         statusChanged &&
         (accountStatus === 'restricted' || accountStatus === 'disabled')
     ) {
-        await sendAccountRestrictedAlert(
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        sendAccountRestrictedAlert(
             strapiInstance,
             accountId,
             accountStatus,
@@ -619,10 +621,7 @@ export async function sendAccountRestrictedAlert(
         let klubrUuid = 'N/A';
 
         if (connectedAccount.klubr) {
-            if (
-                typeof connectedAccount.klubr === 'object' &&
-                connectedAccount.klubr !== null
-            ) {
+            if (typeof connectedAccount.klubr === 'object') {
                 // Already populated — use directly
                 klubrName = connectedAccount.klubr.denomination || 'Inconnu';
                 klubrUuid = connectedAccount.klubr.uuid || 'N/A';

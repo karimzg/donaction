@@ -715,6 +715,9 @@ describe('syncAccountStatus', () => {
         // Connected account was previously 'pending' → now 'restricted' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
 
+        // Flush fire-and-forget promise
+        await new Promise((r) => setTimeout(r, 0));
+
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining('restricted'),
@@ -748,6 +751,9 @@ describe('syncAccountStatus', () => {
 
         // Connected account was previously 'pending' → now 'disabled' (status changed)
         await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        // Flush fire-and-forget promise
+        await new Promise((r) => setTimeout(r, 0));
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -787,6 +793,43 @@ describe('syncAccountStatus', () => {
 
         // Status unchanged → no alert
         expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
+    });
+
+    it('sends alert when transitioning from restricted to disabled', async () => {
+        // Account was restricted, now disabled (status changed → alert expected)
+        vi.mocked(mockStrapiInstance.db.query).mockReturnValue({
+            findOne: vi
+                .fn()
+                .mockResolvedValue(
+                    makeConnectedAccount({ account_status: 'restricted' })
+                ),
+        } as any);
+
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: 'requirements.past_due',
+                    currently_due: [],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        await syncAccountStatus(mockStrapiInstance, 'acct_test_123');
+
+        // Wait for fire-and-forget alert to complete
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    ACCOUNT_STATUS: 'disabled',
+                }),
+            })
+        );
     });
 
     it('does not send alert for pending accounts', async () => {
