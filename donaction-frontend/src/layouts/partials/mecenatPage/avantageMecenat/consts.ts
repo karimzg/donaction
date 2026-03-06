@@ -114,7 +114,7 @@ export const gridData = [
 	{
 		title: 'Le partenariat gagnant / gagnant',
 		description:
-			"Cher Klubr, nous croyons au pouvoir du partenariat gagnant/gagnant, où les clubs sportifs et les mécènes prospèrent ensemble. Le mécénat sportif va bien au-delà d'un simple soutien financier ; c'est une collaboration dynamique qui apporte des avantages significatifs à toutes les parties impliquées.",
+			"Cher Donaction, nous croyons au pouvoir du partenariat gagnant/gagnant, où les clubs sportifs et les mécènes prospèrent ensemble. Le mécénat sportif va bien au-delà d'un simple soutien financier ; c'est une collaboration dynamique qui apporte des avantages significatifs à toutes les parties impliquées.",
 		list: [
 			{
 				img: img_3_1,

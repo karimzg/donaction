@@ -90,10 +90,10 @@ const ShareCta = ({
 					<FontAwesomeIcon icon={faXmarkCircle} />
 				</p>
 				<div className='flex gap-2 items-center justify-start'>
-					<FacebookShareButton onClick={() => share("FACEBOOK")} url={linkToShare} hashtag={'#klubr'}>
+					<FacebookShareButton onClick={() => share("FACEBOOK")} url={linkToShare} hashtag={'#donaction'}>
 						<FacebookIcon size={32} round />
 					</FacebookShareButton>
-					<TwitterShareButton onClick={() => share("TWITTER")} url={linkToShare} title={text} hashtags={['klubr']}>
+					<TwitterShareButton onClick={() => share("TWITTER")} url={linkToShare} title={text} hashtags={['donaction']}>
 						<XIcon size={32} round />
 					</TwitterShareButton>
 					<WhatsappShareButton onClick={() => share("WHATSAPP")} url={linkToShare} title={text} separator=':: '>

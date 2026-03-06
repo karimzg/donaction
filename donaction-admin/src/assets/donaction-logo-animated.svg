@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 526 128" width="526" height="128" fill="none" style="max-width: 100%; height: auto;">
+  <defs>
+    <style>
+      /* Heart pulse: scale from visual center within transformed group */
+      @keyframes heartPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+      }
+      .heart-path {
+        transform-origin: 50px 48px;
+        animation: heartPulse 2s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Icon: 96x96 centered vertically in 128px (y offset = 16) -->
+  <!-- viewBox 0-100 scaled to 96px → factor 0.96 -->
+  <g transform="translate(0, 16) scale(0.96)">
+
+    <!-- Central heart with pulse from center -->
+    <g transform="translate(0, 4) scale(1.1, 0.9)" style="transform-origin: 50px 48px">
+      <path
+        class="heart-path"
+        d="M50 64 C50 64, 36 52, 36 43 C36 37, 40 32, 45 32 C47.5 32, 50 34.5, 50 34.5 C50 34.5, 52.5 32, 55 32 C60 32, 64 37, 64 43 C64 52, 50 64, 50 64 Z"
+        fill="#FB9289"
+      />
+    </g>
+
+    <!-- Orbit ring - green (right half) -->
+    <!-- Framer: pathLength 0→1 in 1.5s, easeInOut, repeat ∞, repeatDelay 0.5s → cycle 2s -->
+    <!-- Léger fade: opacity 0→1 sur la durée du tracé, easeInOut -->
+    <path
+      d="M50 15 C 69 15, 85 31, 85 50 C 85 69, 69 85, 50 85"
+      stroke="#73CFA8"
+      stroke-width="6"
+      stroke-linecap="round"
+      fill="none"
+      pathLength="1"
+      stroke-dasharray="1"
+      stroke-dashoffset="1"
+      opacity="0"
+    >
+      <animate
+        attributeName="stroke-dashoffset"
+        values="1;0;1;1"
+        keyTimes="0;0.75;0.7501;1"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0 0 1 1; 0 0 1 1"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+      <animate
+        attributeName="opacity"
+        values="0;1;0;0"
+        keyTimes="0;0.75;0.7501;1"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0 0 1 1; 0 0 1 1"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+    </path>
+
+    <!-- Orbit ring - pink (left half), delayed 0.75s -->
+    <path
+      d="M50 85 C 31 85, 15 69, 15 50 C 15 31, 31 15, 50 15"
+      stroke="#FB9289"
+      stroke-width="6"
+      stroke-linecap="round"
+      fill="none"
+      pathLength="1"
+      stroke-dasharray="1"
+      stroke-dashoffset="1"
+      opacity="0"
+    >
+      <animate
+        attributeName="stroke-dashoffset"
+        values="1;0;1;1"
+        keyTimes="0;0.75;0.7501;1"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0 0 1 1; 0 0 1 1"
+        dur="2s"
+        begin="0.75s"
+        repeatCount="indefinite"
+      />
+      <animate
+        attributeName="opacity"
+        values="0;1;0;0"
+        keyTimes="0;0.75;0.7501;1"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0 0 1 1; 0 0 1 1"
+        dur="2s"
+        begin="0.75s"
+        repeatCount="indefinite"
+      />
+    </path>
+
+    <!-- Energy particles (scale from center via r animation) -->
+    <!-- Framer: scale [0,1,0], opacity [0,1,0], times [0,0.5,1], dur 2s, easeOut -->
+
+    <!-- Particle - right (green), delay 0s -->
+    <circle cx="85" cy="50" r="0" fill="#73CFA8" opacity="0">
+      <animate attributeName="r" values="0;4;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Particle - top (green), delay 0s (was 0.5s, avancé de 500ms) -->
+    <circle cx="50" cy="15" r="0" fill="#73CFA8" opacity="0">
+      <animate attributeName="r" values="0;4;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="0s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="0s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Particle - left (pink), delay 1s -->
+    <circle cx="15" cy="50" r="0" fill="#FB9289" opacity="0">
+      <animate attributeName="r" values="0;4;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="1s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="1s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Particle - bottom (pink), delay 1s (was 1.5s, avancé de 500ms) -->
+    <circle cx="50" cy="85" r="0" fill="#FB9289" opacity="0">
+      <animate attributeName="r" values="0;4;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="1s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0 0 0.58 1; 0 0 0.58 1" dur="2s" begin="1s" repeatCount="indefinite" />
+    </circle>
+
+  </g>
+
+  <!-- Wordmark: DON (green, weight 900) + ACTION (black, weight 400) -->
+  <!-- Baseline remonté de 2px: 93 → 91 -->
+  <text y="91" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="72">
+    <tspan x="108" font-weight="900" letter-spacing="-1.8" fill="#73CFA8">DON</tspan><tspan font-weight="400" letter-spacing="1.8" fill="currentColor">ACTION</tspan>
+  </text>
+</svg>
