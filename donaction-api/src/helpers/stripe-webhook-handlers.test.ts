@@ -98,6 +98,58 @@ describe('handleWebhookEvent', () => {
         );
     });
 
+    it('routes account.application.deauthorized to syncAccountStatus', async () => {
+        await handleWebhookEvent(
+            mockStrapi,
+            makeEvent('account.application.deauthorized')
+        );
+        expect(syncAccountStatus).toHaveBeenCalledWith(
+            mockStrapi,
+            'acct_test'
+        );
+    });
+
+    it('routes charge.dispute.created without error', async () => {
+        const event = makeEvent('charge.dispute.created');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        // Stub handler — syncAccountStatus not called for disputes
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+    });
+
+    it('routes charge.dispute.updated without error', async () => {
+        const event = makeEvent('charge.dispute.updated');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+    });
+
+    it('routes charge.dispute.closed without error', async () => {
+        const event = makeEvent('charge.dispute.closed');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+    });
+
+    it('routes payout.paid without error', async () => {
+        const event = makeEvent('payout.paid');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+    });
+
+    it('routes payout.failed without error', async () => {
+        const event = makeEvent('payout.failed');
+        await expect(
+            handleWebhookEvent(mockStrapi, event)
+        ).resolves.toBeUndefined();
+        expect(syncAccountStatus).not.toHaveBeenCalled();
+    });
+
     it('does not call syncAccountStatus for unknown event types', async () => {
         await handleWebhookEvent(mockStrapi, makeEvent('charge.succeeded'));
         expect(syncAccountStatus).not.toHaveBeenCalled();
