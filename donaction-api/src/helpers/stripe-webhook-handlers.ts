@@ -284,11 +284,24 @@ export async function retryFailedWebhooks(
     });
 
     try {
+        // Age threshold: only retry 'received'/'processing' events older than 5 minutes
+        // to avoid racing with the main handler's optimistic lock
+        const stuckThreshold = new Date(Date.now() - 5 * 60 * 1000);
+
         const failedLogs = await strapiInstance.db
             .query('api::webhook-log.webhook-log')
             .findMany({
                 where: {
-                    processed: false,
+                    $or: [
+                        // Failed: always eligible for retry
+                        { status: 'failed' },
+                        // Received or processing: only if stuck (older than 5 min)
+                        // to avoid racing with the main handler's optimistic lock
+                        {
+                            status: { $in: ['received', 'processing'] },
+                            updatedAt: { $lt: stuckThreshold.toISOString() },
+                        },
+                    ],
                     retry_count: { $lt: 3 },
                 },
                 limit: 50,
@@ -303,6 +316,29 @@ export async function retryFailedWebhooks(
 
         for (const log of failedLogs) {
             try {
+                // Optimistic lock: claim the event before processing to prevent
+                // concurrent cron runs from double-processing the same event.
+                // Includes 'processing' to reclaim stuck events (already age-filtered
+                // by findMany to >5 min, so legitimate in-flight processing is safe).
+                const claimed = await strapiInstance.db
+                    .query('api::webhook-log.webhook-log')
+                    .update({
+                        where: {
+                            id: log.id,
+                            status: { $in: ['failed', 'received', 'processing'] },
+                        },
+                        data: { status: 'processing' },
+                    });
+
+                if (!claimed) {
+                    logSimple({
+                        message: `Webhook ${log.event_id} déjà réclamé, ignoré`,
+                        color: 'yellow',
+                        prefix: 'StripeConnect',
+                    });
+                    continue;
+                }
+
                 logSimple({
                     message: `Retraitement ${log.event_id} (tentative ${log.retry_count + 1}/3)`,
                     color: 'blue',
@@ -319,10 +355,10 @@ export async function retryFailedWebhooks(
                     .update({
                         documentId: log.documentId,
                         data: {
-                            processed: true,
+                            status: 'processed',
                             processed_at: new Date(),
                             retry_count: log.retry_count + 1,
-                            error_message: null,
+                            processing_error: null,
                         },
                     });
 
@@ -332,7 +368,7 @@ export async function retryFailedWebhooks(
                     prefix: 'StripeConnect',
                 });
             } catch (error) {
-                // Stripe events expire after 30 days — mark as permanently failed
+                // Stripe events expire after 30 days — mark as ignored (not retryable)
                 if (error?.statusCode === 404) {
                     logSimple({
                         message: `Événement ${log.event_id} expiré sur Stripe (>30 jours)`,
@@ -345,10 +381,10 @@ export async function retryFailedWebhooks(
                         .update({
                             documentId: log.documentId,
                             data: {
-                                processed: true,
+                                status: 'ignored',
                                 processed_at: new Date(),
                                 retry_count: 3,
-                                error_message: 'Event expired on Stripe (>30 days)',
+                                processing_error: 'Event expired on Stripe (>30 days)',
                             },
                         });
                     continue;
@@ -364,8 +400,9 @@ export async function retryFailedWebhooks(
                     .update({
                         documentId: log.documentId,
                         data: {
+                            status: 'failed',
                             retry_count: log.retry_count + 1,
-                            error_message: error.message,
+                            processing_error: error.message,
                         },
                     });
             }
