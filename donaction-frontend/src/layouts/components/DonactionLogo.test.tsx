@@ -16,7 +16,7 @@ describe('DonactionLogo', () => {
 		render(<DonactionLogo />);
 		const img = screen.getByAltText('Donaction');
 		expect(img).toBeInTheDocument();
-		expect(img).toHaveAttribute('src', '/images/donaction-logo.png');
+		expect(img).toHaveAttribute('src', '/images/donaction-logo-animated.svg');
 	});
 
 	it('uses default dimensions when not provided', () => {
