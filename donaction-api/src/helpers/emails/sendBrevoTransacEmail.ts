@@ -46,6 +46,13 @@ const BREVO_TEMPLATES = {
 };
 
 async function sendBrevoTransacEmail(props: BrevoTransacEmailProps) {
+    // Guard: caller must provide either explicit recipients or destIsAdmin
+    if (!props.destIsAdmin && (!props.to || props.to.length === 0)) {
+        throw new Error(
+            'sendBrevoTransacEmail: either "to" or "destIsAdmin" is required',
+        );
+    }
+
     return new Promise(async (resolve, reject) => {
         try {
             const apiInstance = await getBrevoInstance(

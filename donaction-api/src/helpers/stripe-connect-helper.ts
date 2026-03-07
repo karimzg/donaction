@@ -618,9 +618,9 @@ export async function sendAccountRestrictedAlert(
                 klubrName = connectedAccount.klubr.denomination || 'Inconnu';
                 klubrUuid = connectedAccount.klubr.uuid || 'N/A';
             } else {
-                // Numeric FK fallback — query by documentId via the
-                // connected_account → klubr relation. We use documentId
-                // (Strapi v5 convention) rather than internal id.
+                // Numeric FK fallback — re-populate klubr via connected-account relation.
+                // Using `id` here is intentional: Query Engine (strapi.db.query)
+                // uses internal `id`, unlike Document Service which uses `documentId`.
                 const connectedAccountWithKlubr = await strapiInstance.db
                     .query('api::connected-account.connected-account')
                     .findOne({
