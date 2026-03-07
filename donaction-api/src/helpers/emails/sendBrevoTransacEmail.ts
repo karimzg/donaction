@@ -2,6 +2,35 @@ import getBrevoInstance from './getBrevoInstance';
 import * as fs from 'fs';
 import { ADMIN_EMAIL_PRIMARY, ADMIN_EMAIL_BCC } from './emailConstants';
 
+export interface BrevoEmailRecipient {
+    email: string;
+    name?: string;
+}
+
+export interface BrevoEmailAttachment {
+    filename: string;
+    path: string;
+}
+
+export interface BrevoTransacEmailProps {
+    /** Brevo template ID (use BREVO_TEMPLATES constants) */
+    templateId: number;
+    /** Template variables — values must be strings */
+    params: Record<string, string>;
+    /** Tags for categorization and analytics */
+    tags: string[];
+    /** Recipients — required unless destIsAdmin is true */
+    to?: BrevoEmailRecipient[];
+    /** Email subject — optional when template defines its own */
+    subject?: string;
+    /** Sender override — defaults to Klubr / hello@donaction.fr */
+    from?: BrevoEmailRecipient;
+    /** File attachments */
+    attachments?: BrevoEmailAttachment[];
+    /** When true, auto-routes to ADMIN_EMAIL_PRIMARY with ADMIN_EMAIL_BCC */
+    destIsAdmin?: boolean;
+}
+
 const BREVO_TEMPLATES = {
     ADMIN_ALERT: 27,
     FORGOT_PASSWORD: 9,
@@ -16,7 +45,7 @@ const BREVO_TEMPLATES = {
     DONATION_DONOR_RELAUNCH: 21,
 };
 
-async function sendBrevoTransacEmail(props: any) {
+async function sendBrevoTransacEmail(props: BrevoTransacEmailProps) {
     return new Promise(async (resolve, reject) => {
         try {
             const apiInstance = await getBrevoInstance(
