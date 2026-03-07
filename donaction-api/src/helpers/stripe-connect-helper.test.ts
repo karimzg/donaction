@@ -6,8 +6,6 @@ import { TradePolicyEntity } from '../_types';
 // Stub env vars before importing module (top-level guard throws without them)
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_fake');
 vi.stubEnv('STRIPE_WEBHOOK_SECRET_CONNECT', 'whsec_fake');
-vi.stubEnv('SUPER_ADMIN_EMAIL', 'admin-test@donaction.fr');
-
 // Mock Stripe client as a class (Stripe SDK uses `new Stripe(...)`)
 vi.mock('stripe', () => {
     return {
@@ -35,6 +33,12 @@ vi.mock('./logger', () => ({
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue({}),
     BREVO_TEMPLATES: { ADMIN_ALERT: 27 },
+}));
+
+// Mock email constants
+vi.mock('./emails/emailConstants', () => ({
+    ADMIN_EMAIL_PRIMARY: 'admin-test@donaction.fr',
+    ADMIN_EMAIL_BCC: 'bcc-test@donaction.fr',
 }));
 
 const {
@@ -1012,7 +1016,7 @@ describe('sendAccountRestrictedAlert', () => {
             expect.objectContaining({
                 subject: '[ALERTE] Compte Stripe disabled: Club Test',
                 templateId: 27,
-                to: [{ email: 'admin-test@donaction.fr', name: 'Admin Donaction' }],
+                destIsAdmin: true,
                 params: expect.objectContaining({
                     ALERT_TYPE: 'Compte Stripe Connect disabled',
                     CLUB_NAME: 'Club Test',
@@ -1079,27 +1083,6 @@ describe('sendAccountRestrictedAlert', () => {
                 }),
             })
         );
-    });
-
-    it('does not send when SUPER_ADMIN_EMAIL env var is missing', async () => {
-        const originalEmail = process.env.SUPER_ADMIN_EMAIL;
-        delete process.env.SUPER_ADMIN_EMAIL;
-
-        await sendAccountRestrictedAlert(
-            mockStrapiInstance,
-            'acct_test_123',
-            'restricted',
-            makeStripeAccount(),
-            makeConnectedAccount()
-        );
-
-        expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
-        expect(strapiLog.error).toHaveBeenCalledWith(
-            expect.stringContaining('SUPER_ADMIN_EMAIL')
-        );
-
-        // Restore env
-        process.env.SUPER_ADMIN_EMAIL = originalEmail;
     });
 
     it('does not throw when email sending fails', async () => {

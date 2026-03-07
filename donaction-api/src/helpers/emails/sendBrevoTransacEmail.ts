@@ -1,5 +1,6 @@
 import getBrevoInstance from './getBrevoInstance';
 import * as fs from 'fs';
+import { ADMIN_EMAIL_PRIMARY, ADMIN_EMAIL_BCC } from './emailConstants';
 
 const BREVO_TEMPLATES = {
     ADMIN_ALERT: 27,
@@ -32,6 +33,15 @@ async function sendBrevoTransacEmail(props: any) {
                     };
                 },
             );
+
+            // When destIsAdmin is true, route to centralized admin email + BCC
+            const recipients = props.destIsAdmin
+                ? [{ email: ADMIN_EMAIL_PRIMARY, name: 'Admin Donaction' }]
+                : props.to;
+            const bcc = props.destIsAdmin
+                ? [{ email: ADMIN_EMAIL_BCC }]
+                : undefined;
+
             const res = await apiInstance.sendTransacEmail({
                 subject: props.subject,
                 from: props.from || { name: 'Klubr', email: 'hello@donaction.fr' },
@@ -41,7 +51,11 @@ async function sendBrevoTransacEmail(props: any) {
                               // { email: 'hamach78@gmail.com' },
                               { email: 'k.zgoulli@gmail.com' },
                           ]
-                        : props.to,
+                        : recipients,
+                bcc:
+                    process.env.EMAIL_BREVO_ENV !== 'prod'
+                        ? undefined
+                        : bcc,
                 templateId: props.templateId,
                 params: {
                     ...props.params,

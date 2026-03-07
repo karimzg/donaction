@@ -1337,7 +1337,7 @@ export default factories.createCoreController(
                         await sendBrevoTransacEmail({
                             subject: `[ALERTE] Échec envoi email création club: ${entity.denomination}`,
                             templateId: BREVO_TEMPLATES.ADMIN_ALERT,
-                            to: [{ email: process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr' }],
+                            destIsAdmin: true,
                             params: {
                                 ALERT_TYPE: 'Échec envoi email',
                                 CLUB_NAME: entity.denomination,
@@ -1367,7 +1367,7 @@ export default factories.createCoreController(
                     await sendBrevoTransacEmail({
                         subject: `[ALERTE] Échec  : ${ctx.request.body.data.denomination}`,
                         templateId: BREVO_TEMPLATES.ADMIN_ALERT,
-                        to: [{ email: process.env.SUPER_ADMIN_EMAIL || 'admin@donaction.fr' }],
+                        destIsAdmin: true,
                         params: {
                             ALERT_TYPE: 'Échec création association',
                             CLUB_NAME: ctx.request.body.data.denomination,

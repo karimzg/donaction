@@ -608,14 +608,6 @@ export async function sendAccountRestrictedAlert(
     connectedAccount: ConnectedAccountWithOptionalKlubr,
 ): Promise<void> {
     try {
-        const adminEmail = process.env.SUPER_ADMIN_EMAIL;
-        if (!adminEmail) {
-            strapiLog.error(
-                'SUPER_ADMIN_EMAIL env var not set — admin alert not sent',
-            );
-            return;
-        }
-
         // Extract klubr info from pre-populated relation or fallback to DB query
         let klubrName = 'Inconnu';
         let klubrUuid = 'N/A';
@@ -651,7 +643,7 @@ export async function sendAccountRestrictedAlert(
         await sendBrevoTransacEmail({
             subject: `[ALERTE] Compte Stripe ${accountStatus}: ${klubrName}`,
             templateId: BREVO_TEMPLATES.ADMIN_ALERT,
-            to: [{ email: adminEmail, name: 'Admin Donaction' }],
+            destIsAdmin: true,
             params: {
                 ALERT_TYPE: `Compte Stripe Connect ${accountStatus}`,
                 CLUB_NAME: klubrName,
