@@ -2,6 +2,10 @@ import type Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 import { syncAccountStatus, stripe } from './stripe-connect-helper';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
+import {
+    sendBrevoTransacEmail,
+    BREVO_TEMPLATES,
+} from './emails/sendBrevoTransacEmail';
 
 /**
  * Handles account.updated webhook event
@@ -217,7 +221,10 @@ export async function handlePersonUpdated(
 
 /**
  * Handles account.application.deauthorized webhook event
- * Triggered when a connected account disconnects from the platform
+ * Triggered when a connected account disconnects from the platform.
+ *
+ * After deauthorization, the platform can no longer access the Stripe account
+ * via the API, so we update the database directly instead of calling syncAccountStatus.
  */
 export async function handleAccountDeauthorized(
     strapiInstance: Core.Strapi,
@@ -242,7 +249,69 @@ export async function handleAccountDeauthorized(
     }
 
     try {
-        await syncAccountStatus(strapiInstance, accountId);
+        // Find connected account with klubr relation
+        const connectedAccount = await strapiInstance.db
+            .query('api::connected-account.connected-account')
+            .findOne({
+                where: { stripe_account_id: accountId },
+                populate: { klubr: true },
+            });
+
+        if (!connectedAccount) {
+            strapiLog.error(
+                `Compte connecté introuvable pour le compte Stripe déautorisé: ${accountId}`
+            );
+            return;
+        }
+
+        // Disable the connected account
+        await strapiInstance
+            .documents('api::connected-account.connected-account')
+            .update({
+                documentId: connectedAccount.documentId,
+                data: {
+                    account_status: 'disabled',
+                    charges_enabled: false,
+                    payouts_enabled: false,
+                    last_sync: new Date(),
+                },
+            });
+
+        logSimple({
+            message: `Compte ${accountId} désactivé (deauthorized)`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+
+        // Disable donation eligibility for the klubr
+        if (connectedAccount.klubr?.documentId) {
+            await strapiInstance
+                .documents('api::klubr.klubr')
+                .update({
+                    documentId: connectedAccount.klubr.documentId,
+                    data: { donationEligible: false },
+                });
+
+            logSimple({
+                message: `Klubr ${connectedAccount.klubr.denomination || connectedAccount.klubr.documentId} - collecte de dons désactivée`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+        }
+
+        // Fire-and-forget: send admin alert
+        void sendDeauthorizedAdminAlert(
+            strapiInstance,
+            accountId,
+            connectedAccount
+        );
+
+        // Fire-and-forget: send notification to klubr admin
+        void sendDeauthorizedKlubrNotification(
+            strapiInstance,
+            accountId,
+            connectedAccount
+        );
 
         logSimple({
             message: `Compte ${accountId} déautorisé de la plateforme`,
@@ -255,6 +324,126 @@ export async function handleAccountDeauthorized(
             error
         );
         throw error;
+    }
+}
+
+/**
+ * Sends an admin alert when an account is deauthorized.
+ * Non-blocking: errors are logged but not propagated.
+ */
+async function sendDeauthorizedAdminAlert(
+    strapiInstance: Core.Strapi,
+    accountId: string,
+    connectedAccount: any
+): Promise<void> {
+    try {
+        const klubrName = connectedAccount.klubr?.denomination || 'Inconnu';
+        const klubrUuid = connectedAccount.klubr?.uuid || 'N/A';
+
+        await sendBrevoTransacEmail({
+            subject: `[ALERTE] Compte Stripe déconnecté: ${klubrName}`,
+            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            destIsAdmin: true,
+            params: {
+                ALERT_TYPE: 'Compte Stripe Connect déconnecté (deauthorized)',
+                CLUB_NAME: klubrName,
+                KLUBR_UUID: klubrUuid,
+                STRIPE_ACCOUNT_ID: accountId,
+                ACCOUNT_STATUS: 'disabled',
+                DISABLED_REASON: 'Déconnexion volontaire de la plateforme',
+                CURRENTLY_DUE: 'N/A',
+                CHARGES_ENABLED: 'Non',
+                PAYOUTS_ENABLED: 'Non',
+            },
+            tags: ['admin-alert', 'stripe-connect', 'account-deauthorized'],
+        });
+
+        logSimple({
+            message: `Alerte admin envoyée pour compte déautorisé: ${accountId}`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (alertError) {
+        strapiLog.error(
+            `Echec de l'envoi de l'alerte admin pour le compte déautorisé ${accountId}:`,
+            alertError
+        );
+    }
+}
+
+/**
+ * Sends a notification email to the klubr admin when the account is deauthorized.
+ * Non-blocking: errors are logged but not propagated.
+ */
+async function sendDeauthorizedKlubrNotification(
+    strapiInstance: Core.Strapi,
+    accountId: string,
+    connectedAccount: any
+): Promise<void> {
+    try {
+        if (!connectedAccount.klubr?.id) {
+            logSimple({
+                message: `Pas de klubr associé pour la notification de déconnexion: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        // Find the klubr admin member to get their email
+        const adminMember = await strapiInstance.db
+            .query('api::klubr-membre.klubr-membre')
+            .findOne({
+                where: {
+                    klubr: connectedAccount.klubr.id,
+                    role: 'Admin',
+                },
+                populate: { user: true },
+            });
+
+        const adminEmail =
+            adminMember?.email || adminMember?.user?.email;
+
+        if (!adminEmail) {
+            logSimple({
+                message: `Aucun email admin trouvé pour le klubr ${connectedAccount.klubr.denomination || connectedAccount.klubr.id}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const klubrName = connectedAccount.klubr.denomination || 'Votre association';
+
+        await sendBrevoTransacEmail({
+            subject: `Votre compte Stripe a été déconnecté - ${klubrName}`,
+            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            to: [{ email: adminEmail, name: klubrName }],
+            params: {
+                ALERT_TYPE: 'Déconnexion du compte Stripe',
+                CLUB_NAME: klubrName,
+                KLUBR_UUID: connectedAccount.klubr.uuid || 'N/A',
+                STRIPE_ACCOUNT_ID: accountId,
+                ACCOUNT_STATUS: 'disabled',
+                DISABLED_REASON:
+                    'Votre compte Stripe a été déconnecté de la plateforme Donaction. La collecte de dons est désactivée.',
+                CURRENTLY_DUE: 'Reconnectez votre compte Stripe pour réactiver la collecte',
+                CHARGES_ENABLED: 'Non',
+                PAYOUTS_ENABLED: 'Non',
+            },
+            tags: ['klubr-notification', 'stripe-connect', 'account-deauthorized'],
+        });
+
+        logSimple({
+            message: `Notification klubr envoyée à ${adminEmail} pour compte déautorisé: ${accountId}`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (notifError) {
+        strapiLog.error(
+            `Echec de l'envoi de la notification klubr pour le compte déautorisé ${accountId}:`,
+            notifError
+        );
     }
 }
 
