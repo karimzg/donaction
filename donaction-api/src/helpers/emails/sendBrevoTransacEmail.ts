@@ -15,8 +15,8 @@ export interface BrevoEmailAttachment {
 export interface BrevoTransacEmailProps {
     /** Brevo template ID (use BREVO_TEMPLATES constants) */
     templateId: number;
-    /** Template variables — values must be strings */
-    params: Record<string, string>;
+    /** Template variables — Brevo accepts strings and numbers natively */
+    params: Record<string, string | number>;
     /** Tags for categorization and analytics */
     tags: string[];
     /** Recipients — required unless destIsAdmin is true */
