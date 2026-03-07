@@ -6,6 +6,7 @@ import {
     sendBrevoTransacEmail,
     BREVO_TEMPLATES,
 } from './emails/sendBrevoTransacEmail';
+import { ConnectedAccountWithOptionalKlubr } from '../_types';
 
 /**
  * Handles account.updated webhook event
@@ -301,7 +302,6 @@ export async function handleAccountDeauthorized(
 
         // Fire-and-forget: send admin alert
         void sendDeauthorizedAdminAlert(
-            strapiInstance,
             accountId,
             connectedAccount
         );
@@ -332,13 +332,20 @@ export async function handleAccountDeauthorized(
  * Non-blocking: errors are logged but not propagated.
  */
 async function sendDeauthorizedAdminAlert(
-    strapiInstance: Core.Strapi,
     accountId: string,
-    connectedAccount: any
+    connectedAccount: ConnectedAccountWithOptionalKlubr
 ): Promise<void> {
     try {
-        const klubrName = connectedAccount.klubr?.denomination || 'Inconnu';
-        const klubrUuid = connectedAccount.klubr?.uuid || 'N/A';
+        let klubrName = 'Inconnu';
+        let klubrUuid = 'N/A';
+
+        if (
+            connectedAccount.klubr &&
+            typeof connectedAccount.klubr === 'object'
+        ) {
+            klubrName = connectedAccount.klubr.denomination || 'Inconnu';
+            klubrUuid = connectedAccount.klubr.uuid || 'N/A';
+        }
 
         await sendBrevoTransacEmail({
             subject: `[ALERTE] Compte Stripe déconnecté: ${klubrName}`,
@@ -378,10 +385,14 @@ async function sendDeauthorizedAdminAlert(
 async function sendDeauthorizedKlubrNotification(
     strapiInstance: Core.Strapi,
     accountId: string,
-    connectedAccount: any
+    connectedAccount: ConnectedAccountWithOptionalKlubr
 ): Promise<void> {
     try {
-        if (!connectedAccount.klubr?.id) {
+        // Guard: klubr must be a populated object (not a numeric FK)
+        if (
+            !connectedAccount.klubr ||
+            typeof connectedAccount.klubr !== 'object'
+        ) {
             logSimple({
                 message: `Pas de klubr associé pour la notification de déconnexion: ${accountId}`,
                 color: 'yellow',
@@ -390,12 +401,14 @@ async function sendDeauthorizedKlubrNotification(
             return;
         }
 
+        const klubr = connectedAccount.klubr;
+
         // Find the klubr admin member to get their email
         const adminMember = await strapiInstance.db
             .query('api::klubr-membre.klubr-membre')
             .findOne({
                 where: {
-                    klubr: connectedAccount.klubr.id,
+                    klubr: klubr.id,
                     role: 'Admin',
                 },
                 populate: { user: true },
@@ -406,14 +419,14 @@ async function sendDeauthorizedKlubrNotification(
 
         if (!adminEmail) {
             logSimple({
-                message: `Aucun email admin trouvé pour le klubr ${connectedAccount.klubr.denomination || connectedAccount.klubr.id}`,
+                message: `Aucun email admin trouvé pour le klubr ${klubr.denomination || klubr.id}`,
                 color: 'yellow',
                 prefix: 'StripeConnect',
             });
             return;
         }
 
-        const klubrName = connectedAccount.klubr.denomination || 'Votre association';
+        const klubrName = klubr.denomination || 'Votre association';
 
         await sendBrevoTransacEmail({
             subject: `Votre compte Stripe a été déconnecté - ${klubrName}`,
@@ -422,7 +435,7 @@ async function sendDeauthorizedKlubrNotification(
             params: {
                 ALERT_TYPE: 'Déconnexion du compte Stripe',
                 CLUB_NAME: klubrName,
-                KLUBR_UUID: connectedAccount.klubr.uuid || 'N/A',
+                KLUBR_UUID: klubr.uuid || 'N/A',
                 STRIPE_ACCOUNT_ID: accountId,
                 ACCOUNT_STATUS: 'disabled',
                 DISABLED_REASON:
