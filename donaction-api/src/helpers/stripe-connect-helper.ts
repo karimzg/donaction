@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 import {
     ConnectedAccountEntity,
+    ConnectedAccountWithOptionalKlubr,
     FinancialAuditLogEntity,
     KlubrEntity,
     TradePolicyEntity,
@@ -319,6 +320,26 @@ export async function syncAccountStatus(
         prefix: 'StripeConnect',
     });
 
+    // Fire-and-forget admin alert on status transition to restricted/disabled.
+    // Triggered BEFORE the DB update so that a failing update doesn't suppress the alert.
+    // sendAccountRestrictedAlert has internal try/catch so it never throws.
+    // NOTE: If two webhook events for the same account arrive simultaneously,
+    // both may read the old account_status and both pass statusChanged === true,
+    // resulting in duplicate alerts. Acceptable at current scale.
+    const statusChanged = connectedAccount.account_status !== accountStatus;
+    if (
+        statusChanged &&
+        (accountStatus === 'restricted' || accountStatus === 'disabled')
+    ) {
+        void sendAccountRestrictedAlert(
+            strapiInstance,
+            accountId,
+            accountStatus,
+            account,
+            connectedAccount,
+        );
+    }
+
     // Update database using Document Service API with documentId
     const updated = await strapiInstance
         .documents('api::connected-account.connected-account')
@@ -341,22 +362,6 @@ export async function syncAccountStatus(
         color: 'green',
         prefix: 'StripeConnect',
     });
-
-    // Fire-and-forget admin alert on status transition to restricted/disabled.
-    // sendAccountRestrictedAlert has internal try/catch so it never throws.
-    const statusChanged = connectedAccount.account_status !== accountStatus;
-    if (
-        statusChanged &&
-        (accountStatus === 'restricted' || accountStatus === 'disabled')
-    ) {
-        void sendAccountRestrictedAlert(
-            strapiInstance,
-            accountId,
-            accountStatus,
-            account,
-            connectedAccount,
-        );
-    }
 
     return updated as ConnectedAccountEntity;
 }
@@ -600,15 +605,7 @@ export async function sendAccountRestrictedAlert(
     accountId: string,
     accountStatus: 'restricted' | 'disabled',
     stripeAccount: Stripe.Account,
-    // Inline type instead of ConnectedAccountEntity because the klubr field
-    // shape depends on whether the caller populated the relation (object) or not (number).
-    // Strapi's generated ContentType doesn't model this populate-dependent variance.
-    connectedAccount: {
-        id: number;
-        documentId: string;
-        account_status?: string;
-        klubr?: KlubrEntity | number | null;
-    },
+    connectedAccount: ConnectedAccountWithOptionalKlubr,
 ): Promise<void> {
     try {
         const adminEmail = process.env.SUPER_ADMIN_EMAIL;
@@ -663,9 +660,8 @@ export async function sendAccountRestrictedAlert(
                 ACCOUNT_STATUS: accountStatus,
                 DISABLED_REASON: disabledReason,
                 CURRENTLY_DUE: currentlyDue,
-                // Stringified: Brevo template params must be strings
-                CHARGES_ENABLED: String(stripeAccount.charges_enabled),
-                PAYOUTS_ENABLED: String(stripeAccount.payouts_enabled),
+                CHARGES_ENABLED: stripeAccount.charges_enabled ? 'Oui' : 'Non',
+                PAYOUTS_ENABLED: stripeAccount.payouts_enabled ? 'Oui' : 'Non',
             },
             tags: ['admin-alert', 'stripe-connect', `account-${accountStatus}`],
         });

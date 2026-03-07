@@ -916,6 +916,35 @@ describe('syncAccountStatus', () => {
         expect(sendBrevoTransacEmail).not.toHaveBeenCalled();
     });
 
+    it('still sends alert even if DB update fails', async () => {
+        // Make update throw
+        vi.mocked(mockStrapiInstance.documents).mockReturnValue({
+            update: vi.fn().mockRejectedValue(new Error('DB conflict')),
+            create: vi.fn().mockResolvedValue({}),
+        } as any);
+
+        vi.mocked(stripe.accounts.retrieve).mockResolvedValue(
+            makeStripeAccount({
+                charges_enabled: false,
+                payouts_enabled: false,
+                details_submitted: true,
+                requirements: {
+                    disabled_reason: null,
+                    currently_due: ['individual.verification.document'],
+                    pending_verification: [],
+                } as any,
+            })
+        );
+
+        // syncAccountStatus will throw due to DB update failure
+        await expect(
+            syncAccountStatus(mockStrapiInstance, 'acct_test_123')
+        ).rejects.toThrow('DB conflict');
+
+        // But alert was fired before the update, so it should still be sent
+        await vi.waitFor(() => expect(sendBrevoTransacEmail).toHaveBeenCalled());
+    });
+
     it('throws when connected account not found in database', async () => {
         const strapiNoAccount = makeMockStrapi();
         vi.mocked(strapiNoAccount.db.query).mockReturnValue({

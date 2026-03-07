@@ -48,6 +48,19 @@ export type TradePolicyEntity =
     };
 export type ConnectedAccountEntity =
     Data.ContentType<'api::connected-account.connected-account'>;
+
+/**
+ * Connected account with optional klubr relation.
+ * Used when the klubr field shape depends on whether the caller populated the
+ * relation (object) or not (numeric FK). Strapi's generated ContentType doesn't
+ * model this populate-dependent variance.
+ */
+export type ConnectedAccountWithOptionalKlubr = {
+    id: number;
+    documentId: string;
+    account_status?: string;
+    klubr?: KlubrEntity | number | null;
+};
 export type FinancialAuditLogEntity =
     Data.ContentType<'api::financial-audit-log.financial-audit-log'>;
 export type ReceiptCancellationEntity =
