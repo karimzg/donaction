@@ -2,10 +2,16 @@ import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 import {
     ConnectedAccountEntity,
+    ConnectedAccountWithOptionalKlubr,
     FinancialAuditLogEntity,
+    KlubrEntity,
     TradePolicyEntity,
 } from '../_types';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
+import {
+    sendBrevoTransacEmail,
+    BREVO_TEMPLATES,
+} from './emails/sendBrevoTransacEmail';
 import { DEFAULT_CURRENCY } from '../constants';
 
 /**
@@ -290,11 +296,12 @@ export async function syncAccountStatus(
 
     const account = await stripe.accounts.retrieve(accountId);
 
-    // Find connected account in database
+    // Find connected account in database (populate klubr for admin alert context)
     const connectedAccount = await strapiInstance.db
         .query('api::connected-account.connected-account')
         .findOne({
             where: { stripe_account_id: accountId },
+            populate: { klubr: true },
         });
 
     if (!connectedAccount) {
@@ -312,6 +319,26 @@ export async function syncAccountStatus(
         color: 'blue',
         prefix: 'StripeConnect',
     });
+
+    // Fire-and-forget admin alert on status transition to restricted/disabled.
+    // Triggered BEFORE the DB update so that a failing update doesn't suppress the alert.
+    // sendAccountRestrictedAlert has internal try/catch so it never throws.
+    // NOTE: If two webhook events for the same account arrive simultaneously,
+    // both may read the old account_status and both pass statusChanged === true,
+    // resulting in duplicate alerts. Acceptable at current scale.
+    const statusChanged = connectedAccount.account_status !== accountStatus;
+    if (
+        statusChanged &&
+        (accountStatus === 'restricted' || accountStatus === 'disabled')
+    ) {
+        void sendAccountRestrictedAlert(
+            strapiInstance,
+            accountId,
+            accountStatus,
+            account,
+            connectedAccount,
+        );
+    }
 
     // Update database using Document Service API with documentId
     const updated = await strapiInstance
@@ -558,10 +585,96 @@ export async function logFinancialAction(
     return auditLog as FinancialAuditLogEntity;
 }
 
+/**
+ * Sends an admin alert when a connected account becomes restricted or disabled.
+ * Non-blocking: email failure is logged but does not propagate.
+ *
+ * Expects `connectedAccount.klubr` to be pre-populated (object with denomination/uuid).
+ * When called from `syncAccountStatus`, the klubr relation is already populated via
+ * `populate: { klubr: true }`. If klubr is a numeric ID (not populated), falls back
+ * to a DB query.
+ *
+ * @param strapiInstance - Strapi instance
+ * @param accountId - Stripe account ID
+ * @param accountStatus - Determined account status
+ * @param stripeAccount - Stripe account object
+ * @param connectedAccount - Database connected account record (klubr should be populated)
+ */
+export async function sendAccountRestrictedAlert(
+    strapiInstance: Core.Strapi,
+    accountId: string,
+    accountStatus: 'restricted' | 'disabled',
+    stripeAccount: Stripe.Account,
+    connectedAccount: ConnectedAccountWithOptionalKlubr,
+): Promise<void> {
+    try {
+        // Extract klubr info from pre-populated relation or fallback to DB query
+        let klubrName = 'Inconnu';
+        let klubrUuid = 'N/A';
+
+        if (connectedAccount.klubr) {
+            if (typeof connectedAccount.klubr === 'object') {
+                // Already populated — use directly
+                klubrName = connectedAccount.klubr.denomination || 'Inconnu';
+                klubrUuid = connectedAccount.klubr.uuid || 'N/A';
+            } else {
+                // Numeric FK fallback — re-populate klubr via connected-account relation.
+                // Using `id` here is intentional: Query Engine (strapi.db.query)
+                // uses internal `id`, unlike Document Service which uses `documentId`.
+                const connectedAccountWithKlubr = await strapiInstance.db
+                    .query('api::connected-account.connected-account')
+                    .findOne({
+                        where: { id: connectedAccount.id },
+                        populate: { klubr: { select: ['denomination', 'uuid'] } },
+                    });
+
+                if (connectedAccountWithKlubr?.klubr) {
+                    klubrName = connectedAccountWithKlubr.klubr.denomination || 'Inconnu';
+                    klubrUuid = connectedAccountWithKlubr.klubr.uuid || 'N/A';
+                }
+            }
+        }
+
+        const disabledReason =
+            stripeAccount.requirements?.disabled_reason || 'Non spécifié';
+        const currentlyDue =
+            stripeAccount.requirements?.currently_due?.join(', ') || 'Aucun';
+
+        await sendBrevoTransacEmail({
+            subject: `[ALERTE] Compte Stripe ${accountStatus}: ${klubrName}`,
+            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            destIsAdmin: true,
+            params: {
+                ALERT_TYPE: `Compte Stripe Connect ${accountStatus}`,
+                CLUB_NAME: klubrName,
+                KLUBR_UUID: klubrUuid,
+                STRIPE_ACCOUNT_ID: accountId,
+                ACCOUNT_STATUS: accountStatus,
+                DISABLED_REASON: disabledReason,
+                CURRENTLY_DUE: currentlyDue,
+                CHARGES_ENABLED: stripeAccount.charges_enabled ? 'Oui' : 'Non',
+                PAYOUTS_ENABLED: stripeAccount.payouts_enabled ? 'Oui' : 'Non',
+            },
+            tags: ['admin-alert', 'stripe-connect', `account-${accountStatus}`],
+        });
+
+        logSimple({
+            message: `Alerte admin envoyée pour compte ${accountStatus}: ${accountId}`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (alertError) {
+        strapiLog.error(
+            `Echec de l'envoi de l'alerte admin pour le compte ${accountId}:`,
+            alertError,
+        );
+    }
+}
+
 // --- Pure helper functions ---
 
 /** Determines account status from Stripe account data */
-const determineAccountStatus = (
+export const determineAccountStatus = (
     account: Stripe.Account,
 ): 'pending' | 'active' | 'restricted' | 'disabled' => {
     if (account.charges_enabled && account.payouts_enabled) {
@@ -577,7 +690,7 @@ const determineAccountStatus = (
 };
 
 /** Determines verification status from Stripe account data */
-const determineVerificationStatus = (
+export const determineVerificationStatus = (
     account: Stripe.Account,
 ): 'unverified' | 'pending' | 'verified' | 'rejected' => {
     if (!account.details_submitted) {

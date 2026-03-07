@@ -2,10 +2,7 @@ const SibApiV3Sdk = require('sib-api-v3-sdk');
 const fs = require('fs');
 import { logSimple } from '../logger';
 
-// Admin email configuration with env fallbacks
-const ADMIN_EMAIL_PRIMARY =
-    process.env.ADMIN_EMAIL_PRIMARY || 'hello@donaction.fr';
-const ADMIN_EMAIL_BCC = process.env.ADMIN_EMAIL_BCC || 'k.zgoulli@gmail.com';
+import { ADMIN_EMAIL_PRIMARY, ADMIN_EMAIL_BCC } from './emailConstants';
 
 export interface EmailPayload {
     to: string;

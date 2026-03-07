@@ -1,5 +1,35 @@
 import getBrevoInstance from './getBrevoInstance';
 import * as fs from 'fs';
+import { ADMIN_EMAIL_PRIMARY, ADMIN_EMAIL_BCC } from './emailConstants';
+
+export interface BrevoEmailRecipient {
+    email: string;
+    name?: string;
+}
+
+export interface BrevoEmailAttachment {
+    filename: string;
+    path: string;
+}
+
+export interface BrevoTransacEmailProps {
+    /** Brevo template ID (use BREVO_TEMPLATES constants) */
+    templateId: number;
+    /** Template variables — Brevo accepts strings and numbers natively */
+    params: Record<string, string | number>;
+    /** Tags for categorization and analytics */
+    tags: string[];
+    /** Recipients — required unless destIsAdmin is true */
+    to?: BrevoEmailRecipient[];
+    /** Email subject — optional when template defines its own */
+    subject?: string;
+    /** Sender override — defaults to Klubr / hello@donaction.fr */
+    from?: BrevoEmailRecipient;
+    /** File attachments */
+    attachments?: BrevoEmailAttachment[];
+    /** When true, auto-routes to ADMIN_EMAIL_PRIMARY with ADMIN_EMAIL_BCC */
+    destIsAdmin?: boolean;
+}
 
 const BREVO_TEMPLATES = {
     ADMIN_ALERT: 27,
@@ -15,7 +45,14 @@ const BREVO_TEMPLATES = {
     DONATION_DONOR_RELAUNCH: 21,
 };
 
-async function sendBrevoTransacEmail(props: any) {
+async function sendBrevoTransacEmail(props: BrevoTransacEmailProps) {
+    // Guard: caller must provide either explicit recipients or destIsAdmin
+    if (!props.destIsAdmin && (!props.to || props.to.length === 0)) {
+        throw new Error(
+            'sendBrevoTransacEmail: either "to" or "destIsAdmin" is required',
+        );
+    }
+
     return new Promise(async (resolve, reject) => {
         try {
             const apiInstance = await getBrevoInstance(
@@ -32,6 +69,15 @@ async function sendBrevoTransacEmail(props: any) {
                     };
                 },
             );
+
+            // When destIsAdmin is true, route to centralized admin email + BCC
+            const recipients = props.destIsAdmin
+                ? [{ email: ADMIN_EMAIL_PRIMARY, name: 'Admin Donaction' }]
+                : props.to;
+            const bcc = props.destIsAdmin
+                ? [{ email: ADMIN_EMAIL_BCC }]
+                : undefined;
+
             const res = await apiInstance.sendTransacEmail({
                 subject: props.subject,
                 from: props.from || { name: 'Klubr', email: 'hello@donaction.fr' },
@@ -41,7 +87,11 @@ async function sendBrevoTransacEmail(props: any) {
                               // { email: 'hamach78@gmail.com' },
                               { email: 'k.zgoulli@gmail.com' },
                           ]
-                        : props.to,
+                        : recipients,
+                bcc:
+                    process.env.EMAIL_BREVO_ENV !== 'prod'
+                        ? undefined
+                        : bcc,
                 templateId: props.templateId,
                 params: {
                     ...props.params,
