@@ -32,7 +32,7 @@ vi.mock('./logger', () => ({
 // Mock Brevo email
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue({}),
-    BREVO_TEMPLATES: { ADMIN_ALERT: 27, SUPER_ADMIN_ALERT_STRIPE: 29 },
+    BREVO_TEMPLATES: { SUPER_ADMIN_ALERT_ASSO_CREATE_FAILED: 27, SUPER_ADMIN_ALERT_STRIPE: 29 },
 }));
 
 // Mock email constants

@@ -402,6 +402,16 @@ async function sendDeauthorizedKlubrNotification(
         }
 
         const klubr = connectedAccount.klubr;
+
+        if (!klubr.documentId) {
+            logSimple({
+                message: `Klubr sans documentId, notification ignorée: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
         const klubrName = klubr.denomination || 'Votre association';
 
         // Find KlubMemberLeader members to notify
@@ -422,8 +432,8 @@ async function sendDeauthorizedKlubrNotification(
             return;
         }
 
-        // Send LEADER_ALERT to each leader
-        for (const leader of leadersWithEmail) {
+        // Send LEADER_ALERT to all leaders in parallel
+        await Promise.all(leadersWithEmail.map(async (leader) => {
             const leaderEmail =
                 leader.email || leader.users_permissions_user?.email;
 
@@ -446,7 +456,7 @@ async function sendDeauthorizedKlubrNotification(
                 color: 'yellow',
                 prefix: 'StripeConnect',
             });
-        }
+        }));
     } catch (notifError) {
         strapiLog.error(
             `Echec de l'envoi de la notification klubr pour le compte déautorisé ${accountId}:`,

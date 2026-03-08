@@ -19,7 +19,7 @@ vi.mock('./logger', () => ({
 // Mock email sending
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue(undefined),
-    BREVO_TEMPLATES: { ADMIN_ALERT: 27, SUPER_ADMIN_ALERT_STRIPE: 29, LEADER_ALERT: 30 },
+    BREVO_TEMPLATES: { SUPER_ADMIN_ALERT_ASSO_CREATE_FAILED: 27, SUPER_ADMIN_ALERT_STRIPE: 29, LEADER_ALERT: 30 },
 }));
 
 import {
@@ -28,7 +28,7 @@ import {
 } from './stripe-webhook-handlers';
 import { syncAccountStatus } from './stripe-connect-helper';
 import { logSimple, strapiLog } from './logger';
-import { sendBrevoTransacEmail } from './emails/sendBrevoTransacEmail';
+import { sendBrevoTransacEmail, BREVO_TEMPLATES } from './emails/sendBrevoTransacEmail';
 import Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
 
@@ -380,8 +380,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Flush microtask queue for fire-and-forget promises
-        await Promise.resolve();
+        // Flush async fire-and-forget chains
+        await new Promise(process.nextTick);
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -402,8 +402,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Flush microtask queue for fire-and-forget promises
-        await Promise.resolve();
+        // Flush async fire-and-forget chains
+        await new Promise(process.nextTick);
 
         expect(mockGetKlubMembres).toHaveBeenCalledWith(
             'doc_klubr_456',
@@ -411,7 +411,7 @@ describe('handleAccountDeauthorized', () => {
         );
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                templateId: 30,
+                templateId: BREVO_TEMPLATES.LEADER_ALERT,
                 to: [{ email: 'leader@monasso.fr', name: 'Jean Dupont' }],
                 tags: expect.arrayContaining([
                     'klubr-notification',
@@ -432,8 +432,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Flush microtask queue for fire-and-forget promises
-        await Promise.resolve();
+        // Flush async fire-and-forget chains
+        await new Promise(process.nextTick);
 
         // Admin alert should still be sent, but not klubr notification
         const calls = vi.mocked(sendBrevoTransacEmail).mock.calls;

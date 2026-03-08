@@ -225,12 +225,12 @@ const handleEmail = async (result: KlubDonEntity) => {
                         });
                 };
                 await send(klubLeadersAndNetworkLeaders, entryDon);
-                if (entryDon.klub_don_contribution?.klubr.id) {
+                if (entryDon.klub_don_contribution?.klubr?.id) {
                     const klubLeadersAndNetworkLeadersContribution =
                         await strapi.services[
                             'api::klubr-membre.klubr-membre'
                         ].getKlubMembres(
-                            entryDon.klub_don_contribution?.klubr.documentId,
+                            entryDon.klub_don_contribution?.klubr?.documentId,
                             destinatairesTypes,
                         );
                     await send(
