@@ -32,7 +32,7 @@ vi.mock('./logger', () => ({
 // Mock Brevo email
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue({}),
-    BREVO_TEMPLATES: { ADMIN_ALERT: 27 },
+    BREVO_TEMPLATES: { ADMIN_ALERT: 27, SUPER_ADMIN_ALERT_STRIPE: 29 },
 }));
 
 // Mock email constants
@@ -1015,7 +1015,7 @@ describe('sendAccountRestrictedAlert', () => {
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: '[ALERTE] Compte Stripe disabled: Club Test',
-                templateId: 27,
+                templateId: 29,
                 destIsAdmin: true,
                 params: expect.objectContaining({
                     ALERT_TYPE: 'Compte Stripe Connect disabled',
