@@ -689,7 +689,7 @@ stateDiagram-v2
 // helpers/emails/sendBrevoTransacEmail.ts
 const BREVO_TEMPLATES = {
     DONATION_DONOR_CONFIRMATION: 8,    // Confirmation donateur
-    DONATION_ADMIN_NOTIFICATION: 7,     // Notification managers
+    DONATION_LEADERS_NOTIFICATION: 7,     // Notification managers
     DONATION_DONOR_RELAUNCH: 21,        // Relance don abandonné
     CLUB_INVOICE: 13,                   // Facture club
     // ...
@@ -720,7 +720,7 @@ const BREVO_TEMPLATES = {
 
 #### Email aux Managers du Club
 
-**Template:** `DONATION_ADMIN_NOTIFICATION` (ID: 7)
+**Template:** `DONATION_LEADERS_NOTIFICATION` (ID: 7)
 
 **Destinataires:**
 - Responsable du projet (si don à un projet)
@@ -1048,7 +1048,7 @@ updateBodyWithDeductionFiscale(body, don) {
 
 | ID | Nom | Usage |
 |----|-----|-------|
-| 7 | DONATION_ADMIN_NOTIFICATION | Notification managers nouveau don |
+| 7 | DONATION_LEADERS_NOTIFICATION | Notification managers nouveau don |
 | 8 | DONATION_DONOR_CONFIRMATION | Confirmation don au donateur |
 | 21 | DONATION_DONOR_RELAUNCH | Relance don abandonné |
 | 13 | CLUB_INVOICE | Envoi facture club |
