@@ -140,6 +140,7 @@
       "enum": [
         "none",
         "warning_received",
+        "warning_closed",
         "open",
         "under_review",
         "won",

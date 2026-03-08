@@ -202,50 +202,58 @@ describe('handleWebhookEvent', () => {
         expect(syncAccountStatus).not.toHaveBeenCalled();
     });
 
-    it('routes charge.dispute.created to handleDispute', async () => {
-        // handleDispute now requires db access; use a mock strapi with db.query
-        const mockDisputeStrapi = makeDisputeMockStrapi();
+    it('routes charge.dispute.created to handleDispute and updates klub_don', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
         const event = makeDisputeEvent('charge.dispute.created');
-        await expect(
-            handleWebhookEvent(mockDisputeStrapi, event)
-        ).resolves.toBeUndefined();
+        await handleWebhookEvent(mockDisputeStrapi, event);
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(mockUpdateDoc).toHaveBeenCalledWith(
+            expect.objectContaining({
+                documentId: 'doc_don_123',
+                data: expect.objectContaining({ disputeId: 'dp_test_123' }),
+            })
+        );
     });
 
-    it('routes charge.dispute.updated to handleDispute', async () => {
-        const mockDisputeStrapi = makeDisputeMockStrapi();
+    it('routes charge.dispute.updated to handleDispute and updates klub_don', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
         const event = makeDisputeEvent('charge.dispute.updated');
-        await expect(
-            handleWebhookEvent(mockDisputeStrapi, event)
-        ).resolves.toBeUndefined();
+        await handleWebhookEvent(mockDisputeStrapi, event);
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(mockUpdateDoc).toHaveBeenCalled();
     });
 
-    it('routes charge.dispute.closed to handleDispute', async () => {
-        const mockDisputeStrapi = makeDisputeMockStrapi();
-        const event = makeDisputeEvent('charge.dispute.closed');
-        await expect(
-            handleWebhookEvent(mockDisputeStrapi, event)
-        ).resolves.toBeUndefined();
+    it('routes charge.dispute.closed to handleDispute and updates klub_don', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
+        const event = makeDisputeEvent('charge.dispute.closed', { status: 'won' });
+        await handleWebhookEvent(mockDisputeStrapi, event);
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(mockUpdateDoc).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ disputeStatus: 'won' }),
+            })
+        );
     });
 
-    it('routes charge.dispute.funds_withdrawn to handleDispute', async () => {
-        const mockDisputeStrapi = makeDisputeMockStrapi();
+    it('routes charge.dispute.funds_withdrawn to handleDispute and updates klub_don', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
         const event = makeDisputeEvent('charge.dispute.funds_withdrawn');
-        await expect(
-            handleWebhookEvent(mockDisputeStrapi, event)
-        ).resolves.toBeUndefined();
+        await handleWebhookEvent(mockDisputeStrapi, event);
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(mockUpdateDoc).toHaveBeenCalled();
     });
 
-    it('routes charge.dispute.funds_reinstated to handleDispute', async () => {
-        const mockDisputeStrapi = makeDisputeMockStrapi();
+    it('routes charge.dispute.funds_reinstated to handleDispute and updates klub_don', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
         const event = makeDisputeEvent('charge.dispute.funds_reinstated');
-        await expect(
-            handleWebhookEvent(mockDisputeStrapi, event)
-        ).resolves.toBeUndefined();
+        await handleWebhookEvent(mockDisputeStrapi, event);
         expect(syncAccountStatus).not.toHaveBeenCalled();
+        expect(mockUpdateDoc).toHaveBeenCalled();
     });
 
     it('routes payout.paid and logs payout info', async () => {
@@ -667,23 +675,26 @@ describe('handleDispute', () => {
         );
     });
 
-    it('attempts reverse transfer on charge.dispute.created when amount > 0', async () => {
+    it('attempts reverse transfer on charge.dispute.funds_withdrawn when amount > 0', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
 
-        // Mock stripe.transfers.list to return a matching transfer
-        vi.mocked(mockStripeClient.transfers.list).mockResolvedValue({
-            data: [
-                {
-                    id: 'tr_test_789',
-                    amount: 5000,
-                    metadata: { payment_intent_id: 'pi_test_456' },
-                },
-            ],
+        // Mock stripe.transfers.list auto-pagination (for await...of)
+        const mockTransfers = [
+            {
+                id: 'tr_test_789',
+                amount: 5000,
+                metadata: { payment_intent_id: 'pi_test_456' },
+            },
+        ];
+        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
+            [Symbol.asyncIterator]: async function* () {
+                for (const t of mockTransfers) yield t;
+            },
         } as any);
 
         await handleDispute(
             mockDisputeStrapi,
-            makeDisputeEvent('charge.dispute.created')
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
         );
 
         expect(mockStripeClient.transfers.list).toHaveBeenCalledWith(
@@ -705,15 +716,29 @@ describe('handleDispute', () => {
     it('skips reverse transfer when no matching transfer found', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
 
-        vi.mocked(mockStripeClient.transfers.list).mockResolvedValue({
-            data: [],
+        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
+            [Symbol.asyncIterator]: async function* () {
+                // empty
+            },
         } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        expect(mockStripeClient.transfers.createReversal).not.toHaveBeenCalled();
+    });
+
+    it('does NOT reverse transfer on charge.dispute.created (waits for funds_withdrawn)', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
 
         await handleDispute(
             mockDisputeStrapi,
             makeDisputeEvent('charge.dispute.created')
         );
 
+        expect(mockStripeClient.transfers.list).not.toHaveBeenCalled();
         expect(mockStripeClient.transfers.createReversal).not.toHaveBeenCalled();
     });
 
@@ -795,9 +820,62 @@ describe('handleDispute', () => {
 
         await handleDispute(
             mockDisputeStrapi,
-            makeDisputeEvent('charge.dispute.created', { amount: 0 })
+            makeDisputeEvent('charge.dispute.funds_withdrawn', { amount: 0 })
         );
 
         expect(mockStripeClient.transfers.list).not.toHaveBeenCalled();
+    });
+
+    it('skips processing on duplicate charge.dispute.created (idempotency)', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockFindOnePayment = vi.fn().mockResolvedValue({
+            intent_id: 'pi_test_456',
+            klub_don: {
+                id: 1,
+                documentId: 'doc_don_123',
+                disputeId: 'dp_test_123', // Already processed
+                klubr: {
+                    id: 10,
+                    documentId: 'doc_klubr_456',
+                    denomination: 'Mon Association',
+                    uuid: 'klubr-uuid-789',
+                },
+            },
+        });
+        const mockDisputeStrapi = makeDisputeMockStrapi({
+            mockUpdateDoc,
+            mockFindOnePayment,
+        });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.created')
+        );
+
+        expect(mockUpdateDoc).not.toHaveBeenCalled();
+    });
+
+    it('logs dispute_opened audit on charge.dispute.created', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.created')
+        );
+
+        await new Promise(process.nextTick);
+
+        expect(logFinancialAction).toHaveBeenCalledWith(
+            mockDisputeStrapi,
+            'dispute_opened',
+            'doc_klubr_456',
+            'doc_don_123',
+            5000,
+            'dp_test_123',
+            expect.objectContaining({
+                dispute_status: 'needs_response',
+                dispute_reason: 'fraudulent',
+            }),
+        );
     });
 });

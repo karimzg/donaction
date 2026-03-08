@@ -1008,7 +1008,15 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
         disputeId: Schema.Attribute.String;
         disputeReason: Schema.Attribute.String;
         disputeStatus: Schema.Attribute.Enumeration<
-            ['none', 'warning_received', 'open', 'under_review', 'won', 'lost']
+            [
+                'none',
+                'warning_received',
+                'warning_closed',
+                'open',
+                'under_review',
+                'won',
+                'lost',
+            ]
         > &
             Schema.Attribute.DefaultTo<'none'>;
         donorPaysFee: Schema.Attribute.Boolean;

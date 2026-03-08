@@ -487,7 +487,7 @@ interface DisputeKlubDon {
 /**
  * Possible values for dispute status
  */
-type DisputeStatusValue = 'none' | 'warning_received' | 'open' | 'under_review' | 'won' | 'lost';
+type DisputeStatusValue = 'none' | 'warning_received' | 'warning_closed' | 'open' | 'under_review' | 'won' | 'lost';
 
 /**
  * Maps Stripe dispute status to internal dispute status
@@ -495,7 +495,7 @@ type DisputeStatusValue = 'none' | 'warning_received' | 'open' | 'under_review' 
 const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
     warning_needs_response: 'warning_received',
     warning_under_review: 'warning_received',
-    warning_closed: 'none',
+    warning_closed: 'warning_closed',
     needs_response: 'open',
     under_review: 'under_review',
     won: 'won',
@@ -521,14 +521,15 @@ export async function handleDispute(
 
     const dispute = event.data.object as Stripe.Dispute;
     const accountId = event.account ?? 'unknown';
-    const paymentIntentId = dispute.payment_intent as string;
 
-    if (!paymentIntentId) {
+    if (!dispute.payment_intent) {
         strapiLog.error(
             `Dispute ${dispute.id} reçue sans payment_intent`
         );
         return;
     }
+
+    const paymentIntentId = dispute.payment_intent as string;
 
     // Find the donation via the payment record
     const payment = await strapiInstance.db
@@ -552,6 +553,17 @@ export async function handleDispute(
     }
 
     const klubDon = payment.klub_don;
+
+    // Idempotency guard: skip if this dispute was already processed
+    if (klubDon.disputeId === dispute.id && event.type === 'charge.dispute.created') {
+        logSimple({
+            message: `Dispute ${dispute.id} déjà traitée pour don ${klubDon.documentId}, ignoré`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+        return;
+    }
+
     const disputeStatus = DISPUTE_STATUS_MAP[dispute.status] || 'open';
 
     // Update klub_don with dispute info
@@ -579,14 +591,31 @@ export async function handleDispute(
     if (event.type === 'charge.dispute.created') {
         // Send urgent admin alert
         void sendDisputeAdminAlert(
-            strapiInstance,
             dispute,
             klubDon,
             accountId,
             'created',
         );
 
-        // Reverse transfer if dispute involves funds
+        // Log audit for dispute opening
+        if (klubDon.klubr?.documentId) {
+            void logFinancialAction(
+                strapiInstance,
+                'dispute_opened',
+                klubDon.klubr.documentId,
+                klubDon.documentId,
+                dispute.amount,
+                dispute.id,
+                {
+                    dispute_status: dispute.status,
+                    dispute_reason: dispute.reason,
+                },
+            );
+        }
+    }
+
+    // Reverse transfer only when Stripe actually withdraws funds (not on dispute creation)
+    if (event.type === 'charge.dispute.funds_withdrawn') {
         if (dispute.amount > 0 && accountId !== 'unknown') {
             await reverseTransferForDispute(
                 strapiInstance,
@@ -617,7 +646,7 @@ export async function handleDispute(
         }
 
         // Notify association leaders if dispute is lost
-        if (dispute.status === 'lost') {
+        if (disputeStatus === 'lost') {
             void sendDisputeLostKlubrNotification(
                 strapiInstance,
                 dispute,
@@ -627,11 +656,10 @@ export async function handleDispute(
 
         // Send admin alert for closure
         void sendDisputeAdminAlert(
-            strapiInstance,
             dispute,
             klubDon,
             accountId,
-            dispute.status === 'lost' ? 'lost' : 'won',
+            disputeStatus === 'lost' ? 'lost' : 'won',
         );
     }
 
@@ -643,7 +671,7 @@ export async function handleDispute(
 }
 
 /**
- * Reverses the transfer to the connected account when a dispute is opened.
+ * Reverses the transfer to the connected account when Stripe withdraws funds (charge.dispute.funds_withdrawn).
  * Non-blocking if it fails (logged but not propagated).
  */
 async function reverseTransferForDispute(
@@ -653,19 +681,22 @@ async function reverseTransferForDispute(
     accountId: string,
 ): Promise<void> {
     try {
-        // Find transfers associated with this charge
+        // Find the transfer linked to this payment via metadata
         const paymentIntentId = dispute.payment_intent as string;
-        const transfers = await stripe.transfers.list({
-            destination: accountId,
-            limit: 10,
-        });
+        let relatedTransfer: Stripe.Transfer | undefined;
 
-        // Find the transfer linked to this payment via transfer_group or metadata
-        const relatedTransfer = transfers.data.find(
-            (t) =>
-                t.metadata?.payment_intent_id === paymentIntentId ||
-                t.metadata?.klub_don_id === klubDon.documentId,
-        );
+        for await (const transfer of stripe.transfers.list({
+            destination: accountId,
+            limit: 100,
+        })) {
+            if (
+                transfer.metadata?.payment_intent_id === paymentIntentId ||
+                transfer.metadata?.klub_don_id === klubDon.documentId
+            ) {
+                relatedTransfer = transfer;
+                break;
+            }
+        }
 
         if (!relatedTransfer) {
             logSimple({
@@ -683,7 +714,7 @@ async function reverseTransferForDispute(
                 amount: Math.min(dispute.amount, relatedTransfer.amount),
                 metadata: {
                     dispute_id: dispute.id,
-                    reason: 'dispute_opened',
+                    reason: 'dispute_funds_withdrawn',
                 },
             },
         );
@@ -722,7 +753,6 @@ async function reverseTransferForDispute(
  * Non-blocking: errors are logged but not propagated.
  */
 async function sendDisputeAdminAlert(
-    _strapiInstance: Core.Strapi,
     dispute: Stripe.Dispute,
     klubDon: DisputeKlubDon,
     accountId: string,
