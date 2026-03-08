@@ -350,6 +350,7 @@ describe('handleAccountDeauthorized', () => {
                     account_status: 'disabled',
                     charges_enabled: false,
                     payouts_enabled: false,
+                    last_sync: expect.any(Date),
                 }),
             })
         );
@@ -379,8 +380,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Allow fire-and-forget promises to resolve
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await Promise.resolve();
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -401,8 +402,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Allow fire-and-forget promises to resolve
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await Promise.resolve();
 
         expect(mockGetKlubMembres).toHaveBeenCalledWith(
             'doc_klubr_456',
@@ -431,8 +432,8 @@ describe('handleAccountDeauthorized', () => {
             makeDeauthEvent('acct_deauth_test')
         );
 
-        // Allow fire-and-forget promises to resolve
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await Promise.resolve();
 
         // Admin alert should still be sent, but not klubr notification
         const calls = vi.mocked(sendBrevoTransacEmail).mock.calls;
