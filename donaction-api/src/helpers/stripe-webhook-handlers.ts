@@ -349,7 +349,7 @@ async function sendDeauthorizedAdminAlert(
 
         await sendBrevoTransacEmail({
             subject: `[ALERTE] Compte Stripe déconnecté: ${klubrName}`,
-            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
             destIsAdmin: true,
             params: {
                 ALERT_TYPE: 'Compte Stripe Connect déconnecté (deauthorized)',
@@ -430,7 +430,7 @@ async function sendDeauthorizedKlubrNotification(
 
         await sendBrevoTransacEmail({
             subject: `Votre compte Stripe a été déconnecté - ${klubrName}`,
-            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
             to: [{ email: adminEmail, name: klubrName }],
             params: {
                 ALERT_TYPE: 'Déconnexion du compte Stripe',
