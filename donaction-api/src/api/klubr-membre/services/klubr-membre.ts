@@ -205,7 +205,10 @@ export default factories.createCoreService(
             }
         },
 
-        async getKlubMembres(klubId: number, roles: Array<string>) {
+        async getKlubMembres(
+            klubrDocumentId: string,
+            roles: Array<KlubrMemberEntity['role']>,
+        ) {
             roles = roles || [];
             return await strapi
                 .documents('api::klubr-membre.klubr-membre')
@@ -219,7 +222,7 @@ export default factories.createCoreService(
                         $and: [
                             {
                                 // @ts-ignore
-                                klubr: klubId,
+                                klubr: { documentId: klubrDocumentId },
                             },
                             {
                                 role: {
