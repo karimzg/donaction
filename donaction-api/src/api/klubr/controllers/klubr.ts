@@ -1336,7 +1336,8 @@ export default factories.createCoreController(
 
                         await sendBrevoTransacEmail({
                             subject: `[ALERTE] Échec envoi email création club: ${entity.denomination}`,
-                            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+                            templateId:
+                                BREVO_TEMPLATES.SUPER_ADMIN_ALERT,
                             destIsAdmin: true,
                             params: {
                                 ALERT_TYPE: 'Échec envoi email',
@@ -1345,7 +1346,11 @@ export default factories.createCoreController(
                                 ERROR_MESSAGE: String(e),
                                 KLUBR_UUID: entity.uuid,
                             },
-                            tags: ['admin-alert', 'email-failure', 'club-creation'],
+                            tags: [
+                                'admin-alert',
+                                'email-failure',
+                                'club-creation',
+                            ],
                         });
                     } catch (adminEmailError) {
                         console.error('[createKlubrByMember] Failed to send admin alert:', adminEmailError);
@@ -1366,7 +1371,7 @@ export default factories.createCoreController(
 
                     await sendBrevoTransacEmail({
                         subject: `[ALERTE] Échec  : ${ctx.request.body.data.denomination}`,
-                        templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+                        templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_ASSO_CREATE_FAILED,
                         destIsAdmin: true,
                         params: {
                             ALERT_TYPE: 'Échec création association',

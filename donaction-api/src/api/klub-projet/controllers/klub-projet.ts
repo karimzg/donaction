@@ -548,7 +548,7 @@ export default factories.createCoreController(
                             await strapi.services[
                                 'api::klubr-membre.klubr-membre'
                             ].getKlubMembres(
-                                entityWithUUID.klubr?.id,
+                                entityWithUUID.klubr?.documentId,
                                 destinatairesTypes,
                             );
 

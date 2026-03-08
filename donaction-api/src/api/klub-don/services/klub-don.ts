@@ -111,7 +111,7 @@ export default factories.createCoreService(
             return await sendBrevoTransacEmail({
                 from: { name: 'Klubr - Dons', email: 'dons@donaction.fr' },
                 to: [{ email: emailDestinataire }],
-                templateId: BREVO_TEMPLATES.DONATION_ADMIN_NOTIFICATION,
+                templateId: BREVO_TEMPLATES.DONATION_LEADERS_NOTIFICATION,
                 params: {
                     RECEIVER_FULLNAME: `${membreOrAdminDestinataire?.prenom || ''} ${
                         membreOrAdminDestinataire?.nom || ''

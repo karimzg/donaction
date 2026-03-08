@@ -642,7 +642,7 @@ export async function sendAccountRestrictedAlert(
 
         await sendBrevoTransacEmail({
             subject: `[ALERTE] Compte Stripe ${accountStatus}: ${klubrName}`,
-            templateId: BREVO_TEMPLATES.ADMIN_ALERT,
+            templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
             destIsAdmin: true,
             params: {
                 ALERT_TYPE: `Compte Stripe Connect ${accountStatus}`,

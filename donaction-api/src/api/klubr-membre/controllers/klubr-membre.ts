@@ -624,7 +624,7 @@ export default factories.createCoreController(
                 const destinatairesTypes = ['AdminEditor'];
                 const klubAdminEditors = await strapi.services[
                     'api::klubr-membre.klubr-membre'
-                ].getKlubMembres(klubr.id, destinatairesTypes);
+                ].getKlubMembres(klubr.documentId, destinatairesTypes);
 
                 /* Create or get Admin Edtior for Klub */
                 const klubAdminEditor =

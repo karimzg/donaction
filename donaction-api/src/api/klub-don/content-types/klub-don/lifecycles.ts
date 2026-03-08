@@ -182,7 +182,7 @@ const handleEmail = async (result: KlubDonEntity) => {
                 ];
                 const klubLeadersAndNetworkLeaders = await strapi.services[
                     'api::klubr-membre.klubr-membre'
-                ].getKlubMembres(entryDon.klubr.id, destinatairesTypes);
+                ].getKlubMembres(entryDon.klubr.documentId, destinatairesTypes);
 
                 console.log({ klubLeadersAndNetworkLeaders });
 
@@ -225,12 +225,12 @@ const handleEmail = async (result: KlubDonEntity) => {
                         });
                 };
                 await send(klubLeadersAndNetworkLeaders, entryDon);
-                if (entryDon.klub_don_contribution?.klubr.id) {
+                if (entryDon.klub_don_contribution?.klubr?.id) {
                     const klubLeadersAndNetworkLeadersContribution =
                         await strapi.services[
                             'api::klubr-membre.klubr-membre'
                         ].getKlubMembres(
-                            entryDon.klub_don_contribution?.klubr.id,
+                            entryDon.klub_don_contribution?.klubr?.documentId,
                             destinatairesTypes,
                         );
                     await send(
