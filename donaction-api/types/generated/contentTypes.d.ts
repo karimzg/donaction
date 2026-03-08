@@ -722,9 +722,13 @@ export interface ApiFinancialAuditLogFinancialAuditLog
         action_type: Schema.Attribute.Enumeration<
             [
                 'transfer_created',
+                'transfer_reversed',
                 'payout_initiated',
                 'refund_processed',
                 'fee_calculated',
+                'dispute_opened',
+                'dispute_won',
+                'dispute_lost',
             ]
         > &
             Schema.Attribute.Required;
@@ -1000,6 +1004,13 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
             Schema.Attribute.Private;
         datePaiment: Schema.Attribute.DateTime;
         deductionFiscale: Schema.Attribute.Decimal;
+        disputeClosedAt: Schema.Attribute.DateTime;
+        disputeId: Schema.Attribute.String;
+        disputeReason: Schema.Attribute.String;
+        disputeStatus: Schema.Attribute.Enumeration<
+            ['none', 'warning_received', 'open', 'under_review', 'won', 'lost']
+        > &
+            Schema.Attribute.DefaultTo<'none'>;
         donorPaysFee: Schema.Attribute.Boolean;
         emailSent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
         estOrganisme: Schema.Attribute.Boolean;

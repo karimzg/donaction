@@ -16,9 +16,13 @@
       "type": "enumeration",
       "enum": [
         "transfer_created",
+        "transfer_reversed",
         "payout_initiated",
         "refund_processed",
-        "fee_calculated"
+        "fee_calculated",
+        "dispute_opened",
+        "dispute_won",
+        "dispute_lost"
       ],
       "required": true
     },

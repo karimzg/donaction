@@ -100,7 +100,8 @@ export type StripeWebhookPayload =
     | Stripe.Capability
     | Stripe.Person
     | Stripe.AccountSession
-    | Stripe.ExternalAccount;
+    | Stripe.ExternalAccount
+    | Stripe.Dispute;
 
 /**
  * Webhook log entity for storing Stripe webhook events

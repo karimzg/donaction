@@ -134,6 +134,27 @@
     "donorPaysFee": {
       "type": "boolean",
       "required": false
+    },
+    "disputeStatus": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "warning_received",
+        "open",
+        "under_review",
+        "won",
+        "lost"
+      ],
+      "default": "none"
+    },
+    "disputeId": {
+      "type": "string"
+    },
+    "disputeReason": {
+      "type": "string"
+    },
+    "disputeClosedAt": {
+      "type": "datetime"
     }
   }
 }
