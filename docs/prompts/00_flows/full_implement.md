@@ -1,8 +1,8 @@
 ---
 name: full_implement
 description: Automate all steps of the AI-driven development flow.
-version: 1.1.0
-last_updated: 2026-02-11
+version: 1.2.0
+last_updated: 2026-03-08
 ---
 
 # Goal
@@ -20,6 +20,7 @@ $ARGUMENTS
 - EACH step must be 100% successful before proceeding to next
 - Use TodoWrite to track progress for each issue
 - Browser validation available via `claude-in-chrome` for visual/behavioral checks when needed
+- **User interactions**: Every time the prompt says "Ask user" with checkboxes (`- [ ]`), you MUST use the `AskUserQuestion` tool with the checkboxes formatted in the question. Never output checkboxes as plain text — always use the tool so the user gets an interactive prompt.
 
 ## Steps
 

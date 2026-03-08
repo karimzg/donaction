@@ -16,6 +16,7 @@ Transform PR review feedback into actionable fixes with user-controlled priority
 - Categorize by severity (Critical, Important, Suggestions)
 - Interactive fix selection
 - Propose automated fixes for top priorities
+- **User interactions**: Every time the prompt says "Ask user" with checkboxes (`- [ ]`), you MUST use the `AskUserQuestion` tool with the checkboxes formatted in the question. Never output checkboxes as plain text — always use the tool so the user gets an interactive prompt.
 
 ## Steps
 
@@ -25,7 +26,7 @@ Transform PR review feedback into actionable fixes with user-controlled priority
    - Critical (🔴): Security, blockers, breaking changes
    - Important (⚠️): Best practices, performance, missing features
    - Suggestions (💡): Nice-to-have, optimizations, documentation
-4. Present categorized list to user
+4. Present categorized list to user as a table with columns: `#` (sequential issue number), `File`, `Issue`, `Details`. The `File` column MUST contain the absolute file path with line number as plain text (e.g. `/Users/mac/repos/donaction/src/helpers/handler.ts:42`) — this format is automatically rendered as a clickable link in the terminal. Do NOT wrap it in markdown link syntax.
 5. Ask user via interactive selection:
    - Which Critical issues to fix now?
    - Which Important issues to address?
