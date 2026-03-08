@@ -432,8 +432,8 @@ async function sendDeauthorizedKlubrNotification(
             return;
         }
 
-        // Send LEADER_ALERT to all leaders in parallel
-        await Promise.all(leadersWithEmail.map(async (leader) => {
+        // Send LEADER_ALERT to all leaders in parallel (allSettled to avoid dropping remaining emails on first failure)
+        const results = await Promise.allSettled(leadersWithEmail.map(async (leader) => {
             const leaderEmail =
                 leader.email || leader.users_permissions_user?.email;
 
@@ -457,6 +457,13 @@ async function sendDeauthorizedKlubrNotification(
                 prefix: 'StripeConnect',
             });
         }));
+
+        results.forEach((result, i) => {
+            if (result.status === 'rejected') {
+                const leaderEmail = leadersWithEmail[i].email || leadersWithEmail[i].users_permissions_user?.email;
+                strapiLog.error(`Echec envoi notification à ${leaderEmail}:`, result.reason);
+            }
+        });
     } catch (notifError) {
         strapiLog.error(
             `Echec de l'envoi de la notification klubr pour le compte déautorisé ${accountId}:`,

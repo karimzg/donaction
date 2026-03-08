@@ -19,7 +19,7 @@ vi.mock('./logger', () => ({
 // Mock email sending
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue(undefined),
-    BREVO_TEMPLATES: { SUPER_ADMIN_ALERT_ASSO_CREATE_FAILED: 27, SUPER_ADMIN_ALERT_STRIPE: 29, LEADER_ALERT: 30 },
+    BREVO_TEMPLATES: { SUPER_ADMIN_ALERT: 28, SUPER_ADMIN_ALERT_ASSO_CREATE_FAILED: 27, SUPER_ADMIN_ALERT_STRIPE: 29, LEADER_ALERT: 30 },
 }));
 
 import {
