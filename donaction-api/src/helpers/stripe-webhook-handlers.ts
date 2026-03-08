@@ -473,9 +473,26 @@ async function sendDeauthorizedKlubrNotification(
 }
 
 /**
+ * Minimal shape for klub_don used by dispute helpers
+ */
+interface DisputeKlubDon {
+    documentId: string;
+    klubr?: {
+        documentId: string;
+        denomination?: string;
+        uuid?: string;
+    } | null;
+}
+
+/**
+ * Possible values for dispute status
+ */
+type DisputeStatusValue = 'none' | 'warning_received' | 'open' | 'under_review' | 'won' | 'lost';
+
+/**
  * Maps Stripe dispute status to internal dispute status
  */
-const DISPUTE_STATUS_MAP: Record<string, string> = {
+const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
     warning_needs_response: 'warning_received',
     warning_under_review: 'warning_received',
     warning_closed: 'none',
@@ -535,8 +552,7 @@ export async function handleDispute(
     }
 
     const klubDon = payment.klub_don;
-    const disputeStatus = (DISPUTE_STATUS_MAP[dispute.status] || 'open') as
-        'none' | 'warning_received' | 'open' | 'under_review' | 'won' | 'lost';
+    const disputeStatus = DISPUTE_STATUS_MAP[dispute.status] || 'open';
 
     // Update klub_don with dispute info
     await strapiInstance
@@ -633,7 +649,7 @@ export async function handleDispute(
 async function reverseTransferForDispute(
     strapiInstance: Core.Strapi,
     dispute: Stripe.Dispute,
-    klubDon: any,
+    klubDon: DisputeKlubDon,
     accountId: string,
 ): Promise<void> {
     try {
@@ -708,7 +724,7 @@ async function reverseTransferForDispute(
 async function sendDisputeAdminAlert(
     _strapiInstance: Core.Strapi,
     dispute: Stripe.Dispute,
-    klubDon: any,
+    klubDon: DisputeKlubDon,
     accountId: string,
     alertType: 'created' | 'lost' | 'won',
 ): Promise<void> {
@@ -765,7 +781,7 @@ async function sendDisputeAdminAlert(
 async function sendDisputeLostKlubrNotification(
     strapiInstance: Core.Strapi,
     dispute: Stripe.Dispute,
-    klubDon: any,
+    klubDon: DisputeKlubDon,
 ): Promise<void> {
     try {
         const klubr = klubDon.klubr;
