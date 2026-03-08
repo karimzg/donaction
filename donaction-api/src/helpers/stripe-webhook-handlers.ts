@@ -379,7 +379,7 @@ async function sendDeauthorizedAdminAlert(
 }
 
 /**
- * Sends a notification email to the klubr admin when the account is deauthorized.
+ * Sends a LEADER_ALERT notification to KlubMemberLeader members when the account is deauthorized.
  * Non-blocking: errors are logged but not propagated.
  */
 async function sendDeauthorizedKlubrNotification(
@@ -402,56 +402,51 @@ async function sendDeauthorizedKlubrNotification(
         }
 
         const klubr = connectedAccount.klubr;
+        const klubrName = klubr.denomination || 'Votre association';
 
-        // Find the klubr admin member to get their email
-        const adminMember = await strapiInstance.db
-            .query('api::klubr-membre.klubr-membre')
-            .findOne({
-                where: {
-                    klubr: klubr.id,
-                    role: 'Admin',
-                },
-                populate: { user: true },
-            });
+        // Find KlubMemberLeader members to notify
+        const leaders = await strapiInstance
+            .service('api::klubr-membre.klubr-membre')
+            .getKlubMembres(klubr.documentId, ['KlubMemberLeader']);
 
-        const adminEmail =
-            adminMember?.email || adminMember?.user?.email;
+        const leadersWithEmail = leaders.filter(
+            (member) => member.email || member.users_permissions_user?.email,
+        );
 
-        if (!adminEmail) {
+        if (leadersWithEmail.length === 0) {
             logSimple({
-                message: `Aucun email admin trouvé pour le klubr ${klubr.denomination || klubr.id}`,
+                message: `Aucun dirigeant avec email trouvé pour le klubr ${klubrName}`,
                 color: 'yellow',
                 prefix: 'StripeConnect',
             });
             return;
         }
 
-        const klubrName = klubr.denomination || 'Votre association';
+        // Send LEADER_ALERT to each leader
+        for (const leader of leadersWithEmail) {
+            const leaderEmail =
+                leader.email || leader.users_permissions_user?.email;
 
-        await sendBrevoTransacEmail({
-            subject: `Votre compte Stripe a été déconnecté - ${klubrName}`,
-            templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
-            to: [{ email: adminEmail, name: klubrName }],
-            params: {
-                ALERT_TYPE: 'Déconnexion du compte Stripe',
-                CLUB_NAME: klubrName,
-                KLUBR_UUID: klubr.uuid || 'N/A',
-                STRIPE_ACCOUNT_ID: accountId,
-                ACCOUNT_STATUS: 'disabled',
-                DISABLED_REASON:
-                    'Votre compte Stripe a été déconnecté de la plateforme Donaction. La collecte de dons est désactivée.',
-                CURRENTLY_DUE: 'Reconnectez votre compte Stripe pour réactiver la collecte',
-                CHARGES_ENABLED: 'Non',
-                PAYOUTS_ENABLED: 'Non',
-            },
-            tags: ['klubr-notification', 'stripe-connect', 'account-deauthorized'],
-        });
+            await sendBrevoTransacEmail({
+                subject: `Action requise - Collecte de dons désactivée pour ${klubrName}`,
+                templateId: BREVO_TEMPLATES.LEADER_ALERT,
+                to: [{ email: leaderEmail, name: `${leader.prenom || ''} ${leader.nom || ''}`.trim() }],
+                params: {
+                    CLUB_NAME: klubrName,
+                    ALERT_MESSAGE:
+                        'Le compte de paiement de votre association a été déconnecté de la plateforme Donaction. ' +
+                        'La collecte de dons est actuellement désactivée. ' +
+                        'Veuillez contacter votre administrateur ou reconnecter votre compte pour rétablir la collecte.',
+                },
+                tags: ['klubr-notification', 'stripe-connect', 'account-deauthorized'],
+            });
 
-        logSimple({
-            message: `Notification klubr envoyée à ${adminEmail} pour compte déautorisé: ${accountId}`,
-            color: 'yellow',
-            prefix: 'StripeConnect',
-        });
+            logSimple({
+                message: `Notification LEADER_ALERT envoyée à ${leaderEmail} pour compte déautorisé: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+        }
     } catch (notifError) {
         strapiLog.error(
             `Echec de l'envoi de la notification klubr pour le compte déautorisé ${accountId}:`,

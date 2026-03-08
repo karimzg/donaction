@@ -19,7 +19,7 @@ vi.mock('./logger', () => ({
 // Mock email sending
 vi.mock('./emails/sendBrevoTransacEmail', () => ({
     sendBrevoTransacEmail: vi.fn().mockResolvedValue(undefined),
-    BREVO_TEMPLATES: { ADMIN_ALERT: 27 },
+    BREVO_TEMPLATES: { ADMIN_ALERT: 27, SUPER_ADMIN_ALERT_STRIPE: 29, LEADER_ALERT: 30 },
 }));
 
 import {
@@ -269,18 +269,22 @@ describe('handleAccountDeauthorized', () => {
 
     let mockUpdateDoc: ReturnType<typeof vi.fn>;
     let mockFindOne: ReturnType<typeof vi.fn>;
-    let mockFindOneMember: ReturnType<typeof vi.fn>;
+    let mockGetKlubMembres: ReturnType<typeof vi.fn>;
     let mockStrapiDeauth: Core.Strapi;
 
     beforeEach(() => {
         vi.clearAllMocks();
         mockUpdateDoc = vi.fn().mockResolvedValue({});
         mockFindOne = vi.fn().mockResolvedValue(makeConnectedAccount());
-        mockFindOneMember = vi.fn().mockResolvedValue({
-            email: 'admin@monasso.fr',
-            role: 'Admin',
-            user: { email: 'admin-user@monasso.fr' },
-        });
+        mockGetKlubMembres = vi.fn().mockResolvedValue([
+            {
+                email: 'leader@monasso.fr',
+                nom: 'Dupont',
+                prenom: 'Jean',
+                role: 'KlubMemberLeader',
+                users_permissions_user: { email: 'leader-user@monasso.fr' },
+            },
+        ]);
 
         mockStrapiDeauth = {
             db: {
@@ -288,14 +292,17 @@ describe('handleAccountDeauthorized', () => {
                     if (uid === 'api::connected-account.connected-account') {
                         return { findOne: mockFindOne };
                     }
-                    if (uid === 'api::klubr-membre.klubr-membre') {
-                        return { findOne: mockFindOneMember };
-                    }
                     return { findOne: vi.fn() };
                 }),
             },
             documents: vi.fn().mockReturnValue({
                 update: mockUpdateDoc,
+            }),
+            service: vi.fn().mockImplementation((uid: string) => {
+                if (uid === 'api::klubr-membre.klubr-membre') {
+                    return { getKlubMembres: mockGetKlubMembres };
+                }
+                return {};
             }),
         } as unknown as Core.Strapi;
     });
@@ -388,7 +395,7 @@ describe('handleAccountDeauthorized', () => {
         );
     });
 
-    it('sends klubr notification email to admin member', async () => {
+    it('sends LEADER_ALERT to KlubMemberLeader members', async () => {
         await handleAccountDeauthorized(
             mockStrapiDeauth,
             makeDeauthEvent('acct_deauth_test')
@@ -397,19 +404,27 @@ describe('handleAccountDeauthorized', () => {
         // Allow fire-and-forget promises to resolve
         await new Promise((r) => setTimeout(r, 10));
 
+        expect(mockGetKlubMembres).toHaveBeenCalledWith(
+            'doc_klubr_456',
+            ['KlubMemberLeader'],
+        );
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                to: [{ email: 'admin@monasso.fr', name: 'Mon Association' }],
+                templateId: 30,
+                to: [{ email: 'leader@monasso.fr', name: 'Jean Dupont' }],
                 tags: expect.arrayContaining([
                     'klubr-notification',
                     'account-deauthorized',
                 ]),
+                params: expect.objectContaining({
+                    CLUB_NAME: 'Mon Association',
+                }),
             })
         );
     });
 
-    it('skips klubr notification when no admin member email found', async () => {
-        mockFindOneMember.mockResolvedValue(null);
+    it('skips klubr notification when no leaders found', async () => {
+        mockGetKlubMembres.mockResolvedValue([]);
 
         await handleAccountDeauthorized(
             mockStrapiDeauth,
@@ -419,7 +434,7 @@ describe('handleAccountDeauthorized', () => {
         // Allow fire-and-forget promises to resolve
         await new Promise((r) => setTimeout(r, 10));
 
-        // Admin alert should still be sent (1 call), but not klubr notification
+        // Admin alert should still be sent, but not klubr notification
         const calls = vi.mocked(sendBrevoTransacEmail).mock.calls;
         const klubrNotifCalls = calls.filter((c) =>
             (c[0] as any).tags?.includes('klubr-notification')
