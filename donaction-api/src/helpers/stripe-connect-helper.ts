@@ -102,9 +102,15 @@ export type BusinessType = 'individual' | 'company' | 'non_profit';
  */
 export type FinancialActionType =
     | 'transfer_created'
+    | 'transfer_reversed'
+    | 'transfer_reversal_failed'
     | 'payout_initiated'
     | 'refund_processed'
-    | 'fee_calculated';
+    | 'fee_calculated'
+    | 'dispute_opened'
+    | 'dispute_won'
+    | 'dispute_lost'
+    | 'transfer_creation_failed';
 
 /**
  * Creates a Stripe connected account for a klubr
