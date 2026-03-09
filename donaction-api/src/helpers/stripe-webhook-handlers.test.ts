@@ -849,7 +849,7 @@ describe('handleDispute', () => {
             makeDisputeEvent('charge.dispute.funds_withdrawn', { amount: 0 })
         );
 
-        expect(mockStripeClient.transfers.list).not.toHaveBeenCalled();
+        expect(mockStripeClient.charges.retrieve).not.toHaveBeenCalled();
     });
 
     it('skips processing on duplicate charge.dispute.created (idempotency)', async () => {
@@ -993,7 +993,7 @@ describe('handleDispute', () => {
 
         await handleDispute(mockDisputeStrapi, event);
 
-        expect(mockStripeClient.transfers.list).not.toHaveBeenCalled();
+        expect(mockStripeClient.charges.retrieve).not.toHaveBeenCalled();
     });
 
     it('logs transfer_reversed audit after successful reversal', async () => {

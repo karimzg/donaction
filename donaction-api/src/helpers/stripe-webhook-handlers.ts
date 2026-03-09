@@ -483,7 +483,6 @@ const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
     under_review: 'under_review',
     won: 'won',
     lost: 'lost',
-    funds_reinstated: 'won',
 };
 
 /**
@@ -581,7 +580,7 @@ export async function handleDispute(
         disputeReason: dispute.reason,
     };
     if (['won', 'lost'].includes(disputeStatus)) {
-        updateData.disputeClosedAt = new Date();
+        updateData.disputeClosedAt = new Date(event.created * 1000);
     }
 
     await strapiInstance
@@ -715,6 +714,44 @@ export async function handleDispute(
 }
 
 /**
+ * Resolves the original Stripe transfer from a dispute by following charge → transfer chain.
+ * Returns null if no transfer is found (with appropriate logging).
+ */
+async function resolveTransferFromDispute(
+    dispute: Stripe.Dispute,
+    operation: string,
+): Promise<Stripe.Transfer | null> {
+    const chargeId = typeof dispute.charge === 'string'
+        ? dispute.charge
+        : dispute.charge?.id;
+
+    if (!chargeId) {
+        logSimple({
+            message: `Dispute ${dispute.id} sans charge, ${operation} ignoré`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+        return null;
+    }
+
+    const charge = await stripe.charges.retrieve(chargeId);
+    const transferId = typeof charge.transfer === 'string'
+        ? charge.transfer
+        : charge.transfer?.id;
+
+    if (!transferId) {
+        logSimple({
+            message: `Aucun transfert trouvé sur charge ${chargeId} pour dispute ${dispute.id}, ${operation} ignoré`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+        return null;
+    }
+
+    return stripe.transfers.retrieve(transferId);
+}
+
+/**
  * Reverses the transfer to the connected account when Stripe withdraws funds (charge.dispute.funds_withdrawn).
  * Non-blocking if it fails (logged but not propagated).
  */
@@ -725,34 +762,8 @@ async function reverseTransferForDispute(
     accountId: string,
 ): Promise<void> {
     try {
-        const chargeId = typeof dispute.charge === 'string'
-            ? dispute.charge
-            : dispute.charge?.id;
-
-        if (!chargeId) {
-            logSimple({
-                message: `Dispute ${dispute.id} sans charge, reversal ignoré`,
-                color: 'yellow',
-                prefix: 'StripeConnect',
-            });
-            return;
-        }
-
-        const charge = await stripe.charges.retrieve(chargeId);
-        const transferId = typeof charge.transfer === 'string'
-            ? charge.transfer
-            : charge.transfer?.id;
-
-        if (!transferId) {
-            logSimple({
-                message: `Aucun transfert trouvé sur charge ${chargeId} pour dispute ${dispute.id}, reversal ignoré`,
-                color: 'yellow',
-                prefix: 'StripeConnect',
-            });
-            return;
-        }
-
-        const relatedTransfer = await stripe.transfers.retrieve(transferId);
+        const relatedTransfer = await resolveTransferFromDispute(dispute, 'reversal');
+        if (!relatedTransfer) return;
 
         // Idempotency: check if reversal already exists for this dispute
         const existingReversals = await stripe.transfers.listReversals(
@@ -785,7 +796,7 @@ async function reverseTransferForDispute(
 
         logSimple({
             message: `Transfert ${relatedTransfer.id} reversé: ${reversal.id} (${reversal.amount / 100}€)`,
-            color: 'yellow',
+            color: 'green',
             prefix: 'StripeConnect',
         });
 
@@ -855,34 +866,9 @@ async function reTransferForDisputeWon(
     accountId: string,
 ): Promise<void> {
     try {
-        const chargeId = typeof dispute.charge === 'string'
-            ? dispute.charge
-            : dispute.charge?.id;
+        const originalTransfer = await resolveTransferFromDispute(dispute, 're-transfer');
+        if (!originalTransfer) return;
 
-        if (!chargeId) {
-            logSimple({
-                message: `Dispute ${dispute.id} sans charge, re-transfer ignoré`,
-                color: 'yellow',
-                prefix: 'StripeConnect',
-            });
-            return;
-        }
-
-        const charge = await stripe.charges.retrieve(chargeId);
-        const transferId = typeof charge.transfer === 'string'
-            ? charge.transfer
-            : charge.transfer?.id;
-
-        if (!transferId) {
-            logSimple({
-                message: `Aucun transfert trouvé sur charge ${chargeId} pour dispute ${dispute.id}, re-transfer ignoré`,
-                color: 'yellow',
-                prefix: 'StripeConnect',
-            });
-            return;
-        }
-
-        const originalTransfer = await stripe.transfers.retrieve(transferId);
         const reinstatedAmount = Math.min(dispute.amount, originalTransfer.amount);
 
         // Create new transfer to the connected account for the reinstated amount
@@ -948,6 +934,14 @@ async function reTransferForDisputeWon(
                 );
             }
         }
+
+        // Send admin alert about the failure
+        void sendDisputeAdminAlert(
+            dispute,
+            klubDon,
+            accountId,
+            'reversal_failed',
+        );
     }
 }
 
@@ -964,13 +958,14 @@ async function sendDisputeAdminAlert(
     try {
         const klubrName = klubDon.klubr?.denomination || 'Inconnu';
         const klubrUuid = klubDon.klubr?.uuid || 'N/A';
-        const amountEuros = (dispute.amount / 100).toFixed(2);
+        const currency = (dispute.currency || 'eur').toUpperCase();
+        const amountFormatted = `${(dispute.amount / 100).toFixed(2)} ${currency}`;
 
         const alertMessages: Record<string, string> = {
-            created: `Nouveau litige ouvert - ${amountEuros}€`,
-            lost: `Litige perdu - ${amountEuros}€ définitivement perdus`,
-            won: `Litige gagné - ${amountEuros}€ récupérés`,
-            reversal_failed: `Echec du reversal de transfert - ${amountEuros}€`,
+            created: `Nouveau litige ouvert - ${amountFormatted}`,
+            lost: `Litige perdu - ${amountFormatted} définitivement perdus`,
+            won: `Litige gagné - ${amountFormatted} récupérés`,
+            reversal_failed: `Echec du reversal de transfert - ${amountFormatted}`,
         };
 
         const deadline = dispute.evidence_details?.due_by
@@ -1030,7 +1025,8 @@ async function sendDisputeLostKlubrNotification(
         }
 
         const klubrName = klubr.denomination || 'Votre association';
-        const amountEuros = (dispute.amount / 100).toFixed(2);
+        const currency = (dispute.currency || 'eur').toUpperCase();
+        const amountFormatted = `${(dispute.amount / 100).toFixed(2)} ${currency}`;
 
         // Find club-level leaders to notify (Admin is platform-level, notified separately via destIsAdmin)
         const leaders = await strapiInstance
@@ -1059,7 +1055,7 @@ async function sendDisputeLostKlubrNotification(
                     leader.email || leader.users_permissions_user?.email;
 
                 await sendBrevoTransacEmail({
-                    subject: `Litige perdu - ${amountEuros}€ pour ${klubrName}`,
+                    subject: `Litige perdu - ${amountFormatted} pour ${klubrName}`,
                     templateId: BREVO_TEMPLATES.LEADER_ALERT,
                     to: [
                         {
@@ -1070,7 +1066,7 @@ async function sendDisputeLostKlubrNotification(
                     params: {
                         CLUB_NAME: klubrName,
                         ALERT_MESSAGE:
-                            `Un litige de ${amountEuros}€ concernant un don a été perdu. ` +
+                            `Un litige de ${amountFormatted} concernant un don a été perdu. ` +
                             `Le montant a été définitivement débité. ` +
                             `Raison du litige : ${dispute.reason || 'non précisée'}. ` +
                             `Veuillez contacter votre administrateur pour plus d'informations.`,
@@ -1104,13 +1100,13 @@ async function sendDisputeLostKlubrNotification(
 
         // Also notify platform super admin
         await sendBrevoTransacEmail({
-            subject: `Litige perdu - ${amountEuros}€ pour ${klubrName}`,
+            subject: `Litige perdu - ${amountFormatted} pour ${klubrName}`,
             templateId: BREVO_TEMPLATES.LEADER_ALERT,
             destIsAdmin: true,
             params: {
                 CLUB_NAME: klubrName,
                 ALERT_MESSAGE:
-                    `Un litige de ${amountEuros}€ concernant un don à ${klubrName} a été perdu. ` +
+                    `Un litige de ${amountFormatted} concernant un don à ${klubrName} a été perdu. ` +
                     `Le montant a été définitivement débité. ` +
                     `Raison du litige : ${dispute.reason || 'non précisée'}.`,
             },
