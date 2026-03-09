@@ -58,6 +58,7 @@ export type ConnectedAccountEntity =
 export type ConnectedAccountWithOptionalKlubr = {
     id: number;
     documentId: string;
+    stripe_account_id?: string;
     account_status?: string;
     klubr?: KlubrEntity | number | null;
 };

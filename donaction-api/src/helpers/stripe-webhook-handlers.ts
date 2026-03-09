@@ -1237,23 +1237,18 @@ export async function handlePayoutFailed(
             return;
         }
 
-        // Fire-and-forget: send admin alert
-        void sendPayoutFailedAdminAlert(
+        const notificationContext = {
             accountId,
             connectedAccount,
-            payout,
             amountInEuros,
             failureMessage,
-        );
+        };
+
+        // Fire-and-forget: send admin alert
+        void sendPayoutFailedAdminAlert({ ...notificationContext, payout });
 
         // Fire-and-forget: send notification to klubr leaders
-        void sendPayoutFailedKlubrNotification(
-            strapiInstance,
-            accountId,
-            connectedAccount,
-            amountInEuros,
-            failureMessage,
-        );
+        void sendPayoutFailedKlubrNotification(strapiInstance, notificationContext);
 
         logSimple({
             message: `Payout ${payout.id} échoué pour ${accountId} — notifications envoyées`,
@@ -1269,17 +1264,21 @@ export async function handlePayoutFailed(
     }
 }
 
+interface PayoutFailedNotificationContext {
+    accountId: string;
+    connectedAccount: ConnectedAccountWithOptionalKlubr;
+    amountInEuros: number;
+    failureMessage: string;
+}
+
 /**
  * Sends an admin alert when a payout fails.
  * Non-blocking: errors are logged but not propagated.
  */
 async function sendPayoutFailedAdminAlert(
-    accountId: string,
-    connectedAccount: ConnectedAccountWithOptionalKlubr,
-    payout: Stripe.Payout,
-    amountInEuros: number,
-    failureMessage: string,
+    opts: PayoutFailedNotificationContext & { payout: Stripe.Payout },
 ): Promise<void> {
+    const { accountId, connectedAccount, payout, amountInEuros, failureMessage } = opts;
     try {
         let klubrName = 'Inconnu';
         let klubrUuid = 'N/A';
@@ -1296,6 +1295,9 @@ async function sendPayoutFailedAdminAlert(
             subject: `[ALERTE] Virement échoué: ${klubrName} — ${amountInEuros}€`,
             templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
             destIsAdmin: true,
+            // Template SUPER_ADMIN_ALERT_STRIPE has fixed param names designed for account alerts.
+            // We repurpose them for payout context: CURRENTLY_DUE = payout amount,
+            // DISABLED_REASON = failure message, ACCOUNT_STATUS = payout status.
             params: {
                 ALERT_TYPE: 'Virement échoué (payout.failed)',
                 CLUB_NAME: klubrName,
@@ -1329,11 +1331,9 @@ async function sendPayoutFailedAdminAlert(
  */
 async function sendPayoutFailedKlubrNotification(
     strapiInstance: Core.Strapi,
-    accountId: string,
-    connectedAccount: ConnectedAccountWithOptionalKlubr,
-    amountInEuros: number,
-    failureMessage: string,
+    opts: PayoutFailedNotificationContext,
 ): Promise<void> {
+    const { accountId, connectedAccount, amountInEuros, failureMessage } = opts;
     try {
         // Guard: klubr must be a populated object (not a numeric FK)
         if (

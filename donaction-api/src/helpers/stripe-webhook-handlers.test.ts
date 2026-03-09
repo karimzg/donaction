@@ -389,11 +389,15 @@ const makePayoutFailedMockStrapi = (overrides: Record<string, any> = {}) => {
 describe('handlePayoutFailed', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('returns early when event has no account id', async () => {
-        const event = makePayoutFailedEvent({ account: undefined });
-        // Override account at event level
+        const event = makePayoutFailedEvent();
         (event as any).account = undefined;
 
         await handlePayoutFailed(mockStrapi, event);
@@ -421,8 +425,8 @@ describe('handlePayoutFailed', () => {
 
         await handlePayoutFailed(mockStrapiInstance, event);
 
-        // Wait for fire-and-forget promises to settle
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -451,8 +455,8 @@ describe('handlePayoutFailed', () => {
 
         await handlePayoutFailed(mockStrapiInstance, event);
 
-        // Wait for fire-and-forget promises to settle
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
 
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -476,8 +480,8 @@ describe('handlePayoutFailed', () => {
 
         await handlePayoutFailed(mockStrapiInstance, event);
 
-        // Wait for fire-and-forget promises to settle
-        await new Promise((r) => setTimeout(r, 10));
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
 
         // Only admin alert should be sent (destIsAdmin: true), not leader alert
         const calls = vi.mocked(sendBrevoTransacEmail).mock.calls;
