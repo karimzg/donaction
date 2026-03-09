@@ -477,6 +477,7 @@ async function sendDeauthorizedKlubrNotification(
  */
 interface DisputeKlubDon {
     documentId: string;
+    disputeId?: string | null;
     klubr?: {
         documentId: string;
         denomination?: string;
@@ -487,14 +488,14 @@ interface DisputeKlubDon {
 /**
  * Possible values for dispute status
  */
-type DisputeStatusValue = 'none' | 'warning_received' | 'warning_closed' | 'open' | 'under_review' | 'won' | 'lost';
+type DisputeStatusValue = 'none' | 'warning_received' | 'warning_under_review' | 'warning_closed' | 'open' | 'under_review' | 'won' | 'lost';
 
 /**
  * Maps Stripe dispute status to internal dispute status
  */
 const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
     warning_needs_response: 'warning_received',
-    warning_under_review: 'warning_received',
+    warning_under_review: 'warning_under_review',
     warning_closed: 'warning_closed',
     needs_response: 'open',
     under_review: 'under_review',
@@ -567,18 +568,21 @@ export async function handleDispute(
     const disputeStatus = DISPUTE_STATUS_MAP[dispute.status] || 'open';
 
     // Update klub_don with dispute info
+    // Only set disputeClosedAt on terminal statuses — never reset to null (late events could erase it)
+    const updateData: Record<string, any> = {
+        disputeStatus,
+        disputeId: dispute.id,
+        disputeReason: dispute.reason,
+    };
+    if (['won', 'lost'].includes(disputeStatus)) {
+        updateData.disputeClosedAt = new Date();
+    }
+
     await strapiInstance
         .documents('api::klub-don.klub-don')
         .update({
             documentId: klubDon.documentId,
-            data: {
-                disputeStatus,
-                disputeId: dispute.id,
-                disputeReason: dispute.reason,
-                disputeClosedAt: ['won', 'lost'].includes(disputeStatus)
-                    ? new Date()
-                    : null,
-            },
+            data: updateData,
         });
 
     logSimple({
@@ -597,20 +601,27 @@ export async function handleDispute(
             'created',
         );
 
-        // Log audit for dispute opening
+        // Log audit for dispute opening (awaited — financial audit must not be lost)
         if (klubDon.klubr?.documentId) {
-            void logFinancialAction(
-                strapiInstance,
-                'dispute_opened',
-                klubDon.klubr.documentId,
-                klubDon.documentId,
-                dispute.amount,
-                dispute.id,
-                {
-                    dispute_status: dispute.status,
-                    dispute_reason: dispute.reason,
-                },
-            );
+            try {
+                await logFinancialAction(
+                    strapiInstance,
+                    'dispute_opened',
+                    klubDon.klubr.documentId,
+                    klubDon.documentId,
+                    dispute.amount,
+                    dispute.id,
+                    {
+                        dispute_status: dispute.status,
+                        dispute_reason: dispute.reason,
+                    },
+                );
+            } catch (auditError) {
+                strapiLog.error(
+                    `Echec de l'audit log dispute_opened pour dispute ${dispute.id}:`,
+                    auditError,
+                );
+            }
         }
     }
 
@@ -629,20 +640,27 @@ export async function handleDispute(
     if (event.type === 'charge.dispute.closed') {
         const auditActionType = disputeStatus === 'won' ? 'dispute_won' : 'dispute_lost';
 
-        // Log audit for closure
+        // Log audit for closure (awaited — financial audit must not be lost)
         if (klubDon.klubr?.documentId) {
-            void logFinancialAction(
-                strapiInstance,
-                auditActionType,
-                klubDon.klubr.documentId,
-                klubDon.documentId,
-                dispute.amount,
-                dispute.id,
-                {
-                    dispute_status: dispute.status,
-                    dispute_reason: dispute.reason,
-                },
-            );
+            try {
+                await logFinancialAction(
+                    strapiInstance,
+                    auditActionType,
+                    klubDon.klubr.documentId,
+                    klubDon.documentId,
+                    dispute.amount,
+                    dispute.id,
+                    {
+                        dispute_status: dispute.status,
+                        dispute_reason: dispute.reason,
+                    },
+                );
+            } catch (auditError) {
+                strapiLog.error(
+                    `Echec de l'audit log ${auditActionType} pour dispute ${dispute.id}:`,
+                    auditError,
+                );
+            }
         }
 
         // Notify association leaders if dispute is lost
@@ -681,7 +699,6 @@ async function reverseTransferForDispute(
     accountId: string,
 ): Promise<void> {
     try {
-        // Find the transfer linked to this payment via metadata
         const paymentIntentId = dispute.payment_intent as string;
         let relatedTransfer: Stripe.Transfer | undefined;
 
@@ -701,6 +718,23 @@ async function reverseTransferForDispute(
         if (!relatedTransfer) {
             logSimple({
                 message: `Aucun transfert trouvé pour dispute ${dispute.id}, reversal ignoré`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        // Idempotency: check if reversal already exists for this dispute
+        const existingReversals = await stripe.transfers.listReversals(
+            relatedTransfer.id,
+            { limit: 10 },
+        );
+        const alreadyReversed = existingReversals.data.some(
+            (r) => r.metadata?.dispute_id === dispute.id,
+        );
+        if (alreadyReversed) {
+            logSimple({
+                message: `Reversal déjà effectué pour dispute ${dispute.id}, ignoré`,
                 color: 'yellow',
                 prefix: 'StripeConnect',
             });

@@ -1011,6 +1011,7 @@ export interface ApiKlubDonKlubDon extends Struct.CollectionTypeSchema {
             [
                 'none',
                 'warning_received',
+                'warning_under_review',
                 'warning_closed',
                 'open',
                 'under_review',

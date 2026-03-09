@@ -9,6 +9,7 @@ vi.mock('./stripe-connect-helper', () => ({
         transfers: {
             list: vi.fn().mockResolvedValue({ data: [] }),
             createReversal: vi.fn().mockResolvedValue({ id: 'trr_test', amount: 5000 }),
+            listReversals: vi.fn().mockResolvedValue({ data: [] }),
         },
     },
 }));
@@ -691,6 +692,10 @@ describe('handleDispute', () => {
                 for (const t of mockTransfers) yield t;
             },
         } as any);
+        // No existing reversals
+        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+            data: [],
+        } as any);
 
         await handleDispute(
             mockDisputeStrapi,
@@ -701,6 +706,10 @@ describe('handleDispute', () => {
             expect.objectContaining({
                 destination: 'acct_connect_test',
             })
+        );
+        expect(mockStripeClient.transfers.listReversals).toHaveBeenCalledWith(
+            'tr_test_789',
+            { limit: 10 },
         );
         expect(mockStripeClient.transfers.createReversal).toHaveBeenCalledWith(
             'tr_test_789',
@@ -876,6 +885,119 @@ describe('handleDispute', () => {
                 dispute_status: 'needs_response',
                 dispute_reason: 'fraudulent',
             }),
+        );
+    });
+
+    it('catches and logs reversal Stripe API errors without throwing', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+
+        const mockTransfers = [
+            {
+                id: 'tr_test_789',
+                amount: 5000,
+                metadata: { payment_intent_id: 'pi_test_456' },
+            },
+        ];
+        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
+            [Symbol.asyncIterator]: async function* () {
+                for (const t of mockTransfers) yield t;
+            },
+        } as any);
+        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+            data: [],
+        } as any);
+        vi.mocked(mockStripeClient.transfers.createReversal).mockRejectedValueOnce(
+            new Error('Stripe API failure')
+        );
+
+        // Should not throw — error is caught and logged
+        await expect(
+            handleDispute(
+                mockDisputeStrapi,
+                makeDisputeEvent('charge.dispute.funds_withdrawn')
+            )
+        ).resolves.toBeUndefined();
+
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('Echec du reversal'),
+            expect.any(Error),
+        );
+    });
+
+    it('sends admin alert on charge.dispute.closed', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.closed', { status: 'won' })
+        );
+
+        await new Promise(process.nextTick);
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                destIsAdmin: true,
+                tags: expect.arrayContaining(['admin-alert', 'dispute-won']),
+            })
+        );
+    });
+
+    it('skips reversal when already reversed for this dispute (idempotency)', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+
+        const mockTransfers = [
+            {
+                id: 'tr_test_789',
+                amount: 5000,
+                metadata: { payment_intent_id: 'pi_test_456' },
+            },
+        ];
+        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
+            [Symbol.asyncIterator]: async function* () {
+                for (const t of mockTransfers) yield t;
+            },
+        } as any);
+        // Existing reversal for this dispute
+        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+            data: [{ id: 'trr_existing', metadata: { dispute_id: 'dp_test_123' } }],
+        } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        expect(mockStripeClient.transfers.createReversal).not.toHaveBeenCalled();
+    });
+
+    it('does NOT set disputeClosedAt on non-terminal status', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.updated', { status: 'under_review' })
+        );
+
+        const updateCall = mockUpdateDoc.mock.calls[0][0];
+        expect(updateCall.data).not.toHaveProperty('disputeClosedAt');
+    });
+
+    it('maps warning_under_review to distinct status', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.updated', { status: 'warning_under_review' })
+        );
+
+        expect(mockUpdateDoc).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    disputeStatus: 'warning_under_review',
+                }),
+            })
         );
     });
 });
