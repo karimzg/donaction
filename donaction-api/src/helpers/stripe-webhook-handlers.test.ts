@@ -4,10 +4,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('./stripe-connect-helper', () => ({
     syncAccountStatus: vi.fn().mockResolvedValue({}),
     logFinancialAction: vi.fn().mockResolvedValue({}),
+    createTransferToConnectedAccount: vi.fn().mockResolvedValue({ id: 'tr_new_transfer', amount: 5000 }),
     stripe: {
         events: { retrieve: vi.fn() },
+        charges: {
+            retrieve: vi.fn(),
+        },
         transfers: {
             list: vi.fn().mockResolvedValue({ data: [] }),
+            retrieve: vi.fn(),
             createReversal: vi.fn().mockResolvedValue({ id: 'trr_test', amount: 5000 }),
             listReversals: vi.fn().mockResolvedValue({ data: [] }),
         },
@@ -33,7 +38,7 @@ import {
     handleAccountDeauthorized,
     handleDispute,
 } from './stripe-webhook-handlers';
-import { syncAccountStatus, logFinancialAction, stripe as mockStripeClient } from './stripe-connect-helper';
+import { syncAccountStatus, logFinancialAction, createTransferToConnectedAccount, stripe as mockStripeClient } from './stripe-connect-helper';
 import { logSimple, strapiLog } from './logger';
 import { sendBrevoTransacEmail, BREVO_TEMPLATES } from './emails/sendBrevoTransacEmail';
 import Stripe from 'stripe';
@@ -65,6 +70,7 @@ const makeDisputeEvent = (
         data: {
             object: {
                 id: 'dp_test_123',
+                charge: 'ch_test_123',
                 payment_intent: 'pi_test_456',
                 status: 'needs_response',
                 reason: 'fraudulent',
@@ -75,6 +81,29 @@ const makeDisputeEvent = (
         },
         account: 'acct_connect_test',
     }) as unknown as Stripe.Event;
+
+/** Mock Stripe charge+transfer lookup used by reverseTransferForDispute and reTransferForDisputeWon */
+const mockChargeTransferLookup = (opts: { withReversals?: boolean; rejectReversal?: Error } = {}) => {
+    vi.mocked(mockStripeClient.charges.retrieve).mockResolvedValue({
+        id: 'ch_test_123',
+        transfer: 'tr_test_789',
+    } as any);
+    vi.mocked(mockStripeClient.transfers.retrieve).mockResolvedValue({
+        id: 'tr_test_789',
+        amount: 5000,
+        metadata: { payment_intent_id: 'pi_test_456' },
+    } as any);
+    vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+        data: opts.withReversals
+            ? [{ id: 'trr_existing', metadata: { dispute_id: 'dp_test_123' } }]
+            : [],
+    } as any);
+    if (opts.rejectReversal) {
+        vi.mocked(mockStripeClient.transfers.createReversal).mockRejectedValueOnce(
+            opts.rejectReversal
+        );
+    }
+};
 
 /** Build a mock Strapi instance for dispute tests */
 const makeDisputeMockStrapi = (overrides: Record<string, any> = {}) => {
@@ -678,35 +707,15 @@ describe('handleDispute', () => {
 
     it('attempts reverse transfer on charge.dispute.funds_withdrawn when amount > 0', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
-
-        // Mock stripe.transfers.list auto-pagination (for await...of)
-        const mockTransfers = [
-            {
-                id: 'tr_test_789',
-                amount: 5000,
-                metadata: { payment_intent_id: 'pi_test_456' },
-            },
-        ];
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                for (const t of mockTransfers) yield t;
-            },
-        } as any);
-        // No existing reversals
-        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
-            data: [],
-        } as any);
+        mockChargeTransferLookup();
 
         await handleDispute(
             mockDisputeStrapi,
             makeDisputeEvent('charge.dispute.funds_withdrawn')
         );
 
-        expect(mockStripeClient.transfers.list).toHaveBeenCalledWith(
-            expect.objectContaining({
-                destination: 'acct_connect_test',
-            })
-        );
+        expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
         expect(mockStripeClient.transfers.listReversals).toHaveBeenCalledWith(
             'tr_test_789',
             { limit: 10 },
@@ -722,13 +731,12 @@ describe('handleDispute', () => {
         );
     });
 
-    it('skips reverse transfer when no matching transfer found', async () => {
+    it('skips when charge has no transfer', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
 
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                // empty
-            },
+        vi.mocked(mockStripeClient.charges.retrieve).mockResolvedValue({
+            id: 'ch_test_123',
+            transfer: null,
         } as any);
 
         await handleDispute(
@@ -747,7 +755,7 @@ describe('handleDispute', () => {
             makeDisputeEvent('charge.dispute.created')
         );
 
-        expect(mockStripeClient.transfers.list).not.toHaveBeenCalled();
+        expect(mockStripeClient.charges.retrieve).not.toHaveBeenCalled();
         expect(mockStripeClient.transfers.createReversal).not.toHaveBeenCalled();
     });
 
@@ -774,11 +782,20 @@ describe('handleDispute', () => {
             'KlubMemberLeader',
             'AdminEditor',
         ]);
+        // Club leaders notification
         expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 templateId: BREVO_TEMPLATES.LEADER_ALERT,
                 to: [{ email: 'leader@asso.fr', name: 'Pierre Martin' }],
                 tags: expect.arrayContaining(['klubr-notification', 'dispute-lost']),
+            })
+        );
+        // Platform super admin notification
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                templateId: BREVO_TEMPLATES.LEADER_ALERT,
+                destIsAdmin: true,
+                tags: expect.arrayContaining(['admin-alert', 'dispute-lost']),
             })
         );
     });
@@ -890,25 +907,7 @@ describe('handleDispute', () => {
 
     it('catches and logs reversal Stripe API errors without throwing', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
-
-        const mockTransfers = [
-            {
-                id: 'tr_test_789',
-                amount: 5000,
-                metadata: { payment_intent_id: 'pi_test_456' },
-            },
-        ];
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                for (const t of mockTransfers) yield t;
-            },
-        } as any);
-        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
-            data: [],
-        } as any);
-        vi.mocked(mockStripeClient.transfers.createReversal).mockRejectedValueOnce(
-            new Error('Stripe API failure')
-        );
+        mockChargeTransferLookup({ rejectReversal: new Error('Stripe API failure') });
 
         // Should not throw — error is caught and logged
         await expect(
@@ -944,23 +943,7 @@ describe('handleDispute', () => {
 
     it('skips reversal when already reversed for this dispute (idempotency)', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
-
-        const mockTransfers = [
-            {
-                id: 'tr_test_789',
-                amount: 5000,
-                metadata: { payment_intent_id: 'pi_test_456' },
-            },
-        ];
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                for (const t of mockTransfers) yield t;
-            },
-        } as any);
-        // Existing reversal for this dispute
-        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
-            data: [{ id: 'trr_existing', metadata: { dispute_id: 'dp_test_123' } }],
-        } as any);
+        mockChargeTransferLookup({ withReversals: true });
 
         await handleDispute(
             mockDisputeStrapi,
@@ -1015,22 +998,7 @@ describe('handleDispute', () => {
 
     it('logs transfer_reversed audit after successful reversal', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
-
-        const mockTransfers = [
-            {
-                id: 'tr_test_789',
-                amount: 5000,
-                metadata: { payment_intent_id: 'pi_test_456' },
-            },
-        ];
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                for (const t of mockTransfers) yield t;
-            },
-        } as any);
-        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
-            data: [],
-        } as any);
+        mockChargeTransferLookup();
 
         await handleDispute(
             mockDisputeStrapi,
@@ -1053,35 +1021,17 @@ describe('handleDispute', () => {
 
     it('logs failed reversal audit when createReversal throws', async () => {
         const mockDisputeStrapi = makeDisputeMockStrapi();
-
-        const mockTransfers = [
-            {
-                id: 'tr_test_789',
-                amount: 5000,
-                metadata: { payment_intent_id: 'pi_test_456' },
-            },
-        ];
-        vi.mocked(mockStripeClient.transfers.list).mockReturnValue({
-            [Symbol.asyncIterator]: async function* () {
-                for (const t of mockTransfers) yield t;
-            },
-        } as any);
-        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
-            data: [],
-        } as any);
-        vi.mocked(mockStripeClient.transfers.createReversal).mockRejectedValueOnce(
-            new Error('Insufficient funds')
-        );
+        mockChargeTransferLookup({ rejectReversal: new Error('Insufficient funds') });
 
         await handleDispute(
             mockDisputeStrapi,
             makeDisputeEvent('charge.dispute.funds_withdrawn')
         );
 
-        // Should log a failed transfer_reversed audit
+        // Should log a failed transfer_reversal_failed audit
         expect(logFinancialAction).toHaveBeenCalledWith(
             mockDisputeStrapi,
-            'transfer_reversed',
+            'transfer_reversal_failed',
             'doc_klubr_456',
             'doc_don_123',
             5000,
@@ -1153,5 +1103,88 @@ describe('handleDispute', () => {
         );
 
         expect(mockUpdateDoc).not.toHaveBeenCalled();
+    });
+
+    it('maps funds_reinstated to won status', async () => {
+        const mockUpdateDoc = vi.fn().mockResolvedValue({});
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockUpdateDoc });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_reinstated', { status: 'won' })
+        );
+
+        expect(mockUpdateDoc).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    disputeStatus: 'won',
+                }),
+            })
+        );
+    });
+
+    it('re-transfers funds on charge.dispute.funds_reinstated', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+        mockChargeTransferLookup();
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_reinstated', { status: 'won' })
+        );
+
+        expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
+        expect(logFinancialAction).toHaveBeenCalledWith(
+            mockDisputeStrapi,
+            'transfer_created',
+            'doc_klubr_456',
+            'doc_don_123',
+            5000,
+            'tr_new_transfer',
+            expect.objectContaining({
+                reason: 'dispute_funds_reinstated',
+            }),
+        );
+    });
+
+    it('sends admin alert when reversal fails', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+        mockChargeTransferLookup({ rejectReversal: new Error('Stripe API failure') });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        await new Promise(process.nextTick);
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                destIsAdmin: true,
+                tags: expect.arrayContaining(['admin-alert', 'dispute-reversal_failed']),
+            })
+        );
+    });
+
+    it('uses transfer_reversal_failed audit type on failed reversal', async () => {
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+        mockChargeTransferLookup({ rejectReversal: new Error('Insufficient funds') });
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        expect(logFinancialAction).toHaveBeenCalledWith(
+            mockDisputeStrapi,
+            'transfer_reversal_failed',
+            'doc_klubr_456',
+            'doc_don_123',
+            5000,
+            'failed_dp_test_123',
+            expect.objectContaining({
+                status: 'failed',
+            }),
+        );
     });
 });

@@ -183,6 +183,7 @@ const results = await strapi.db.query('api::klubr.klubr').findMany({
 |------|-----------------|
 | `API_DOCS.md` | Endpoint list, middlewares, rate limits |
 | `DATABASE.md` | Entity relationships, schema, migrations |
+| `ROLES.md` | Member roles hierarchy, notification patterns, Admin vs club-level roles |
 
 ## Critical Strapi v5 Documentation
 | File | Purpose |

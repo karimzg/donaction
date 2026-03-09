@@ -1,12 +1,12 @@
 import type Stripe from 'stripe';
 import { Core } from '@strapi/strapi';
-import { syncAccountStatus, stripe, logFinancialAction } from './stripe-connect-helper';
+import { syncAccountStatus, stripe, logFinancialAction, createTransferToConnectedAccount } from './stripe-connect-helper';
 import { logBlock, logSimple, strapiLog, COLORS } from './logger';
 import {
     sendBrevoTransacEmail,
     BREVO_TEMPLATES,
 } from './emails/sendBrevoTransacEmail';
-import { ConnectedAccountWithOptionalKlubr } from '../_types';
+import { ConnectedAccountWithOptionalKlubr, DisputeKlubDon, DisputeStatusValue } from '../_types';
 
 /**
  * Handles account.updated webhook event
@@ -473,25 +473,6 @@ async function sendDeauthorizedKlubrNotification(
 }
 
 /**
- * Minimal shape for klub_don used by dispute helpers
- */
-interface DisputeKlubDon {
-    documentId: string;
-    disputeId?: string | null;
-    disputeClosedAt?: string | Date | null;
-    klubr?: {
-        documentId: string;
-        denomination?: string;
-        uuid?: string;
-    } | null;
-}
-
-/**
- * Possible values for dispute status
- */
-type DisputeStatusValue = 'none' | 'warning_received' | 'warning_under_review' | 'warning_closed' | 'open' | 'under_review' | 'won' | 'lost';
-
-/**
  * Maps Stripe dispute status to internal dispute status
  */
 const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
@@ -502,6 +483,7 @@ const DISPUTE_STATUS_MAP: Record<string, DisputeStatusValue> = {
     under_review: 'under_review',
     won: 'won',
     lost: 'lost',
+    funds_reinstated: 'won',
 };
 
 /**
@@ -661,6 +643,26 @@ export async function handleDispute(
         }
     }
 
+    // Re-transfer funds when dispute is won and Stripe reinstates funds
+    if (event.type === 'charge.dispute.funds_reinstated') {
+        if (dispute.amount > 0 && accountId !== 'unknown') {
+            await reTransferForDisputeWon(
+                strapiInstance,
+                dispute,
+                klubDon,
+                accountId,
+            );
+        }
+
+        // Send admin alert
+        void sendDisputeAdminAlert(
+            dispute,
+            klubDon,
+            accountId,
+            'won',
+        );
+    }
+
     if (event.type === 'charge.dispute.closed') {
         const auditActionType = disputeStatus === 'won' ? 'dispute_won' : 'dispute_lost';
 
@@ -723,32 +725,34 @@ async function reverseTransferForDispute(
     accountId: string,
 ): Promise<void> {
     try {
-        const paymentIntentId = typeof dispute.payment_intent === 'string'
-            ? dispute.payment_intent
-            : dispute.payment_intent?.id;
-        let relatedTransfer: Stripe.Transfer | undefined;
+        const chargeId = typeof dispute.charge === 'string'
+            ? dispute.charge
+            : dispute.charge?.id;
 
-        for await (const transfer of stripe.transfers.list({
-            destination: accountId,
-            limit: 100,
-        })) {
-            if (
-                transfer.metadata?.payment_intent_id === paymentIntentId ||
-                transfer.metadata?.klub_don_id === klubDon.documentId
-            ) {
-                relatedTransfer = transfer;
-                break;
-            }
-        }
-
-        if (!relatedTransfer) {
+        if (!chargeId) {
             logSimple({
-                message: `Aucun transfert trouvé pour dispute ${dispute.id}, reversal ignoré`,
+                message: `Dispute ${dispute.id} sans charge, reversal ignoré`,
                 color: 'yellow',
                 prefix: 'StripeConnect',
             });
             return;
         }
+
+        const charge = await stripe.charges.retrieve(chargeId);
+        const transferId = typeof charge.transfer === 'string'
+            ? charge.transfer
+            : charge.transfer?.id;
+
+        if (!transferId) {
+            logSimple({
+                message: `Aucun transfert trouvé sur charge ${chargeId} pour dispute ${dispute.id}, reversal ignoré`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const relatedTransfer = await stripe.transfers.retrieve(transferId);
 
         // Idempotency: check if reversal already exists for this dispute
         const existingReversals = await stripe.transfers.listReversals(
@@ -811,7 +815,7 @@ async function reverseTransferForDispute(
             try {
                 await logFinancialAction(
                     strapiInstance,
-                    'transfer_reversed',
+                    'transfer_reversal_failed',
                     klubDon.klubr.documentId,
                     klubDon.documentId,
                     dispute.amount,
@@ -829,6 +833,121 @@ async function reverseTransferForDispute(
                 );
             }
         }
+
+        // Send admin alert about the failure
+        void sendDisputeAdminAlert(
+            dispute,
+            klubDon,
+            accountId,
+            'reversal_failed',
+        );
+    }
+}
+
+/**
+ * Re-transfers funds to the connected account when dispute is won (charge.dispute.funds_reinstated).
+ * Non-blocking if it fails (logged but not propagated).
+ */
+async function reTransferForDisputeWon(
+    strapiInstance: Core.Strapi,
+    dispute: Stripe.Dispute,
+    klubDon: DisputeKlubDon,
+    accountId: string,
+): Promise<void> {
+    try {
+        const chargeId = typeof dispute.charge === 'string'
+            ? dispute.charge
+            : dispute.charge?.id;
+
+        if (!chargeId) {
+            logSimple({
+                message: `Dispute ${dispute.id} sans charge, re-transfer ignoré`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const charge = await stripe.charges.retrieve(chargeId);
+        const transferId = typeof charge.transfer === 'string'
+            ? charge.transfer
+            : charge.transfer?.id;
+
+        if (!transferId) {
+            logSimple({
+                message: `Aucun transfert trouvé sur charge ${chargeId} pour dispute ${dispute.id}, re-transfer ignoré`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const originalTransfer = await stripe.transfers.retrieve(transferId);
+        const reinstatedAmount = Math.min(dispute.amount, originalTransfer.amount);
+
+        // Create new transfer to the connected account for the reinstated amount
+        const newTransfer = await createTransferToConnectedAccount(
+            reinstatedAmount,
+            accountId,
+            {
+                dispute_id: dispute.id,
+                original_transfer_id: originalTransfer.id,
+                reason: 'dispute_funds_reinstated',
+            },
+        );
+
+        logSimple({
+            message: `Transfert créé pour fonds réintégrés: ${newTransfer.id} (${newTransfer.amount / 100}€)`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
+
+        // Audit log
+        if (klubDon.klubr?.documentId) {
+            await logFinancialAction(
+                strapiInstance,
+                'transfer_created',
+                klubDon.klubr.documentId,
+                klubDon.documentId,
+                newTransfer.amount,
+                newTransfer.id,
+                {
+                    dispute_id: dispute.id,
+                    reason: 'dispute_funds_reinstated',
+                    original_transfer_id: originalTransfer.id,
+                },
+            );
+        }
+    } catch (error) {
+        strapiLog.error(
+            `Echec du re-transfer pour dispute gagnée ${dispute.id}:`,
+            error,
+        );
+
+        // Log failed attempt for forensic traceability
+        if (klubDon.klubr?.documentId) {
+            try {
+                await logFinancialAction(
+                    strapiInstance,
+                    'transfer_created',
+                    klubDon.klubr.documentId,
+                    klubDon.documentId,
+                    dispute.amount,
+                    `failed_retransfer_${dispute.id}`,
+                    {
+                        dispute_id: dispute.id,
+                        reason: 'dispute_funds_reinstated',
+                        status: 'failed',
+                        error: error instanceof Error ? error.message : String(error),
+                    },
+                );
+            } catch (auditError) {
+                strapiLog.error(
+                    `Echec de l'audit log pour re-transfer échoué (dispute ${dispute.id}):`,
+                    auditError,
+                );
+            }
+        }
     }
 }
 
@@ -840,7 +959,7 @@ async function sendDisputeAdminAlert(
     dispute: Stripe.Dispute,
     klubDon: DisputeKlubDon,
     accountId: string,
-    alertType: 'created' | 'lost' | 'won',
+    alertType: 'created' | 'lost' | 'won' | 'reversal_failed',
 ): Promise<void> {
     try {
         const klubrName = klubDon.klubr?.denomination || 'Inconnu';
@@ -851,6 +970,7 @@ async function sendDisputeAdminAlert(
             created: `Nouveau litige ouvert - ${amountEuros}€`,
             lost: `Litige perdu - ${amountEuros}€ définitivement perdus`,
             won: `Litige gagné - ${amountEuros}€ récupérés`,
+            reversal_failed: `Echec du reversal de transfert - ${amountEuros}€`,
         };
 
         const deadline = dispute.evidence_details?.due_by
@@ -912,7 +1032,7 @@ async function sendDisputeLostKlubrNotification(
         const klubrName = klubr.denomination || 'Votre association';
         const amountEuros = (dispute.amount / 100).toFixed(2);
 
-        // Find KlubMemberLeader and AdminEditor members to notify
+        // Find club-level leaders to notify (Admin is platform-level, notified separately via destIsAdmin)
         const leaders = await strapiInstance
             .service('api::klubr-membre.klubr-membre')
             .getKlubMembres(klubr.documentId, [
@@ -980,6 +1100,25 @@ async function sendDisputeLostKlubrNotification(
                     result.reason,
                 );
             }
+        });
+
+        // Also notify platform super admin
+        await sendBrevoTransacEmail({
+            subject: `Litige perdu - ${amountEuros}€ pour ${klubrName}`,
+            templateId: BREVO_TEMPLATES.LEADER_ALERT,
+            destIsAdmin: true,
+            params: {
+                CLUB_NAME: klubrName,
+                ALERT_MESSAGE:
+                    `Un litige de ${amountEuros}€ concernant un don à ${klubrName} a été perdu. ` +
+                    `Le montant a été définitivement débité. ` +
+                    `Raison du litige : ${dispute.reason || 'non précisée'}.`,
+            },
+            tags: [
+                'admin-alert',
+                'stripe-connect',
+                'dispute-lost',
+            ],
         });
     } catch (notifError) {
         strapiLog.error(

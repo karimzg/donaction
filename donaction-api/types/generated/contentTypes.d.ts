@@ -723,6 +723,7 @@ export interface ApiFinancialAuditLogFinancialAuditLog
             [
                 'transfer_created',
                 'transfer_reversed',
+                'transfer_reversal_failed',
                 'payout_initiated',
                 'refund_processed',
                 'fee_calculated',

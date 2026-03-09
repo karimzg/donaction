@@ -129,3 +129,30 @@ export type WebhookLogEntity = Data.ContentType<'api::webhook-log.webhook-log'> 
     related_don?: KlubDonEntity;
     related_klubr?: KlubrEntity;
 };
+
+/**
+ * Possible values for dispute status
+ */
+export type DisputeStatusValue =
+    | 'none'
+    | 'warning_received'
+    | 'warning_under_review'
+    | 'warning_closed'
+    | 'open'
+    | 'under_review'
+    | 'won'
+    | 'lost';
+
+/**
+ * Minimal shape for klub_don used by dispute helpers
+ */
+export interface DisputeKlubDon {
+    documentId: string;
+    disputeId?: string | null;
+    disputeClosedAt?: string | Date | null;
+    klubr?: {
+        documentId: string;
+        denomination?: string;
+        uuid?: string;
+    } | null;
+}
