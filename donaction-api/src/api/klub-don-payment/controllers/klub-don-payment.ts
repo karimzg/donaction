@@ -411,21 +411,25 @@ export default factories.createCoreController(
                         });
 
                         // Extract transfer_id from charge for O(1) dispute reversal lookup
+                        // Only for Connect payments (those with transfer_data)
                         let transferId: string | undefined;
                         const succeededIntent = event.data.object as Stripe.PaymentIntent;
-                        const latestChargeId = typeof succeededIntent.latest_charge === 'string'
-                            ? succeededIntent.latest_charge
-                            : succeededIntent.latest_charge?.id;
-                        if (latestChargeId) {
-                            try {
-                                const charge = await stripe.charges.retrieve(latestChargeId);
-                                transferId = typeof charge.transfer === 'string'
-                                    ? charge.transfer
-                                    : charge.transfer?.id || undefined;
-                            } catch (err) {
-                                strapiLog.warn(
-                                    `Impossible de récupérer le transfer_id pour charge ${latestChargeId}: ${err.message}`
-                                );
+                        const isConnectPayment = !!succeededIntent.transfer_data;
+                        if (isConnectPayment) {
+                            const latestChargeId = typeof succeededIntent.latest_charge === 'string'
+                                ? succeededIntent.latest_charge
+                                : succeededIntent.latest_charge?.id;
+                            if (latestChargeId) {
+                                try {
+                                    const charge = await stripe.charges.retrieve(latestChargeId);
+                                    transferId = typeof charge.transfer === 'string'
+                                        ? charge.transfer
+                                        : charge.transfer?.id ?? undefined;
+                                } catch (err) {
+                                    strapiLog.warn(
+                                        `Impossible de récupérer le transfer_id pour charge ${latestChargeId}: ${(err as Error).message}`
+                                    );
+                                }
                             }
                         }
 

@@ -538,7 +538,7 @@ export async function handleDispute(
     }
 
     const klubDon = payment.klub_don;
-    const storedTransferId: string | undefined = payment.transfer_id || undefined;
+    const storedTransferId: string | undefined = payment.transfer_id ?? undefined;
 
     // Idempotency guard: skip duplicate created events
     if (klubDon.disputeId === dispute.id && event.type === 'charge.dispute.created') {
@@ -728,12 +728,21 @@ async function resolveTransferFromDispute(
 ): Promise<Stripe.Transfer | null> {
     // Fast path: use stored transfer_id for O(1) lookup
     if (storedTransferId) {
-        logSimple({
-            message: `Utilisation du transfer_id stocké ${storedTransferId} pour dispute ${dispute.id}`,
-            color: 'green',
-            prefix: 'StripeConnect',
-        });
-        return stripe.transfers.retrieve(storedTransferId);
+        try {
+            logSimple({
+                message: `Utilisation du transfer_id stocké ${storedTransferId} pour dispute ${dispute.id}`,
+                color: 'green',
+                prefix: 'StripeConnect',
+            });
+            return await stripe.transfers.retrieve(storedTransferId);
+        } catch (err) {
+            logSimple({
+                message: `Échec récupération transfer ${storedTransferId}, fallback sur charge chain: ${(err as Error).message}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            // Fall through to charge → transfer chain
+        }
     }
 
     // Fallback: resolve via charge → transfer chain (2 API calls)

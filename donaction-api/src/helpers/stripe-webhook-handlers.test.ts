@@ -1288,4 +1288,84 @@ describe('handleDispute', () => {
         expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
         expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
     });
+
+    it('falls back to charge→transfer chain when stored transfer_id retrieval fails', async () => {
+        const mockFindOnePayment = vi.fn().mockResolvedValue({
+            intent_id: 'pi_test_456',
+            transfer_id: 'tr_stale_invalid',
+            klub_don: {
+                id: 1,
+                documentId: 'doc_don_123',
+                klubr: {
+                    id: 10,
+                    documentId: 'doc_klubr_456',
+                    denomination: 'Mon Association',
+                    uuid: 'klubr-uuid-789',
+                },
+            },
+        });
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockFindOnePayment });
+
+        // First call (fast path) rejects, second call (fallback) resolves
+        vi.mocked(mockStripeClient.transfers.retrieve)
+            .mockRejectedValueOnce(new Error('No such transfer: tr_stale_invalid'))
+            .mockResolvedValueOnce({
+                id: 'tr_test_789',
+                amount: 5000,
+                metadata: {},
+            } as any);
+        vi.mocked(mockStripeClient.charges.retrieve).mockResolvedValue({
+            id: 'ch_test_123',
+            transfer: 'tr_test_789',
+        } as any);
+        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+            data: [],
+        } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        // Should have tried stored ID first, then fallen back to charge chain
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_stale_invalid');
+        expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
+    });
+
+    it('handles classic payment (no transfer on charge) gracefully', async () => {
+        const mockFindOnePayment = vi.fn().mockResolvedValue({
+            intent_id: 'pi_test_456',
+            // no transfer_id stored (classic payment)
+            klub_don: {
+                id: 1,
+                documentId: 'doc_don_123',
+                klubr: {
+                    id: 10,
+                    documentId: 'doc_klubr_456',
+                    denomination: 'Mon Association',
+                    uuid: 'klubr-uuid-789',
+                },
+            },
+        });
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockFindOnePayment });
+
+        // charge.transfer is null (classic, non-Connect payment)
+        vi.mocked(mockStripeClient.charges.retrieve).mockResolvedValue({
+            id: 'ch_test_classic',
+            transfer: null,
+        } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        // Should attempt charge lookup but find no transfer
+        expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
+        // Should NOT attempt transfer retrieval since charge.transfer is null
+        expect(mockStripeClient.transfers.retrieve).not.toHaveBeenCalled();
+        // Should NOT attempt reversal
+        expect(mockStripeClient.transfers.createReversal).not.toHaveBeenCalled();
+    });
 });
