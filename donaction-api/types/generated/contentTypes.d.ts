@@ -730,6 +730,7 @@ export interface ApiFinancialAuditLogFinancialAuditLog
                 'dispute_opened',
                 'dispute_won',
                 'dispute_lost',
+                'transfer_creation_failed',
             ]
         > &
             Schema.Attribute.Required;

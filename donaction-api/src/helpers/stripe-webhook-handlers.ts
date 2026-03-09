@@ -652,15 +652,15 @@ export async function handleDispute(
                 klubDon,
                 accountId,
             );
-        }
 
-        // Send admin alert
-        void sendDisputeAdminAlert(
-            dispute,
-            klubDon,
-            accountId,
-            'won',
-        );
+            // Send admin alert (only when re-transfer was attempted)
+            void sendDisputeAdminAlert(
+                dispute,
+                klubDon,
+                accountId,
+                'won',
+            );
+        }
     }
 
     if (event.type === 'charge.dispute.closed') {
@@ -757,7 +757,7 @@ async function reverseTransferForDispute(
         // Idempotency: check if reversal already exists for this dispute
         const existingReversals = await stripe.transfers.listReversals(
             relatedTransfer.id,
-            { limit: 10 },
+            { limit: 100 },
         );
         const alreadyReversed = existingReversals.data.some(
             (r) => r.metadata?.dispute_id === dispute.id,
@@ -929,7 +929,7 @@ async function reTransferForDisputeWon(
             try {
                 await logFinancialAction(
                     strapiInstance,
-                    'transfer_created',
+                    'transfer_creation_failed',
                     klubDon.klubr.documentId,
                     klubDon.documentId,
                     dispute.amount,

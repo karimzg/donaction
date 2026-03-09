@@ -109,7 +109,8 @@ export type FinancialActionType =
     | 'fee_calculated'
     | 'dispute_opened'
     | 'dispute_won'
-    | 'dispute_lost';
+    | 'dispute_lost'
+    | 'transfer_creation_failed';
 
 /**
  * Creates a Stripe connected account for a klubr

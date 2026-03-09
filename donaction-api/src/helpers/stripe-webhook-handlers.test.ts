@@ -718,7 +718,7 @@ describe('handleDispute', () => {
         expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
         expect(mockStripeClient.transfers.listReversals).toHaveBeenCalledWith(
             'tr_test_789',
-            { limit: 10 },
+            { limit: 100 },
         );
         expect(mockStripeClient.transfers.createReversal).toHaveBeenCalledWith(
             'tr_test_789',
