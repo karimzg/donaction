@@ -1187,4 +1187,105 @@ describe('handleDispute', () => {
             }),
         );
     });
+
+    // ---------- storedTransferId fast path (issue #192) ----------
+
+    it('uses stored transfer_id for O(1) lookup on funds_withdrawn (skips charges.retrieve)', async () => {
+        const mockFindOnePayment = vi.fn().mockResolvedValue({
+            intent_id: 'pi_test_456',
+            transfer_id: 'tr_stored_123',
+            klub_don: {
+                id: 1,
+                documentId: 'doc_don_123',
+                klubr: {
+                    id: 10,
+                    documentId: 'doc_klubr_456',
+                    denomination: 'Mon Association',
+                    uuid: 'klubr-uuid-789',
+                },
+            },
+        });
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockFindOnePayment });
+
+        vi.mocked(mockStripeClient.transfers.retrieve).mockResolvedValue({
+            id: 'tr_stored_123',
+            amount: 5000,
+            metadata: {},
+        } as any);
+        vi.mocked(mockStripeClient.transfers.listReversals).mockResolvedValue({
+            data: [],
+        } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        // Should use stored transfer_id directly — no charge lookup
+        expect(mockStripeClient.charges.retrieve).not.toHaveBeenCalled();
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_stored_123');
+        expect(mockStripeClient.transfers.createReversal).toHaveBeenCalledWith(
+            'tr_stored_123',
+            expect.objectContaining({
+                amount: 5000,
+                metadata: expect.objectContaining({ dispute_id: 'dp_test_123' }),
+            }),
+        );
+    });
+
+    it('uses stored transfer_id for O(1) lookup on funds_reinstated (skips charges.retrieve)', async () => {
+        const mockFindOnePayment = vi.fn().mockResolvedValue({
+            intent_id: 'pi_test_456',
+            transfer_id: 'tr_stored_456',
+            klub_don: {
+                id: 1,
+                documentId: 'doc_don_123',
+                klubr: {
+                    id: 10,
+                    documentId: 'doc_klubr_456',
+                    denomination: 'Mon Association',
+                    uuid: 'klubr-uuid-789',
+                },
+            },
+        });
+        const mockDisputeStrapi = makeDisputeMockStrapi({ mockFindOnePayment });
+
+        vi.mocked(mockStripeClient.transfers.retrieve).mockResolvedValue({
+            id: 'tr_stored_456',
+            amount: 5000,
+            metadata: {},
+        } as any);
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_reinstated', { status: 'won' })
+        );
+
+        // Should use stored transfer_id directly — no charge lookup
+        expect(mockStripeClient.charges.retrieve).not.toHaveBeenCalled();
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_stored_456');
+        expect(createTransferToConnectedAccount).toHaveBeenCalledWith(
+            5000,
+            'acct_connect_test',
+            expect.objectContaining({
+                dispute_id: 'dp_test_123',
+                original_transfer_id: 'tr_stored_456',
+            }),
+        );
+    });
+
+    it('falls back to charge→transfer chain when transfer_id is not stored', async () => {
+        // Default mock has no transfer_id
+        const mockDisputeStrapi = makeDisputeMockStrapi();
+        mockChargeTransferLookup();
+
+        await handleDispute(
+            mockDisputeStrapi,
+            makeDisputeEvent('charge.dispute.funds_withdrawn')
+        );
+
+        // Should fallback to charge retrieval
+        expect(mockStripeClient.charges.retrieve).toHaveBeenCalledWith('ch_test_123');
+        expect(mockStripeClient.transfers.retrieve).toHaveBeenCalledWith('tr_test_789');
+    });
 });

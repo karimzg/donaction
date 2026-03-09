@@ -538,6 +538,7 @@ export async function handleDispute(
     }
 
     const klubDon = payment.klub_don;
+    const storedTransferId: string | undefined = payment.transfer_id || undefined;
 
     // Idempotency guard: skip duplicate created events
     if (klubDon.disputeId === dispute.id && event.type === 'charge.dispute.created') {
@@ -638,6 +639,7 @@ export async function handleDispute(
                 dispute,
                 klubDon,
                 accountId,
+                storedTransferId,
             );
         }
     }
@@ -650,6 +652,7 @@ export async function handleDispute(
                 dispute,
                 klubDon,
                 accountId,
+                storedTransferId,
             );
 
             // Send admin alert (only when re-transfer was attempted)
@@ -720,7 +723,25 @@ export async function handleDispute(
 async function resolveTransferFromDispute(
     dispute: Stripe.Dispute,
     operation: string,
+    storedTransferId?: string,
 ): Promise<Stripe.Transfer | null> {
+    // Fast path: use stored transfer_id for O(1) lookup
+    if (storedTransferId) {
+        logSimple({
+            message: `Utilisation du transfer_id stocké ${storedTransferId} pour dispute ${dispute.id}`,
+            color: 'green',
+            prefix: 'StripeConnect',
+        });
+        return stripe.transfers.retrieve(storedTransferId);
+    }
+
+    // Fallback: resolve via charge → transfer chain (2 API calls)
+    logSimple({
+        message: `Aucun transfer_id stocké, résolution via charge pour dispute ${dispute.id}`,
+        color: 'yellow',
+        prefix: 'StripeConnect',
+    });
+
     const chargeId = typeof dispute.charge === 'string'
         ? dispute.charge
         : dispute.charge?.id;
@@ -760,9 +781,10 @@ async function reverseTransferForDispute(
     dispute: Stripe.Dispute,
     klubDon: DisputeKlubDon,
     accountId: string,
+    storedTransferId?: string,
 ): Promise<void> {
     try {
-        const relatedTransfer = await resolveTransferFromDispute(dispute, 'reversal');
+        const relatedTransfer = await resolveTransferFromDispute(dispute, 'reversal', storedTransferId);
         if (!relatedTransfer) return;
 
         // Idempotency: check if reversal already exists for this dispute
@@ -864,9 +886,10 @@ async function reTransferForDisputeWon(
     dispute: Stripe.Dispute,
     klubDon: DisputeKlubDon,
     accountId: string,
+    storedTransferId?: string,
 ): Promise<void> {
     try {
-        const originalTransfer = await resolveTransferFromDispute(dispute, 're-transfer');
+        const originalTransfer = await resolveTransferFromDispute(dispute, 're-transfer', storedTransferId);
         if (!originalTransfer) return;
 
         const reinstatedAmount = Math.min(dispute.amount, originalTransfer.amount);

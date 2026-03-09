@@ -966,6 +966,7 @@ export interface ApiKlubDonPaymentKlubDonPayment
             Schema.Attribute.Required &
             Schema.Attribute.DefaultTo<'none'>;
         status: Schema.Attribute.String;
+        transfer_id: Schema.Attribute.String;
         updatedAt: Schema.Attribute.DateTime;
         updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
             Schema.Attribute.Private;
