@@ -717,7 +717,8 @@ export async function handleDispute(
 }
 
 /**
- * Resolves the original Stripe transfer from a dispute by following charge → transfer chain.
+ * Resolves the original Stripe transfer from a dispute.
+ * Uses stored transfer_id for O(1) lookup if available, otherwise follows charge → transfer chain.
  * Returns null if no transfer is found (with appropriate logging).
  */
 async function resolveTransferFromDispute(
