@@ -478,6 +478,7 @@ async function sendDeauthorizedKlubrNotification(
 interface DisputeKlubDon {
     documentId: string;
     disputeId?: string | null;
+    disputeClosedAt?: string | Date | null;
     klubr?: {
         documentId: string;
         denomination?: string;
@@ -530,7 +531,9 @@ export async function handleDispute(
         return;
     }
 
-    const paymentIntentId = dispute.payment_intent as string;
+    const paymentIntentId = typeof dispute.payment_intent === 'string'
+        ? dispute.payment_intent
+        : dispute.payment_intent.id;
 
     // Find the donation via the payment record
     const payment = await strapiInstance.db
@@ -555,7 +558,7 @@ export async function handleDispute(
 
     const klubDon = payment.klub_don;
 
-    // Idempotency guard: skip if this dispute was already processed
+    // Idempotency guard: skip duplicate created events
     if (klubDon.disputeId === dispute.id && event.type === 'charge.dispute.created') {
         logSimple({
             message: `Dispute ${dispute.id} déjà traitée pour don ${klubDon.documentId}, ignoré`,
@@ -565,11 +568,32 @@ export async function handleDispute(
         return;
     }
 
-    const disputeStatus = DISPUTE_STATUS_MAP[dispute.status] || 'open';
+    // Idempotency guard: skip closed retries if already closed
+    if (klubDon.disputeClosedAt && event.type === 'charge.dispute.closed') {
+        logSimple({
+            message: `Dispute ${dispute.id} déjà clôturée pour don ${klubDon.documentId}, ignoré`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+        return;
+    }
+
+    const mappedStatus = DISPUTE_STATUS_MAP[dispute.status];
+    if (!mappedStatus) {
+        strapiLog.warn(
+            `Statut dispute inconnu: '${dispute.status}', mappé à 'open' par défaut`
+        );
+    }
+    const disputeStatus = mappedStatus || 'open';
 
     // Update klub_don with dispute info
     // Only set disputeClosedAt on terminal statuses — never reset to null (late events could erase it)
-    const updateData: Record<string, any> = {
+    const updateData: {
+        disputeStatus: DisputeStatusValue;
+        disputeId: string;
+        disputeReason: string | null;
+        disputeClosedAt?: Date;
+    } = {
         disputeStatus,
         disputeId: dispute.id,
         disputeReason: dispute.reason,
@@ -699,7 +723,9 @@ async function reverseTransferForDispute(
     accountId: string,
 ): Promise<void> {
     try {
-        const paymentIntentId = dispute.payment_intent as string;
+        const paymentIntentId = typeof dispute.payment_intent === 'string'
+            ? dispute.payment_intent
+            : dispute.payment_intent?.id;
         let relatedTransfer: Stripe.Transfer | undefined;
 
         for await (const transfer of stripe.transfers.list({
@@ -779,6 +805,30 @@ async function reverseTransferForDispute(
             `Echec du reversal de transfert pour dispute ${dispute.id}:`,
             error,
         );
+
+        // Audit the failed reversal attempt for forensic traceability
+        if (klubDon.klubr?.documentId) {
+            try {
+                await logFinancialAction(
+                    strapiInstance,
+                    'transfer_reversed',
+                    klubDon.klubr.documentId,
+                    klubDon.documentId,
+                    dispute.amount,
+                    `failed_${dispute.id}`,
+                    {
+                        dispute_id: dispute.id,
+                        status: 'failed',
+                        error: error instanceof Error ? error.message : String(error),
+                    },
+                );
+            } catch (auditError) {
+                strapiLog.error(
+                    `Echec de l'audit log pour reversal échoué (dispute ${dispute.id}):`,
+                    auditError,
+                );
+            }
+        }
     }
 }
 
@@ -862,10 +912,13 @@ async function sendDisputeLostKlubrNotification(
         const klubrName = klubr.denomination || 'Votre association';
         const amountEuros = (dispute.amount / 100).toFixed(2);
 
-        // Find KlubMemberLeader members to notify
+        // Find KlubMemberLeader and AdminEditor members to notify
         const leaders = await strapiInstance
             .service('api::klubr-membre.klubr-membre')
-            .getKlubMembres(klubr.documentId, ['KlubMemberLeader']);
+            .getKlubMembres(klubr.documentId, [
+                'KlubMemberLeader',
+                'AdminEditor',
+            ]);
 
         const leadersWithEmail = leaders.filter(
             (member) => member.email || member.users_permissions_user?.email,
@@ -902,7 +955,11 @@ async function sendDisputeLostKlubrNotification(
                             `Raison du litige : ${dispute.reason || 'non précisée'}. ` +
                             `Veuillez contacter votre administrateur pour plus d'informations.`,
                     },
-                    tags: ['klubr-notification', 'stripe-connect', 'dispute-lost'],
+                    tags: [
+                        'klubr-notification',
+                        'stripe-connect',
+                        'dispute-lost',
+                    ],
                 });
 
                 logSimple({
