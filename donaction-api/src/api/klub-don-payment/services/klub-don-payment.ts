@@ -17,6 +17,7 @@ export default factories.createCoreService(
             idempotencyKey,
             applicationFeeAmount,
             paymentMethod,
+            transferId,
         }: {
             status: string;
             donUuid: string;
@@ -24,6 +25,7 @@ export default factories.createCoreService(
             idempotencyKey?: string;
             applicationFeeAmount?: number;
             paymentMethod?: 'stripe_classic' | 'stripe_connect';
+            transferId?: string;
         }) {
             try {
                 const klubrDon: KlubDonEntity = await strapi.db
@@ -57,6 +59,7 @@ export default factories.createCoreService(
                         ...(applicationFeeAmount !== undefined && {
                             application_fee_amount: applicationFeeAmount,
                         }),
+                        ...(transferId && { transfer_id: transferId }),
                     },
                 };
                 const payment = klubrDon.klub_don_payments.find(

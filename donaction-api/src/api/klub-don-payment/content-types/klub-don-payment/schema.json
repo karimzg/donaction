@@ -76,6 +76,9 @@
     },
     "application_fee_amount": {
       "type": "decimal"
+    },
+    "transfer_id": {
+      "type": "string"
     }
   }
 }
