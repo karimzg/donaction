@@ -1188,14 +1188,14 @@ export async function handlePayoutPaid(
 
 /**
  * Handles payout.failed webhook event
- * Stub handler - detailed payout logic in follow-up US
+ * Alerts admin and notifies klubr leaders when a payout to an association fails.
  */
 export async function handlePayoutFailed(
-    _strapiInstance: Core.Strapi,
+    strapiInstance: Core.Strapi,
     event: Stripe.Event
 ): Promise<void> {
     logBlock({
-        statusColor: COLORS.yellow,
+        statusColor: COLORS.red,
         entries: [
             { key: 'Webhook', value: 'payout.failed' },
             { key: 'Event ID', value: event.id },
@@ -1204,13 +1204,219 @@ export async function handlePayoutFailed(
     });
 
     const payout = event.data.object as Stripe.Payout;
-    const accountId = event.account ?? 'unknown';
+    const accountId = event.account;
+
+    if (!accountId) {
+        strapiLog.error(
+            'payout.failed reçu sans account id'
+        );
+        return;
+    }
+
+    const amountInEuros = (payout.amount || 0) / 100;
+    const failureMessage = payout.failure_message || 'Raison inconnue';
+    const failureCode = payout.failure_code || 'unknown';
 
     strapiLog.error(
-        `Payout ${payout.id} échoué pour compte ${accountId}`
+        `Payout ${payout.id} échoué pour compte ${accountId}: ${failureMessage} (${failureCode})`
     );
 
-    // TODO: Implement payout failure handling + notification in follow-up US
+    try {
+        // Find connected account with klubr relation
+        const connectedAccount = await strapiInstance.db
+            .query('api::connected-account.connected-account')
+            .findOne({
+                where: { stripe_account_id: accountId },
+                populate: { klubr: true },
+            });
+
+        if (!connectedAccount) {
+            strapiLog.error(
+                `Compte connecté introuvable pour payout.failed: ${accountId}`
+            );
+            return;
+        }
+
+        // Fire-and-forget: send admin alert
+        void sendPayoutFailedAdminAlert(
+            accountId,
+            connectedAccount,
+            payout,
+            amountInEuros,
+            failureMessage,
+        );
+
+        // Fire-and-forget: send notification to klubr leaders
+        void sendPayoutFailedKlubrNotification(
+            strapiInstance,
+            accountId,
+            connectedAccount,
+            amountInEuros,
+            failureMessage,
+        );
+
+        logSimple({
+            message: `Payout ${payout.id} échoué pour ${accountId} — notifications envoyées`,
+            color: 'red',
+            prefix: 'StripeConnect',
+        });
+    } catch (error) {
+        strapiLog.error(
+            'Erreur lors du traitement du webhook payout.failed:',
+            error
+        );
+        throw error;
+    }
+}
+
+/**
+ * Sends an admin alert when a payout fails.
+ * Non-blocking: errors are logged but not propagated.
+ */
+async function sendPayoutFailedAdminAlert(
+    accountId: string,
+    connectedAccount: ConnectedAccountWithOptionalKlubr,
+    payout: Stripe.Payout,
+    amountInEuros: number,
+    failureMessage: string,
+): Promise<void> {
+    try {
+        let klubrName = 'Inconnu';
+        let klubrUuid = 'N/A';
+
+        if (
+            connectedAccount.klubr &&
+            typeof connectedAccount.klubr === 'object'
+        ) {
+            klubrName = connectedAccount.klubr.denomination || 'Inconnu';
+            klubrUuid = connectedAccount.klubr.uuid || 'N/A';
+        }
+
+        await sendBrevoTransacEmail({
+            subject: `[ALERTE] Virement échoué: ${klubrName} — ${amountInEuros}€`,
+            templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
+            destIsAdmin: true,
+            params: {
+                ALERT_TYPE: 'Virement échoué (payout.failed)',
+                CLUB_NAME: klubrName,
+                KLUBR_UUID: klubrUuid,
+                STRIPE_ACCOUNT_ID: accountId,
+                ACCOUNT_STATUS: `Payout ${payout.id} échoué`,
+                DISABLED_REASON: failureMessage,
+                CURRENTLY_DUE: `${amountInEuros}€`,
+                CHARGES_ENABLED: 'N/A',
+                PAYOUTS_ENABLED: 'N/A',
+            },
+            tags: ['admin-alert', 'stripe-connect', 'payout-failed'],
+        });
+
+        logSimple({
+            message: `Alerte admin envoyée pour payout échoué: ${payout.id}`,
+            color: 'yellow',
+            prefix: 'StripeConnect',
+        });
+    } catch (alertError) {
+        strapiLog.error(
+            `Echec de l'envoi de l'alerte admin pour payout échoué ${payout.id}:`,
+            alertError
+        );
+    }
+}
+
+/**
+ * Sends a LEADER_ALERT notification to klubr leaders when a payout fails.
+ * Non-blocking: errors are logged but not propagated.
+ */
+async function sendPayoutFailedKlubrNotification(
+    strapiInstance: Core.Strapi,
+    accountId: string,
+    connectedAccount: ConnectedAccountWithOptionalKlubr,
+    amountInEuros: number,
+    failureMessage: string,
+): Promise<void> {
+    try {
+        // Guard: klubr must be a populated object (not a numeric FK)
+        if (
+            !connectedAccount.klubr ||
+            typeof connectedAccount.klubr !== 'object'
+        ) {
+            logSimple({
+                message: `Pas de klubr associé pour la notification de payout échoué: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const klubr = connectedAccount.klubr;
+
+        if (!klubr.documentId) {
+            logSimple({
+                message: `Klubr sans documentId, notification payout échoué ignorée: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        const klubrName = klubr.denomination || 'Votre association';
+
+        // Find KlubMemberLeader + AdminEditor members to notify
+        const leaders = await strapiInstance
+            .service('api::klubr-membre.klubr-membre')
+            .getKlubMembres(klubr.documentId, ['KlubMemberLeader', 'AdminEditor']);
+
+        const leadersWithEmail = leaders.filter(
+            (member) => member.email || member.users_permissions_user?.email,
+        );
+
+        if (leadersWithEmail.length === 0) {
+            logSimple({
+                message: `Aucun dirigeant avec email trouvé pour le klubr ${klubrName}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+            return;
+        }
+
+        // Send LEADER_ALERT to all leaders in parallel
+        const results = await Promise.allSettled(leadersWithEmail.map(async (leader) => {
+            const leaderEmail =
+                leader.email || leader.users_permissions_user?.email;
+
+            await sendBrevoTransacEmail({
+                subject: `Action requise - Virement échoué pour ${klubrName}`,
+                templateId: BREVO_TEMPLATES.LEADER_ALERT,
+                to: [{ email: leaderEmail, name: `${leader.prenom || ''} ${leader.nom || ''}`.trim() }],
+                params: {
+                    CLUB_NAME: klubrName,
+                    ALERT_MESSAGE:
+                        `Un virement de ${amountInEuros}€ vers votre association a échoué. ` +
+                        `Raison : ${failureMessage}. ` +
+                        'Veuillez vérifier vos coordonnées bancaires dans les paramètres de votre compte Stripe.',
+                },
+                tags: ['klubr-notification', 'stripe-connect', 'payout-failed'],
+            });
+
+            logSimple({
+                message: `Notification LEADER_ALERT envoyée à ${leaderEmail} pour payout échoué: ${accountId}`,
+                color: 'yellow',
+                prefix: 'StripeConnect',
+            });
+        }));
+
+        results.forEach((result, i) => {
+            if (result.status === 'rejected') {
+                const leaderEmail = leadersWithEmail[i].email || leadersWithEmail[i].users_permissions_user?.email;
+                strapiLog.error(`Echec envoi notification payout échoué à ${leaderEmail}:`, result.reason);
+            }
+        });
+    } catch (notifError) {
+        strapiLog.error(
+            `Echec de l'envoi de la notification klubr pour payout échoué ${accountId}:`,
+            notifError
+        );
+    }
 }
 
 /**
