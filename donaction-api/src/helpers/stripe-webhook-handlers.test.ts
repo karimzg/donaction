@@ -37,6 +37,7 @@ import {
     handleWebhookEvent,
     handleAccountDeauthorized,
     handleDispute,
+    handlePayoutFailed,
 } from './stripe-webhook-handlers';
 import { syncAccountStatus, logFinancialAction, createTransferToConnectedAccount, stripe as mockStripeClient } from './stripe-connect-helper';
 import { logSimple, strapiLog } from './logger';
@@ -299,10 +300,11 @@ describe('handleWebhookEvent', () => {
         );
     });
 
-    it('routes payout.failed and logs error', async () => {
-        const event = makeEvent('payout.failed');
+    it('routes payout.failed and looks up connected account', async () => {
+        const mockPayoutStrapi = makePayoutFailedMockStrapi();
+        const event = makePayoutFailedEvent();
         await expect(
-            handleWebhookEvent(mockStrapi, event)
+            handleWebhookEvent(mockPayoutStrapi, event)
         ).resolves.toBeUndefined();
         expect(syncAccountStatus).not.toHaveBeenCalled();
         expect(strapiLog.error).toHaveBeenCalledWith(
@@ -323,6 +325,180 @@ describe('handleWebhookEvent', () => {
         await expect(
             handleWebhookEvent(mockStrapi, makeEvent('account.updated'))
         ).rejects.toThrow('sync failed');
+    });
+});
+
+// ---------- handlePayoutFailed ----------
+
+/** Build a payout.failed Stripe event */
+const makePayoutFailedEvent = (
+    overrides: Record<string, any> = {}
+): Stripe.Event =>
+    ({
+        id: 'evt_payout_failed_123',
+        type: 'payout.failed',
+        data: {
+            object: {
+                id: 'po_test_123',
+                amount: 50000,
+                failure_message: 'account_closed',
+                failure_code: 'account_closed',
+                ...overrides,
+            },
+        },
+        account: overrides.account ?? 'acct_payout_test',
+    }) as unknown as Stripe.Event;
+
+/** Build a mock Strapi instance for payout.failed tests */
+const makePayoutFailedMockStrapi = (overrides: Record<string, any> = {}) => {
+    const mockFindOneAccount = overrides.mockFindOneAccount || vi.fn().mockResolvedValue({
+        id: 1,
+        documentId: 'doc_ca_123',
+        stripe_account_id: 'acct_payout_test',
+        klubr: {
+            id: 10,
+            documentId: 'doc_klubr_payout',
+            denomination: 'Asso Test',
+            uuid: 'klubr-uuid-payout',
+        },
+    });
+    const mockGetKlubMembres = overrides.mockGetKlubMembres || vi.fn().mockResolvedValue([]);
+
+    return {
+        db: {
+            query: vi.fn().mockImplementation((uid: string) => {
+                if (uid === 'api::connected-account.connected-account') {
+                    return { findOne: mockFindOneAccount };
+                }
+                return { findOne: vi.fn() };
+            }),
+        },
+        documents: vi.fn().mockReturnValue({
+            update: vi.fn().mockResolvedValue({}),
+            create: vi.fn().mockResolvedValue({}),
+        }),
+        service: vi.fn().mockImplementation((uid: string) => {
+            if (uid === 'api::klubr-membre.klubr-membre') {
+                return { getKlubMembres: mockGetKlubMembres };
+            }
+            return {};
+        }),
+    } as unknown as Core.Strapi;
+};
+
+describe('handlePayoutFailed', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('returns early when event has no account id', async () => {
+        const event = makePayoutFailedEvent();
+        (event as any).account = undefined;
+
+        await handlePayoutFailed(mockStrapi, event);
+
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('sans account id')
+        );
+    });
+
+    it('returns early when connected account is not found', async () => {
+        const mockFindOneAccount = vi.fn().mockResolvedValue(null);
+        const mockStrapiInstance = makePayoutFailedMockStrapi({ mockFindOneAccount });
+        const event = makePayoutFailedEvent();
+
+        await handlePayoutFailed(mockStrapiInstance, event);
+
+        expect(strapiLog.error).toHaveBeenCalledWith(
+            expect.stringContaining('introuvable')
+        );
+    });
+
+    it('sends admin alert with payout details', async () => {
+        const mockStrapiInstance = makePayoutFailedMockStrapi();
+        const event = makePayoutFailedEvent();
+
+        await handlePayoutFailed(mockStrapiInstance, event);
+
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                destIsAdmin: true,
+                templateId: BREVO_TEMPLATES.SUPER_ADMIN_ALERT_STRIPE,
+                params: expect.objectContaining({
+                    ALERT_TYPE: expect.stringContaining('payout.failed'),
+                    CLUB_NAME: 'Asso Test',
+                }),
+                tags: expect.arrayContaining(['payout-failed']),
+            })
+        );
+    });
+
+    it('sends leader notification when leaders exist', async () => {
+        const mockGetKlubMembres = vi.fn().mockResolvedValue([
+            {
+                prenom: 'Jean',
+                nom: 'Dupont',
+                email: 'jean@test.fr',
+                users_permissions_user: { email: 'jean@test.fr' },
+            },
+        ]);
+        const mockStrapiInstance = makePayoutFailedMockStrapi({ mockGetKlubMembres });
+        const event = makePayoutFailedEvent();
+
+        await handlePayoutFailed(mockStrapiInstance, event);
+
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
+
+        expect(sendBrevoTransacEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                templateId: BREVO_TEMPLATES.LEADER_ALERT,
+                to: expect.arrayContaining([
+                    expect.objectContaining({ email: 'jean@test.fr' }),
+                ]),
+                params: expect.objectContaining({
+                    CLUB_NAME: 'Asso Test',
+                    ALERT_MESSAGE: expect.stringContaining('500€'),
+                }),
+                tags: expect.arrayContaining(['payout-failed']),
+            })
+        );
+    });
+
+    it('does not send leader notification when no leaders found', async () => {
+        const mockGetKlubMembres = vi.fn().mockResolvedValue([]);
+        const mockStrapiInstance = makePayoutFailedMockStrapi({ mockGetKlubMembres });
+        const event = makePayoutFailedEvent();
+
+        await handlePayoutFailed(mockStrapiInstance, event);
+
+        // Flush microtask queue for fire-and-forget promises
+        await vi.runAllTimersAsync();
+
+        // Only admin alert should be sent (destIsAdmin: true), not leader alert
+        const calls = vi.mocked(sendBrevoTransacEmail).mock.calls;
+        const leaderCalls = calls.filter(
+            (call) => call[0].templateId === BREVO_TEMPLATES.LEADER_ALERT
+        );
+        expect(leaderCalls).toHaveLength(0);
+    });
+
+    it('propagates errors from connected account lookup', async () => {
+        const mockFindOneAccount = vi.fn().mockRejectedValue(new Error('db error'));
+        const mockStrapiInstance = makePayoutFailedMockStrapi({ mockFindOneAccount });
+        const event = makePayoutFailedEvent();
+
+        await expect(
+            handlePayoutFailed(mockStrapiInstance, event)
+        ).rejects.toThrow('db error');
     });
 });
 
